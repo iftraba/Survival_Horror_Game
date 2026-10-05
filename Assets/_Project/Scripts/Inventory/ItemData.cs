@@ -1,0 +1,36 @@
+using UnityEngine;
+
+namespace Horror
+{
+    public enum ItemType { Weapon, Ammo, Healing, Key, Misc }
+    public enum AmmoType { None, Handgun, Shotgun, Rifle }
+
+    [CreateAssetMenu(menuName = "Horror/Item", fileName = "NewItem")]
+    public class ItemData : ScriptableObject
+    {
+        public string displayName = "Objeto";
+        [TextArea] public string description;
+        public ItemType type = ItemType.Misc;
+        public Sprite icon;
+        public Color tint = Color.white;
+        [Min(1)] public int maxStack = 1;
+
+        [Header("En el mundo")]
+        [Tooltip("Modelo que se ve en el suelo")] public GameObject worldPrefab;
+        public float worldScale = 1f;
+        [Tooltip("Masa del cuerpo rigido (kg)")] public float mass = 0.5f;
+
+        [Header("Objetivo")]
+        [Tooltip("Si no esta vacio, al recoger este objeto el objetivo de la partida pasa a este texto")]
+        public string pickupObjective;
+
+        [Header("Healing")]
+        public float healAmount = 50f;
+
+        [Header("Weapon")]
+        public WeaponData weapon;
+
+        [Header("Ammo")]
+        public AmmoType ammoType = AmmoType.None;
+    }
+}

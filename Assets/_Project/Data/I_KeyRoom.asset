@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fec1bc90f18f4e54caa80a75be7d65ee, type: 3}
+  m_Name: I_KeyRoom
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ItemData
+  displayName: Llave de la sala
+  description: Abre la puerta de la sala segura.
+  type: 3
+  icon: {fileID: 8167376833299193698, guid: abadb25bcc1bb2e4b96b1002212d0546, type: 3}
+  tint: {r: 0, g: 1, b: 1, a: 1}
+  maxStack: 1
+  worldPrefab: {fileID: 919132149155446097, guid: a9e53a0b43df3114e99a9ccd149d1dc5, type: 3}
+  worldScale: 1.6
+  mass: 0.1
+  pickupObjective: Llave conseguida. Abre la puerta de la sala del fondo.
+  healAmount: 50
+  weapon: {fileID: 0}
+  ammoType: 0

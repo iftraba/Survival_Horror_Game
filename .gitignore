@@ -1,0 +1,59 @@
+# --- Unity: carpetas que Unity regenera ---
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Capturas de pantalla de pruebas del editor
+/[Aa]ssets/[Ss]creenshots/
+/[Aa]ssets/[Ss]creenshots.meta
+
+# --- IDE / proyectos generados ---
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# --- Unity: otros ---
+sysinfo.txt
+crashlytics-build.properties
+*.apk
+*.aab
+*.unitypackage
+*.app
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# --- Pipeline de modelos generados con IA ---
+# Intermedios de Blender (limpieza, enderezado, rig): se regeneran desde los originales de Meshy
+/Tools/raw_generated/stage/
+# Python
+__pycache__/
+*.pyc
+
+# --- Sistema ---
+.DS_Store
+Thumbs.db
+desktop.ini

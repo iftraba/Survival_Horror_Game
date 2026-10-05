@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fec1bc90f18f4e54caa80a75be7d65ee, type: 3}
+  m_Name: I_ShotgunAmmo
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ItemData
+  displayName: Cartuchos
+  description: Cartuchos de escopeta.
+  type: 1
+  icon: {fileID: 7128445691041460600, guid: 8da918bee0e21684baeec06298378f16, type: 3}
+  tint: {r: 1, g: 0, b: 0, a: 1}
+  maxStack: 12
+  worldPrefab: {fileID: 919132149155446097, guid: c90160bffc1f3064283f90f4c8e2614c, type: 3}
+  worldScale: 1.5
+  mass: 0.5
+  pickupObjective: 
+  healAmount: 50
+  weapon: {fileID: 0}
+  ammoType: 2

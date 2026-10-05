@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fec1bc90f18f4e54caa80a75be7d65ee, type: 3}
+  m_Name: I_Spray
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ItemData
+  displayName: Spray curativo
+  description: Restaura salud.
+  type: 2
+  icon: {fileID: 872719979490790903, guid: b129f2c1ea36ec241b89e22da435c51e, type: 3}
+  tint: {r: 0, g: 1, b: 0, a: 1}
+  maxStack: 1
+  worldPrefab: {fileID: 919132149155446097, guid: 6c7f5758529809e43a60e1a31d3ed4bf, type: 3}
+  worldScale: 1.4
+  mass: 0.4
+  pickupObjective: 
+  healAmount: 60
+  weapon: {fileID: 0}
+  ammoType: 0
