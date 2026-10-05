@@ -15,7 +15,20 @@ namespace Horror.EditorTools
         const string Data = "Assets/_Project/Data";
         const string Mats = "Assets/_Project/Materials";
 
-        [MenuItem("Horror/Build Test Scene")]
+        /// <summary>
+        /// LEGADO: genero el nivel por codigo hasta la Fase 0. Desde la migracion (SceneMigration) la escena
+        /// Comisaria.unity y sus prefabs son la fuente de verdad: regenerar BORRA lo editado a mano.
+        /// </summary>
+        [MenuItem("Horror/Legado/Regenerar escena desde codigo (sobrescribe la escena)")]
+        static void BuildMenu()
+        {
+            if (EditorUtility.DisplayDialog("Regenerar escena desde codigo",
+                    "Esto borra el nivel actual y lo vuelve a generar desde TestSceneBuilder.\n" +
+                    "Se perdera todo lo editado a mano en la escena y los enlaces a prefabs.\n\nContinuar?",
+                    "Regenerar", "Cancelar"))
+                Build();
+        }
+
         public static void Build()
         {
             Directory.CreateDirectory(Data);
@@ -99,6 +112,8 @@ namespace Horror.EditorTools
             // La superficie vive en la raiz del nivel y solo recoge su geometria (no personajes ni objetos)
             var surface = root.AddComponent<NavMeshSurface>();
             surface.collectObjects = CollectObjects.Children;
+            // Colisiones, no mallas: en el juego exportado las mallas de los modelos no se pueden leer
+            surface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
             var items = new GameObject("Items").transform;
 
             // Perimetro (sala principal z -15..5, sala segura z 5..15)
