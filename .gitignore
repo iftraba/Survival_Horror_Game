@@ -57,3 +57,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Descargas de Mixamo: se pueden volver a bajar; las copias que usa el juego estan en Assets/_Project/Art/Mixamo
+/Tools/mixamo/download/
+

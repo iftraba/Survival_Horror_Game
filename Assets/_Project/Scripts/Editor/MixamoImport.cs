@@ -38,7 +38,7 @@ namespace Horror.EditorTools
         }
 
         /// <summary>Configura todas las animaciones de una carpeta. Devuelve nombre de clip -> velocidad de zancada (m/s).</summary>
-        public static Dictionary<string, float> ConfigureAnimations(string folder, string measureAvatarFbx)
+        public static Dictionary<string, float> ConfigureAnimations(string folder, string measureAvatarFbx, ICollection<string> loopClips = null)
         {
             var speeds = new Dictionary<string, float>();
             foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { folder }))
@@ -52,33 +52,36 @@ namespace Horror.EditorTools
                 imp.SaveAndReimport();
 
                 string clipName = Path.GetFileNameWithoutExtension(path);
-                bool loop = LoopWords.Any(w => clipName.ToLowerInvariant().Contains(w));
+                // Si se da la lista de ciclicos se usa tal cual (las palabras fallan: "Running To Stop" no es un ciclo)
+                bool loop = loopClips != null ? loopClips.Contains(clipName) : LoopWords.Any(w => clipName.ToLowerInvariant().Contains(w));
                 var clips = imp.defaultClipAnimations;
                 foreach (var c in clips)
                 {
                     c.name = clipName;
                     c.loopTime = loop;
                     c.loopPose = loop;
-                    // raiz: sin giro ni desplazamiento (el juego mueve al personaje); altura segun los pies
+                    // Raiz: el desplazamiento horizontal se EXTRAE como movimiento de raiz (el juego lo ignora: applyRootMotion
+                    // = false, asi el personaje se queda en su sitio y solo animan las piernas). NO se hornea en la pose:
+                    // eso solo vale para animaciones "In Place"; en las que avanzan, el cuerpo se iria y volveria de golpe.
+                    // Altura y giro si se hornean (la oscilacion del cuerpo y los giros en el sitio se conservan).
+                    c.lockRootPositionXZ = false;
+                    c.lockRootHeightY = true;
+                    c.keepOriginalPositionY = true;
                     c.lockRootRotation = true;
                     c.keepOriginalOrientation = true;
-                    c.lockRootHeightY = true;
-                    c.heightFromFeet = true;
-                    c.keepOriginalPositionY = false;
-                    c.lockRootPositionXZ = true;
-                    c.keepOriginalPositionXZ = true;
                 }
                 imp.clipAnimations = clips;
                 imp.SaveAndReimport();
             }
-            // velocidad de la zancada: con la raiz fija, el pie apoyado se desliza hacia atras a la velocidad de la marcha
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>(measureAvatarFbx);
+            // Velocidad real del movimiento de raiz de cada clip ciclico (la que lleva Unity al extraerlo): es la velocidad
+            // a la que debe avanzar el personaje para que los pies no patinen.
             foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { folder }))
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 var clip = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AnimationClip>().FirstOrDefault(c => !c.name.StartsWith("__"));
-                if (clip == null || !clip.isLooping || model == null) continue;
-                speeds[clip.name] = MeasureStride(model, clip);
+                if (clip == null) continue;
+                var v = clip.averageSpeed;
+                speeds[clip.name] = new Vector2(v.x, v.z).magnitude;
             }
             return speeds;
         }

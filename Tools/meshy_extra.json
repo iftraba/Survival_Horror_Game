@@ -5,7 +5,7 @@
                     "target_polycount":  40000,
                     "topology":  "triangle",
                     "symmetry_mode":  "auto",
-                    "negative_prompt":  "arms down, arms in front, crossed arms, hands touching the body, bent elbows, hands raised, shrugging, zombie pose, hat, cap, helmet, cartoon, stylized, oversized head, big eyes, fused fingers, extra limbs, cape, long flowing clothing, loose hanging fabric, long hair covering the body, low quality, blurry, deformed"
+                    "negative_prompt":  "child, kid, teenager, young boy, hat, cap, helmet, cartoon, stylized, big head, big eyes, gloves, fists, clenched hands, fused fingers, holding objects, hands together, arms down, crossed arms, bent elbows, hands raised, extra limbs, cape, loose fabric, long hair, low quality"
                 },
     "refine":  {
                    "enable_pbr":  true
