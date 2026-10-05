@@ -15,6 +15,7 @@ namespace Horror
         static readonly int AttackId = Animator.StringToHash("Attack");
         static readonly int HitId = Animator.StringToHash("Hit");
         static readonly int DeadId = Animator.StringToHash("Dead");
+        static readonly int AlertId = Animator.StringToHash("Alert");
 
         ZombieAI ai;
         NavMeshAgent agent;
@@ -38,6 +39,7 @@ namespace Horror
         void OnEnable()
         {
             ai.Attacked += OnAttacked;
+            ai.Alerted += OnAlerted;
             health.Damaged += OnDamaged;
             health.Died += OnDied;
         }
@@ -45,6 +47,7 @@ namespace Horror
         void OnDisable()
         {
             ai.Attacked -= OnAttacked;
+            ai.Alerted -= OnAlerted;
             health.Damaged -= OnDamaged;
             health.Died -= OnDied;
         }
@@ -56,6 +59,13 @@ namespace Horror
         }
 
         void OnAttacked() => animator?.SetTrigger(AttackId);
+
+        // Solo los controladores nuevos (Mixamo) tienen grito; en los antiguos se ignora sin avisos
+        void OnAlerted()
+        {
+            if (animator == null) return;
+            foreach (var p in animator.parameters) if (p.nameHash == AlertId) { animator.SetTrigger(AlertId); return; }
+        }
         void OnDamaged(Vector3 _) => animator?.SetTrigger(HitId);
         void OnDied() => animator?.SetBool(DeadId, true);
     }

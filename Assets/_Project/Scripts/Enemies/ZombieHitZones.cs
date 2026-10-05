@@ -26,7 +26,28 @@ namespace Horror
 
         void Awake()
         {
-            Transform Bone(string n) => FindDeep(transform, n);
+            // Humanoid (Mixamo): huesos por su funcion; esqueleto propio: por nombre
+            var anim = GetComponentInChildren<Animator>();
+            bool human = anim != null && anim.isHuman;
+            Transform Bone(string n)
+            {
+                if (human)
+                {
+                    var hb = n switch
+                    {
+                        "Hips" => HumanBodyBones.Hips, "Neck" => HumanBodyBones.Neck, "Head" => HumanBodyBones.Head,
+                        "UpperArm.L" => HumanBodyBones.LeftUpperArm, "UpperArm.R" => HumanBodyBones.RightUpperArm,
+                        "LowerArm.L" => HumanBodyBones.LeftLowerArm, "LowerArm.R" => HumanBodyBones.RightLowerArm,
+                        "Hand.L" => HumanBodyBones.LeftHand, "Hand.R" => HumanBodyBones.RightHand,
+                        "UpperLeg.L" => HumanBodyBones.LeftUpperLeg, "UpperLeg.R" => HumanBodyBones.RightUpperLeg,
+                        "LowerLeg.L" => HumanBodyBones.LeftLowerLeg, "LowerLeg.R" => HumanBodyBones.RightLowerLeg,
+                        "Foot.L" => HumanBodyBones.LeftFoot, "Foot.R" => HumanBodyBones.RightFoot,
+                        _ => HumanBodyBones.LastBone,
+                    };
+                    if (hb != HumanBodyBones.LastBone) return anim.GetBoneTransform(hb);
+                }
+                return FindDeep(transform, n);
+            }
             var hips = Bone("Hips"); var neck = Bone("Neck"); var head = Bone("Head");
             var list = new System.Collections.Generic.List<Zone>();
             // la cabeza: esfera algo por encima del hueso (el hueso esta en la base del craneo)

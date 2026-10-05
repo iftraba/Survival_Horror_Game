@@ -18,6 +18,10 @@ namespace Horror
         public float hearingRange = 4.5f;
 
         public event System.Action Attacked;
+        /// <summary>Empieza a perseguir al jugador (grito de alerta). Lo usa la animacion.</summary>
+        public event System.Action Alerted;
+        [Tooltip("Segundos que se queda gritando al detectarte antes de ir a por ti (0 = sin grito)")]
+        public float alertTime = 1.6f;
 
         /// <summary>Zombis activos (vivos): lo usa el audio para subir la musica de tension.</summary>
         public static readonly System.Collections.Generic.List<ZombieAI> All = new System.Collections.Generic.List<ZombieAI>();
@@ -38,7 +42,7 @@ namespace Horror
             health = GetComponent<Health>();
             agent = GetComponent<NavMeshAgent>();
             health.Died += OnDied;
-            health.Damaged += _ => { staggerUntil = Time.time + staggerTime; chasing = true; };
+            health.Damaged += _ => { staggerUntil = Time.time + staggerTime; StartChase(false); };
         }
 
         void Start()
@@ -75,7 +79,7 @@ namespace Horror
             float dist = Vector3.Distance(transform.position, player.position);
             // Te detecta si te ve (sin paredes en medio) o si estas tan cerca que te oye
             if (!chasing && (dist <= hearingRange || (dist <= detectRange && Time.time >= nextSightCheck && CanSeePlayer())))
-                chasing = true;
+                StartChase(true);
             else if (chasing && dist > loseRange) chasing = false;
 
             bool staggered = Time.time < staggerUntil;
@@ -84,6 +88,7 @@ namespace Horror
             if (!chasing || staggered)
             {
                 if (canNav) agent.isStopped = true;
+                if (chasing) FaceTarget();   // gritando o aturdido: sigue mirandote
                 return;
             }
 
@@ -151,6 +156,18 @@ namespace Horror
             return true;
         }
 
+        /// <summary>Pasa a perseguir. Si 'scream', se queda quieto gritando un momento antes (si le disparan, no).</summary>
+        void StartChase(bool scream)
+        {
+            if (chasing) return;
+            chasing = true;
+            if (scream && alertTime > 0f)
+            {
+                staggerUntil = Mathf.Max(staggerUntil, Time.time + alertTime);
+                Alerted?.Invoke();
+            }
+        }
+
         /// <summary>Golpea una puerta cerrada que le corta el paso (misma animacion y sonido que el ataque).</summary>
         public void BashDoor() => Attacked?.Invoke();
 
@@ -158,7 +175,7 @@ namespace Horror
         public static void Noise(Vector3 position, float radius)
         {
             foreach (var z in All)
-                if (z != null && !z.chasing && Vector3.Distance(z.transform.position, position) <= radius) z.chasing = true;
+                if (z != null && !z.chasing && Vector3.Distance(z.transform.position, position) <= radius) z.StartChase(true);
         }
 
         void FaceTarget()
