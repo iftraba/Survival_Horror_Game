@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_taquilla_reuniones
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_taquilla_reuniones
+  title: Nota arrugada
+  category: 1
+  body: "Taquilla del fondo de la sala de reuniones.\nLa cerr\xE9 con candado de n\xFAmeros y, claro, ya no me acordaba.\nPor si se me olvida otra vez:"
+  highlight: 4 7 1 9
+  image: {fileID: 0}
+  objective: "Hay una taquilla con c\xF3digo en la sala de reuniones, en la planta de arriba."

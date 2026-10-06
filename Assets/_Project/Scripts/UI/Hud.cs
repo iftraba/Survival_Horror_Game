@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 namespace Horror
 {
     /// <summary>HUD e inventario provisionales con IMGUI. Se reemplazaran por UI Toolkit/uGUI mas adelante.</summary>
-    public class Hud : MonoBehaviour
+    public partial class Hud : MonoBehaviour
     {
         public Health playerHealth;
         public Inventory inventory;
@@ -17,6 +17,8 @@ namespace Horror
 
         int selected = -1;
         GUIStyle label, big, center;
+        int saveSel = 1, overwriteSlot;   // menu de guardado: slot elegido y slot pendiente de confirmar sobrescritura
+        bool pauseLoadList;
 
         public static void Message(string text)
         {
@@ -38,10 +40,15 @@ namespace Horror
             bool fresh = Time.frameCount <= GameState.MenuOpenedFrame;   // la tecla que abrio el menu no cuenta dentro
             if (GameState.SaveMenuOpen)
             {
-                if (!fresh && (kb.enterKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame)) DoSave();
+                if (fresh) { saveSel = SaveSystem.CurrentSlot; overwriteSlot = 0; }
+                int n = SaveSystem.SlotCount;
+                if (!fresh && (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame)) { saveSel = saveSel % n + 1; overwriteSlot = 0; }
+                if (!fresh && (kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame)) { saveSel = (saveSel + n - 2) % n + 1; overwriteSlot = 0; }
+                if (!fresh && (kb.enterKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame)) TrySave(saveSel);
                 else if (!fresh && (kb.escapeKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame)) GameState.SetSaveMenuOpen(false);
                 return;
             }
+            if (ArchiveAndKeypadKeys(kb, fresh)) return;   // nota a pantalla completa o teclado de taquilla
             if (GameState.BoxOpen)
             {
                 if (!fresh && (kb.escapeKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame))
@@ -51,6 +58,7 @@ namespace Horror
 
             if (kb.escapeKey.wasPressedThisFrame)
             {
+                pauseLoadList = false;
                 if (GameState.InventoryOpen) { GameState.SetInventoryOpen(false); ItemPreview.Get().Show(null); }
                 else GameState.SetPaused(!GameState.Paused);
                 return;
@@ -62,7 +70,12 @@ namespace Horror
                 if (!GameState.InventoryOpen) ItemPreview.Get().Show(null);   // apaga la camara del visor
                 return;
             }
-            if (GameState.InventoryOpen && !GameState.Paused) InventoryKeys(kb);
+            if (!GameState.InventoryOpen) archiveTab = false;
+            if (GameState.InventoryOpen && !GameState.Paused)
+            {
+                if (kb.qKey.wasPressedThisFrame) archiveTab = !archiveTab;
+                if (archiveTab) ArchiveKeys(kb); else InventoryKeys(kb);
+            }
         }
 
         static void Restart()
@@ -108,6 +121,8 @@ namespace Horror
             if (GameState.InventoryOpen) DrawInventory();
             if (GameState.BoxOpen) DrawItemBox();
             if (GameState.SaveMenuOpen) DrawSaveMenu();
+            if (GameState.NoteOpen) DrawNoteReader();
+            if (GameState.KeypadOpen) DrawKeypad();
             if (GameState.Paused) DrawPause();
             if (GameState.PlayerDead) DrawDeath();
             if (GameState.Victory) DrawVictory();
@@ -152,12 +167,21 @@ namespace Horror
             float x = Screen.width / 2f - w / 2f, y = Screen.height / 2f - 150f;
             GUI.Label(new Rect(0, y - 70, Screen.width, 60), "PAUSA", big);
 
+            if (pauseLoadList)
+            {
+                float lx = Screen.width / 2f - 220f, ly = Mathf.Max(90f, Screen.height / 2f - SaveSlotsGUI.Height / 2f - 20f);
+                GUI.Label(new Rect(0, ly - 44, Screen.width, 34), "CARGAR PARTIDA", center);
+                int slot = SaveSlotsGUI.Draw(lx, ly, 440f, false, SaveSystem.CurrentSlot);
+                if (slot > 0) SaveSystem.LoadAndRestart(slot);
+                if (GUI.Button(new Rect(x, ly + SaveSlotsGUI.Height + 4, w, h), "Volver")) pauseLoadList = false;
+                return;
+            }
+
             if (GUI.Button(new Rect(x, y, w, h), "Reanudar")) GameState.SetPaused(false);
             y += h + gap;
 
-            GUI.enabled = SaveSystem.HasSave;
-            string saved = SaveSystem.HasSave ? "Cargar partida  (" + SaveSystem.SavedAt() + ")" : "Cargar partida  (sin guardado)";
-            if (GUI.Button(new Rect(x, y, w, h), saved)) SaveSystem.LoadAndRestart();
+            GUI.enabled = SaveSystem.HasAnySave;
+            if (GUI.Button(new Rect(x, y, w, h), SaveSystem.HasAnySave ? "Cargar partida" : "Cargar partida  (sin guardados)")) pauseLoadList = true;
             GUI.enabled = true;
             y += h + gap;
 
@@ -287,6 +311,8 @@ namespace Horror
         void DrawInventory()
         {
             Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0.01f, 0.015f, 0.02f, 0.86f));
+            DrawInvTabs();
+            if (archiveTab) { DrawArchive(); ItemPreview.Get().Show(null); return; }
             if (inventory == null) return;
 
             const int size = 104, gap = 10;
@@ -294,7 +320,7 @@ namespace Horror
             float totalW = gridW + 40f + 420f;
             // La rejilla crece con las bolsas: se sube para que quepa (la base son 2 filas)
             int rows = Mathf.Max(2, (inventory.slots.Length + InvCols - 1) / InvCols);
-            float gx = Screen.width / 2f - totalW / 2f, gy = Mathf.Max(80f, Screen.height / 2f - 170f - (rows - 2) * (size + gap) / 2f);
+            float gx = Screen.width / 2f - totalW / 2f, gy = Mathf.Max(120f, Screen.height / 2f - 170f - (rows - 2) * (size + gap) / 2f);
 
             var title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold };
             GUI.color = new Color(0.9f, 0.78f, 0.45f);
@@ -381,31 +407,42 @@ namespace Horror
 
         // ------------------------------------------------------------------ sala segura: guardado y baul
 
-        void DoSave()
+        /// <summary>Guarda en el slot; si ya hay una partida, pide pulsar otra vez para sobrescribirla.</summary>
+        void TrySave(int slot)
         {
-            bool ok = SaveSystem.Save();
+            saveSel = slot;
+            if (SaveSystem.HasSave(slot) && overwriteSlot != slot) { overwriteSlot = slot; return; }
+            DoSave(slot);
+        }
+
+        void DoSave(int slot)
+        {
+            bool ok = SaveSystem.Save(slot);
             if (ok) GameAudio.Play(Sfx.PhoneDial, Vector3.zero, 0.8f, 1f, false);
+            overwriteSlot = 0;
             GameState.SetSaveMenuOpen(false);
-            Message(ok ? "Partida guardada" : "No se pudo guardar la partida");
+            Message(ok ? $"Partida guardada (slot {slot})" : "No se pudo guardar la partida");
         }
 
         void DrawSaveMenu()
         {
             Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0.03f, 0.02f, 0f, 0.8f));
-            var panel = new Rect(Screen.width / 2f - 230, Screen.height / 2f - 120, 460, 240);
+            float listH = SaveSlotsGUI.Height;
+            var panel = new Rect(Screen.width / 2f - 260, Mathf.Max(20f, Screen.height / 2f - (listH + 170f) / 2f), 520, listH + 170f);
             Fill(panel, new Color(0.10f, 0.07f, 0.04f, 0.97f));
             Frame(panel, new Color(0.95f, 0.72f, 0.35f, 0.55f), 2f);
             var title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
             GUI.color = new Color(1f, 0.82f, 0.5f);
-            GUI.Label(new Rect(panel.x, panel.y + 18, panel.width, 32), "TELEFONO - GUARDAR PARTIDA", title);
+            GUI.Label(new Rect(panel.x, panel.y + 14, panel.width, 32), "TELEFONO - GUARDAR PARTIDA", title);
+            GUI.color = new Color(1f, 1f, 1f, 0.6f);
+            bool confirming = overwriteSlot != 0;
+            GUI.Label(new Rect(panel.x, panel.y + 48, panel.width, 24),
+                confirming ? $"El slot {overwriteSlot} ya tiene una partida: pulsa otra vez para sobrescribirla" : "Elige un slot  (flechas + Enter, o clic)",
+                new GUIStyle(center) { fontSize = 14 });
             GUI.color = Color.white;
-            GUI.Label(new Rect(panel.x, panel.y + 64, panel.width, 28), "Guardar la partida?", center);
-            string last = SaveSystem.HasSave ? "Ultimo guardado: " + SaveSystem.SavedAt() : "No hay partidas guardadas";
-            GUI.color = new Color(1f, 1f, 1f, 0.55f);
-            GUI.Label(new Rect(panel.x, panel.y + 96, panel.width, 24), last, new GUIStyle(center) { fontSize = 14 });
-            GUI.color = Color.white;
-            if (GUI.Button(new Rect(panel.x + 60, panel.y + 150, 150, 40), "Guardar  (Enter)")) DoSave();
-            if (GUI.Button(new Rect(panel.x + 250, panel.y + 150, 150, 40), "Salir  (Esc)")) GameState.SetSaveMenuOpen(false);
+            int clicked = SaveSlotsGUI.Draw(panel.x + 30, panel.y + 80, panel.width - 60, true, saveSel);
+            if (clicked > 0) TrySave(clicked);
+            if (GUI.Button(new Rect(panel.x + panel.width / 2f - 75, panel.yMax - 54, 150, 38), "Salir  (Esc)")) GameState.SetSaveMenuOpen(false);
         }
 
         int boxHover = -1;

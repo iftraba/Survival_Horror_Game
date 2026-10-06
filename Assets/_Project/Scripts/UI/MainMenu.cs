@@ -10,7 +10,7 @@ namespace Horror
         public string subtitle = "una noche muy larga";
 
         GUIStyle titleStyle, subStyle, small;
-        bool options;
+        bool options, loadList;
 
         void Start()
         {
@@ -48,13 +48,20 @@ namespace Horror
             GUI.color = Color.white;
 
             float x = 64, y = sh * 0.45f, w = 340, h = 46, gap = 12;
-            if (!options)
+            if (loadList)
+            {
+                GUI.Label(new Rect(x, y - 44, w, 30), "Cargar partida", small);
+                int slot = SaveSlotsGUI.Draw(x, y, 440, false, SaveSystem.CurrentSlot);
+                if (slot > 0) SaveSystem.LoadAndRestart(slot);
+                if (GUI.Button(new Rect(x, y + SaveSlotsGUI.Height + 4, w, h), "Volver")) loadList = false;
+            }
+            else if (!options)
             {
                 if (GUI.Button(new Rect(x, y, w, h), "Nueva partida")) NewGame();
                 y += h + gap;
-                GUI.enabled = SaveSystem.HasSave;
-                string cont = SaveSystem.HasSave ? "Continuar  (" + SaveSystem.SavedAt() + ")" : "Continuar  (sin guardado)";
-                if (GUI.Button(new Rect(x, y, w, h), cont)) SaveSystem.LoadAndRestart();
+                GUI.enabled = SaveSystem.HasAnySave;
+                string cont = SaveSystem.HasAnySave ? "Cargar partida" : "Cargar partida  (sin guardados)";
+                if (GUI.Button(new Rect(x, y, w, h), cont)) loadList = true;
                 GUI.enabled = true;
                 y += h + gap;
                 if (GUI.Button(new Rect(x, y, w, h), "Opciones")) options = true;

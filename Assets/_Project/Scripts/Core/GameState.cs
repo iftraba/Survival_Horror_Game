@@ -10,10 +10,14 @@ namespace Horror
         public static bool BoxOpen { get; private set; }
         /// <summary>Menu de guardado de la maquina de escribir/terminal.</summary>
         public static bool SaveMenuOpen { get; private set; }
+        /// <summary>Lectura de una nota a pantalla completa.</summary>
+        public static bool NoteOpen { get; private set; }
+        /// <summary>Teclado numerico de una taquilla con codigo.</summary>
+        public static bool KeypadOpen { get; private set; }
         public static bool PlayerDead { get; private set; }
         public static bool Paused { get; private set; }
         public static bool Victory { get; private set; }
-        public static bool InputBlocked => InventoryOpen || BoxOpen || SaveMenuOpen || PlayerDead || Paused || Victory;
+        public static bool InputBlocked => InventoryOpen || BoxOpen || SaveMenuOpen || NoteOpen || KeypadOpen || PlayerDead || Paused || Victory;
         /// <summary>Fotograma en que se abrio un menu: la tecla que lo abrio no debe actuar dentro de el.</summary>
         public static int MenuOpenedFrame { get; private set; } = -1;
 
@@ -25,6 +29,8 @@ namespace Horror
             InventoryOpen = false;
             BoxOpen = false;
             SaveMenuOpen = false;
+            NoteOpen = false;
+            KeypadOpen = false;
             PlayerDead = false;
             Paused = false;
             Victory = false;
@@ -40,6 +46,8 @@ namespace Horror
         public static void SetInventoryOpen(bool open) { InventoryOpen = open; Opened(open); Apply(); }
         public static void SetBoxOpen(bool open) { BoxOpen = open; Opened(open); Apply(); }
         public static void SetSaveMenuOpen(bool open) { SaveMenuOpen = open; Opened(open); Apply(); }
+        public static void SetNoteOpen(bool open) { NoteOpen = open; Opened(open); Apply(); }
+        public static void SetKeypadOpen(bool open) { KeypadOpen = open; Opened(open); Apply(); }
         public static void SetPlayerDead(bool dead) { PlayerDead = dead; Apply(); }
         public static void SetPaused(bool paused) { Paused = paused; Apply(); }
         public static void SetVictory(bool victory) { Victory = victory; Apply(); }
@@ -48,7 +56,7 @@ namespace Horror
 
         static void Apply()
         {
-            Time.timeScale = (InventoryOpen || BoxOpen || SaveMenuOpen || Paused || Victory) ? 0f : 1f;
+            Time.timeScale = (InventoryOpen || BoxOpen || SaveMenuOpen || NoteOpen || KeypadOpen || Paused || Victory) ? 0f : 1f;
             Cursor.lockState = InputBlocked ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = InputBlocked;
             Changed?.Invoke();

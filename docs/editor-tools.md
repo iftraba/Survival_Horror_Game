@@ -10,6 +10,7 @@ Scripts de editor (envueltos en `#if UNITY_EDITOR`) en `Assets/_Project/Scripts/
 | `BossBalance` | — | Simula disparos para fijar la vida del jefe (`Apply`). |
 | `BossWing` | Horror/Reformar zona del jefe | Reforma la zona final: pasillo, sala segura 2, puertas, sala del jefe, loot y zombis. |
 | `UpperFloor` | Horror/Construir planta superior | Construye escalera, hueco del forjado, muros, salas, luces, mobiliario, botín y zombis de la planta superior. Idempotente (rehace `UpperFloor_*` y `CeilingSlab`; deja el `Ceiling` original desactivado). |
+| `ArchiveSetup` | Horror/Notas y taquilla con codigo | Crea las notas (`Data/Notes/*.asset`), las registra en `ItemDatabase.notes`, coloca los papeles (pista del código en la mesa del archivo, parte de guardia en el interrogatorio), monta la taquilla con código (4719) en la sala de reuniones y deja dentro la riñonera. Idempotente (rehace `UpperFloor_Extras` y retira cualquier riñonera suelta). |
 | `SavePhone` | Horror/Crear teléfono de guardado | Crea el prefab `SavePhone` (mesita + teléfono + interactuable + luz) y sustituye los terminales de la escena en su posición y orientación. El modelo sale de `Tools/blender/build_phone.py`. |
 | `MainMenuBuilder` | Horror/Crear menú principal | Crea la escena `MainMenu` y deja las dos escenas en los ajustes de compilación. |
 | `GraphicsSetup` | — | Ajustes de URP (antialiasing, sombras, SSAO, post-proceso). |

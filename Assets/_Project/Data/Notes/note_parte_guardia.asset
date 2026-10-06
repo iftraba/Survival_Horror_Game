@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_parte_guardia
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_parte_guardia
+  title: Parte de guardia
+  category: 0
+  body: "TURNO DE NOCHE. Tres detenidos en el calabozo desde las diez; ninguno quiere hablar.\n\nDesde medianoche se oyen ruidos abajo y el tel\xE9fono de la sala del fondo no deja de sonar. Nadie lo coge.\n\nEl capit\xE1n ha cerrado esa sala con llave y se ha ido sin decir palabra. Ma\xF1ana vienen de la central.\n\nNo me f\xEDo de lo que hay ah\xED abajo.\n\u2014 R."
+  highlight: 
+  image: {fileID: 0}
+  objective: 

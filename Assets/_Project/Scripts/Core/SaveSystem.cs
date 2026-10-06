@@ -22,6 +22,7 @@ namespace Horror
         public float cameraYaw;
         public float health;
         public int bagSlots;            // casillas extra ganadas con bolsas
+        public List<string> notes = new List<string>();   // ids de las notas leidas (Archivo)
         public List<SlotSave> slots = new List<SlotSave>();
         public string equipped;
         public List<MagSave> mags = new List<MagSave>();
@@ -46,8 +47,61 @@ namespace Horror
     {
         public static SaveData Pending { get; private set; }
 
-        static string FilePath => Path.Combine(Application.persistentDataPath, "savegame.json");
-        public static bool HasSave => File.Exists(FilePath);
+        public const int SlotCount = 5;
+
+        /// <summary>Resumen de un slot para las listas (se lee del archivo solo cuando cambia).</summary>
+        public class SlotInfo { public bool exists; public string savedAt = ""; public string objective = ""; public long ticks; }
+
+        static readonly SlotInfo[] infos = new SlotInfo[SlotCount + 1];
+        static bool migrated;
+
+        static string PathFor(int slot) => Path.Combine(Application.persistentDataPath, "savegame_" + slot + ".json");
+
+        /// <summary>Ultimo slot usado para guardar o cargar (1..SlotCount).</summary>
+        public static int CurrentSlot
+        {
+            get { return Mathf.Clamp(PlayerPrefs.GetInt("lastSaveSlot", 1), 1, SlotCount); }
+            private set { PlayerPrefs.SetInt("lastSaveSlot", Mathf.Clamp(value, 1, SlotCount)); PlayerPrefs.Save(); }
+        }
+
+        // El guardado de un solo archivo (savegame.json) pasa a ser el slot 1
+        static void MigrateLegacy()
+        {
+            if (migrated) return;
+            migrated = true;
+            try
+            {
+                string old = Path.Combine(Application.persistentDataPath, "savegame.json");
+                if (File.Exists(old) && !File.Exists(PathFor(1))) File.Move(old, PathFor(1));
+            }
+            catch (Exception e) { Debug.LogWarning("[Horror] No se pudo migrar el guardado antiguo: " + e.Message); }
+        }
+
+        public static SlotInfo Peek(int slot)
+        {
+            MigrateLegacy();
+            slot = Mathf.Clamp(slot, 1, SlotCount);
+            string p = PathFor(slot);
+            var info = infos[slot] ?? (infos[slot] = new SlotInfo());
+            if (!File.Exists(p)) { info.exists = false; info.ticks = 0; info.savedAt = ""; info.objective = ""; return info; }
+            long t = File.GetLastWriteTimeUtc(p).Ticks;
+            if (info.exists && info.ticks == t) return info;
+            info.exists = true; info.ticks = t;
+            try
+            {
+                var d = JsonUtility.FromJson<SaveData>(File.ReadAllText(p));
+                info.savedAt = d.savedAt ?? ""; info.objective = d.objective ?? "";
+            }
+            catch { info.savedAt = "(ilegible)"; info.objective = ""; }
+            return info;
+        }
+
+        public static bool HasSave(int slot) => Peek(slot).exists;
+
+        public static bool HasAnySave
+        {
+            get { for (int i = 1; i <= SlotCount; i++) if (Peek(i).exists) return true; return false; }
+        }
 
         public static void ClearPending() => Pending = null;
 
@@ -57,14 +111,17 @@ namespace Horror
 
         static IEnumerable<LockerDoor> OrderedLockers() =>
             UnityEngine.Object.FindObjectsByType<LockerDoor>(FindObjectsSortMode.None)
-                .OrderBy(x => x.transform.position.z).ThenBy(x => x.transform.position.x);
+                .OrderBy(x => !string.IsNullOrEmpty(x.code))     // las de codigo van al final: no desalinean guardados antiguos
+                .ThenBy(x => x.transform.position.z).ThenBy(x => x.transform.position.x);
 
         static IEnumerable<LightSwitch> OrderedSwitches() =>
             UnityEngine.Object.FindObjectsByType<LightSwitch>(FindObjectsSortMode.None)
                 .OrderBy(s => s.transform.position.z).ThenBy(s => s.transform.position.x);
 
-        public static bool Save()
+        public static bool Save(int slot)
         {
+            slot = Mathf.Clamp(slot, 1, SlotCount);
+            MigrateLegacy();
             var pc = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
             if (pc == null) return false;
             var health = pc.GetComponent<Health>();
@@ -82,6 +139,7 @@ namespace Horror
                 objective = Objectives.Current,
             };
 
+            d.notes = NoteArchive.Ids();
             if (inv != null) d.bagSlots = inv.BagSlots;
             if (inv != null && inv.slots != null)
                 foreach (var s in inv.slots)
@@ -108,7 +166,8 @@ namespace Horror
 
             try
             {
-                File.WriteAllText(FilePath, JsonUtility.ToJson(d, true));
+                File.WriteAllText(PathFor(slot), JsonUtility.ToJson(d, true));
+                CurrentSlot = slot;
                 return true;
             }
             catch (Exception e)
@@ -118,18 +177,12 @@ namespace Horror
             }
         }
 
-        public static string SavedAt()
+        /// <summary>Lee el archivo del slot y recarga la escena; GameFlow aplica los datos al arrancar.</summary>
+        public static bool LoadAndRestart(int slot)
         {
-            if (!HasSave) return "";
-            try { return JsonUtility.FromJson<SaveData>(File.ReadAllText(FilePath)).savedAt; }
-            catch { return ""; }
-        }
-
-        /// <summary>Lee el archivo y recarga la escena; GameFlow aplica los datos al arrancar.</summary>
-        public static bool LoadAndRestart()
-        {
-            if (!HasSave) return false;
-            try { Pending = JsonUtility.FromJson<SaveData>(File.ReadAllText(FilePath)); }
+            slot = Mathf.Clamp(slot, 1, SlotCount);
+            if (!HasSave(slot)) return false;
+            try { Pending = JsonUtility.FromJson<SaveData>(File.ReadAllText(PathFor(slot))); CurrentSlot = slot; }
             catch (Exception e)
             {
                 Debug.LogWarning("[Horror] Partida guardada ilegible: " + e.Message);
@@ -146,6 +199,7 @@ namespace Horror
             var d = Pending;
             if (d == null) return false;
             Pending = null;
+            NoteArchive.Restore(d.notes);
 
             var pc = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
             if (pc != null)

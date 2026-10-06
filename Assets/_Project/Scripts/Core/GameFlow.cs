@@ -18,6 +18,7 @@ namespace Horror
         void Start()
         {
             GameState.ResetAll();
+            NoteArchive.Clear();
             if (SaveSystem.ApplyPending()) return;
             ItemStorage.Clear();   // partida nueva: baul vacio
             Objectives.Set(startObjective, false);

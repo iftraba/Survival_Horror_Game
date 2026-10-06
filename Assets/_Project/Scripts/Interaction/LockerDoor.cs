@@ -13,23 +13,44 @@ namespace Horror
         public float openAngle = -110f;
         public float openTime = 0.45f;
 
+        [Tooltip("Si no esta vacio, la taquilla esta bloqueada y se abre tecleando este codigo")] public string code;
+
         [SerializeField] bool open;
         bool moving;
+        bool codeSolved;
+
+        /// <summary>Taquilla que aun pide codigo.</summary>
+        public bool Locked => !string.IsNullOrEmpty(code) && !codeSolved && !open;
 
         public bool IsOpen => open;
-        public string Prompt => moving || open ? "" : "E  Abrir taquilla";
+        public string Prompt => moving || open ? "" : (Locked ? "E  Introducir código" : "E  Abrir taquilla");
 
         public void Interact(GameObject who)
         {
             if (open || moving || hinge == null) return;
+            if (Locked)
+            {
+                GameAudio.Play(Sfx.DoorLocked, transform.position, 0.6f, 1.2f);
+                Keypad.Open(this);
+                return;
+            }
             GameAudio.Play(Sfx.DoorOpen, transform.position, 0.6f, 1.45f);
             StartCoroutine(Swing());
+        }
+
+        /// <summary>Codigo correcto: se desbloquea y se abre.</summary>
+        public void Unlock()
+        {
+            codeSolved = true;
+            GameAudio.Play(Sfx.DoorUnlock, transform.position, 0.8f, 1f);
+            Interact(null);
         }
 
         /// <summary>Estado guardado: abierta sin animacion.</summary>
         public void SetOpen(bool value)
         {
             open = value;
+            if (value) codeSolved = true;
             if (hinge == null) return;
             hinge.localRotation = Quaternion.Euler(0f, value ? openAngle : 0f, 0f);
             foreach (var c in hinge.GetComponentsInChildren<Collider>(true)) c.enabled = !value;

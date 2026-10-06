@@ -31,7 +31,9 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 
 ## Riñoneras y guardado (ideas del usuario)
 - Hecho: concepto de riñonera (`I_Bag`, +2 casillas, tope 6), una en el escritorio de la arena del jefe. Es pequeña, tipo riñonera, NO mochila.
-- Por hacer: **slots de guardado múltiples** (hoy un solo `savegame.json`; propuesta 5 slots con selector en el teléfono y en el menú); modelo y vista previa de la riñonera al recogerla (la animación, a futuro); **salas después del jefe** (un par) y más riñoneras: o colocadas, o con puzzle (taquilla bloqueada arriba que pide un código o dos piezas sueltas).
+- Hecho: **5 slots de guardado** (`savegame_1..5.json`; selector en el teléfono, la pausa y el menú; migración automática del guardado antiguo al slot 1). Sin probar en Play: el usuario debe comprobar las pantallas.
+- Hecho: **Archivo** (Historia/Pistas) y puzzle de la riñonera: nota con el código 4719 (mesa del archivo, planta alta) → taquilla con código en la sala de reuniones → riñonera dentro. Hay además una nota de historia en el interrogatorio. Textos provisionales. Sin probar en Play.
+- Por hacer: modelo y vista previa de la riñonera al recogerla (la animación, a futuro); **salas después del jefe** (un par) y más riñoneras: o colocadas, o con puzzle (taquilla bloqueada arriba que pide un código o dos piezas sueltas).
 - Luces: corregidas las lámparas duplicadas de la planta alta (ver README).
 
 ## Pendiente

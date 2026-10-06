@@ -10,7 +10,9 @@ Objetos con los que se interactúa con **E**. Código en `Assets/_Project/Script
 | `Door` | Puerta abatible en la bisagra. Puede exigir llave (`requiredKey`, `consumeKey`), tener `partner` (doble hoja), mensaje de objetivo al abrir (`openedObjective`) y deja pasar a los zombis (`zombiesCanForce`, `zombieForceTime`). Lleva un `NavMeshObstacle` que bloquea el paso cerrada. `ApplySaved` restaura el estado. |
 | `ExitDoor` | Puerta de salida: con `I_KeyExit` termina la partida con victoria. |
 | `Pickup` | Objeto del mundo (rigidbody). Se recoge con E, lleva `item` y `count`; puede fijar un objetivo al recogerlo. |
-| `LockerDoor` | Taquilla que se abre con E. |
+| `LockerDoor` | Taquilla que se abre con E. Con `code` rellenado está bloqueada: E abre el teclado numérico (`Keypad`) y al acertar se desbloquea y se abre. Las de código se ordenan al final en el guardado para no desalinear partidas antiguas. |
+| `Keypad` | Estado del teclado numérico (entrada, error, taquilla objetivo); lo dibuja el `Hud` y acepta ratón, teclas 0-9 y teclado numérico. |
+| `ReadableNote` | Nota en el mundo (papel sobre una mesa, `NoteData`). E la abre a pantalla completa y la añade al Archivo; no se recoge ni ocupa casilla. Pasar a leerla por primera vez puede fijar un objetivo. |
 | `LightSwitch` | Interruptor que enciende o apaga un grupo de `CeilingLamp`. |
 | `ItemBox` | Baúl de sala segura: abre la pantalla de intercambio con `ItemStorage` (global). |
 | `SaveTerminal` | Punto de guardado de sala segura: abre el menú de guardado del HUD. Físicamente es un **teléfono antiguo de disco** sobre una mesita (prefab `Interactables/SavePhone`, modelo `Art/Props/Phone.fbx`, con una luz cálida tenue que guía al jugador). El script mantiene el nombre `SaveTerminal` por compatibilidad. **Suena** (`ringRange` 10 m, cada 30-55 s) cuando el jugador está cerca: señal de que ahí se puede guardar. |
