@@ -17,6 +17,31 @@ namespace Horror
         [Tooltip("A esta distancia te oye aunque haya paredes en medio.")]
         public float hearingRange = 4.5f;
 
+        [System.Serializable]
+        public struct AttackVariant
+        {
+            [Tooltip("Segundos desde que empieza la animacion hasta que el golpe conecta")] public float hitDelay;
+            [Tooltip("Multiplicador del dano de ataque")] public float damageMultiplier;
+            [Tooltip("Pausa hasta el siguiente ataque (0 = usa attackCooldown)")] public float cooldown;
+        }
+
+        [Header("Ataques")]
+        [Tooltip("Variantes de ataque (cada una con su animacion). Vacio = un ataque que golpea al instante.")]
+        public AttackVariant[] attackVariants;
+        /// <summary>Variante elegida en el ultimo ataque: la lee la animacion antes de lanzar el ataque.</summary>
+        public int LastAttackVariant { get; private set; }
+
+        [Header("Jefe / estados especiales")]
+        [Tooltip("Letargo: no detecta ni persigue hasta que se le despierte (Wake), le disparen o haya un ruido fuerte cerca. El jefe baila.")]
+        public bool dormant;
+        [Tooltip("Objeto que suelta al morir (la llave de salida)")] public ItemData dropOnDeath;
+        [Tooltip("Nombre para la barra de vida (solo jefes)")] public string bossName;
+
+        /// <summary>El jefe que esta peleando ahora (para la barra de vida del HUD).</summary>
+        public static ZombieAI ActiveBoss { get; private set; }
+        public Health Hp => health;
+        public bool IsDormant => dormant;
+
         public event System.Action Attacked;
         /// <summary>Empieza a perseguir al jugador (grito de alerta). Lo usa la animacion.</summary>
         public event System.Action Alerted;
@@ -36,13 +61,19 @@ namespace Horror
         Health playerHealth;
         float nextAttack, staggerUntil;
         bool chasing;
+        Coroutine pendingHit;
 
         void Awake()
         {
             health = GetComponent<Health>();
             agent = GetComponent<NavMeshAgent>();
             health.Died += OnDied;
-            health.Damaged += _ => { staggerUntil = Time.time + staggerTime; StartChase(false); };
+            health.Damaged += _ =>
+            {
+                if (dormant) { Wake(); return; }                       // le han dado: se despierta (con rugido)
+                if (staggerTime > 0f) staggerUntil = Time.time + staggerTime;
+                StartChase(false);
+            };
         }
 
         void Start()
@@ -76,6 +107,12 @@ namespace Horror
                 return;
             }
 
+            if (dormant)
+            {
+                if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
+                return;
+            }
+
             float dist = Vector3.Distance(transform.position, player.position);
             // Te detecta si te ve (sin paredes en medio) o si estas tan cerca que te oye
             if (!chasing && (dist <= hearingRange || (dist <= detectRange && Time.time >= nextSightCheck && CanSeePlayer())))
@@ -98,9 +135,13 @@ namespace Horror
                 FaceTarget();
                 if (Time.time >= nextAttack)
                 {
-                    nextAttack = Time.time + attackCooldown;
+                    int n = attackVariants != null ? attackVariants.Length : 0;
+                    LastAttackVariant = n > 0 ? Random.Range(0, n) : 0;
+                    var v = n > 0 ? attackVariants[LastAttackVariant] : new AttackVariant { damageMultiplier = 1f };
+                    nextAttack = Time.time + (v.cooldown > 0f ? v.cooldown : attackCooldown);
                     Attacked?.Invoke();
-                    playerHealth.TakeDamage(attackDamage, transform.position);
+                    if (pendingHit != null) StopCoroutine(pendingHit);
+                    pendingHit = StartCoroutine(LandHit(v.hitDelay, attackDamage * (v.damageMultiplier > 0f ? v.damageMultiplier : 1f)));
                 }
                 return;
             }
@@ -159,13 +200,37 @@ namespace Horror
         /// <summary>Pasa a perseguir. Si 'scream', se queda quieto gritando un momento antes (si le disparan, no).</summary>
         void StartChase(bool scream)
         {
-            if (chasing) return;
+            if (chasing || dormant) return;
             chasing = true;
             if (scream && alertTime > 0f)
             {
                 staggerUntil = Mathf.Max(staggerUntil, Time.time + alertTime);
                 Alerted?.Invoke();
             }
+        }
+
+        /// <summary>Despierta del letargo: ruge (animacion de alerta) y pasa a combatir.</summary>
+        public void Wake()
+        {
+            if (!dormant) return;
+            dormant = false;
+            if (!string.IsNullOrEmpty(bossName))
+            {
+                ActiveBoss = this;
+                Objectives.Set("Derrota al jefe: tiene la llave de la salida.");
+            }
+            StartChase(true);
+        }
+
+        /// <summary>El golpe conecta tras 'delay' segundos, si sigue vivo y el jugador sigue a tiro.</summary>
+        System.Collections.IEnumerator LandHit(float delay, float damage)
+        {
+            if (delay > 0f) yield return new WaitForSeconds(delay);
+            pendingHit = null;
+            if (health.IsDead || playerHealth == null || playerHealth.IsDead || player == null) yield break;
+            if (Time.time < staggerUntil && staggerTime > 0f && delay > 0f) yield break;      // un disparo lo interrumpe
+            if (Vector3.Distance(transform.position, player.position) > attackRange * 1.35f) yield break;   // esquivado
+            playerHealth.TakeDamage(damage, transform.position);
         }
 
         /// <summary>Golpea una puerta cerrada que le corta el paso (misma animacion y sonido que el ataque).</summary>
@@ -175,7 +240,10 @@ namespace Horror
         public static void Noise(Vector3 position, float radius)
         {
             foreach (var z in All)
-                if (z != null && !z.chasing && Vector3.Distance(z.transform.position, position) <= radius) z.StartChase(true);
+            {
+                if (z == null || z.chasing || Vector3.Distance(z.transform.position, position) > radius) continue;
+                if (z.dormant) z.Wake(); else z.StartChase(true);
+            }
         }
 
         void FaceTarget()
@@ -194,6 +262,16 @@ namespace Horror
             {
                 transform.rotation = Quaternion.Euler(-90f, transform.eulerAngles.y, 0f);
                 transform.position += Vector3.down * 0.5f;
+            }
+            if (ActiveBoss == this) ActiveBoss = null;
+            if (dropOnDeath != null)
+            {
+                Objectives.Set("Recoge la llave que ha soltado el jefe y sal por la puerta del fondo.");
+                // cae delante de donde murio, algo elevado para que no quede dentro del cuerpo
+                var items = GameObject.Find("Items");
+                var pk = Pickup.Spawn(dropOnDeath, 1, transform.position + transform.forward * 0.9f + Vector3.up * 1.2f, transform.forward * 0.6f);
+                if (items != null) pk.transform.SetParent(items.transform);
+                Hud.Message("El jefe ha soltado: " + dropOnDeath.displayName);
             }
             enabled = false;
             Destroy(gameObject, 15f);

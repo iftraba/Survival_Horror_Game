@@ -13,6 +13,12 @@ namespace Horror
         public float torsoMultiplier = 1f;
         public float limbMultiplier = 0.6f;
 
+        [Header("Tamano (m, a escala 1). Se multiplican por la escala del modelo")]
+        public float headRadius = 0.15f;
+        [Tooltip("Cuanto por encima del hueso de la cabeza esta el centro del craneo")] public float headLift = 0.13f;
+        public float torsoRadius = 0.2f;
+        [Tooltip("Multiplica el radio de los brazos y las piernas")] public float limbRadiusScale = 1f;
+
         struct Zone
         {
             public Transform a, b;      // extremos del segmento (b null = esfera en a)
@@ -49,16 +55,19 @@ namespace Horror
                 return FindDeep(transform, n);
             }
             var hips = Bone("Hips"); var neck = Bone("Neck"); var head = Bone("Head");
+            // un modelo escalado (jefe x1.35, Yaku x0.9...) tiene la cabeza y el torso escalados: las zonas tambien
+            float sc = anim != null ? anim.transform.lossyScale.y : 1f;
             var list = new System.Collections.Generic.List<Zone>();
             // la cabeza: esfera algo por encima del hueso (el hueso esta en la base del craneo)
-            if (head != null) list.Add(new Zone { a = head, b = neck, radius = 0.15f, multiplier = headMultiplier, isHead = true, offset = new Vector3(0f, 0.13f, 0f) });
-            if (hips != null && neck != null) list.Add(new Zone { a = hips, b = neck, radius = 0.2f, multiplier = torsoMultiplier });
+            if (head != null) list.Add(new Zone { a = head, b = neck, radius = headRadius * sc, multiplier = headMultiplier, isHead = true, offset = new Vector3(0f, headLift * sc, 0f) });
+            if (hips != null && neck != null) list.Add(new Zone { a = hips, b = neck, radius = torsoRadius * sc, multiplier = torsoMultiplier });
             foreach (var s in new[] { "L", "R" })
             {
-                AddLimb(list, Bone("UpperArm." + s), Bone("LowerArm." + s), 0.075f);
-                AddLimb(list, Bone("LowerArm." + s), Bone("Hand." + s), 0.065f);
-                AddLimb(list, Bone("UpperLeg." + s), Bone("LowerLeg." + s), 0.1f);
-                AddLimb(list, Bone("LowerLeg." + s), Bone("Foot." + s), 0.085f);
+                float k = sc * limbRadiusScale;
+                AddLimb(list, Bone("UpperArm." + s), Bone("LowerArm." + s), 0.075f * k);
+                AddLimb(list, Bone("LowerArm." + s), Bone("Hand." + s), 0.065f * k);
+                AddLimb(list, Bone("UpperLeg." + s), Bone("LowerLeg." + s), 0.1f * k);
+                AddLimb(list, Bone("LowerLeg." + s), Bone("Foot." + s), 0.085f * k);
             }
             zones = list.ToArray();
         }

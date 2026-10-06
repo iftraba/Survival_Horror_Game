@@ -91,7 +91,20 @@ namespace Horror
             animator.speed = playback;
         }
 
-        void OnAttacked() => animator?.SetTrigger(AttackId);
+        static readonly int VariantId = Animator.StringToHash("AttackVariant");
+        int hasVariantParam = -1;
+
+        void OnAttacked()
+        {
+            if (animator == null) return;
+            if (hasVariantParam < 0)
+            {
+                hasVariantParam = 0;
+                foreach (var p in animator.parameters) if (p.nameHash == VariantId) hasVariantParam = 1;
+            }
+            if (hasVariantParam == 1) animator.SetInteger(VariantId, ai.LastAttackVariant);
+            animator.SetTrigger(AttackId);
+        }
 
         // Solo los controladores nuevos (Mixamo) tienen grito; en los antiguos se ignora sin avisos
         void OnAlerted()

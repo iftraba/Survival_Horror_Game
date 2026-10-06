@@ -104,6 +104,7 @@ namespace Horror
             DrawPrompt();
             DrawMessage();
             DrawObjective();
+            DrawBossBar();
             if (GameState.InventoryOpen) DrawInventory();
             if (GameState.BoxOpen) DrawItemBox();
             if (GameState.SaveMenuOpen) DrawSaveMenu();
@@ -121,6 +122,24 @@ namespace Horror
             GUI.Label(new Rect(20, 16, 420, 20), "OBJETIVO", small);
             GUI.color = Color.white;
             GUI.Label(new Rect(20, 36, 420, 60), Objectives.Current, text);
+        }
+
+        /// <summary>Barra de vida del jefe, abajo en el centro, mientras pelea.</summary>
+        void DrawBossBar()
+        {
+            var boss = ZombieAI.ActiveBoss;
+            if (boss == null || boss.Hp == null || boss.Hp.IsDead || GameState.Victory) return;
+            float pct = Mathf.Clamp01(boss.Hp.Current / boss.Hp.maxHealth);
+            float w = Mathf.Min(Screen.width * 0.5f, 640f), h = 16f;
+            var r = new Rect(Screen.width / 2f - w / 2f, Screen.height - 70f, w, h);
+            Fill(new Rect(r.x - 3, r.y - 3, r.width + 6, r.height + 6), new Color(0f, 0f, 0f, 0.7f));
+            Fill(r, new Color(0.12f, 0.02f, 0.02f, 1f));
+            Fill(new Rect(r.x, r.y, r.width * pct, r.height), Color.Lerp(new Color(0.55f, 0.05f, 0.05f), new Color(0.85f, 0.15f, 0.1f), pct));
+            Frame(new Rect(r.x - 3, r.y - 3, r.width + 6, r.height + 6), new Color(0.8f, 0.7f, 0.5f, 0.6f), 1f);
+            var st = new GUIStyle(label) { fontSize = 15, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
+            GUI.color = new Color(0.95f, 0.85f, 0.6f);
+            GUI.Label(new Rect(r.x, r.y - 26f, r.width, 22f), boss.bossName, st);
+            GUI.color = Color.white;
         }
 
         void DrawPause()

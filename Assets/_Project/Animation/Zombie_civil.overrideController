@@ -7,7 +7,7 @@ AnimatorOverrideController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Zombie_civil
-  m_Controller: {fileID: 9100000, guid: 5ec5667d63c75394aac38f5d03dfd4ca, type: 2}
+  m_Controller: {fileID: 9100000, guid: 46af75c2fc611d542bd7bcbbc4c0ba0a, type: 2}
   m_Clips:
   - m_OriginalClip: {fileID: 8603145137928975468, guid: cf16b4de3ff6f4e4e9e3642fdca4854d, type: 3}
     m_OverrideClip: {fileID: -2516395320954554133, guid: 259591cfde6d3b14a82b465b95b78bc8, type: 3}
@@ -21,3 +21,21 @@ AnimatorOverrideController:
     m_OverrideClip: {fileID: 0}
   - m_OriginalClip: {fileID: -3399703380930832114, guid: cf16b4de3ff6f4e4e9e3642fdca4854d, type: 3}
     m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: b9f578b3002ff324e845e759e8a71e35, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: bbd5a13cd24788943b1946fa307d7cea, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 7e2784cb27204e8468963dd3f726c20a, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 8a9a0c5d33e5a394f812d529d61bc3de, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 2232811747a6fd349a5d59cdbfcab823, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 2232811747a6fd349a5d59cdbfcab823, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: aa0f690ac1563fb40bf06e743244fe83, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: aa0f690ac1563fb40bf06e743244fe83, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: c3ee7ee166965ec4982c54323dc8e064, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 6244ba610483799478d901bb4a1462b8, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: e57f93b808d201d4e82fbd0949fc197d, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: bfc71dd907d1c304e9b1cdde57ab942d, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 79490eeefe0454e458d7fed8a95e163f, type: 3}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: bb830cd37333e84408cf4ef6a9292d3a, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: bb830cd37333e84408cf4ef6a9292d3a, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 754e4ff41d8d01745a295e494f443040, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 754e4ff41d8d01745a295e494f443040, type: 3}

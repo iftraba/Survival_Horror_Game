@@ -1,0 +1,271 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2467731812086957362
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2519281656357505515}
+  - component: {fileID: 4833761902673839058}
+  - component: {fileID: 80146101387475501}
+  - component: {fileID: 4315472434843769261}
+  - component: {fileID: 5242664262697185337}
+  - component: {fileID: 1759990035966691341}
+  - component: {fileID: 2592790034221166130}
+  - component: {fileID: 8903936621735217585}
+  m_Layer: 0
+  m_Name: Boss
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2519281656357505515
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3124470786411873371}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &4833761902673839058
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.85
+  m_Height: 2.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &80146101387475501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe121e4422c21a9479e0ebf858480093, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieHitZones
+  headMultiplier: 3
+  torsoMultiplier: 0.5
+  limbMultiplier: 0.25
+  headRadius: 0.19
+  headLift: 0.1
+  torsoRadius: 0.42
+  limbRadiusScale: 2
+--- !u!195 &4315472434843769261
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.6
+  m_Speed: 1.9
+  m_Acceleration: 6
+  avoidancePriority: 50
+  m_AngularSpeed: 200
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2.8
+  m_BaseOffset: 1.4
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &5242664262697185337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99548ff9749f20a4ba621de27f5a5d2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.Health
+  maxHealth: 1410
+--- !u!114 &1759990035966691341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 256fb512a3f2e8f41b1e1ef8540f304b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAI
+  detectRange: 14
+  loseRange: 22
+  attackRange: 2.4
+  attackDamage: 55
+  attackCooldown: 1.8
+  walkSpeed: 1.1
+  chaseSpeed: 1.9
+  staggerTime: 0
+  hearingRange: 4.5
+  attackVariants:
+  - hitDelay: 0.48437503
+    damageMultiplier: 1
+    cooldown: 1.6
+  - hitDelay: 1.06
+    damageMultiplier: 1
+    cooldown: 2.6500003
+  - hitDelay: 1.1226416
+    damageMultiplier: 1
+    cooldown: 2.15
+  dormant: 1
+  dropOnDeath: {fileID: 11400000, guid: 904b17372510e394d96479ad688098f0, type: 2}
+  bossName: EL COLOSO
+  alertTime: 2.6
+--- !u!114 &2592790034221166130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5216742f32efcfd4683aaf471b8de50e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAudio
+--- !u!114 &8903936621735217585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b5f63e7a6a82e14195228db8bfc6ad4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAnimation
+  animator: {fileID: 9060245694699773473}
+  strideSpeed: 1.4
+  gaitMode: 1
+  walkClipSpeed: 1.4715
+  runClipSpeed: 1.7685
+  runAbove: 1.2
+  maxWalkPlayback: 2.2
+--- !u!1001 &3231017023443510192
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2519281656357505515}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.35
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.35
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.35
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_Name
+      value: Model
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 07aa4876443dc70479a4d7b767ea9f98, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+--- !u!4 &3124470786411873371 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+  m_PrefabInstance: {fileID: 3231017023443510192}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &9060245694699773473 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
+  m_PrefabInstance: {fileID: 3231017023443510192}
+  m_PrefabAsset: {fileID: 0}

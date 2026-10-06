@@ -31,8 +31,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 668112685714321165}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.9848078, z: -0, w: -0.17364821}
-  m_LocalPosition: {x: -2.5, y: 1, z: -8.5}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -77,6 +77,10 @@ MonoBehaviour:
   headMultiplier: 3
   torsoMultiplier: 1
   limbMultiplier: 0.6
+  headRadius: 0.15
+  headLift: 0.13
+  torsoRadius: 0.2
+  limbRadiusScale: 1
 --- !u!195 &2691600762506104771
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -87,8 +91,8 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.4
-  m_Speed: 2
-  m_Acceleration: 8
+  m_Speed: 2.2
+  m_Acceleration: 6
   avoidancePriority: 50
   m_AngularSpeed: 200
   m_StoppingDistance: 0
@@ -128,11 +132,24 @@ MonoBehaviour:
   loseRange: 22
   attackRange: 1.6
   attackDamage: 20
-  attackCooldown: 1.3
+  attackCooldown: 1.4
   walkSpeed: 1.1
-  chaseSpeed: 2
-  staggerTime: 0.45
+  chaseSpeed: 2.2
+  staggerTime: 0.5
   hearingRange: 4.5
+  attackVariants:
+  - hitDelay: 0.6580087
+    damageMultiplier: 1
+    cooldown: 1.4
+  - hitDelay: 0.57227516
+    damageMultiplier: 1
+    cooldown: 1.782889
+  - hitDelay: 0.3229167
+    damageMultiplier: 1
+    cooldown: 1.4
+  dormant: 0
+  dropOnDeath: {fileID: 0}
+  bossName: 
   alertTime: 1.6
 --- !u!114 &4242706226236077433
 MonoBehaviour:
@@ -159,12 +176,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAnimation
   animator: {fileID: 1354167245596270696}
-  strideSpeed: 1
+  strideSpeed: 1.4
   gaitMode: 1
-  walkClipSpeed: 0.33
-  runClipSpeed: 2.84
+  walkClipSpeed: 0.297
+  runClipSpeed: 2.5559998
   runAbove: 1.6
-  maxWalkPlayback: 3.2
+  maxWalkPlayback: 2.2
 --- !u!1001 &4873002852084915705
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -232,7 +249,7 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: 69a70a8b7bf1c3f48b8e636f068c01f2, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 46af75c2fc611d542bd7bcbbc4c0ba0a, type: 2}
+      objectReference: {fileID: 22100000, guid: 8538c9d695deed147b68c5759ea760a2, type: 2}
     - target: {fileID: 5866666021909216657, guid: 69a70a8b7bf1c3f48b8e636f068c01f2, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
