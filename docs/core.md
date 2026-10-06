@@ -15,7 +15,7 @@ Estado global, vida, guardado/carga, objetivos, ajustes del jugador, audio ambie
 | `SaveSystem` (estática) | Guarda/carga un JSON en `persistentDataPath/savegame.json`: jugador, inventario, arma y cargadores, pickups, zombis vivos, puertas, taquillas, baúl, interruptores y objetivo. Cargar = `LoadAndRestart()` (recarga la escena de juego) y `GameFlow` aplica `Pending`. |
 | `Objectives` | Objetivo actual (se muestra en el HUD y se guarda). |
 | `ItemDatabase` | Lista de todos los `ItemData` para reconstruir objetos por nombre al cargar. |
-| `GameAudio` | Música ambiente, capa de tensión cuando hay persecución, sustos lejanos y utilidades `Play`/`PlayClip`. |
+| `GameAudio` | Música ambiente, capa de tensión cuando hay persecución, sustos lejanos y utilidades `Play`/`PlayClip`. Sonidos nuevos: `StairStep`, `PhoneRing/Dial/Pickup`, `BossRoar/Step`. Los clips salen de packs CC0 y síntesis (`Tools/audio/build_free_audio.py`). |
 | `CeilingLamp` / `FillLightRating` | Lámpara de techo con parpadeo, apagado desde interruptor (`SetPowered`) e intensidad nominal guardada aparte. |
 | `RuntimeNavMesh` | Hornea el NavMesh en `Start` (usa colliders físicos y respeta `NavMeshModifier` no caminable); excluye las hojas de las puertas durante el horneado. |
 

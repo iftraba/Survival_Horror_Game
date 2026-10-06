@@ -9,6 +9,7 @@ namespace Horror
         PlayerHurt, PlayerDeath,
         DoorOpen, DoorClose, DoorLocked, DoorUnlock,
         Pickup, Flashlight, Switch, LampZap,
+        StairStep, PhoneRing, PhoneDial, PhonePickup, BossRoar, BossStep,
     }
 
     /// <summary>
@@ -32,6 +33,9 @@ namespace Horror
         public AudioClip doorOpen, doorClose, doorLocked, doorUnlock;
         public AudioClip pickup, flashlight, lightSwitch, lampZap;
         public AudioClip lampHum, heartbeat;
+        [Header("Telefono, escalera y jefe")]
+        public AudioClip[] stairSteps;
+        public AudioClip phoneRing, phoneDial, phonePickup, bossRoar, bossStep;
 
         [Header("Sustos lejanos")]
         public AudioClip[] stingers;
@@ -174,6 +178,12 @@ namespace Horror
                 case Sfx.Flashlight: return flashlight;
                 case Sfx.Switch: return lightSwitch;
                 case Sfx.LampZap: return lampZap;
+                case Sfx.StairStep: return Any(stairSteps);
+                case Sfx.PhoneRing: return phoneRing;
+                case Sfx.PhoneDial: return phoneDial;
+                case Sfx.PhonePickup: return phonePickup;
+                case Sfx.BossRoar: return bossRoar;
+                case Sfx.BossStep: return bossStep;
                 default: return null;
             }
         }

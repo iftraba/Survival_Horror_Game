@@ -7,7 +7,7 @@ Zombis y jefe. Código en `Assets/_Project/Scripts/Enemies/`. Prefabs en `Prefab
 |---|---|
 | `ZombieAI` | Máquina de estados sobre `NavMeshAgent`: vagar → alerta (grito, `alertTime`) → perseguir → atacar. Ve al jugador por distancia/ángulo/visión directa y oye disparos (`Noise`). Ataque con variantes (`AttackVariant`: `hitDelay`, `damageMultiplier`, `cooldown`) y daño retardado (`LandHit`) que se cancela si muere, se aleja (1.35× alcance) o es aturdido. Fuerza puertas no bloqueadas tras `zombieForceTime`. Estático `All` (vivos) y `ActiveBoss`. |
 | `ZombieHitZones` | Cápsulas/esferas que siguen a los huesos (Humanoid o por nombre): cabeza, torso, brazos, piernas, escaladas por el tamaño del modelo. Multiplicador por zona (cabeza ×3 por defecto). |
-| `ZombieAudio` | Gruñidos (más frecuentes en persecución), ataque, quejido y muerte en 3D. |
+| `ZombieAudio` | Gruñidos (más frecuentes en persecución), ataque, quejido y muerte en 3D; gruñido de alerta al detectar al jugador; el jefe tiene voz grave, rugido al despertar (`Alerted`) y pasos pesados. |
 | `BossRoomTrigger` | Volumen tras la puerta del jefe: al entrar el jugador, `boss.Wake()`. |
 
 ## Jefe ("EL COLOSO")

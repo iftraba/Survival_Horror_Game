@@ -36,7 +36,10 @@ namespace Horror
             travelled -= stride;
 
             float volume = player != null && player.IsRunning ? 0.9f : player != null && player.IsAiming ? 0.35f : 0.55f;
-            GameAudio.Play(Sfx.Footstep, transform.position, volume, Random.Range(0.9f, 1.1f), false);
+            // en la escalera suenan peldaños (macizos y mas graves); el suelo lo decide el collider que hay bajo los pies
+            bool stairs = Physics.Raycast(transform.position, Vector3.down, out var hit, body.height * 0.5f + 0.4f, ~0, QueryTriggerInteraction.Ignore)
+                          && (hit.collider.name.StartsWith("Step_") || hit.collider.name == "Stair_NavRamp");
+            GameAudio.Play(stairs ? Sfx.StairStep : Sfx.Footstep, transform.position, volume, Random.Range(0.9f, 1.1f), false);
         }
     }
 }

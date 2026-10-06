@@ -382,6 +382,7 @@ namespace Horror
         void DoSave()
         {
             bool ok = SaveSystem.Save();
+            if (ok) GameAudio.Play(Sfx.PhoneDial, Vector3.zero, 0.8f, 1f, false);
             GameState.SetSaveMenuOpen(false);
             Message(ok ? "Partida guardada" : "No se pudo guardar la partida");
         }

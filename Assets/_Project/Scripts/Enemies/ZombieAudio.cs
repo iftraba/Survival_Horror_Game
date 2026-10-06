@@ -10,7 +10,8 @@ namespace Horror
         Health health;
         Transform player;
         float voicePitch;
-        float nextGroan;
+        float nextGroan, nextStep;
+        UnityEngine.AI.NavMeshAgent agent;
 
         void Awake()
         {
@@ -22,12 +23,15 @@ namespace Horror
             if (name.Contains("Mecanico")) voicePitch = Random.Range(0.72f, 0.82f);
             else if (name.Contains("Paciente")) voicePitch = Random.Range(1.2f, 1.3f);
 
+            if (!string.IsNullOrEmpty(ai.bossName)) voicePitch = Random.Range(0.62f, 0.7f);   // el jefe: voz de gigante
+            agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
             nextGroan = Time.time + Random.Range(1f, 6f);
         }
 
         void OnEnable()
         {
             ai.Attacked += OnAttacked;
+            ai.Alerted += OnAlerted;
             health.Damaged += OnDamaged;
             health.Died += OnDied;
         }
@@ -35,12 +39,26 @@ namespace Horror
         void OnDisable()
         {
             ai.Attacked -= OnAttacked;
+            ai.Alerted -= OnAlerted;
             health.Damaged -= OnDamaged;
             health.Died -= OnDied;
         }
 
+        void OnAlerted()
+        {
+            if (health.IsDead) return;
+            if (!string.IsNullOrEmpty(ai.bossName)) GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1f, false);   // el rugido se oye en toda la sala
+            else GameAudio.Play(Sfx.ZombieGroan, transform.position, 1f, voicePitch * 0.92f);
+        }
+
         void Update()
         {
+            // pasos pesados del jefe mientras se desplaza
+            if (!string.IsNullOrEmpty(ai.bossName) && !health.IsDead && agent != null && agent.enabled && agent.velocity.magnitude > 0.5f && Time.time >= nextStep)
+            {
+                nextStep = Time.time + Mathf.Clamp(1.1f / agent.velocity.magnitude, 0.4f, 0.9f);
+                GameAudio.Play(Sfx.BossStep, transform.position, 1f, Random.Range(0.92f, 1.08f));
+            }
             if (health.IsDead || Time.time < nextGroan) return;
             nextGroan = Time.time + (ai.IsChasing ? Random.Range(2.5f, 5f) : Random.Range(6f, 14f));
 

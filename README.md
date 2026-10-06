@@ -46,6 +46,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-06 · Core/Enemies/Player · Sonidos reales: packs CC0 + síntesis (zombis, puertas, pasos, armas, teléfono, jefe); pasos de escalera; el teléfono suena cerca; rugido y pasos del jefe; alerta de zombis; recargas por arma. Traspaso en `docs/estado-actual.md`.
 - 2026-10-06 · Core/Art pipeline · Plan de sonidos reales con fal.ai (`Tools/audio/sfx_prompts.md`), pendiente de la clave en el editor.
 - 2026-10-06 · Level/Enemies · Planta superior con escalera: pasillo y seis salas (archivo, interrogatorio, descanso, despacho del jefe, sala segura 3 con teléfono, reuniones); la llave de la sala pasa al despacho del jefe; 5 zombis nuevos arriba; cubículo del pie de la escalera retirado.
 - 2026-10-06 · Interaction/UI · Punto de guardado físico: teléfono antiguo de disco (prefab `SavePhone`, modelo hecho en Blender) en lugar del terminal; menú de guardado en tonos cálidos.
