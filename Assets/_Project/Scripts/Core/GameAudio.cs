@@ -23,7 +23,13 @@ namespace Horror
         [Header("Musica")]
         public AudioClip ambientLoop;
         public AudioClip tensionLoop;
-        [Range(0f, 1f)] public float musicVolume = 0.5f;
+        [Range(0f, 1f)] public float musicVolume = 0.7f;
+
+        [Header("Mezcla (multiplica el volumen de cada familia de efectos)")]
+        [Tooltip("Puertas: abrir, cerrar, cerrada con llave y desbloqueo (tambien taquillas y baul)")]
+        [Range(0f, 1f)] public float doorGain = 0.4f;
+        [Tooltip("Gruñidos, ataques, quejidos y muerte de los zombis (no el jefe)")]
+        [Range(0f, 1f)] public float zombieGain = 0.5f;
 
         [Header("Efectos")]
         public AudioClip[] footsteps;
@@ -142,7 +148,7 @@ namespace Horror
         {
             if (Instance == null) return;
             var clip = Instance.Resolve(sfx);
-            if (clip != null) Instance.Emit(clip, position, volume, pitch, spatial, range);
+            if (clip != null) Instance.Emit(clip, position, volume * Instance.Gain(sfx), pitch, spatial, range);
         }
 
         public static void PlayClip(AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f, bool spatial = true)
@@ -174,6 +180,17 @@ namespace Horror
                 s.clip = clip;
                 s.Play();
                 volume -= 1f;
+            }
+        }
+
+        /// <summary>Ganancia de mezcla segun la familia del efecto.</summary>
+        float Gain(Sfx sfx)
+        {
+            switch (sfx)
+            {
+                case Sfx.DoorOpen: case Sfx.DoorClose: case Sfx.DoorLocked: case Sfx.DoorUnlock: return doorGain;
+                case Sfx.ZombieGroan: case Sfx.ZombieAttack: case Sfx.ZombieHurt: case Sfx.ZombieDeath: return zombieGain;
+                default: return 1f;
             }
         }
 
