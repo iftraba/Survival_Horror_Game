@@ -16,6 +16,9 @@ Zombis y jefe. Código en `Assets/_Project/Scripts/Enemies/`. Prefabs en `Prefab
 - Vida **1410**: la fija `BossBalance.Apply(headShots=15, distance=5)` tras simular 6000 disparos (escopeta 8×14, dispersión ±4°). Cabeza = punto débil; torso ×0.5 y extremidades ×0.25 con zonas agrandadas.
 - Al morir suelta `I_KeyExit` y fija el objetivo de recogerla y salir. Barra de vida del HUD mientras pelea.
 
+## Reparto
+Planta baja: 2 civiles, 2 chicas, 2 policías; la planta superior añade civil ×2, chica, policía y el **Yaku**, que guarda la llave en el despacho del jefe. El jefe está en su sala. Los zombis suben y bajan por la escalera (rampa de NavMesh invisible).
+
 ## Tipos de zombi (definidos en `ZombieKit.Kinds`)
 | Tipo | Rasgos |
 |---|---|
