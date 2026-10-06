@@ -13,6 +13,8 @@ namespace Horror
         [Header("Dificultad")]
         [Tooltip("Multiplica la velocidad de persecucion de todos los enemigos (zombis y jefes). 1 = la original")]
         [Range(0.5f, 2f)] public float enemySpeedMultiplier = 1.2f;
+        [Tooltip("Suelo de velocidad de persecucion (m/s): los zombis que andan mas despacio suben a este valor. 0 = sin suelo")]
+        [Range(0f, 3f)] public float minEnemySpeed = 1.0f;
 
         [Header("Equipo inicial (partida nueva)")]
         [Tooltip("Arma con la que se empieza, ya equipada")] public ItemData startWeapon;
@@ -23,6 +25,7 @@ namespace Horror
         {
             GameState.ResetAll();
             ZombieAI.SpeedMultiplier = enemySpeedMultiplier;
+            ZombieAI.MinSpeed = minEnemySpeed;
             NoteArchive.Clear();
             if (SaveSystem.ApplyPending()) return;
             ItemStorage.Clear();   // partida nueva: baul vacio

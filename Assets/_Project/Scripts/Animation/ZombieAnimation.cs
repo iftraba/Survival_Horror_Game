@@ -86,7 +86,8 @@ namespace Horror
             // velocidad de reproduccion: que el avance del clip coincida con el del agente
             float target = 1f;
             if (v >= 0.12f)
-                target = v < runAbove ? Mathf.Clamp(v / walkClipSpeed, 0.6f, maxWalkPlayback) : Mathf.Clamp(v / runClipSpeed, 0.6f, 1.6f);
+                // con el suelo de velocidad de GameFlow los que andan suben a ~1 m/s: el tope de reproduccion de andar se amplia a 3x
+                target = v < runAbove ? Mathf.Clamp(v / walkClipSpeed, 0.6f, Mathf.Max(maxWalkPlayback, 3f)) : Mathf.Clamp(v / runClipSpeed, 0.6f, 1.6f);
             playback = Mathf.MoveTowards(playback, target, 4f * Time.deltaTime);
             animator.speed = playback;
         }

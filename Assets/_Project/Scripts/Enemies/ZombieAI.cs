@@ -15,6 +15,8 @@ namespace Horror
         public float chaseSpeed = 1.4f;
         /// <summary>Multiplicador de velocidad de todos los enemigos (lo fija GameFlow al empezar la partida).</summary>
         public static float SpeedMultiplier = 1f;
+        /// <summary>Suelo de velocidad de persecucion (m/s): ningun enemigo persigue mas lento que esto (lo fija GameFlow).</summary>
+        public static float MinSpeed = 0f;
         public float staggerTime = 0.45f;
         [Tooltip("A esta distancia te oye aunque haya paredes en medio.")]
         public float hearingRange = 4.5f;
@@ -151,7 +153,7 @@ namespace Horror
             if (canNav)
             {
                 agent.isStopped = false;
-                agent.speed = chaseSpeed * SpeedMultiplier;
+                agent.speed = Mathf.Max(chaseSpeed * SpeedMultiplier, MinSpeed);
                 agent.SetDestination(player.position);
             }
             else

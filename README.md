@@ -48,6 +48,7 @@ Más reciente primero. Formato: fecha · módulo · cambio.
 
 - 2026-10-06 · Core/Enemies/Player · Sonidos reales: packs CC0 + síntesis (zombis, puertas, pasos, armas, teléfono, jefe); pasos de escalera; el teléfono suena cerca; rugido y pasos del jefe; alerta de zombis; recargas por arma. Traspaso en `docs/estado-actual.md`.
 - 2026-10-06 · Level/Notes/Enemies · **Tramo final tras el jefe** (`PostBossWing`): la puerta norte de la arena pasa a ser una puerta con la llave de salida y detrás hay pasillo, vestíbulo, sala segura 4 (teléfono, baúl, 2 notas), sala de control (llave del garaje, taquilla con código 0316 con la 2ª riñonera, 2 zombis) y garaje (el portón que ahora termina la partida, pide la llave del garaje). 4 zombis nuevos, NavMesh comprobado (la arena conecta con las 3 salas), textos de las notas provisionales. Sin probar en Play.
+- 2026-10-06 · Enemies/Core · Suelo de velocidad de persecución: `GameFlow.minEnemySpeed` = 1,0 m/s (los zombis lentos —policías, chicas, Pxl1 y Pxl3— suben a 1,0; los rápidos no cambian). Tope de reproducción del andar a 3×.
 - 2026-10-06 · Enemies/Core · Velocidad de los enemigos +20 %: multiplicador global `GameFlow.enemySpeedMultiplier` = 1,2 (`ZombieAI.SpeedMultiplier`), para zombis y jefes; ajustable en el inspector.
 - 2026-10-06 · Audio · Música subida un 20 % más: `musicVolume` 0,84 (0,45 → 0,7 → 0,84).
 - 2026-10-06 · Audio · Puertas a `doorGain` 0,24 (-40 %) y daño que recibe el personaje a `playerHurtGain` 0,2 (-20 %), ajustados en vivo en Play y luego guardados en la escena.
