@@ -20,4 +20,4 @@ Cómo entran personajes, animaciones y objetos en el juego.
 - **Git LFS** para binarios (FBX, imágenes, audio). Cuota gratuita 1 GB: vigilar los FBX con malla de las animaciones.
 
 ## Exportar el juego
-Windows 64 bits, `Desktop/Juego/Comisaria.exe` (producto "Comisaria", empresa "iftraba", 1920×1080). Requiere el módulo Windows Mono sano del editor; con Smart App Control activo, Unity no puede compilar (bloquea `Unity.AspNetCore.NamedPipeSupport.dll`).
+Procedimiento: `manage_build` (acción `build`) genera `Builds/StandaloneWindows64/Comisaria.exe` en el proyecto (ignorado por git, ~232 MB, ~30 s); después se copia a `Desktop/Juego` con `robocopy /MIR` excluyendo `Comisaria_BackUpThisFolder_ButDontShipItWithYourGame` (símbolos de depuración: no se envía). Windows 64 bits, `Desktop/Juego/Comisaria.exe` (producto "Comisaria", empresa "iftraba", 1920×1080). Requiere el módulo Windows Mono sano del editor; con Smart App Control activo, Unity no puede compilar (bloquea `Unity.AspNetCore.NamedPipeSupport.dll`).

@@ -5,7 +5,7 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 ## Qué hay hecho
 - Juego jugable en Unity 6000.6.4f1 (URP): planta baja, **planta superior con escalera**, zona del jefe, protagonista Soldier, 4 zombis + jefe con modelos del usuario, menú principal, guardado con **teléfono antiguo** en tres salas seguras, inventario y baúl global.
 - Versión estable en la etiqueta `estable` (anterior a menú, planta superior y teléfonos; moverla cuando el usuario lo pida).
-- Exportación Windows hecha una vez en `Desktop/Juego/Comisaria.exe` (volver a compilar para incluir lo nuevo).
+- Exportación Windows en `Desktop/Juego/Comisaria.exe`: última build el 2026-10-06 (commit `e6f518c`: slots, Archivo, taquilla con código, riñonera, luces recalibradas, 39 sonidos). Volver a compilar al añadir cosas (ver `docs/art-pipeline.md`).
 - Documentación por módulos en `docs/` y registro de cambios en el README (regla: actualizar en cada cambio).
 - Skills del proyecto en `.claude/skills/`: `pedir-modelo-ia`, `modelo-blender`.
 
@@ -30,7 +30,7 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 - No hacer pruebas en Play si el usuario está jugando; sin foco, Unity no avanza (usar pausa + `EditorApplication.Step()`).
 
 ## Riñoneras y guardado (ideas del usuario)
-- Hecho: concepto de riñonera (`I_Bag`, +2 casillas, tope 6), una en el escritorio de la arena del jefe. Es pequeña, tipo riñonera, NO mochila.
+- Hecho: concepto de riñonera (`I_Bag`, +2 casillas, tope 6), una dentro de la taquilla con código de la sala de reuniones. Es pequeña, tipo riñonera, NO mochila.
 - Hecho: **5 slots de guardado** (`savegame_1..5.json`; selector en el teléfono, la pausa y el menú; migración automática del guardado antiguo al slot 1). Sin probar en Play: el usuario debe comprobar las pantallas.
 - Hecho: **Archivo** (Historia/Pistas) y puzzle de la riñonera: nota con el código 4719 (mesa del archivo, planta alta) → taquilla con código en la sala de reuniones → riñonera dentro. Hay además una nota de historia en el interrogatorio. Textos provisionales. Sin probar en Play.
 - Hecho: pantalla de objeto conseguido al recoger la riñonera (`ItemShowcase`, modelo 3D girando); sin probar en Play.
@@ -38,10 +38,21 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 - Luces: corregidas las lámparas duplicadas de la planta alta y recalibrada la iluminación (suavidad de `Env_*`, bloom, relleno a 2,55 m con alcance medido; ver `docs/level.md`). Sin probar en Play.
 - Modelo de la riñonera: **hecho en Blender** (`Tools/blender/build_rinonera.py`, 1.400 triángulos), asignado a `I_Bag` con su miniatura y colocado en la taquilla. Antecedente: **dos intentos con Meshy 6 en modo texto (`generate_model`) salieron como una persona de 25 cm** (soldado la primera vez, persona de negro con los pulgares arriba la segunda; 41 k triángulos, 8,7 MB cada uno), pese a que el segundo prompt decía "not a person, not a figurine". Se descartaron y se borraron los archivos. No repetir en modo texto para objetos sencillos: Blender (skill `modelo-blender`) o imagen → 3D. Cada intento gasta créditos de Meshy; el plugin no permite fijar el número de polígonos.
 
-## Pendiente
-1. Comprobar los sonidos en juego y ajustar.
-2. Probar a fondo: jefe (baile → puerta → combate → llave → salida), zombi Yaku, planta superior con zombis.
-3. Volver a exportar el `.exe` con todo lo nuevo.
-4. Más zonas, ventanas/azotea, mejoras de postproceso (algunos efectos no entran en la build).
-5. Animación de disparo de pistola (descargar "Pistol Fire"/"Shooting" de Mixamo con el Soldier).
-6. Mover la etiqueta `estable` al último commit estable cuando el usuario lo pida.
+## Después de que el usuario y sus compañeros prueben la build (2026-10-06)
+Lo que hay que comprobar en el `.exe` (todo se montó sin verlo jugando):
+1. **Luces**: ¿alguna sala sigue quemada o demasiado oscura? (se recalibraron todas menos la arena del jefe). Anotar sala y qué se ve.
+2. **Sonidos** (39 clips de fal.ai): ¿cuáles no encajan? En especial: disparos (pistola/escopeta), `lamp_hum` y `heartbeat` (bucles sin recortar), gruñidos, teléfono. Repetir los malos con otro prompt (enseñar el prompt antes de enviar). Falta el hueco para `shotgun_pump`.
+3. **Puzzle de la riñonera**: nota (mesa del archivo, planta alta) → código 4719 → taquilla de reuniones → riñonera → pantalla de objeto conseguido → inventario de 10 casillas.
+4. **Archivo** (pestaña de Tab, Q cambia; Historia/Pistas) y lectura de notas a pantalla completa.
+5. **5 slots de guardado**: guardar en el teléfono, sobrescribir (pide confirmación), cargar desde pausa y menú; comprobar que las casillas de riñonera y las notas leídas vuelven al cargar.
+6. **Jefe completo** (baile → puerta → combate → llave → salida), zombi Yaku y planta superior con zombis.
+7. Rendimiento y cualquier cosa que se rompa solo en la build (algunos efectos de postproceso no entran).
+
+## Pendiente (para seguir)
+1. Arreglar lo que salga de las pruebas de arriba.
+2. **Salas después del jefe** (un par) y decidir cómo termina el juego; más riñoneras (colocadas o con puzzle) cuando haya salas.
+3. **Textos reales** de las notas (los actuales los escribió Claude como provisionales) y más notas de historia/pistas, quizá con dibujos.
+4. Animación del personaje al ponerse la riñonera (a futuro); animación de disparo de pistola (descargar "Pistol Fire"/"Shooting" de Mixamo con el Soldier).
+5. Música (`music_ambient`, `music_tension`) con `stable-audio` de fal, pedir OK antes de enviar; recortar los bucles de las lámparas y el latido.
+6. Más zonas, ventanas/azotea, mejoras de postproceso.
+7. Mover la etiqueta `estable` al último commit estable cuando el usuario lo pida.
