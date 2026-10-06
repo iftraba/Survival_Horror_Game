@@ -9,7 +9,7 @@ namespace Horror.EditorTools
 {
     /// <summary>
     /// Zombis del pack de la Asset Store "Zombie" (Pxltiger, importado en Assets/Zombie): tres modelos humanoides y 10
-    /// animaciones. Construye dos AnimatorOverrideController sobre el controlador base de los zombis (ZombieHumanoid) y
+    /// animaciones. Construye tres AnimatorOverrideController sobre el controlador base de los zombis (ZombieHumanoid) y
     /// los prefabs Zombie_Pxl1..3 con el mismo montaje que ZombieKit. El pack solo trae un ataque y ninguna reaccion a
     /// golpes ni grito de alerta: se reutilizan idle y la caida para la muerte. Se puede repetir.
     /// </summary>
