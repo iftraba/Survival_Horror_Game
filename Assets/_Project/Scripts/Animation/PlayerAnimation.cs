@@ -94,6 +94,7 @@ namespace Horror
 
         Transform spine, rHand, lHand;
         float aimBlend;
+        float recoil;
         Quaternion smoothFix = Quaternion.identity;
 
         /// <summary>
@@ -129,9 +130,16 @@ namespace Horror
             // filtro: al pasar de la pose de apuntar a la de disparo (cada una pide un giro distinto) el torso no da un tirón
             smoothFix = Quaternion.Slerp(smoothFix, target, 1f - Mathf.Exp(-14f * Time.deltaTime));
             spine.rotation = Quaternion.Slerp(Quaternion.identity, smoothFix, aimBlend) * spine.rotation;
+            // retroceso: el torso sube un poco con cada disparo y vuelve (el arma larga da mas patada)
+            recoil = Mathf.MoveTowards(recoil, 0f, Time.deltaTime * 5f);
+            if (recoil > 0f)
+            {
+                float kick = weapons.Equipped.twoHanded ? 7f : 4f;
+                spine.rotation = Quaternion.AngleAxis(-kick * recoil * recoil, transform.right) * spine.rotation;
+            }
         }
 
-        void OnFired() { CacheParams(); if (animator != null && has.Contains(ShootId)) animator.SetTrigger(ShootId); }
+        void OnFired() { recoil = 1f; CacheParams(); if (animator != null && has.Contains(ShootId)) animator.SetTrigger(ShootId); }
         void OnReload() { CacheParams(); if (animator != null && has.Contains(ReloadId)) animator.SetTrigger(ReloadId); }
         void OnDamaged(Vector3 _) { CacheParams(); if (animator != null && has.Contains(HitId)) animator.SetTrigger(HitId); }
         void OnDied() => animator?.SetBool(DeadId, true);

@@ -115,7 +115,8 @@ namespace Horror.EditorTools
             var aimRifle = First("P_RifleAimingIdle", "P_RifleAimIdle");
             var aimPistol = First("P_PistolIdle", "P_PistolAimIdle", "P_PistolAim") ?? aimRifle;
             var fireRifle = First("P_FiringRifle", "P_RifleFire");
-            var firePistol = First("P_PistolFire", "P_Shooting", "P_PistolShoot") ?? fireRifle;
+            var firePistol = First("P_PistolFire", "P_Shooting", "P_PistolShoot") ?? aimPistol;   // sin clip de pistola: se mantiene la pose de apuntar (el retroceso es por codigo)
+            fireRifle = aimRifle;   // el clip de rifle gira el torso unos 30 grados respecto a la pose de apuntar: tiron al disparar; retroceso por codigo
             var dying = First("P_Dying");
             log.Add(idleNote); log.Add(walkNote);
             log.Add(aimPistol == aimRifle ? "apuntar con pistola: usa la pose de rifle (falta Pistol Idle)" : "apuntar con pistola: clip real");
