@@ -15,10 +15,10 @@ MonoBehaviour:
   displayName: "Ri\xF1onera"
   description: "Una ri\xF1onera peque\xF1a. Al cogerla, tu inventario gana 2 casillas de forma permanente."
   type: 5
-  icon: {fileID: 0}
+  icon: {fileID: -6383022795709590374, guid: 9b02a0e2794e86c41b6f8a09f26ba045, type: 3}
   tint: {r: 0.25, g: 0.3, b: 0.2, a: 1}
   maxStack: 1
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 919132149155446097, guid: 8c9afdcda5dc95e41b999040c4766c35, type: 3}
   worldScale: 1
   mass: 0.4
   pickupObjective: 

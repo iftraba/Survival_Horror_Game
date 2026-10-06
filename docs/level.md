@@ -21,5 +21,7 @@ Pistola al empezar; **la llave de la sala está en la planta superior**; escopet
 ## Luz
 Lámparas de techo (`CeilingLamp`) con interruptores (`LightSwitch`): cada interruptor controla un grupo. La sala del jefe y las salas seguras tienen luz propia. Una lámpara por posición: `UpperFloor.Build` retira las lámparas de la planta alta anteriores antes de crear las suyas (antes se apilaban 5 copias por sala y el centro salía quemado).
 
+**Cómo está calibrada la luz (octubre 2026)**: los materiales `Env_*` (suelo, pared, techo, madera, metal) sacan la suavidad del canal alfa de la textura multiplicada por `_Smoothness`; con el deslizador a 1 el suelo era un espejo y cada lámpara dejaba un fogonazo. Ahora: suelo 0,4, pared 0,22, techo 0,2, madera 0,3, metal 0,55. El Bloom está en intensidad 0,3 (umbral 1). Cada lámpara tiene un foco con sombra (intensidad ~17-32) y un relleno puntual sin sombras **a 2,55 m** (cerca del techo, para no quemar el suelo bajo la lámpara) cuyo alcance se midió contra las paredes de su sala (1,4 × la distancia, entre 5 y 9 m; si es menor que la distancia a la pared, la pared queda a oscuras). Las lámparas de la arena del jefe se dejaron como estaban (referencia). Al añadir salas nuevas: foco ~25, relleno a 2,55 m de altura y alcance ≥ 1,4 × la distancia a la pared más lejana.
+
 ## Pendiente
 Sonido de pasos distinto en la escalera, ventanas y azotea.

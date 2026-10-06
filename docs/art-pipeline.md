@@ -11,6 +11,7 @@ Cómo entran personajes, animaciones y objetos en el juego.
 ## Objetos y armas
 - Opción A: IA generativa 3D (Meshy). Skill del proyecto `pedir-modelo-ia`: redacta el prompt (≤780 caracteres, inglés).
 - Opción B: Blender por script (`Tools/blender/`, Blender 5.2). Skill `modelo-blender`.
+- Ejemplo hecho con Blender: `Tools/blender/build_rinonera.py` (riñonera; reutiliza el `Mesher` de `build_items.py`, genera vistas previas con `-- <fbx> <carpeta>` y exporta con origen en el centro de la base). Meshy en **modo texto** devolvió una persona de 25 cm dos veces para este objeto (ver `estado-actual.md`): para objetos simples, Blender o imagen → 3D.
 - Ejemplo hecho con Blender: `Tools/blender/build_phone.py` (teléfono de disco). Se exporta con `bake_space_transform=True` y el origen en el suelo para que Unity lo oriente y apoye bien.
 - Los personajes humanoides **no** se hacen con scripts: los modelos decimados o reposados por código salieron amorfos.
 
