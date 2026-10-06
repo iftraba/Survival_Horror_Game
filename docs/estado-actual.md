@@ -5,7 +5,7 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 ## Qué hay hecho
 - Juego jugable en Unity 6000.6.4f1 (URP): planta baja, **planta superior con escalera**, zona del jefe, protagonista Soldier, 4 zombis + jefe con modelos del usuario, menú principal, guardado con **teléfono antiguo** en tres salas seguras, inventario y baúl global.
 - Versión estable en la etiqueta `estable` (anterior a menú, planta superior y teléfonos; moverla cuando el usuario lo pida).
-- Exportación Windows en `Desktop/Juego/Comisaria.exe`: última build el 2026-10-06 (commit `e6f518c`: slots, Archivo, taquilla con código, riñonera, luces recalibradas, 39 sonidos). Volver a compilar al añadir cosas (ver `docs/art-pipeline.md`).
+- Exportación Windows en `Desktop/Juego/Comisaria.exe`: última build el 2026-10-06 (commit `7d169de`: slots, Archivo, taquilla con código, riñonera, luces recalibradas, 39 sonidos, mezcla de audio corregida). Volver a compilar al añadir cosas (ver `docs/art-pipeline.md`).
 - Documentación por módulos en `docs/` y registro de cambios en el README (regla: actualizar en cada cambio).
 - Skills del proyecto en `.claude/skills/`: `pedir-modelo-ia`, `modelo-blender`.
 
