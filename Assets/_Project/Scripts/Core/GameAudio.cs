@@ -30,6 +30,10 @@ namespace Horror
         [Range(0f, 1f)] public float doorGain = 0.4f;
         [Tooltip("Gruñidos, ataques, quejidos y muerte de los zombis (no el jefe)")]
         [Range(0f, 1f)] public float zombieGain = 0.5f;
+        [Tooltip("Pasos del jugador (suelo y escalera)")]
+        [Range(0f, 1f)] public float stepGain = 0.4f;
+        [Tooltip("Quejido y muerte del jugador (el daño que recibe)")]
+        [Range(0f, 1f)] public float playerHurtGain = 0.5f;
 
         [Header("Efectos")]
         public AudioClip[] footsteps;
@@ -190,6 +194,8 @@ namespace Horror
             {
                 case Sfx.DoorOpen: case Sfx.DoorClose: case Sfx.DoorLocked: case Sfx.DoorUnlock: return doorGain;
                 case Sfx.ZombieGroan: case Sfx.ZombieAttack: case Sfx.ZombieHurt: case Sfx.ZombieDeath: return zombieGain;
+                case Sfx.Footstep: case Sfx.StairStep: return stepGain;
+                case Sfx.PlayerHurt: case Sfx.PlayerDeath: return playerHurtGain;
                 default: return 1f;
             }
         }
