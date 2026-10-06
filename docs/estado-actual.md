@@ -20,7 +20,7 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 - El **MCP oficial de fal** está añadido a la configuración de usuario y autenticado (`claude mcp list` → fal conectado). Hace falta una **sesión nueva** para que cargue sus herramientas.
 - **Mostrar siempre el modelo y el prompt exacto al usuario antes de enviar nada** (regla permanente). Prompts: `Tools/audio/sfx_prompts.md`.
 - Modelo en uso: `fal-ai/elevenlabs/sound-effects/v2` (~0,002 USD/s; `cassetteai` ya no está en el catálogo). Se llama con las herramientas MCP `mcp__fal__*` y se descarga con curl a `Assets/_Project/Audio/Generated/`.
-- Hechos: `pistol_shot_fal.mp3` y `shotgun_shot_fal.mp3`, asignados como `fireSound` en `W_Pistol`/`W_Shotgun` (están en esos WeaponData, no en `GameAudio`). Falta que el usuario los oiga; si convencen, seguir con el resto de la lista.
+- Hechos y **cableados** (39 clips `*_fal.mp3` en `Audio/Generated/`): disparos y recargas en `W_Pistol`/`W_Shotgun` (WeaponData); el resto en `GameAudio` de la escena `Comisaria`. `TestSceneBuilder` prefiere los `_fal` a los `.wav`. Sin hueco en el código: `shotgun_pump`. Falta: música (`stable-audio`, pedir OK antes), recortar/comprobar los bucles `lamp_hum` y `heartbeat`, y que el usuario los oiga en juego (cambiar los que no encajen).
 - Incidencia: una petición dio 403 `account_locked` al recuperar el resultado aunque la cuenta figuraba lista; reenviar el mismo prompt funcionó.
 
 ## Entorno

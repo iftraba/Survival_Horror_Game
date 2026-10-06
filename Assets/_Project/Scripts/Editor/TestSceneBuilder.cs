@@ -277,9 +277,15 @@ namespace Horror.EditorTools
             ga.ambientLoop = Clip("music_ambient");
             ga.tensionLoop = Clip("music_tension");
             ga.musicVolume = 0.45f;
-            ga.footsteps = Clips("step", 3);
-            ga.zombieGroans = Clips("zgroan", 4);
-            ga.zombieHurts = Clips("zhurt", 2);
+            ga.footsteps = Clips("step", 3, "step_tile");
+            ga.zombieGroans = Clips("zgroan", 4, "zgroan");
+            ga.zombieHurts = Clips("zhurt", 2, "zhurt");
+            ga.stairSteps = Clips("stairstep", 2, "step_stairs");
+            ga.phoneRing = Clip("phone_ring");
+            ga.phoneDial = Clip("phone_dial");
+            ga.phonePickup = Clip("phone_pickup");
+            ga.bossRoar = Clip("boss_roar");
+            ga.bossStep = Clip("boss_step");
             ga.zombieAttack = Clip("zattack");
             ga.zombieDeath = Clip("zdeath");
             ga.playerHurt = Clip("player_hurt");
@@ -299,10 +305,10 @@ namespace Horror.EditorTools
             pistol.heldScale = 1.3f;       // modelos nuevos de armas: escalas ajustadas a las manos del personaje
             shotgun.heldScale = 0.9f;
             // disparos generados con fal.ai (Audio/Generated); si faltan, los sintetizados
-            pistol.fireSound = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/Generated/pistol_shot_fal.mp3") ?? Clip("pistol_shot");
-            pistol.reloadSound = Clip("reload");
-            shotgun.fireSound = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/Generated/shotgun_shot_fal.mp3") ?? Clip("shotgun_shot");
-            shotgun.reloadSound = Clip("reload");
+            pistol.fireSound = Clip("pistol_shot");
+            pistol.reloadSound = Fal("reload_pistol") ?? Clip("reload");
+            shotgun.fireSound = Clip("shotgun_shot");
+            shotgun.reloadSound = Fal("reload_shotgun") ?? Clip("reload");
             EditorUtility.SetDirty(pistol);
             EditorUtility.SetDirty(shotgun);
 
@@ -347,14 +353,17 @@ namespace Horror.EditorTools
 
         const string AudioPath = "Assets/_Project/Audio/";
 
-        static AudioClip Clip(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>(AudioPath + name + ".wav");
+        // Clips generados con fal.ai (Audio/Generated/<nombre>_fal.mp3) tienen prioridad; si faltan, el .wav de siempre
+        static AudioClip Fal(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>(AudioPath + "Generated/" + name + "_fal.mp3");
 
-        static AudioClip[] Clips(string prefix, int count)
+        static AudioClip Clip(string name) => Fal(name) ?? AssetDatabase.LoadAssetAtPath<AudioClip>(AudioPath + name + ".wav");
+
+        static AudioClip[] Clips(string prefix, int count, string falPrefix = null)
         {
             var list = new System.Collections.Generic.List<AudioClip>();
             for (int i = 1; i <= count; i++)
             {
-                var c = Clip(prefix + i);
+                var c = (falPrefix != null ? Fal(falPrefix + "_" + i) : null) ?? Clip(prefix + i);
                 if (c != null) list.Add(c);
             }
             return list.ToArray();
