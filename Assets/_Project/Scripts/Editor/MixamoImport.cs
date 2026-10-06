@@ -55,6 +55,7 @@ namespace Horror.EditorTools
                 // Si se da la lista de ciclicos se usa tal cual (las palabras fallan: "Running To Stop" no es un ciclo)
                 bool loop = loopClips != null ? loopClips.Contains(clipName) : LoopWords.Any(w => clipName.ToLowerInvariant().Contains(w));
                 var clips = imp.defaultClipAnimations;
+                if (clips.Length > 1) clips = clips.Where(x => x.takeName != "Take 001").ToArray();   // Mixamo trae un 'Take 001' vacio de 1 frame
                 foreach (var c in clips)
                 {
                     c.name = clipName;

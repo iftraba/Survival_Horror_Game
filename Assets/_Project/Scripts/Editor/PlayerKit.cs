@@ -82,7 +82,7 @@ namespace Horror.EditorTools
             var c = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
             if (c == null) c = AnimatorController.CreateAnimatorControllerAtPath(path);
             // vaciar y reconstruir (se conserva el archivo: los prefabs siguen apuntando a el)
-            foreach (var l in c.layers.Skip(1).ToArray()) c.RemoveLayer(c.layers.ToList().IndexOf(l));
+            while (c.layers.Length > 1) c.RemoveLayer(c.layers.Length - 1);
             var sm0 = c.layers[0].stateMachine;
             foreach (var st in sm0.states.ToArray()) sm0.RemoveState(st.state);
             foreach (var t in sm0.anyStateTransitions.ToArray()) sm0.RemoveAnyStateTransition(t);
@@ -96,15 +96,18 @@ namespace Horror.EditorTools
             c.AddParameter("LongGun", AnimatorControllerParameterType.Bool);
             c.AddParameter("Shoot", AnimatorControllerParameterType.Trigger);
             c.AddParameter("Dead", AnimatorControllerParameterType.Bool);
+            c.AddParameter("Reload", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Hit", AnimatorControllerParameterType.Trigger);
 
             // ---- clips por ranura (con sustituto provisional)
             var runF = First("P_RunForward", "P_Running", "P_Run");
             var idle = First("P_BreathingIdle", "P_Idle", "P_BreathingIdle2");
             string idleNote = "reposo: clip real";
             if (idle == null) { idle = PoseClip("P_IdlePose", First("P_TurnLeft45Degrees", "P_RifleTurn"), 0f); idleNote = "reposo: POSTURA FIJA provisional (falta Idle)"; }
-            var walk = First("P_Walking", "P_WalkForward", "P_Walk");
+            var walk = First("P_Walking", "P_WalkForward", "P_Walk", "P_PistolWalk");
             string walkNote = "andar: clip real";
             float walkScale = 1f;
+            float walkSpeedClip = walk != null && walk.name == "P_PistolWalk" ? 2.35f : 2.4f;
             if (walk == null) { walk = runF; walkScale = 0.6f; walkNote = "andar: correr a ritmo lento provisional (falta Walking)"; }
             var back = First("P_WalkingBackwards", "P_WalkBackward", "P_PistolWalkBackward");
             var wl = First("P_WalkLeft", "P_LeftStrafeWalking"); var wr = First("P_WalkRight", "P_RightStrafeWalking");
@@ -143,7 +146,7 @@ namespace Horror.EditorTools
             t2.AddChild(walk == runF ? runF : walk, new Vector2(0f, 1f));
             var ch2 = t2.children;
             if (wfl != null) { int k = ch2.ToList().FindLastIndex(x => x.motion == wfl); ch2[k].mirror = true; }     // diagonal derecha = espejo de la izquierda
-            { int k = ch2.Length - 1; ch2[k].timeScale = walk == runF ? 0.43f : 1f; }                                 // adelante a ~1.7 m/s
+            { int k = ch2.Length - 1; ch2[k].timeScale = walk == runF ? 0.43f : Mathf.Min(1f, 1.7f / walkSpeedClip); }                                 // adelante a ~1.7 m/s
             t2.children = ch2;
 
             Trans(free, aim, 0.18f, ("Aiming", AnimatorConditionMode.If, 0));
@@ -178,6 +181,30 @@ namespace Horror.EditorTools
             {
                 Trans(a, s, 0.04f, ("Shoot", AnimatorConditionMode.If, 0));
                 var back2 = s.AddTransition(a); back2.hasExitTime = true; back2.exitTime = 0.45f; back2.duration = 0.1f;
+            }
+            // recarga (pistola / arma larga) y golpe recibido: se pueden disparar desde cualquier estado del torso
+            var rlP = First("P_Reload", "P_Reloading"); var rlR = First("P_Reloading", "P_Reload");
+            float RT(string path, float fallback) { var w = AssetDatabase.LoadAssetAtPath<WeaponData>(path); return w != null ? w.reloadTime : fallback; }
+            if (rlP != null)
+            {
+                var reloadP = um.AddState("ReloadPistol"); reloadP.motion = rlP; reloadP.speed = rlP.length / RT("Assets/_Project/Data/W_Pistol.asset", 1.6f);
+                var reloadR = um.AddState("ReloadRifle"); reloadR.motion = rlR; reloadR.speed = rlR.length / RT("Assets/_Project/Data/W_Shotgun.asset", 2.5f);
+                foreach (var (st, lg) in new[] { (reloadP, false), (reloadR, true) })
+                {
+                    var tr = um.AddAnyStateTransition(st); tr.hasExitTime = false; tr.duration = 0.15f; tr.canTransitionToSelf = false;
+                    tr.AddCondition(AnimatorConditionMode.If, 0, "Reload");
+                    tr.AddCondition(lg ? AnimatorConditionMode.If : AnimatorConditionMode.IfNot, 0, "LongGun");
+                    var back3 = st.AddTransition(empty); back3.hasExitTime = true; back3.exitTime = 0.92f; back3.duration = 0.2f;
+                }
+                log.Add("recarga: clip real (" + rlP.name + " / " + rlR.name + ")");
+            }
+            var hitClip = First("P_HitReaction", "P_HitReactionStanding");
+            if (hitClip != null)
+            {
+                var hit = um.AddState("Hit"); hit.motion = hitClip; hit.speed = 2.2f;
+                var th = um.AddAnyStateTransition(hit); th.hasExitTime = false; th.duration = 0.08f; th.canTransitionToSelf = true;
+                th.AddCondition(AnimatorConditionMode.If, 0, "Hit");
+                var back4 = hit.AddTransition(empty); back4.hasExitTime = true; back4.exitTime = 0.55f; back4.duration = 0.2f;
             }
             EditorUtility.SetDirty(c);
             AssetDatabase.SaveAssets();
