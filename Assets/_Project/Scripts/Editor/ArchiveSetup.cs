@@ -22,7 +22,7 @@ namespace Horror.EditorTools
         [MenuItem("Horror/Notas y taquilla con codigo")]
         public static void Menu() { Debug.Log("[Horror] " + Build()); }
 
-        static NoteData Note(string id, string title, NoteCategory cat, string body, string highlight, string objective)
+        public static NoteData Note(string id, string title, NoteCategory cat, string body, string highlight, string objective)
         {
             if (!AssetDatabase.IsValidFolder(NotesDir)) AssetDatabase.CreateFolder("Assets/_Project/Data", "Notes");
             string path = NotesDir + "/" + id + ".asset";
@@ -31,6 +31,34 @@ namespace Horror.EditorTools
             n.id = id; n.title = title; n.category = cat; n.body = body; n.highlight = highlight; n.objective = objective;
             EditorUtility.SetDirty(n);
             return n;
+        }
+
+        /// <summary>Taquilla bloqueada con teclado numerico: panel con luz verde en la puerta (gira con ella). La riñonera u otro botin va dentro.</summary>
+        public static GameObject MakeCodeLocker(Transform parent, Material metal, Vector3 pos, float yaw, string code)
+        {
+            var locker = Call<GameObject>("Locker", parent, metal, pos, yaw, false);
+            locker.name = "Locker_Code";
+            var ld = locker.GetComponent<LockerDoor>();
+            ld.code = code;
+            var panel = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            panel.name = "KeypadPanel";
+            Object.DestroyImmediate(panel.GetComponent<Collider>());
+            panel.transform.SetParent(ld.hinge, false);
+            panel.transform.localPosition = new Vector3(0.62f, 1.25f, 0.035f);
+            panel.transform.localScale = new Vector3(0.15f, 0.22f, 0.02f);
+            panel.GetComponent<Renderer>().sharedMaterial = Call<Material>("Mat", "KeypadPanel", new Color(0.06f, 0.07f, 0.08f));
+            var led = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            led.name = "KeypadLed";
+            Object.DestroyImmediate(led.GetComponent<Collider>());
+            led.transform.SetParent(ld.hinge, false);
+            led.transform.localPosition = new Vector3(0.62f, 1.33f, 0.047f);
+            led.transform.localScale = new Vector3(0.09f, 0.03f, 0.008f);
+            led.GetComponent<Renderer>().sharedMaterial = Call<Material>("Mat", "KeypadLed", new Color(0.3f, 1f, 0.45f));
+            var glow = new GameObject("KeypadGlow").AddComponent<Light>();
+            glow.transform.SetParent(ld.hinge, false);
+            glow.transform.localPosition = new Vector3(0.62f, 1.3f, 0.2f);
+            glow.type = LightType.Point; glow.color = new Color(0.3f, 1f, 0.45f); glow.range = 1.4f; glow.intensity = 0.5f; glow.shadows = LightShadows.None;
+            return locker;
         }
 
         public static string Build()
@@ -64,7 +92,7 @@ namespace Horror.EditorTools
             var extras = level.transform.Find("UpperFloor_Extras");
             if (extras == null) { extras = new GameObject("UpperFloor_Extras").transform; extras.SetParent(level.transform); }
             foreach (var t in extras.Cast<Transform>().ToArray()) Object.DestroyImmediate(t.gameObject);
-            foreach (var pk in Object.FindObjectsByType<Pickup>(FindObjectsSortMode.None).Where(p => p.item != null && p.item.name == "I_Bag").ToArray())
+            foreach (var pk in Object.FindObjectsByType<Pickup>(FindObjectsSortMode.None).Where(p => p.item != null && p.item.name == "I_Bag" && p.transform.position.y > 3.5f).ToArray())   // solo la de la planta alta (la del tramo final es de PostBossWing)
                 Object.DestroyImmediate(pk.gameObject);
 
             Physics.SyncTransforms();
@@ -95,29 +123,7 @@ namespace Horror.EditorTools
 
             // ---- taquilla con codigo en la sala de reuniones (pared este)
             var metal = AssetDatabase.FindAssets("Env_Metal t:Material").Select(g => AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(g))).FirstOrDefault();
-            var locker = Call<GameObject>("Locker", extras, metal, new Vector3(14.25f, Y0, -1.2f), -90f, false);
-            locker.name = "Locker_Code";
-            var ld = locker.GetComponent<LockerDoor>();
-            ld.code = TaquillaCode;
-            // panelito de teclado con luz verde en la puerta (gira con ella)
-            var panel = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            panel.name = "KeypadPanel";
-            Object.DestroyImmediate(panel.GetComponent<Collider>());
-            panel.transform.SetParent(ld.hinge, false);
-            panel.transform.localPosition = new Vector3(0.62f, 1.25f, 0.035f);
-            panel.transform.localScale = new Vector3(0.15f, 0.22f, 0.02f);
-            panel.GetComponent<Renderer>().sharedMaterial = Call<Material>("Mat", "KeypadPanel", new Color(0.06f, 0.07f, 0.08f));
-            var led = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            led.name = "KeypadLed";
-            Object.DestroyImmediate(led.GetComponent<Collider>());
-            led.transform.SetParent(ld.hinge, false);
-            led.transform.localPosition = new Vector3(0.62f, 1.33f, 0.047f);
-            led.transform.localScale = new Vector3(0.09f, 0.03f, 0.008f);
-            led.GetComponent<Renderer>().sharedMaterial = Call<Material>("Mat", "KeypadLed", new Color(0.3f, 1f, 0.45f));
-            var glow = new GameObject("KeypadGlow").AddComponent<Light>();
-            glow.transform.SetParent(ld.hinge, false);
-            glow.transform.localPosition = new Vector3(0.62f, 1.3f, 0.2f);
-            glow.type = LightType.Point; glow.color = new Color(0.3f, 1f, 0.45f); glow.range = 1.4f; glow.intensity = 0.5f; glow.shadows = LightShadows.None;
+            var locker = MakeCodeLocker(extras, metal, new Vector3(14.25f, Y0, -1.2f), -90f, TaquillaCode);
             log.Add("taquilla con codigo en " + locker.transform.position.ToString("F2"));
 
             // ---- la rinonera dentro (en la balda), asentada con fisica

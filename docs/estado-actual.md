@@ -59,7 +59,7 @@ Lo que hay que comprobar en el `.exe` (todo se montó sin verlo jugando):
 
 ## Pendiente (para seguir)
 1. Arreglar lo que salga de las pruebas de arriba. **Zombi Civil (verde)**: quitado de la escena porque se bugeaba siempre (4 unidades); investigar la causa (animación/NavMesh/modelo `ZombieGenerated`) y reponerlo. Quedan 8 zombis + jefe.
-2. **Salas después del jefe** (un par) y decidir cómo termina el juego; más riñoneras (colocadas o con puzzle) cuando haya salas.
+2. **Tramo final hecho (2026-10-06, sin probar en Play)**: tras el jefe hay pasillo, vestíbulo, sala segura 4, sala de control y garaje (ver `docs/level.md`); el final ahora es el portón del garaje con la llave del garaje (sala de control) y la 2ª riñonera está en la taquilla 0316 de esa sala. Falta: probar el recorrido completo (jefe → puerta → control → garaje → victoria), equilibrar munición/zombis, y decidir si hay una pantalla/escena final con más historia; más riñoneras y salas cuando se amplíe.
 3. **Textos reales** de las notas (los actuales los escribió Claude como provisionales) y más notas de historia/pistas, quizá con dibujos.
 4. Animación del personaje al ponerse la riñonera (a futuro); animación de disparo de pistola (descargar "Pistol Fire"/"Shooting" de Mixamo con el Soldier).
 5. Música (`music_ambient`, `music_tension`) con `stable-audio` de fal, pedir OK antes de enviar; recortar los bucles de las lámparas y el latido.

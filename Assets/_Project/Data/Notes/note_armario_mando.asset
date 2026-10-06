@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_armario_mando
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_armario_mando
+  title: Nota del operador
+  category: 1
+  body: 'Cerre el armario de mando con candado de numeros por si venian a por las llaves de reserva.
+
+
+    La clave es la hora de la alarma: las tres y dieciseis de la madrugada.
+
+
+    No la apunto en otro sitio.'
+  highlight: 0 3 1 6
+  image: {fileID: 0}
+  objective: Hay un armario de mando con teclado en la sala de control (la del centro).

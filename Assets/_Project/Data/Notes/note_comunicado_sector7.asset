@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_comunicado_sector7
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_comunicado_sector7
+  title: Comunicado interno
+  category: 0
+  body: 'A TODO EL PERSONAL DEL SECTOR 7
+
+
+    Por orden de la Direccion de Grimheim, el sector queda en cuarentena desde las 23:00. Nadie entra ni sale del edificio hasta nueva orden.
+
+
+    Los afectados NO deben ser trasladados al calabozo. Repito: NO trasladar.
+
+
+    Si lees esto y aun puedes caminar, ve al garaje. La llave la tiene el operador de la sala de control.'
+  highlight: 
+  image: {fileID: 0}
+  objective: 
