@@ -29,6 +29,11 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 - `claude.exe` se copió a `C:\Users\iftra\.local\bin\claude.exe` para poder usar `claude` desde cualquier terminal.
 - No hacer pruebas en Play si el usuario está jugando; sin foco, Unity no avanza (usar pausa + `EditorApplication.Step()`).
 
+## Riñoneras y guardado (ideas del usuario)
+- Hecho: concepto de riñonera (`I_Bag`, +2 casillas, tope 6), una en el escritorio de la arena del jefe. Es pequeña, tipo riñonera, NO mochila.
+- Por hacer: **slots de guardado múltiples** (hoy un solo `savegame.json`; propuesta 5 slots con selector en el teléfono y en el menú); modelo y vista previa de la riñonera al recogerla (la animación, a futuro); **salas después del jefe** (un par) y más riñoneras: o colocadas, o con puzzle (taquilla bloqueada arriba que pide un código o dos piezas sueltas).
+- Luces: corregidas las lámparas duplicadas de la planta alta (ver README).
+
 ## Pendiente
 1. Comprobar los sonidos en juego y ajustar.
 2. Probar a fondo: jefe (baile → puerta → combate → llave → salida), zombi Yaku, planta superior con zombis.

@@ -21,6 +21,7 @@ namespace Horror
         public float playerYaw;
         public float cameraYaw;
         public float health;
+        public int bagSlots;            // casillas extra ganadas con bolsas
         public List<SlotSave> slots = new List<SlotSave>();
         public string equipped;
         public List<MagSave> mags = new List<MagSave>();
@@ -81,6 +82,7 @@ namespace Horror
                 objective = Objectives.Current,
             };
 
+            if (inv != null) d.bagSlots = inv.BagSlots;
             if (inv != null && inv.slots != null)
                 foreach (var s in inv.slots)
                     d.slots.Add(s.IsEmpty ? new SlotSave { item = "", count = 0 } : new SlotSave { item = s.item.displayName, count = s.count });
@@ -161,6 +163,7 @@ namespace Horror
                 var inv = pc.GetComponent<Inventory>();
                 if (inv != null)
                 {
+                    inv.SetBagSlots(d.bagSlots);          // antes que las casillas: si no, los objetos de las extra se pierden
                     var stacks = new List<ItemStack>();
                     foreach (var s in d.slots)
                     {

@@ -19,7 +19,7 @@ Pistola al empezar; **la llave de la sala está en la planta superior**; escopet
 `RuntimeNavMesh` en `Start`, `useGeometry = PhysicsColliders`; los muebles no caminables llevan `NavMeshModifier`. Las puertas llevan `NavMeshObstacle` con carve.
 
 ## Luz
-Lámparas de techo (`CeilingLamp`) con interruptores (`LightSwitch`): cada interruptor controla un grupo. La sala del jefe y las salas seguras tienen luz propia.
+Lámparas de techo (`CeilingLamp`) con interruptores (`LightSwitch`): cada interruptor controla un grupo. La sala del jefe y las salas seguras tienen luz propia. Una lámpara por posición: `UpperFloor.Build` retira las lámparas de la planta alta anteriores antes de crear las suyas (antes se apilaban 5 copias por sala y el centro salía quemado).
 
 ## Pendiente
 Sonido de pasos distinto en la escalera, ventanas y azotea.

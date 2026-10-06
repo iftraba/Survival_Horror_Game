@@ -7,7 +7,8 @@ Objetos, inventario del jugador y baúl global. Código en `Assets/_Project/Scri
 |---|---|
 | `ItemData` (ScriptableObject) | Objeto: nombre, descripción, `ItemType` (Weapon, Ammo, Healing, Key, Misc), icono, `maxStack`, prefab en el suelo (`worldPrefab`, `worldScale`, `mass`), `healAmount`, `weapon` (si es un arma), `ammoType`, `pickupObjective`. Assets: `I_Pistol`, `I_Shotgun`, `I_HandgunAmmo`, `I_ShotgunAmmo`, `I_Spray`, `I_KeyRoom`, `I_KeyExit`. |
 | `ItemStack` | Pareja objeto + cantidad. |
-| `Inventory` | Cuadrícula del jugador (`slotCount` 8). `TryAdd` apila y luego usa huecos libres, `ConsumeAmmo`, `Drop`, `Has`, evento `Changed`. |
+| `Inventory` | Cuadrícula del jugador (`slotCount` 8). `TryAdd` apila y luego usa huecos libres, `ConsumeAmmo`, `Drop`, `Has`, evento `Changed`. **Riñoneras**: `AddBagSlots`/`SetBagSlots` amplían la cuadrícula (`BagSlots`, tope `maxBagSlots` = 6 → 14 casillas) conservando el contenido. |
+| `ItemType.Bag` / `ItemData.extraSlots` | Riñonera (`I_Bag`, +2 casillas). Al recogerla (`Pickup.Interact`) no entra en el inventario: suma casillas de forma permanente y desaparece. Se guarda en `SaveData.bagSlots` y se aplica antes de cargar las casillas. La rejilla del inventario sube para que quepan 3-4 filas. Está colocada en el escritorio de la arena del jefe (`BossWing.Loot`). Sin modelo propio todavía (cubo teñido). |
 | `ItemStorage` (estática) | Baúl **global** compartido por todas las salas seguras (capacidad 48). `Put`, `RemoveAt`, `Set`, `Clear`. Se guarda con la partida. |
 
 ## Equipo inicial

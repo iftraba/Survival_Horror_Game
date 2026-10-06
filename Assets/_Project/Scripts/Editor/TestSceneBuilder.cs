@@ -81,6 +81,12 @@ namespace Horror.EditorTools
                 i.displayName = "Llave de la salida"; i.type = ItemType.Key; i.tint = new Color(1f, 0.5f, 0.1f);
                 i.description = "Abre la puerta de salida del edificio.";
             });
+            var bag = Asset<ItemData>("I_Bag", i =>
+            {
+                i.displayName = "Riñonera"; i.type = ItemType.Bag; i.extraSlots = 2; i.maxStack = 1; i.tint = new Color(0.25f, 0.3f, 0.2f);
+                i.worldScale = 1f; i.mass = 0.4f;
+                i.description = "Una riñonera pequeña. Al cogerla, tu inventario gana 2 casillas de forma permanente.";
+            });
             // Objetivos que se muestran al avanzar (se reaplican en cada construccion)
             key.pickupObjective = "Llave conseguida. Abre la puerta de la sala del fondo.";
             keyExit.pickupObjective = "Tienes la llave de salida. Ve a la puerta de la pared norte, al fondo.";
@@ -267,7 +273,7 @@ namespace Horror.EditorTools
 
             // ---------- Flujo de partida ----------
             var flow = new GameObject("GameFlow");
-            flow.AddComponent<ItemDatabase>().items = new[] { pistolItem, shotgunItem, handgunAmmo, shotgunAmmo, spray, key, keyExit };
+            flow.AddComponent<ItemDatabase>().items = new[] { pistolItem, shotgunItem, handgunAmmo, shotgunAmmo, spray, key, keyExit, bag };
             var gameFlow = flow.AddComponent<GameFlow>();
             gameFlow.startWeapon = pistolItem;
             gameFlow.startMagazine = 10;   // dos zombis normales a cuerpo (4 tiros) + 2 de margen

@@ -26,6 +26,17 @@ namespace Horror
         {
             var inv = who.GetComponent<Inventory>();
             if (inv == null || item == null) return;
+            if (item.type == ItemType.Bag)
+            {
+                // La bolsa no se guarda en el inventario: amplia su capacidad y desaparece
+                int added = inv.AddBagSlots(item.extraSlots);
+                if (added <= 0) { Hud.Message("No puedes llevar mas bolsas"); return; }
+                Hud.Message($"{item.displayName}: +{added} casillas de inventario");
+                GameAudio.Play(Sfx.Pickup, who.transform.position, 0.8f, 1f, false);
+                if (!string.IsNullOrEmpty(item.pickupObjective)) Objectives.Set(item.pickupObjective);
+                Destroy(gameObject);
+                return;
+            }
             int left = inv.TryAdd(item, count);
             if (left == count)
             {

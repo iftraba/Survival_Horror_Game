@@ -189,7 +189,7 @@ namespace Horror.EditorTools
             var items = GameObject.Find("Items").transform;
             // la escopeta y los cartuchos previos se recolocan (se eliminan los que hubiera antes del fondo para no duplicar)
             foreach (var pk in Object.FindObjectsByType<Pickup>(FindObjectsSortMode.None).ToArray())
-                if (pk.item != null && (pk.item.name == "I_Shotgun" || pk.item.name == "I_ShotgunAmmo" || pk.item.name == "I_KeyExit")) Object.DestroyImmediate(pk.gameObject);
+                if (pk.item != null && (pk.item.name == "I_Shotgun" || pk.item.name == "I_ShotgunAmmo" || pk.item.name == "I_KeyExit" || pk.item.name == "I_Bag")) Object.DestroyImmediate(pk.gameObject);
             void Put(string item, int n, float x, float y, float z) { var pk = Pickup.Spawn(Item(item), n, new Vector3(x, y, z)); pk.transform.SetParent(items); }
             Put("I_Shotgun", 1, -11.5f, 1.0f, 1.45f);            // mesa del despacho del capitan
             Put("I_ShotgunAmmo", 8, -11.5f, 1.0f, 0.55f);        // la misma mesa
@@ -200,6 +200,7 @@ namespace Horror.EditorTools
             Put("I_HandgunAmmo", 12, -4.6f, 0.6f, 7.5f);
             Put("I_ShotgunAmmo", 8, 14.2f, 1.3f, 12.0f);         // taquilla de la arena (cerrada)
             Put("I_Spray", 1, 9.0f, 0.95f, 19.1f);               // escritorio de la arena
+            Put("I_Bag", 1, 8.3f, 0.95f, 19.1f);                 // riñonera: el mismo escritorio (de momento, hasta que haya mas salas)
             // se asienta la fisica para que la escena arranque con todo en reposo
             var oldMode = Physics.simulationMode;
             Physics.simulationMode = SimulationMode.Script;

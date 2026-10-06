@@ -15,9 +15,33 @@ namespace Horror
     public class Inventory : MonoBehaviour
     {
         public int slotCount = 8;
+        [Tooltip("Tope de casillas extra que pueden dar las bolsas")] public int maxBagSlots = 6;
         public ItemStack[] slots;
 
         public event Action Changed;
+
+        /// <summary>Casillas extra ganadas con bolsas (se guardan en la partida).</summary>
+        public int BagSlots { get; private set; }
+
+        /// <summary>Suma casillas de forma permanente. Devuelve cuantas se anadieron realmente (respeta el tope).</summary>
+        public int AddBagSlots(int extra)
+        {
+            int add = Mathf.Clamp(extra, 0, maxBagSlots - BagSlots);
+            if (add > 0) SetBagSlots(BagSlots + add);
+            return add;
+        }
+
+        /// <summary>Fija el total de casillas de bolsa (al cargar una partida) conservando el contenido.</summary>
+        public void SetBagSlots(int total)
+        {
+            BagSlots = Mathf.Clamp(total, 0, maxBagSlots);
+            int size = slotCount + BagSlots;
+            if (slots == null || slots.Length == size) { Changed?.Invoke(); return; }
+            var old = slots;
+            slots = new ItemStack[size];
+            if (old != null) Array.Copy(old, slots, Mathf.Min(old.Length, size));
+            Changed?.Invoke();
+        }
 
         void Awake()
         {

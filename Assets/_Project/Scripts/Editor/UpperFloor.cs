@@ -189,6 +189,9 @@ namespace Horror.EditorTools
             EditorUtility.SetDirty(rt);
 
             // ---------------------------------------------------------------- 4) luces
+            // Al reconstruir se retiran las lamparas de la planta alta anteriores (si no, se apilan y queman la sala)
+            foreach (var oldLamp in Object.FindObjectsByType<CeilingLamp>(FindObjectsSortMode.None).Where(l => l.transform.position.y > 3.5f).ToArray())
+                Object.DestroyImmediate(oldLamp.gameObject);
             var lampSrc = Object.FindObjectsByType<CeilingLamp>(FindObjectsSortMode.None).Where(l => l.transform.position.y < 3.2f).First();
             float dy = (Y0 + 2.88f) - lampSrc.transform.position.y;
             CeilingLamp NewLamp(Vector2 xz, float intensity, float range, float fillRange, float fillIntensity, Color color, bool flicker = false)

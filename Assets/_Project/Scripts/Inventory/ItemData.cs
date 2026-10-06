@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Horror
 {
-    public enum ItemType { Weapon, Ammo, Healing, Key, Misc }
+    public enum ItemType { Weapon, Ammo, Healing, Key, Misc, Bag }
     public enum AmmoType { None, Handgun, Shotgun, Rifle }
 
     [CreateAssetMenu(menuName = "Horror/Item", fileName = "NewItem")]
@@ -23,6 +23,10 @@ namespace Horror
         [Header("Objetivo")]
         [Tooltip("Si no esta vacio, al recoger este objeto el objetivo de la partida pasa a este texto")]
         public string pickupObjective;
+
+        [Header("Bag")]
+        [Tooltip("Casillas que suma al inventario de forma permanente al recogerla (la bolsa no ocupa casilla)")]
+        public int extraSlots = 2;
 
         [Header("Healing")]
         public float healAmount = 50f;

@@ -292,7 +292,9 @@ namespace Horror
             const int size = 104, gap = 10;
             float gridW = InvCols * size + (InvCols - 1) * gap;
             float totalW = gridW + 40f + 420f;
-            float gx = Screen.width / 2f - totalW / 2f, gy = Screen.height / 2f - 170f;
+            // La rejilla crece con las bolsas: se sube para que quepa (la base son 2 filas)
+            int rows = Mathf.Max(2, (inventory.slots.Length + InvCols - 1) / InvCols);
+            float gx = Screen.width / 2f - totalW / 2f, gy = Mathf.Max(80f, Screen.height / 2f - 170f - (rows - 2) * (size + gap) / 2f);
 
             var title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold };
             GUI.color = new Color(0.9f, 0.78f, 0.45f);
