@@ -57,7 +57,7 @@ namespace Horror
 
             if (!GameState.InputBlocked && Mouse.current != null)
             {
-                Vector2 d = Mouse.current.delta.ReadValue() * sensitivity;
+                Vector2 d = Mouse.current.delta.ReadValue() * sensitivity * GameSettings.Sensitivity;
                 yaw += d.x;
                 pitch = Mathf.Clamp(pitch - d.y, minPitch, maxPitch);
             }

@@ -134,7 +134,7 @@ namespace Horror
                 return false;
             }
             GameState.ResetAll();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            SceneManager.LoadScene(GameSettings.GameScene);
             return true;
         }
 

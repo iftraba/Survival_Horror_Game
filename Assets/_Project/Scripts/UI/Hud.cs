@@ -69,7 +69,7 @@ namespace Horror
         {
             SaveSystem.ClearPending();
             GameState.ResetAll();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            SceneManager.LoadScene(GameSettings.GameScene);
         }
 
         static void QuitGame()
@@ -162,6 +162,8 @@ namespace Horror
             y += h + gap;
 
             if (GUI.Button(new Rect(x, y, w, h), "Reiniciar")) Restart();
+            y += h + gap;
+            if (GUI.Button(new Rect(x, y, w, h), "Menu principal")) { SaveSystem.ClearPending(); GameState.ResetAll(); SceneManager.LoadScene(GameSettings.MenuScene); }
             y += h + gap;
             if (GUI.Button(new Rect(x, y, w, h), "Salir")) QuitGame();
 
