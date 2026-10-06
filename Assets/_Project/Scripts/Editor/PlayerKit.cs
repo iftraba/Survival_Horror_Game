@@ -179,8 +179,8 @@ namespace Horror.EditorTools
             Trans(aimP, aimR, 0.15f, ("LongGun", AnimatorConditionMode.If, 0));
             foreach (var (a, s) in new[] { (aimR, shootR), (aimP, shootP) })
             {
-                Trans(a, s, 0.04f, ("Shoot", AnimatorConditionMode.If, 0));
-                var back2 = s.AddTransition(a); back2.hasExitTime = true; back2.exitTime = 0.45f; back2.duration = 0.1f;
+                Trans(a, s, 0.08f, ("Shoot", AnimatorConditionMode.If, 0));
+                var back2 = s.AddTransition(a); back2.hasExitTime = true; back2.exitTime = 0.45f; back2.duration = 0.18f;
             }
             // recarga (pistola / arma larga) y golpe recibido: se pueden disparar desde cualquier estado del torso
             var rlP = First("P_Reload", "P_Reloading"); var rlR = First("P_Reloading", "P_Reload");

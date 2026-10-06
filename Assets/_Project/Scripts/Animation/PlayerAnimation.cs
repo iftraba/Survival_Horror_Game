@@ -94,6 +94,7 @@ namespace Horror
 
         Transform spine, rHand, lHand;
         float aimBlend;
+        Quaternion smoothFix = Quaternion.identity;
 
         /// <summary>
         /// Las poses de apuntar de Mixamo no miran justo al frente (la de la pistola queda desviada a un lado). Despues de animar,
@@ -112,7 +113,7 @@ namespace Horror
             }
             bool on = player.IsAiming && weapons != null && weapons.Equipped != null && (health == null || !health.IsDead);
             aimBlend = Mathf.MoveTowards(aimBlend, on ? 1f : 0f, Time.deltaTime * 6f);
-            if (aimBlend <= 0f) return;
+            if (aimBlend <= 0f) { smoothFix = Quaternion.identity; return; }
             // direccion real del arma: el eje del agarre (la linea entre manos no vale con la pistola, la mano de apoyo la sujeta por debajo)
             var socket = weapons.Equipped.twoHanded ? weapons.longSocket : weapons.handSocket;
             var barrel = socket != null ? socket.forward : lHand.position - rHand.position;
@@ -124,7 +125,10 @@ namespace Horror
             fix.ToAngleAxis(out float ang, out Vector3 axis);
             if (ang > 180f) ang -= 360f;
             ang = Mathf.Clamp(ang, -60f, 60f);
-            spine.rotation = Quaternion.AngleAxis(ang * aimBlend, axis) * spine.rotation;
+            var target = Quaternion.AngleAxis(ang, axis);
+            // filtro: al pasar de la pose de apuntar a la de disparo (cada una pide un giro distinto) el torso no da un tirón
+            smoothFix = Quaternion.Slerp(smoothFix, target, 1f - Mathf.Exp(-14f * Time.deltaTime));
+            spine.rotation = Quaternion.Slerp(Quaternion.identity, smoothFix, aimBlend) * spine.rotation;
         }
 
         void OnFired() { CacheParams(); if (animator != null && has.Contains(ShootId)) animator.SetTrigger(ShootId); }
