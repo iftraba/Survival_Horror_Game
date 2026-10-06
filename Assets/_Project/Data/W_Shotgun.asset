@@ -15,6 +15,7 @@ MonoBehaviour:
   displayName: Escopeta
   heldPrefab: {fileID: 919132149155446097, guid: dc822172ae80813408e372425d68ab55, type: 3}
   fireSound: {fileID: 8300000, guid: aa8defdf158828d42b73f2b3f9148a4c, type: 3}
+  fireVolume: 0.5
   reloadSound: {fileID: 8300000, guid: 02513718b951cc748994f4a2c847f55b, type: 3}
   heldScale: 0.9
   ammoType: 2

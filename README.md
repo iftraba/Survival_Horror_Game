@@ -47,6 +47,7 @@ docs/                     Documentación por módulos
 Más reciente primero. Formato: fecha · módulo · cambio.
 
 - 2026-10-06 · Core/Enemies/Player · Sonidos reales: packs CC0 + síntesis (zombis, puertas, pasos, armas, teléfono, jefe); pasos de escalera; el teléfono suena cerca; rugido y pasos del jefe; alerta de zombis; recargas por arma. Traspaso en `docs/estado-actual.md`.
+- 2026-10-06 · Weapons/Audio · Volumen de disparo por arma (`WeaponData.fireVolume`) en lugar de uno global: pistola vuelve a su clip original a 1,0 (sonaba mejor) y la escopeta baja a 0,5 (sonaba demasiado alta). Se retira `WeaponController.fireVolume`.
 - 2026-10-06 · Core/UI · El juego pasa a llamarse **Sector 7: Grimheim** (producto de Unity, título del menú principal, ejecutable `Sector7_Grimheim.exe`); los guardados de la carpeta `Comisaria` se copian solos a la nueva. El nombre de la escena `Comisaria` no cambia (es el nivel).
 - 2026-10-06 · Interaction/Audio · Teléfono de guardado más fuerte: clip normalizado (pico 0,66 → 0,97), volumen 0,55 → 1,0, `ringRange` 14 m y alcance sonoro 30 m (`GameAudio.Play` admite `range`).
 - 2026-10-06 · Core/Audio · Chirrido constante de fondo corregido: el zumbido de lámpara de fal era un pitido de ~8,5 kHz sonando en las 29 lámparas; vuelve el `lamp_hum.wav` grave y cada zumbido baja a 0,08 de volumen y 7 m de alcance.

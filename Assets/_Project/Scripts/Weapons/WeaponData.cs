@@ -8,6 +8,8 @@ namespace Horror
         public string displayName = "Arma";
         [Tooltip("Modelo que se muestra en la mano al equiparla")] public GameObject heldPrefab;
         public AudioClip fireSound;
+        [Tooltip("Volumen del disparo. Mas de 1 suma una segunda fuente de audio (un AudioSource no pasa de 1)")]
+        [Range(0.1f, 3f)] public float fireVolume = 1f;
         public AudioClip reloadSound;
         [Tooltip("Escala del modelo en la mano (los personajes son bloques grandes, el arma se agranda para equilibrar)")]
         public float heldScale = 1f;
