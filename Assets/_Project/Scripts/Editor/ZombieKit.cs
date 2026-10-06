@@ -256,6 +256,7 @@ namespace Horror.EditorTools
         public class Spec
         {
             public string name, fbx, bossName;
+            [Tooltip("Ruta completa del modelo (si no se indica, se busca 'fbx' en Art/Mixamo/Characters)")] public string fbxPath;
             public float scale, height, radius, hp, chase, damage, attackRange, cooldown, stagger, alertTime;
             public float walkClip, runClip, runAbove;
             public RuntimeAnimatorController controller;
@@ -271,7 +272,7 @@ namespace Horror.EditorTools
             var root = new GameObject(s.name);
             var col = root.AddComponent<CapsuleCollider>();
             col.height = s.height; col.radius = s.radius; col.center = Vector3.zero;
-            var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(M + "Characters/" + s.fbx + ".fbx");
+            var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(string.IsNullOrEmpty(s.fbxPath) ? M + "Characters/" + s.fbx + ".fbx" : s.fbxPath);
             var model = (GameObject)PrefabUtility.InstantiatePrefab(fbx, root.transform);
             model.name = "Model";
             model.transform.localPosition = new Vector3(0f, -s.height * 0.5f, 0f);

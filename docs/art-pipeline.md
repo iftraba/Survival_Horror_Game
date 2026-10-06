@@ -15,6 +15,11 @@ Cómo entran personajes, animaciones y objetos en el juego.
 - Ejemplo hecho con Blender: `Tools/blender/build_phone.py` (teléfono de disco). Se exporta con `bake_space_transform=True` y el origen en el suelo para que Unity lo oriente y apoye bien.
 - Los personajes humanoides **no** se hacen con scripts: los modelos decimados o reposados por código salieron amorfos.
 
+## Assets de la Asset Store
+- **Zombie** de **Pxltiger** (Asset Store, 3 zombis humanoides + 10 animaciones, `Assets/Zombie/`). Se descarga desde Package Manager → My Assets; queda en `%APPDATA%/Unity/Asset Store-5.x/<editor>/<categoría>/*.unitypackage` y se importa con `AssetDatabase.ImportPackage(ruta, false)` (también por el MCP). Hay que mirar su licencia de la Asset Store (uso en el juego permitido; no se redistribuye el pack suelto) y citar al autor en los créditos.
+- Pasos tras importar (los materiales vienen del render antiguo): 1) comprobar que cada FBX tiene un **avatar humanoide válido** (`Zombie2/3` copiaban el de `Zombie1`; se pusieron en *Create From This Model*); 2) crear un material URP/Lit (`Zombie_URP`) con las texturas (base, normal, oclusión, metálico-suavidad, emisión) y **redirigir el material de cada FBX** (`ModelImporter.AddRemap`; ojo: el nombre interno del material puede variar, `Zombie3` usaba `04 - Default`); 3) construir los prefabs con el kit del proyecto (`PxlZombieKit`).
+- Comprobar siempre en el prefab final que el shader no es `Standard` (se vería rosa en URP).
+
 ## Repositorio
 - GitHub `iftraba/Survival_Horror_Game`, rama `main`; la etiqueta `estable` marca la última versión estable.
 - **Git LFS** para binarios (FBX, imágenes, audio). Cuota gratuita 1 GB: vigilar los FBX con malla de las animaciones.

@@ -290,7 +290,9 @@ namespace Horror.EditorTools
             var yaku = zr.GetComponentsInChildren<ZombieAI>(true).FirstOrDefault(z => z.name == "Zombie_Yaku");
             var spots = new (string prefab, string name, Vector3 pos, float yaw)[]
             {
-                // Civil (verde) retirado de momento: se bugeaba (pasillo (4.5, -5.5) y reuniones (11, 2.5))
+                // Civil (verde) retirado de momento: se bugeaba; en su lugar, zombis del pack Pxltiger (Zombie_Pxl*)
+                ("Zombie_Pxl1", "Zombie_Pxl1_Up",    new Vector3(4.5f, Y0 + 1f, -5.5f), 90f),     // pasillo
+                ("Zombie_Pxl2", "Zombie_Pxl2_Up",    new Vector3(11.0f, Y0 + 1f, 2.5f), 200f),    // reuniones
                 ("Zombie_Girl",  "Zombie_Girl_Up",    new Vector3(-9.5f, Y0 + 1f, -11f), 20f),     // archivo (parpadea)
                 ("Zombie_Cop",   "Zombie_Cop_Up",     new Vector3(2.0f, Y0 + 1f, -11.8f), 180f),   // interrogatorio
                 ("Zombie_Yaku",  "Zombie_Yaku",       new Vector3(-12.0f, Y0 + 1f, 2.3f), 120f),   // despacho del jefe

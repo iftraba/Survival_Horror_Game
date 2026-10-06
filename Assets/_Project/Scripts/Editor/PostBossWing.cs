@@ -245,8 +245,8 @@ namespace Horror.EditorTools
             {
                 ("Zombie_Cop",  "PB_Zombie_Cop",    new Vector3(-6f, 1f, 27.2f), 90f),    // vestibulo
                 ("Zombie_Girl", "PB_Zombie_Girl",   new Vector3(3.0f, 1f, 34.5f), 200f),  // sala de control
-                ("Zombie_Cop",  "PB_Zombie_Cop_2",  new Vector3(-3.0f, 1f, 33.0f), 160f), // sala de control
-                ("Zombie_Girl", "PB_Zombie_Girl_2", new Vector3(10.3f, 1f, 34.0f), 180f), // garaje
+                ("Zombie_Pxl1", "PB_Pxl1",          new Vector3(-3.0f, 1f, 33.0f), 160f), // sala de control
+                ("Zombie_Pxl2", "PB_Pxl2",          new Vector3(10.3f, 1f, 34.0f), 180f), // garaje
             };
             foreach (var sp in spots)
             {

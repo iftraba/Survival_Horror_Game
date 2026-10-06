@@ -218,7 +218,9 @@ namespace Horror.EditorTools
                 Object.DestroyImmediate(z.gameObject);
             var spots = new (string prefab, string name, Vector3 pos, float yaw)[]
             {
-                // Civil (verde) retirado de momento: se bugeaba (pasillo de la oficina (-2.5, -8.5) y barricada (5.2, -2.0))
+                // Civil (verde) retirado de momento: se bugeaba; en su lugar, zombis del pack Pxltiger (Zombie_Pxl*)
+                ("Zombie_Pxl1",  "Zombie_Pxl1_Oficina",   new Vector3(-2.5f, 1f, -8.5f), 200f),   // pasillo de la oficina
+                ("Zombie_Pxl3",  "Zombie_Pxl3_Barricada", new Vector3(5.2f, 1f, -2.0f), 160f),    // barricada
                 ("Zombie_Girl",  "Zombie_Girl",    new Vector3(11.5f, 1f, 1.5f), 250f),    // oficina este
                 ("Zombie_Girl",  "Zombie_Girl_2",  new Vector3(-9.5f, 1f, -15.5f), 40f),   // vestuario (a oscuras)
                 ("Zombie_Cop",   "Zombie_Cop",     new Vector3(-12.5f, 1f, -0.8f), 60f),   // despacho del capitan (con la escopeta)

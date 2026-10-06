@@ -47,6 +47,8 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 - Luces: corregidas las lámparas duplicadas de la planta alta y recalibrada la iluminación (suavidad de `Env_*`, bloom, relleno a 2,55 m con alcance medido; ver `docs/level.md`). Sin probar en Play.
 - Modelo de la riñonera: **hecho en Blender** (`Tools/blender/build_rinonera.py`, 1.400 triángulos), asignado a `I_Bag` con su miniatura y colocado en la taquilla. Antecedente: **dos intentos con Meshy 6 en modo texto (`generate_model`) salieron como una persona de 25 cm** (soldado la primera vez, persona de negro con los pulgares arriba la segunda; 41 k triángulos, 8,7 MB cada uno), pese a que el segundo prompt decía "not a person, not a figurine". Se descartaron y se borraron los archivos. No repetir en modo texto para objetos sencillos: Blender (skill `modelo-blender`) o imagen → 3D. Cada intento gasta créditos de Meshy; el plugin no permite fijar el número de polígonos.
 
+- **Assets de la Asset Store**: importado `Zombie` de Pxltiger (`Assets/Zombie`) → zombis `Zombie_Pxl1/2/3` colocados (9, repartidos por todo el nivel). Limitaciones del pack: un solo ataque, sin reacción al golpe ni grito, andar de 0,27 m/s. Quedan por ver: probarlos en Play (¿animan y patinan bien?), créditos del autor, y qué hacer con otros assets que añada el usuario.
+
 ## Después de que el usuario y sus compañeros prueben la build (2026-10-06)
 Lo que hay que comprobar en el `.exe` (todo se montó sin verlo jugando):
 1. **Luces**: ¿alguna sala sigue quemada o demasiado oscura? (se recalibraron todas menos la arena del jefe). Anotar sala y qué se ve.

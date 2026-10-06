@@ -265,11 +265,11 @@ namespace Horror.EditorTools
             var zr = GameObject.Find("Zombies").transform;
             var spots = new (string prefab, string name, Vector3 pos, float yaw)[]
             {
-                ("Zombie_Girl", "Z2_Girl_Bombas",  new Vector3(-2f, 1f, 42f), 150f),     // cuarto de bombas
+                ("Zombie_Pxl2", "Z2_Pxl2_Bombas",  new Vector3(-2f, 1f, 42f), 150f),     // cuarto de bombas
                 ("Zombie_Cop",  "Z2_Cop_Maquinas", new Vector3(-6f, 1f, 48f), 200f),     // sala de maquinas
-                ("Zombie_Girl", "Z2_Girl_Maquinas", new Vector3(6f, 1f, 51f), 20f),
+                ("Zombie_Pxl3", "Z2_Pxl3_Maquinas", new Vector3(6f, 1f, 51f), 20f),
                 ("Zombie_Cop",  "Z2_Cop_Lab",      new Vector3(-9f, 1f, 61f), 160f),     // laboratorio
-                ("Zombie_Girl", "Z2_Girl_Lab",     new Vector3(-4f, 1f, 58f), 110f),
+                ("Zombie_Pxl1", "Z2_Pxl1_Lab",     new Vector3(-4f, 1f, 58f), 110f),
                 ("Zombie_Yaku", "Z2_Yaku_Almacen", new Vector3(10f, 1f, 60f), 250f),    // almacen
             };
             foreach (var sp in spots)
