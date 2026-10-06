@@ -10,6 +10,9 @@ namespace Horror
     {
         public Camera aimCamera;
         public PlayerController player;
+        [Tooltip("Volumen del disparo. Por encima de 1 suma una segunda fuente: asi los disparos destacan sobre los zombis")]
+        [Range(0.5f, 3f)] public float fireVolume = 2f;
+        float FireVolume => fireVolume;
         [Tooltip("Hueso/objeto de la mano derecha donde se coloca el arma")] public Transform handSocket;
         [Tooltip("Agarre de las armas largas (calculado con la pose de apuntar a dos manos)")] public Transform longSocket;
 
@@ -119,7 +122,7 @@ namespace Horror
             nextShot = Time.time + 1f / Equipped.fireRate;
             mags[Equipped]--;
             Fired?.Invoke();
-            GameAudio.PlayClip(Equipped.fireSound, transform.position, 1f, Random.Range(0.96f, 1.04f), false);
+            GameAudio.PlayClip(Equipped.fireSound, transform.position, FireVolume, Random.Range(0.96f, 1.04f), false);
             ZombieAI.Noise(transform.position, 14f);
 
             for (int p = 0; p < Equipped.pellets; p++)

@@ -48,7 +48,7 @@ namespace Horror
         {
             if (health.IsDead) return;
             if (!string.IsNullOrEmpty(ai.bossName)) GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1f, false);   // el rugido se oye en toda la sala
-            else GameAudio.Play(Sfx.ZombieGroan, transform.position, 1f, voicePitch * 0.92f);
+            else GameAudio.Play(Sfx.ZombieGroan, transform.position, GroanVolume, voicePitch * 0.92f);
         }
 
         void Update()
@@ -68,16 +68,19 @@ namespace Horror
                 if (pc != null) player = pc.transform;
             }
             if (player != null && (player.position - transform.position).sqrMagnitude < 32f * 32f)
-                GameAudio.Play(Sfx.ZombieGroan, transform.position, 1f, voicePitch);
+                GameAudio.Play(Sfx.ZombieGroan, transform.position, GroanVolume, voicePitch);
         }
 
-        void OnAttacked() => GameAudio.Play(Sfx.ZombieAttack, transform.position, 1f, voicePitch);
+        // Los zombis suenan por debajo de los disparos (que ya van al maximo y no pueden subir mas)
+        const float GroanVolume = 0.5f;
+
+        void OnAttacked() => GameAudio.Play(Sfx.ZombieAttack, transform.position, 0.65f, voicePitch);
 
         void OnDamaged(Vector3 _)
         {
-            if (!health.IsDead) GameAudio.Play(Sfx.ZombieHurt, transform.position, 1f, voicePitch);
+            if (!health.IsDead) GameAudio.Play(Sfx.ZombieHurt, transform.position, 0.55f, voicePitch);
         }
 
-        void OnDied() => GameAudio.Play(Sfx.ZombieDeath, transform.position, 1f, voicePitch);
+        void OnDied() => GameAudio.Play(Sfx.ZombieDeath, transform.position, 0.6f, voicePitch);
     }
 }

@@ -360,7 +360,9 @@ namespace Horror.EditorTools
         const string AudioPath = "Assets/_Project/Audio/";
 
         // Clips generados con fal.ai (Audio/Generated/<nombre>_fal.mp3) tienen prioridad; si faltan, el .wav de siempre
-        static AudioClip Fal(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>(AudioPath + "Generated/" + name + "_fal.mp3");
+        static AudioClip Fal(string name) =>
+            AssetDatabase.LoadAssetAtPath<AudioClip>(AudioPath + "Generated/" + name + "_fal.mp3")
+            ?? AssetDatabase.LoadAssetAtPath<AudioClip>(AudioPath + "Generated/" + name + "_fal.wav");   // .wav = version recortada/procesada
 
         static AudioClip Clip(string name) => Fal(name) ?? AssetDatabase.LoadAssetAtPath<AudioClip>(AudioPath + name + ".wav");
 
