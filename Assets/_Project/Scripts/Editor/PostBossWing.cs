@@ -41,6 +41,39 @@ namespace Horror.EditorTools
         static ItemData Item(string n) => AssetDatabase.LoadAssetAtPath<ItemData>(Data + n + ".asset");
         static Material M(string n) => AssetDatabase.LoadAssetAtPath<Material>(Mats + n + ".mat");
 
+        /// <summary>
+        /// El friso, la moldura y el zocalo del muro norte de la arena (N_Wainscot, N_Rail, N_Base: una tira de 29 m) pasaban
+        /// por delante de la puerta de salida. Se parten en dos mitades que dejan libre el marco (x = -0.84 .. 0.84).
+        /// </summary>
+        public static string CutArenaNorthTrim()
+        {
+            var details = GameObject.Find("Details");
+            var wood = M("Env_Wood");
+            if (details == null || wood == null) return "sin Details o Env_Wood";
+            int done = 0;
+            var specs = new (string name, float y, float h, float z, float depth)[]
+            {
+                ("N_Wainscot", 0.55f, 1.10f, 19.48f, 0.04f),
+                ("N_Rail",     1.13f, 0.06f, 19.46f, 0.08f),
+                ("N_Base",     0.07f, 0.14f, 19.46f, 0.08f),
+            };
+            foreach (var s in specs)
+            {
+                // las piezas originales de 29 m y las mitades de una pasada anterior
+                foreach (var t in details.transform.Cast<Transform>().Where(t => t.name == s.name || t.name == s.name + "_L" || t.name == s.name + "_R").ToArray())
+                    Object.DestroyImmediate(t.gameObject);
+                const float x0 = -14.5f, x1 = 14.5f, gap = 0.84f;
+                foreach (var (suffix, a, b) in new[] { ("_L", x0, -gap), ("_R", gap, x1) })
+                {
+                    float len = b - a;
+                    Call<GameObject>("Box", s.name + suffix, new Vector3((a + b) / 2f, s.y, s.z), new Vector3(len, s.h, s.depth), wood, details.transform, 1f, false);
+                    done++;
+                }
+            }
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            return done + " piezas de friso del muro norte (hueco de la puerta libre)";
+        }
+
         [MenuItem("Horror/Tramo final (despues del jefe)")]
         public static void BuildMenu() { Debug.Log("[Horror] " + Build()); }
 
@@ -75,6 +108,8 @@ namespace Horror.EditorTools
             void Wall(string n, float x0, float z0, float x1, float z1) => Call<object>("Partition", solid, details, wall, wood, n, new Vector2(x0, z0), new Vector2(x1, z1));
             void Lintel(float cx, float z) => Call<object>("Lintel", solid, wall, new Vector3(cx, 0f, z), 1.5f, true);
             GameObject Prop(string n, float x, float z, float yaw) => Call<GameObject>("Prop", n, new Vector3(x, 0f, z), yaw, props, 1f);
+
+            log.Add(CutArenaNorthTrim());
 
             // ------------------------------------------------ suelo, techo y muros exteriores
             float zc = (ZMin + ZMax) / 2f, zl = ZMax - ZMin;
