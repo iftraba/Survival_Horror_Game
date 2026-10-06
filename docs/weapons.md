@@ -1,0 +1,23 @@
+# Weapons
+
+Armas, disparo y munición cargada. Código en `Assets/_Project/Scripts/Weapons/`.
+
+## Clases
+| Clase | Qué hace |
+|---|---|
+| `WeaponData` (ScriptableObject) | Datos de un arma: modelo en mano (`heldPrefab`, `heldScale`), sonidos, tipo de munición, `damage`, `range`, `fireRate`, `magazineSize`, `reloadTime`, `pellets`, `spread`, `automatic`, `twoHanded`. Assets: `Data/W_Pistol`, `W_Shotgun`. |
+| `WeaponController` | Equipa el arma (instancia el modelo en `handSocket` o `longSocket` según `twoHanded`), gestiona cargadores (`MagAmmo`, `ReserveAmmo` desde el inventario), recarga (R o automática al disparar con el cargador vacío) y disparo con el clic izquierdo mientras se apunta. |
+
+## Flujo de disparo
+1. `Fire()` resta una bala, emite `Fired`, reproduce sonido y llama a `ZombieAI.Noise` (radio 14 m) para atraer enemigos.
+2. Por cada perdigón (`pellets`) se lanza un rayo **desde la cámara de apuntado** con dispersión aleatoria (`spread`).
+3. `RaycastAll` ordenado por distancia; el primer impacto válido aplica `damage` a un `IDamageable`. Las zonas de `ZombieHitZones` aportan el multiplicador (cabeza ×3 por defecto) y emiten el evento de impacto en cabeza.
+4. Eventos: `Fired`, `ReloadStarted` (los usa `PlayerAnimation`).
+
+## Equilibrio
+- Pistola y escopeta: ver los assets `W_*`. La escopeta dispara 8 perdigones de 14.
+- La vida del jefe (1410) se calcula con `BossBalance` (ver `enemies.md`) para morir con ~15 escopetazos a la cabeza a 5 m.
+
+## Decisiones
+- La dirección de disparo es la de la cámara; el torso del jugador se alinea con ella (`PlayerAnimation.LateUpdate`, ver `animation.md`).
+- El retroceso visual es por código (no hay clip de disparo específico de pistola).
