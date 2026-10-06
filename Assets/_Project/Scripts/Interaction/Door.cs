@@ -89,7 +89,8 @@ namespace Horror
                     GameAudio.Play(Sfx.DoorLocked, transform.position);
                     return;
                 }
-                if (consumeKey) inv.Remove(requiredKey);
+                // la llave se gasta aunque solo una de las dos hojas de una puerta doble tenga consumeKey (si no, abrirla por el otro lado la dejaba en el inventario)
+                if (consumeKey || (partner != null && partner.consumeKey)) inv.Remove(requiredKey);
                 requiredKey = null;
                 if (partner != null) partner.requiredKey = null;
                 Hud.Message("Desbloqueaste la puerta");

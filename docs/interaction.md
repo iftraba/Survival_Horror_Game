@@ -7,7 +7,7 @@ Objetos con los que se interactúa con **E**. Código en `Assets/_Project/Script
 |---|---|
 | `IInteractable` | Contrato: `Prompt` e `Interact(who)`. |
 | `PlayerInteractor` | Elige el interactuable más cercano delante del jugador y muestra su `Prompt` en el HUD. |
-| `Door` | Puerta abatible en la bisagra. Puede exigir llave (`requiredKey`, `consumeKey`), tener `partner` (doble hoja), mensaje de objetivo al abrir (`openedObjective`) y deja pasar a los zombis (`zombiesCanForce`, `zombieForceTime`). Lleva un `NavMeshObstacle` que bloquea el paso cerrada. `ApplySaved` restaura el estado. |
+| `Door` | Puerta abatible en la bisagra. Puede exigir llave (`requiredKey`, `consumeKey`), tener `partner` (doble hoja), mensaje de objetivo al abrir (`openedObjective`); **la llave se gasta al usarla** (`consumeKey`; en una puerta doble basta con que una de las dos hojas lo tenga, porque la hoja derecha de `Door_Main` no lo tenía y la llave de la sala se quedaba en el inventario) y deja pasar a los zombis (`zombiesCanForce`, `zombieForceTime`). Lleva un `NavMeshObstacle` que bloquea el paso cerrada. `ApplySaved` restaura el estado. |
 | `ExitDoor` | Puerta de salida: con `I_KeyExit` termina la partida con victoria. |
 | `Pickup` | Objeto del mundo (rigidbody). Se recoge con E, lleva `item` y `count`; puede fijar un objetivo al recogerlo. |
 | `LockerDoor` | Taquilla que se abre con E. Con `code` rellenado está bloqueada: E abre el teclado numérico (`Keypad`) y al acertar se desbloquea y se abre. Las de código se ordenan al final en el guardado para no desalinear partidas antiguas. |
