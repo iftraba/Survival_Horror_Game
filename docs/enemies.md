@@ -33,6 +33,9 @@ Zombis y jefe. Código en `Assets/_Project/Scripts/Enemies/`. Prefabs en `Prefab
 Los Pxl se construyen con `PxlZombieKit` (menú *Horror/Construir zombis Pxltiger*) sobre el mismo controlador base y prefab que el resto (`ZombieKit.BuildPrefab` con `Spec.fbxPath`). El pack solo trae **un ataque** y **ninguna reacción al golpe ni grito de alerta**: el ataque se repite en las tres variantes, el golpe y el grito reutilizan el idle (no se ve reacción) y la muerte es `Z_FallingBack`. Su clip de andar avanza a 0,27 m/s, así que la persecución es de 0,34-0,42 m/s (animación a ~1,3-1,5×) y el corredor Pxl2 va a 2,8 m/s (carrera a ~0,76×). Se ajustó tras verlos en Play: a 0,6 m/s la animación iba a 2× y se veía nerviosa, a 2,2 m/s el corredor iba a cámara lenta (0,6×), y con `alertTime` 1,6 se quedaban congelados al detectarte porque no hay animación de grito: ahora 0,35 s.
 Reparto de los Pxl: oficina (Pxl1) y barricada (Pxl3) abajo; pasillo (Pxl1) y reuniones (Pxl2) arriba; sala de control (Pxl1) y garaje (Pxl2); cuarto de bombas (Pxl2), sala de máquinas (Pxl3) y laboratorio (Pxl1) de la zona 2.
 
+## Dificultad: velocidad de los enemigos
+`GameFlow.enemySpeedMultiplier` (1,2 desde el 2026-10-06, a petición del usuario: +20 %) multiplica la velocidad de persecución de **todos** los enemigos, jefes incluidos (`ZombieAI.SpeedMultiplier`, que `GameFlow.Start` fija al empezar). Los valores de cada tipo (`chaseSpeed`) no cambian: p. ej. Cop 0,5 → 0,6 m/s, Yaku 2,2 → 2,64, jefes 1,9 → 2,28, Pxl1 0,42 → 0,50. La animación se adapta sola (el modo "gait" lee la velocidad real del agente). Para volver a la velocidad original, ponerlo a 1; los jefes con el tope de reproducción de carrera (1,6×) pueden patinar un poco.
+
 ## Decisiones
 - La velocidad de animación se ajusta a la velocidad real del agente ("gait mode", ver `animation.md`) para evitar patinar.
 - Los zombis rodean muebles: `RuntimeNavMesh` + `NavMeshAgent.climb` 0.3 impiden subirse.

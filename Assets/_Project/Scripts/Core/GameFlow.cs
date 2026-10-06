@@ -10,6 +10,10 @@ namespace Horror
     {
         [TextArea] public string startObjective = "Busca una llave para abrir la puerta de la sala del fondo.";
 
+        [Header("Dificultad")]
+        [Tooltip("Multiplica la velocidad de persecucion de todos los enemigos (zombis y jefes). 1 = la original")]
+        [Range(0.5f, 2f)] public float enemySpeedMultiplier = 1.2f;
+
         [Header("Equipo inicial (partida nueva)")]
         [Tooltip("Arma con la que se empieza, ya equipada")] public ItemData startWeapon;
         [Tooltip("Balas cargadas al empezar. 10 = dos zombis normales a cuerpo (4 tiros cada uno) + 2 de margen")]
@@ -18,6 +22,7 @@ namespace Horror
         void Start()
         {
             GameState.ResetAll();
+            ZombieAI.SpeedMultiplier = enemySpeedMultiplier;
             NoteArchive.Clear();
             if (SaveSystem.ApplyPending()) return;
             ItemStorage.Clear();   // partida nueva: baul vacio

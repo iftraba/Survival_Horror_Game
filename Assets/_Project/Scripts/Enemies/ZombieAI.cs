@@ -13,6 +13,8 @@ namespace Horror
         public float attackCooldown = 1.3f;
         public float walkSpeed = 1.1f;
         public float chaseSpeed = 1.4f;
+        /// <summary>Multiplicador de velocidad de todos los enemigos (lo fija GameFlow al empezar la partida).</summary>
+        public static float SpeedMultiplier = 1f;
         public float staggerTime = 0.45f;
         [Tooltip("A esta distancia te oye aunque haya paredes en medio.")]
         public float hearingRange = 4.5f;
@@ -149,13 +151,13 @@ namespace Horror
             if (canNav)
             {
                 agent.isStopped = false;
-                agent.speed = chaseSpeed;
+                agent.speed = chaseSpeed * SpeedMultiplier;
                 agent.SetDestination(player.position);
             }
             else
             {
                 FaceTarget();
-                transform.position += transform.forward * (walkSpeed * Time.deltaTime);
+                transform.position += transform.forward * (walkSpeed * SpeedMultiplier * Time.deltaTime);
             }
         }
 
