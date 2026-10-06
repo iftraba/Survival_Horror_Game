@@ -15,12 +15,12 @@ MonoBehaviour:
   displayName: Tarjeta de acceso
   description: Tarjeta magnetica del laboratorio. Abre la puerta de la arena del fondo.
   type: 3
-  icon: {fileID: 0}
+  icon: {fileID: -339215146350691305, guid: b13ab538222722941b508e9037437de1, type: 3}
   tint: {r: 0.2, g: 0.85, b: 1, a: 1}
   maxStack: 1
-  worldPrefab: {fileID: 0}
-  worldScale: 1
-  mass: 0.5
+  worldPrefab: {fileID: 919132149155446097, guid: 86e298e31e79d7440a38a21b41ea224c, type: 3}
+  worldScale: 1.8
+  mass: 0.1
   pickupObjective: Tienes la tarjeta de acceso. Abre la puerta de la arena, al final del pasillo central.
   extraSlots: 2
   healAmount: 50

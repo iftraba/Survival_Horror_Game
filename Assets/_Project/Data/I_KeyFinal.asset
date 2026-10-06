@@ -15,12 +15,12 @@ MonoBehaviour:
   displayName: Llave maestra
   description: La llave maestra del complejo. Abre el porton de salida, al norte de la arena.
   type: 3
-  icon: {fileID: 0}
+  icon: {fileID: 4730656342366570531, guid: 1a7f95e3e8112c244bd1921a423e4fd2, type: 3}
   tint: {r: 1, g: 0.25, b: 0.2, a: 1}
   maxStack: 1
-  worldPrefab: {fileID: 0}
-  worldScale: 1
-  mass: 0.5
+  worldPrefab: {fileID: 919132149155446097, guid: 1a57b5e4bc7feff429f944925d2009b5, type: 3}
+  worldScale: 1.5
+  mass: 0.1
   pickupObjective: Tienes la llave maestra. Abre el porton de salida, al norte de la arena.
   extraSlots: 2
   healAmount: 50

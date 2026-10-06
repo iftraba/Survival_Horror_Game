@@ -15,7 +15,7 @@ Objetos con los que se interactúa con **E**. Código en `Assets/_Project/Script
 | `ReadableNote` | Nota en el mundo (papel sobre una mesa, `NoteData`). E la abre a pantalla completa y la añade al Archivo; no se recoge ni ocupa casilla. Pasar a leerla por primera vez puede fijar un objetivo. |
 | `LightSwitch` | Interruptor que enciende o apaga un grupo de `CeilingLamp`. |
 | `ItemBox` | Baúl de sala segura: abre la pantalla de intercambio con `ItemStorage` (global). |
-| `SaveTerminal` | Punto de guardado de sala segura: abre el menú de guardado del HUD. Físicamente es un **teléfono antiguo de disco** sobre una mesita (prefab `Interactables/SavePhone`, modelo `Art/Props/Phone.fbx`, con una luz cálida tenue que guía al jugador). El script mantiene el nombre `SaveTerminal` por compatibilidad. **Suena** (`ringRange` 10 m, cada 30-55 s) cuando el jugador está cerca: señal de que ahí se puede guardar. |
+| `SaveTerminal` | Punto de guardado de sala segura: abre el menú de guardado del HUD. Físicamente es un **teléfono antiguo de disco** sobre una mesita (prefab `Interactables/SavePhone`, modelo `Art/Props/Phone.fbx`, con una luz cálida tenue que guía al jugador). El script mantiene el nombre `SaveTerminal` por compatibilidad. Solo suena **al usarlo** (descolgar al abrir el menú, marcar al guardar): el timbre por el mapa está apagado (`ringsNearby` = false; si se activa, suena a `ringRange` m cada 30-55 s). |
 
 ## Zona del jefe
 `Door_SafeRoom` (sala segura, los zombis no la fuerzan) y `Door_Boss` (reforzada, la fuerzan tras 2.5 s).

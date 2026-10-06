@@ -15,12 +15,12 @@ MonoBehaviour:
   displayName: Llave del garaje
   description: Abre el porton del garaje, al este del vestibulo. Es la ultima salida.
   type: 3
-  icon: {fileID: 0}
+  icon: {fileID: 3747525975294793745, guid: 65887dd8f8dfb704b8690dacc55f7b70, type: 3}
   tint: {r: 0.9, g: 0.85, b: 0.15, a: 1}
   maxStack: 1
-  worldPrefab: {fileID: 0}
-  worldScale: 1
-  mass: 0.5
+  worldPrefab: {fileID: 919132149155446097, guid: 7a8092795f88ab4478d9015fb103bc1e, type: 3}
+  worldScale: 1.6
+  mass: 0.1
   pickupObjective: Tienes la llave del garaje. Abre el porton del garaje, en la sala del este.
   extraSlots: 2
   healAmount: 50
