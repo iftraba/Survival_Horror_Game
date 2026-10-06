@@ -9,10 +9,11 @@ using UnityEngine;
 namespace Horror.EditorTools
 {
     /// <summary>
-    /// Tramo final tras el jefe. La puerta del norte de la arena (antes la salida y fin de la partida) pasa a ser una
+    /// Tramo tras el primer jefe. La puerta del norte de la arena (antes la salida y fin de la partida) pasa a ser una
     /// puerta normal con la llave de salida; detras hay un pasillo, un vestibulo y tres salas:
     ///   oeste: sala segura 4 (telefono + baul + notas), centro: sala de control (llave del garaje, taquilla con codigo
-    ///   con la 2ª riñonera, zombis), este: garaje, con el porton que ahora termina la partida (pide la llave del garaje).
+    ///   con la 2ª riñonera, zombis), este: garaje, cuyo porton (puerta con la llave del garaje) da a la zona 2 (Zone2Wing,
+    ///   que se ejecuta DESPUES: sala segura 5, laboratorio, almacen y la arena del segundo jefe, donde esta el final).
     /// Edita la ESCENA (fuente de verdad). Idempotente: rehace PostBoss_*, los zombis "PB_*" y el botin al norte de z = 20.5.
     /// </summary>
     public static class PostBossWing
@@ -57,8 +58,9 @@ namespace Horror.EditorTools
                 if (old != null) Object.DestroyImmediate(old);
             }
             foreach (var z in Object.FindObjectsByType<ZombieAI>(FindObjectsSortMode.None).Where(z => z.name.StartsWith("PB_")).ToArray()) Object.DestroyImmediate(z.gameObject);
-            foreach (var pk in Object.FindObjectsByType<Pickup>(FindObjectsSortMode.None).Where(p => p.transform.position.z > 20.5f).ToArray()) Object.DestroyImmediate(pk.gameObject);
-            foreach (var l in Object.FindObjectsByType<CeilingLamp>(FindObjectsSortMode.None).Where(l => l.transform.position.z > 20.6f).ToArray()) Object.DestroyImmediate(l.gameObject);
+            // solo lo de este tramo (z 20.5 a 39): lo de mas al norte es de Zone2Wing
+            foreach (var pk in Object.FindObjectsByType<Pickup>(FindObjectsSortMode.None).Where(p => p.transform.position.z > 20.5f && p.transform.position.z < 39f).ToArray()) Object.DestroyImmediate(pk.gameObject);
+            foreach (var l in Object.FindObjectsByType<CeilingLamp>(FindObjectsSortMode.None).Where(l => l.transform.position.z > 20.6f && l.transform.position.z < 39f).ToArray()) Object.DestroyImmediate(l.gameObject);
             // la salida vieja (caja con ExitDoor y su marco) y el muro norte de una pieza se sustituyen
             foreach (var t in level.Cast<Transform>().ToArray())
                 if (t.name == "ExitDoor" || t.name.StartsWith("ExitFrame_") || t.name == "Wall_N") Object.DestroyImmediate(t.gameObject);
@@ -80,7 +82,10 @@ namespace Horror.EditorTools
             Box("Ceiling_Post", new Vector3(0f, 3.5f, zc), new Vector3(30f, 1f, zl), ceilMat, solid, 2.4f);
             Box("Wall_W_Post", new Vector3(-15f, 1.5f, zc + 0.5f), new Vector3(1f, 3f, zl - 1f), wall, solid, 3f);
             Box("Wall_E_Post", new Vector3(15f, 1.5f, zc + 0.5f), new Vector3(1f, 3f, zl - 1f), wall, solid, 3f);
-            Box("Wall_N_Post", new Vector3(0f, 1.5f, 38.5f), new Vector3(31f, 3f, 1f), wall, solid, 3f);
+            // muro norte del tramo (z = 38.5) con el hueco de la puerta del garaje (x 9.55..11.05) hacia la zona 2
+            Box("Wall_N_Post_W", new Vector3(-2.975f, 1.5f, 38.5f), new Vector3(25.05f, 3f, 1f), wall, solid, 3f);
+            Box("Wall_N_Post_E", new Vector3(13.275f, 1.5f, 38.5f), new Vector3(4.45f, 3f, 1f), wall, solid, 3f);
+            Box("Wall_N_Post_Top", new Vector3(CxGarage, 2.7f, 38.5f), new Vector3(1.5f, 0.6f, 1f), wall, solid, 3f);
             // muro norte de la arena (antes de una pieza) con el hueco de la puerta de salida
             Box("Wall_N_W", new Vector3(-7.875f, 1.5f, 20f), new Vector3(14.25f, 3f, 1f), wall, solid, 3f);
             Box("Wall_N_E", new Vector3(7.875f, 1.5f, 20f), new Vector3(14.25f, 3f, 1f), wall, solid, 3f);
@@ -157,11 +162,14 @@ namespace Horror.EditorTools
             // ------------------------------------------------ garaje (este) y porton de salida
             Prop("Crate", 13.4f, 31.0f, 20f); Prop("Crate", 9.0f, 31.4f, -10f); Prop("Barrel", 13.2f, 36.5f, 0f); Prop("Barrel", 12.2f, 36.8f, 0f);
             Prop("Shelf", 6.6f, 33.5f, -90f);
-            var gate = Box("GarageGate", new Vector3(CxGarage, 1.3f, 37.9f), new Vector3(4.2f, 2.6f, 0.14f), metal, solid, 1.5f);
-            gate.AddComponent<ExitDoor>().requiredKey = keyGarage;
-            Box("GarageGate_L", new Vector3(CxGarage - 2.18f, 1.3f, 37.9f), new Vector3(0.16f, 2.7f, 0.2f), metal, solid, 1f, false);
-            Box("GarageGate_R", new Vector3(CxGarage + 2.18f, 1.3f, 37.9f), new Vector3(0.16f, 2.7f, 0.2f), metal, solid, 1f, false);
-            Box("GarageGate_T", new Vector3(CxGarage, 2.67f, 37.9f), new Vector3(4.54f, 0.16f, 0.2f), metal, solid, 1f, false);
+            // el porton del garaje ya no termina la partida: es una puerta con llave hacia la zona 2 (ver Zone2Wing)
+            var doorGate = Inst("Doors/Door_Wood_150.prefab", solid, new Vector3(CxGarage - 0.75f, 0f, 38.5f), 0f, "Door_GarageGate");
+            var dGate = doorGate.GetComponentInChildren<Door>();
+            dGate.requiredKey = keyGarage; dGate.consumeKey = true; dGate.zombiesCanForce = false;
+            dGate.openedObjective = "Instalaciones tecnicas. Sigue adelante: la arena del fondo guarda la salida.";
+            leaves.Add(dGate.gameObject);
+            rt.disableDuringBake = leaves.Distinct().ToArray();
+            EditorUtility.SetDirty(rt);
 
             // ------------------------------------------------ luces
             var lampSrc = Object.FindObjectsByType<CeilingLamp>(FindObjectsSortMode.None).First(l => l.transform.position.y < 3.2f && l.transform.position.z < 20f);

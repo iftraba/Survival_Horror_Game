@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_registro_mantenimiento
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_registro_mantenimiento
+  title: Registro de mantenimiento
+  category: 0
+  body: "REGISTRO DE MANTENIMIENTO \u2014 INSTALACIONES TECNICAS\n\nLos ruidos vienen de la arena del fondo. Dejamos de abrirla cuando los sensores marcaron algo vivo que no debia estar ahi.\n\nEl laboratorio guarda la tarjeta de acceso. El almacen, lo poco que queda de material util.\n\nNo vayas al fondo sin armas."
+  highlight: 
+  image: {fileID: 0}
+  objective: 
