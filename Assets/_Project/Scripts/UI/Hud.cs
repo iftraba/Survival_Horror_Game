@@ -123,6 +123,7 @@ namespace Horror
             if (GameState.SaveMenuOpen) DrawSaveMenu();
             if (GameState.NoteOpen) DrawNoteReader();
             if (GameState.KeypadOpen) DrawKeypad();
+            if (GameState.ShowcaseOpen) DrawShowcase();
             if (GameState.Paused) DrawPause();
             if (GameState.PlayerDead) DrawDeath();
             if (GameState.Victory) DrawVictory();

@@ -19,6 +19,13 @@ namespace Horror
         bool ArchiveAndKeypadKeys(Keyboard kb, bool fresh)
         {
             Keypad.Tick();
+            if (GameState.ShowcaseOpen)
+            {
+                if (!fresh && (kb.escapeKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame
+                               || kb.enterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame))
+                    ItemShowcase.Close();
+                return true;
+            }
             if (GameState.NoteOpen)
             {
                 if (!fresh && (kb.escapeKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame
@@ -188,6 +195,39 @@ namespace Horror
             GUI.matrix = m;
             GUI.color = new Color(1f, 1f, 1f, 0.6f);
             GUI.Label(new Rect(0, r.yMax + 24f, Screen.width, 24f), "E / Esc: cerrar    -    queda guardada en el Archivo (Tab)", new GUIStyle(center) { fontSize = 14 });
+            GUI.color = Color.white;
+        }
+
+        // ------------------------------------------------------------------ objeto conseguido (riñonera...)
+
+        void DrawShowcase()
+        {
+            Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0.01f, 0.012f, 0.015f, 0.9f));
+            var item = ItemShowcase.Item;
+            if (item == null) return;
+            var preview = ItemPreview.Get();
+            preview.Show(item);
+
+            float size = Mathf.Min(420f, Screen.height - 330f);
+            float cx = Screen.width / 2f, top = Mathf.Max(30f, Screen.height / 2f - size / 2f - 110f);
+            GUI.color = new Color(1f, 1f, 1f, 0.55f);
+            GUI.Label(new Rect(0, top, Screen.width, 26f), "OBJETO CONSEGUIDO", new GUIStyle(center) { fontSize = 14, fontStyle = FontStyle.Bold });
+            GUI.color = new Color(0.95f, 0.82f, 0.45f);
+            GUI.Label(new Rect(0, top + 24f, Screen.width, 46f), item.displayName, new GUIStyle(center) { fontSize = 34, fontStyle = FontStyle.Bold });
+            GUI.color = Color.white;
+            GUI.DrawTexture(new Rect(cx - size / 2f, top + 76f, size, size), preview.Texture, ScaleMode.ScaleToFit, true);
+            float ty = top + 76f + size + 8f;
+            if (!string.IsNullOrEmpty(ItemShowcase.Detail))
+            {
+                GUI.color = new Color(0.55f, 1f, 0.6f);
+                GUI.Label(new Rect(0, ty, Screen.width, 30f), ItemShowcase.Detail, new GUIStyle(center) { fontSize = 20, fontStyle = FontStyle.Bold });
+                ty += 32f;
+            }
+            GUI.color = new Color(1f, 1f, 1f, 0.75f);
+            float dw = Mathf.Min(640f, Screen.width - 60f);
+            GUI.Label(new Rect(cx - dw / 2f, ty, dw, 60f), item.description, new GUIStyle(center) { fontSize = 16, wordWrap = true });
+            GUI.color = new Color(1f, 1f, 1f, 0.45f);
+            GUI.Label(new Rect(0, Screen.height - 50f, Screen.width, 24f), "E / Esc: continuar", new GUIStyle(center) { fontSize = 14 });
             GUI.color = Color.white;
         }
 

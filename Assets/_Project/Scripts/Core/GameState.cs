@@ -14,10 +14,12 @@ namespace Horror
         public static bool NoteOpen { get; private set; }
         /// <summary>Teclado numerico de una taquilla con codigo.</summary>
         public static bool KeypadOpen { get; private set; }
+        /// <summary>Pantalla de objeto conseguido (riñonera...).</summary>
+        public static bool ShowcaseOpen { get; private set; }
         public static bool PlayerDead { get; private set; }
         public static bool Paused { get; private set; }
         public static bool Victory { get; private set; }
-        public static bool InputBlocked => InventoryOpen || BoxOpen || SaveMenuOpen || NoteOpen || KeypadOpen || PlayerDead || Paused || Victory;
+        public static bool InputBlocked => InventoryOpen || BoxOpen || SaveMenuOpen || NoteOpen || KeypadOpen || ShowcaseOpen || PlayerDead || Paused || Victory;
         /// <summary>Fotograma en que se abrio un menu: la tecla que lo abrio no debe actuar dentro de el.</summary>
         public static int MenuOpenedFrame { get; private set; } = -1;
 
@@ -31,6 +33,7 @@ namespace Horror
             SaveMenuOpen = false;
             NoteOpen = false;
             KeypadOpen = false;
+            ShowcaseOpen = false;
             PlayerDead = false;
             Paused = false;
             Victory = false;
@@ -48,6 +51,7 @@ namespace Horror
         public static void SetSaveMenuOpen(bool open) { SaveMenuOpen = open; Opened(open); Apply(); }
         public static void SetNoteOpen(bool open) { NoteOpen = open; Opened(open); Apply(); }
         public static void SetKeypadOpen(bool open) { KeypadOpen = open; Opened(open); Apply(); }
+        public static void SetShowcaseOpen(bool open) { ShowcaseOpen = open; Opened(open); Apply(); }
         public static void SetPlayerDead(bool dead) { PlayerDead = dead; Apply(); }
         public static void SetPaused(bool paused) { Paused = paused; Apply(); }
         public static void SetVictory(bool victory) { Victory = victory; Apply(); }
@@ -56,7 +60,7 @@ namespace Horror
 
         static void Apply()
         {
-            Time.timeScale = (InventoryOpen || BoxOpen || SaveMenuOpen || NoteOpen || KeypadOpen || Paused || Victory) ? 0f : 1f;
+            Time.timeScale = (InventoryOpen || BoxOpen || SaveMenuOpen || NoteOpen || KeypadOpen || ShowcaseOpen || Paused || Victory) ? 0f : 1f;
             Cursor.lockState = InputBlocked ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = InputBlocked;
             Changed?.Invoke();
