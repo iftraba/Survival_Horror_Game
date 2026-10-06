@@ -21,7 +21,7 @@ MonoBehaviour:
   damage: 14
   range: 20
   fireRate: 1
-  magazineSize: 6
+  magazineSize: 3
   reloadTime: 2.4
   pellets: 8
   spread: 4

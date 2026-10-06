@@ -167,7 +167,7 @@ namespace Horror
             y += h + gap;
             if (GUI.Button(new Rect(x, y, w, h), "Salir")) QuitGame();
 
-            GUI.Label(new Rect(0, y + h + 20, Screen.width, 30), "Guarda la partida en los terminales", center);
+            GUI.Label(new Rect(0, y + h + 20, Screen.width, 30), "Guarda la partida en los telefonos de las salas seguras", center);
         }
 
         void DrawVictory()
@@ -388,13 +388,13 @@ namespace Horror
 
         void DrawSaveMenu()
         {
-            Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0f, 0.02f, 0.03f, 0.8f));
+            Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0.03f, 0.02f, 0f, 0.8f));
             var panel = new Rect(Screen.width / 2f - 230, Screen.height / 2f - 120, 460, 240);
-            Fill(panel, new Color(0.05f, 0.09f, 0.1f, 0.97f));
-            Frame(panel, new Color(0.35f, 0.85f, 1f, 0.5f), 2f);
+            Fill(panel, new Color(0.10f, 0.07f, 0.04f, 0.97f));
+            Frame(panel, new Color(0.95f, 0.72f, 0.35f, 0.55f), 2f);
             var title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
-            GUI.color = new Color(0.55f, 0.92f, 1f);
-            GUI.Label(new Rect(panel.x, panel.y + 18, panel.width, 32), "TERMINAL DE GUARDADO", title);
+            GUI.color = new Color(1f, 0.82f, 0.5f);
+            GUI.Label(new Rect(panel.x, panel.y + 18, panel.width, 32), "TELEFONO - GUARDAR PARTIDA", title);
             GUI.color = Color.white;
             GUI.Label(new Rect(panel.x, panel.y + 64, panel.width, 28), "Guardar la partida?", center);
             string last = SaveSystem.HasSave ? "Ultimo guardado: " + SaveSystem.SavedAt() : "No hay partidas guardadas";

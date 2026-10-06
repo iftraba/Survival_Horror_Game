@@ -13,7 +13,7 @@ Objetos con los que se interactúa con **E**. Código en `Assets/_Project/Script
 | `LockerDoor` | Taquilla que se abre con E. |
 | `LightSwitch` | Interruptor que enciende o apaga un grupo de `CeilingLamp`. |
 | `ItemBox` | Baúl de sala segura: abre la pantalla de intercambio con `ItemStorage` (global). |
-| `SaveTerminal` | Terminal de guardado de sala segura: abre el menú de guardado del HUD. |
+| `SaveTerminal` | Punto de guardado de sala segura: abre el menú de guardado del HUD. Físicamente es un **teléfono antiguo de disco** sobre una mesita (prefab `Interactables/SavePhone`, modelo `Art/Props/Phone.fbx`, con una luz cálida tenue que guía al jugador). El script mantiene el nombre `SaveTerminal` por compatibilidad. |
 
 ## Zona del jefe
 `Door_SafeRoom` (sala segura, los zombis no la fuerzan) y `Door_Boss` (reforzada, la fuerzan tras 2.5 s).

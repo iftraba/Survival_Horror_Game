@@ -15,7 +15,7 @@ Armas, disparo y munición cargada. Código en `Assets/_Project/Scripts/Weapons/
 4. Eventos: `Fired`, `ReloadStarted` (los usa `PlayerAnimation`).
 
 ## Equilibrio
-- Pistola y escopeta: ver los assets `W_*`. La escopeta dispara 8 perdigones de 14.
+- Pistola y escopeta: ver los assets `W_*`. La escopeta dispara 8 perdigones de 14 y su **cargador es de 3** cartuchos (recarga 2.4 s).
 - La vida del jefe (1410) se calcula con `BossBalance` (ver `enemies.md`) para morir con ~15 escopetazos a la cabeza a 5 m.
 
 ## Decisiones

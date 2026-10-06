@@ -46,6 +46,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-06 · Interaction/UI · Punto de guardado físico: teléfono antiguo de disco (prefab `SavePhone`, modelo hecho en Blender) en lugar del terminal; menú de guardado en tonos cálidos.
+- 2026-10-06 · Weapons · Cargador de la escopeta bajado a 3 cartuchos.
 - 2026-10-06 · Docs · Documentación por módulos en `docs/` y este registro.
 - 2026-10-06 · Art pipeline · Skills `pedir-modelo-ia` y `modelo-blender` (`.claude/skills/`).
 - 2026-10-06 · Editor tools · Ajustes de producto: nombre "Comisaria", empresa "iftraba", ventana 1920×1080; primera compilación Windows a `Desktop/Juego`.

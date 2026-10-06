@@ -9,6 +9,7 @@ Scripts de editor (envueltos en `#if UNITY_EDITOR`) en `Assets/_Project/Scripts/
 | `ZombieKit` | Horror/Construir zombis y jefe | Genera `ZombieHumanoid.controller`, un override por tipo, `Boss.controller` y los prefabs de zombis y jefe. Tiempos de impacto de ataque detectados automáticamente (primer pico de velocidad de mano/pie). |
 | `BossBalance` | — | Simula disparos para fijar la vida del jefe (`Apply`). |
 | `BossWing` | Horror/Reformar zona del jefe | Reforma la zona final: pasillo, sala segura 2, puertas, sala del jefe, loot y zombis. |
+| `SavePhone` | Horror/Crear teléfono de guardado | Crea el prefab `SavePhone` (mesita + teléfono + interactuable + luz) y sustituye los terminales de la escena en su posición y orientación. El modelo sale de `Tools/blender/build_phone.py`. |
 | `MainMenuBuilder` | Horror/Crear menú principal | Crea la escena `MainMenu` y deja las dos escenas en los ajustes de compilación. |
 | `GraphicsSetup` | — | Ajustes de URP (antialiasing, sombras, SSAO, post-proceso). |
 | `ItemIcons` | — | Genera las miniaturas del inventario fotografiando los modelos. |
