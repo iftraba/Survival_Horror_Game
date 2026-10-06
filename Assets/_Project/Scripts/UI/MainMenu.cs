@@ -6,7 +6,7 @@ namespace Horror
     /// <summary>Menu principal: partida nueva, continuar, opciones y salir.</summary>
     public class MainMenu : MonoBehaviour
     {
-        public string title = "COMISARIA";
+        public string title = "SECTOR 7: GRIMHEIM";
         public string subtitle = "una noche muy larga";
 
         GUIStyle titleStyle, subStyle, small;
@@ -23,7 +23,7 @@ namespace Horror
         void Styles()
         {
             if (titleStyle != null) return;
-            titleStyle = new GUIStyle(GUI.skin.label) { fontSize = 72, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft };
+            titleStyle = new GUIStyle(GUI.skin.label) { fontSize = 54, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft };   // 54: "SECTOR 7: GRIMHEIM" cabe en el panel
             subStyle = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleLeft };
             small = new GUIStyle(GUI.skin.label) { fontSize = 16, alignment = TextAnchor.MiddleLeft };
         }

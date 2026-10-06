@@ -73,8 +73,22 @@ namespace Horror
             {
                 string old = Path.Combine(Application.persistentDataPath, "savegame.json");
                 if (File.Exists(old) && !File.Exists(PathFor(1))) File.Move(old, PathFor(1));
+
+                // El juego se llamaba "Comisaria": la carpeta de datos depende del nombre del producto, asi que al
+                // renombrarlo se copian los guardados de la carpeta antigua si la nueva aun no tiene ninguno
+                var parent = Directory.GetParent(Application.persistentDataPath);
+                string oldDir = parent != null ? Path.Combine(parent.FullName, "Comisaria") : null;
+                if (oldDir != null && Directory.Exists(oldDir) && !HasAnyFile())
+                    foreach (var f in Directory.GetFiles(oldDir, "savegame_*.json"))
+                        File.Copy(f, Path.Combine(Application.persistentDataPath, Path.GetFileName(f)), false);
             }
             catch (Exception e) { Debug.LogWarning("[Horror] No se pudo migrar el guardado antiguo: " + e.Message); }
+        }
+
+        static bool HasAnyFile()
+        {
+            for (int i = 1; i <= SlotCount; i++) if (File.Exists(PathFor(i))) return true;
+            return false;
         }
 
         public static SlotInfo Peek(int slot)

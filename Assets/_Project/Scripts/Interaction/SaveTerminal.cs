@@ -9,9 +9,10 @@ namespace Horror
     /// </summary>
     public class SaveTerminal : MonoBehaviour, IInteractable
     {
-        [Tooltip("Distancia a la que el telefono suena")] public float ringRange = 10f;
+        [Tooltip("Distancia a la que el telefono suena")] public float ringRange = 14f;
         public Vector2 ringInterval = new Vector2(30f, 55f);
-        [Range(0f, 1f)] public float ringVolume = 0.55f;
+        [Range(0f, 1f)] public float ringVolume = 1f;
+        [Tooltip("Alcance del sonido (m): es una señal para encontrar el telefono, se oye mas lejos que un efecto normal")] public float hearRange = 30f;
 
         float nextRing;
         Transform player;
@@ -31,7 +32,7 @@ namespace Horror
             }
             nextRing = Time.time + Random.Range(ringInterval.x, ringInterval.y);
             if ((player.position - transform.position).sqrMagnitude < ringRange * ringRange)
-                GameAudio.Play(Sfx.PhoneRing, transform.position, ringVolume, 1f, true);
+                GameAudio.Play(Sfx.PhoneRing, transform.position, ringVolume, 1f, true, hearRange);
         }
 
         public void Interact(GameObject who)

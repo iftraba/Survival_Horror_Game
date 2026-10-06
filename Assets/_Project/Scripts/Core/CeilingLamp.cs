@@ -76,8 +76,8 @@ namespace Horror
                 hum.spatialBlend = 1f;
                 hum.rolloffMode = AudioRolloffMode.Logarithmic;
                 hum.minDistance = 1f;
-                hum.maxDistance = 9f;
-                hum.volume = 0.12f;
+                hum.maxDistance = 7f;
+                hum.volume = 0.08f;   // hay una fuente por lampara: varias suenan a la vez y no deben fatigar
                 hum.time = Random.value * audio.lampHum.length;
                 hum.Play();
             }

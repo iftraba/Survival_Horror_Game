@@ -47,6 +47,10 @@ docs/                     Documentación por módulos
 Más reciente primero. Formato: fecha · módulo · cambio.
 
 - 2026-10-06 · Core/Enemies/Player · Sonidos reales: packs CC0 + síntesis (zombis, puertas, pasos, armas, teléfono, jefe); pasos de escalera; el teléfono suena cerca; rugido y pasos del jefe; alerta de zombis; recargas por arma. Traspaso en `docs/estado-actual.md`.
+- 2026-10-06 · Core/UI · El juego pasa a llamarse **Sector 7: Grimheim** (producto de Unity, título del menú principal, ejecutable `Sector7_Grimheim.exe`); los guardados de la carpeta `Comisaria` se copian solos a la nueva. El nombre de la escena `Comisaria` no cambia (es el nivel).
+- 2026-10-06 · Interaction/Audio · Teléfono de guardado más fuerte: clip normalizado (pico 0,66 → 0,97), volumen 0,55 → 1,0, `ringRange` 14 m y alcance sonoro 30 m (`GameAudio.Play` admite `range`).
+- 2026-10-06 · Core/Audio · Chirrido constante de fondo corregido: el zumbido de lámpara de fal era un pitido de ~8,5 kHz sonando en las 29 lámparas; vuelve el `lamp_hum.wav` grave y cada zumbido baja a 0,08 de volumen y 7 m de alcance.
+- 2026-10-06 · Enemies/Level · Zombi Civil (verde) retirado de la escena y de los constructores (se bugeaba siempre): quedan 8 zombis + jefe. Prefab intacto para reponerlo cuando se arregle.
 - 2026-10-06 · Weapons/Audio · Disparos más fuertes (`WeaponController.fireVolume` = 2, segunda fuente de audio cuando el volumen pasa de 1); escopeta regenerada en fal y recortada (cola larga), pistola normalizada (estaba a 0,61 de pico).
 - 2026-10-06 · Core/Enemies/Audio · Mezcla tras las pruebas: curva de atenuación propia que sí se apaga (22 m), amortiguación entre plantas (los zombis de arriba ya no se oyen abajo), zombis a 0,5-0,65 de volumen para que los disparos destaquen; el primer disparo de escopeta de fal (sonaba a recarga) se descartó.
 - 2026-10-06 · UI/Inventory · Pantalla de **objeto conseguido** al recoger una riñonera (`ItemShowcase`, `GameState.ShowcaseOpen`): pausa, modelo 3D girando con su nombre y "+2 casillas", E/Esc continúa. Sin probar en Play.

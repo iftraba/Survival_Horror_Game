@@ -25,6 +25,13 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 
 - **Cambios tras las primeras pruebas del usuario (2026-10-06):** zombis demasiado altos y los de arriba se oían desde abajo → curva de atenuación propia, amortiguación entre plantas y zombis a 0,5-0,65 (ver `docs/core.md`). El primer disparo de escopeta de fal sonaba a recarga (descartado y borrado). Se regeneró con el prompt "Single powerful 12 gauge shotgun gunshot, one huge explosive bang with a deep low boom and a short echoing tail in a large room…" (ElevenLabs SFX v2, 2,5 s) y como su cola era muy larga y fuerte (energía 0,40 entre 0,4 y 1 s frente a 0,08-0,11 de los otros) se **recortó con una caída exponencial** a 1,5 s: `Generated/shotgun_shot_fal.wav` (original en `shotgun_shot_v2_original.mp3`). Si sigue sin sonar a escopeta, el respaldo es `Audio/shotgun_shot.wav`. La pistola de fal estaba grabada baja (pico 0,61): se normalizó a 0,95 en `pistol_shot_fal.wav` (original `pistol_shot_original.mp3`). **Disparos más fuertes**: `WeaponController.fireVolume` = 2 (suma una segunda fuente porque un `AudioSource` no pasa de 1; ajustable en el inspector del jugador). Los análisis de volumen se hicieron leyendo las muestras (no se puede oír).
 
+- **Chirrido constante (2026-10-06):** era el zumbido de las lámparas: `lamp_hum_fal.mp3` tenía su frecuencia dominante en ~8.500 Hz (pitido agudo) y suena en cada una de las 29 lámparas. Se volvió a `Audio/lamp_hum.wav` (~100 Hz, grave); el de fal quedó apartado como `Generated/lamp_hum_descartado_pitido.mp3` (se puede borrar). Además cada zumbido baja a volumen 0,08 y alcance 7 m (`CeilingLamp`). Los clips `*_fal` de bucle (`heartbeat_fal`) no se han oído: si molestan, mismo remedio (volver al `.wav`).
+
+- **Interfaz de vida y balas "desaparecida" (2026-10-06): no era un fallo del HUD.** Claude recompiló scripts mientras el usuario tenía el editor en Play; la recarga de dominio dejó el juego con vida 0, sin arma equipada e inventario con 0 casillas (el HUD sí se dibujaba en una partida nueva). Regla: comprobar `EditorApplication.isPlaying` antes de tocar scripts (memoria `no-recompilar-en-play`). El aviso "Failed to create agent because there is no valid NavMesh" del `Player.log` ya salía antes (NavMesh horneado en `Start`).
+- **Teléfono**: sonaba bajo (clip con la mitad de energía + volumen 0,55 + atenuación nueva); normalizado y subido (ver README).
+- **Nombre del juego**: Sector 7: Grimheim. El ejecutable ahora es `Desktop/Juego/Sector7_Grimheim.exe`.
+- Servidor MCP de Unity: si se cae, `Tools/run_mcp_server.bat` lo levanta (usar `cmd /c` con la ruta entrecomillada); sin las herramientas `mcp__unity-mcp__*` en la sesión se habla por HTTP con `http://127.0.0.1:8080/mcp`.
+
 ## Entorno
 - Unity necesita el módulo Windows Mono sano y **Smart App Control desactivado** (lo bloqueaba). Se restauró la DLL original `Unity.AspNetCore.NamedPipeSupport.dll` (existe `.bak` en la carpeta del runner).
 - El servidor MCP de Unity se arranca desde **Window → MCP for Unity → Start Server**; si las herramientas `mcp__unity-mcp__*` no aparecen en la sesión, se puede hablar con él por HTTP en `http://127.0.0.1:8080/mcp` (initialize + tools/call).
@@ -51,7 +58,7 @@ Lo que hay que comprobar en el `.exe` (todo se montó sin verlo jugando):
 7. Rendimiento y cualquier cosa que se rompa solo en la build (algunos efectos de postproceso no entran).
 
 ## Pendiente (para seguir)
-1. Arreglar lo que salga de las pruebas de arriba.
+1. Arreglar lo que salga de las pruebas de arriba. **Zombi Civil (verde)**: quitado de la escena porque se bugeaba siempre (4 unidades); investigar la causa (animación/NavMesh/modelo `ZombieGenerated`) y reponerlo. Quedan 8 zombis + jefe.
 2. **Salas después del jefe** (un par) y decidir cómo termina el juego; más riñoneras (colocadas o con puzzle) cuando haya salas.
 3. **Textos reales** de las notas (los actuales los escribió Claude como provisionales) y más notas de historia/pistas, quizá con dibujos.
 4. Animación del personaje al ponerse la riñonera (a futuro); animación de disparo de pistola (descargar "Pistol Fire"/"Shooting" de Mixamo con el Soldier).

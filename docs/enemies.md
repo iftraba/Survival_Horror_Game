@@ -22,7 +22,7 @@ Planta baja: 2 civiles, 2 chicas, 2 policías; la planta superior añade civil �
 ## Tipos de zombi (definidos en `ZombieKit.Kinds`)
 | Tipo | Rasgos |
 |---|---|
-| Civil | Tambaleo lento, 100 de vida |
+| Civil | Tambaleo lento, 100 de vida. **Retirado de la escena (2026-10-06)**: el usuario vio que se bugeaba siempre; el prefab sigue en `Prefabs/Characters/` y los constructores (`BossWing.Zombies`, `UpperFloor.Zombies`) tienen sus cuatro puestos comentados (pasillo de la oficina, barricada, pasillo de arriba y reuniones). Para reponerlo hay que investigar antes qué falla. |
 | Girl | Más pequeña (0.84), 80 de vida |
 | Cop | Lento y resistente (140), escala 0.9 |
 | Yaku | Corre, 130 de vida, 20 de daño |

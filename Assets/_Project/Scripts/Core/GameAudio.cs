@@ -138,11 +138,11 @@ namespace Horror
         // ---- API estatica -------------------------------------------------------------------------
 
         /// <summary>Reproduce un efecto. spatial=false para sonidos del propio jugador (se oyen "en la cabeza").</summary>
-        public static void Play(Sfx sfx, Vector3 position, float volume = 1f, float pitch = 1f, bool spatial = true)
+        public static void Play(Sfx sfx, Vector3 position, float volume = 1f, float pitch = 1f, bool spatial = true, float range = DefaultRange)
         {
             if (Instance == null) return;
             var clip = Instance.Resolve(sfx);
-            if (clip != null) Instance.Emit(clip, position, volume, pitch, spatial);
+            if (clip != null) Instance.Emit(clip, position, volume, pitch, spatial, range);
         }
 
         public static void PlayClip(AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f, bool spatial = true)
