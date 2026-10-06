@@ -45,6 +45,8 @@ namespace Horror
         public static ZombieAI ActiveBoss { get; private set; }
         public Health Hp => health;
         public bool IsDormant => dormant;
+        /// <summary>Un script externo (ataques especiales del jefe) controla al enemigo: la IA normal se detiene.</summary>
+        public bool Suspended { get; set; }
 
         public event System.Action Attacked;
         /// <summary>Empieza a perseguir al jugador (grito de alerta). Lo usa la animacion.</summary>
@@ -111,7 +113,7 @@ namespace Horror
                 return;
             }
 
-            if (dormant)
+            if (dormant || Suspended)
             {
                 if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
                 return;

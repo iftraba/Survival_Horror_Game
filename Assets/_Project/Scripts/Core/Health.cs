@@ -12,6 +12,8 @@ namespace Horror
     public class Health : MonoBehaviour, IDamageable
     {
         public float maxHealth = 100f;
+        [Tooltip("Multiplica el dano recibido (el jefe aturdido recibe mas). 1 = normal")]
+        public float damageTakenMultiplier = 1f;
 
         public float Current { get; private set; }
         public bool IsDead => Current <= 0f;
@@ -25,7 +27,7 @@ namespace Horror
         public void TakeDamage(float amount, Vector3 hitPoint)
         {
             if (IsDead) return;
-            Current = Mathf.Max(0f, Current - amount);
+            Current = Mathf.Max(0f, Current - amount * damageTakenMultiplier);
             Changed?.Invoke(Current, maxHealth);
             Damaged?.Invoke(hitPoint);
             if (IsDead) Died?.Invoke();

@@ -143,7 +143,7 @@ namespace Horror.EditorTools
             var warm = new Color(1f, 0.72f, 0.45f);
             var hallLamp = NewLamp(new Vector3(0f, 0f, 7.3f), 45f, 9f, 4.6f, 18f, warm);
             NewLamp(new Vector3(-6.0f, 0f, 7.2f), 45f, 9f, 5.2f, 18f, warm);               // sala segura
-            foreach (float x in new[] { -8f, 0f, 8f }) NewLamp(new Vector3(x, 0f, 16.8f), 56f, 14f, 8.5f, 22f, new Color(0.8f, 0.92f, 1f));   // arena, fondo
+            foreach (float x in new[] { -8f, 0f, 8f }) NewLamp(new Vector3(x, 0f, 16.8f), 28f, 14f, 9f, 22f, new Color(0.8f, 0.92f, 1f));   // arena, fondo (tenue, como la del segundo jefe)
             // la arena ya tenia tres lamparas (z = 12.5) controladas por el interruptor: ahora siempre encendidas
             var sw = Object.FindObjectsByType<LightSwitch>(FindObjectsSortMode.None).FirstOrDefault(s => Mathf.Abs(s.transform.position.x - 2f) < 0.3f && Mathf.Abs(s.transform.position.z - 5.5f) < 0.3f);
             if (sw != null) { sw.lamps = new[] { hallLamp }; sw.startOn = true; EditorUtility.SetDirty(sw); }

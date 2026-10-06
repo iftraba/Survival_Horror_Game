@@ -14,7 +14,7 @@ namespace Horror.EditorTools
     ///   z 44-54: sala de maquinas (vestibulo grande con zombis);
     ///   z 54-66: laboratorio (oeste: tarjeta de acceso + pista del codigo), pasillo central y almacen (este: taquilla con
     ///            codigo con la 3ª riñonera);
-    ///   z 66-84: arena del SEGUNDO JEFE (mismo prefab que el primero, provisional; suelta la llave maestra) con el
+    ///   z 66-84: SALA DE CALDERAS, arena del SEGUNDO JEFE (Zombie_BossPxl, ver PxlZombieKit.BuildBoss; techo de 5.5 m, caldera central, luz roja de emergencia; suelta la llave maestra) con el
     ///            porton final, que ahora es el fin de la partida.
     /// Edita la ESCENA. Idempotente: rehace Zone2_*, zombis "Z2_*"/"Boss_2" y el botin al norte de z = 39.5.
     /// Orden de ejecucion: BossWing -> PostBossWing -> Zone2Wing.
@@ -85,10 +85,15 @@ namespace Horror.EditorTools
             // ------------------------------------------------ suelo, techo y muros exteriores
             float zc = (Z0 + Z1) / 2f, zl = Z1 - Z0;
             Box("Ground_Z2", new Vector3(0f, -0.5f, zc), new Vector3(30f, 1f, zl), floorMat, solid, 4f);
-            Box("Ceiling_Z2", new Vector3(0f, 3.5f, zc), new Vector3(30f, 1f, zl), ceilMat, solid, 2.4f);
-            Box("Wall_W_Z2", new Vector3(-15f, 1.5f, zc), new Vector3(1f, 3f, zl), wall, solid, 3f);
-            Box("Wall_E_Z2", new Vector3(15f, 1.5f, zc), new Vector3(1f, 3f, zl), wall, solid, 3f);
-            Box("Wall_N_Z2", new Vector3(0f, 1.5f, 84.5f), new Vector3(31f, 3f, 1f), wall, solid, 3f);
+            // salas y pasillos (z 39-66) a 3 m; la sala de calderas (z 66-85) a 5.5 m
+            const float AH = 5.5f;
+            Box("Ceiling_Z2", new Vector3(0f, 3.5f, 52.5f), new Vector3(30f, 1f, 27f), ceilMat, solid, 2.4f);
+            Box("Wall_W_Z2", new Vector3(-15f, 1.5f, 52.5f), new Vector3(1f, 3f, 27f), wall, solid, 3f);
+            Box("Wall_E_Z2", new Vector3(15f, 1.5f, 52.5f), new Vector3(1f, 3f, 27f), wall, solid, 3f);
+            Box("Ceiling_Arena", new Vector3(0f, AH + 0.5f, 75.5f), new Vector3(30f, 1f, 19f), ceilMat, solid, 2.4f);
+            Box("Wall_W_Arena", new Vector3(-15f, AH / 2f, 75.5f), new Vector3(1f, AH, 19f), wall, solid, 3f);
+            Box("Wall_E_Arena", new Vector3(15f, AH / 2f, 75.5f), new Vector3(1f, AH, 19f), wall, solid, 3f);
+            Box("Wall_N_Z2", new Vector3(0f, AH / 2f, 84.5f), new Vector3(31f, AH, 1f), wall, solid, 3f);
 
             // ------------------------------------------------ estructura
             // z = 44: pared sur de la sala de maquinas, con puertas a la sala segura 5 (x 10.3) y al cuarto de bombas (x -4)
@@ -109,6 +114,10 @@ namespace Horror.EditorTools
             Wall("Arena_S_W", -14.5f, 66f, -0.75f, 66f);
             Wall("Arena_S_E", 0.75f, 66f, 14.5f, 66f);
             Lintel(0f, 66f);
+            // la pared de la arena sube hasta el techo alto (las particiones miden 3 m)
+            Box("Arena_S_Up_W", new Vector3(-7.625f, (3f + AH) / 2f, 66f), new Vector3(13.75f, AH - 3f, 0.2f), wall, solid, 3f);
+            Box("Arena_S_Up_E", new Vector3(7.625f, (3f + AH) / 2f, 66f), new Vector3(13.75f, AH - 3f, 0.2f), wall, solid, 3f);
+            Box("Arena_S_Up_Door", new Vector3(0f, (2.6f + AH) / 2f, 66f), new Vector3(1.5f, AH - 2.6f, 0.2f), wall, solid, 3f);
 
             // ------------------------------------------------ llaves y datos
             var keyCard = MakeKey("I_KeyCard", "Tarjeta de acceso", new Color(0.2f, 0.85f, 1f),
@@ -183,10 +192,26 @@ namespace Horror.EditorTools
             locker.name = "Locker_Code_Almacen";
 
             // ------------------------------------------------ arena del segundo jefe (z 66-84) y porton final
-            foreach (var c in new[] { new Vector2(-6f, 72f), new Vector2(6f, 72f), new Vector2(-6f, 79f), new Vector2(6f, 79f) })
-                Box("Column", new Vector3(c.x, 1.5f, c.y), new Vector3(0.7f, 3f, 0.7f), wall, solid, 3f);
-            Prop("Crate", -12.0f, 69.0f, 20f); Prop("Crate", -11.0f, 69.6f, -8f); Prop("Crate", 11.5f, 82.0f, 35f);
-            Prop("Barrel", 12.5f, 68.5f, 0f); Prop("Barrel", -12.5f, 82.5f, 0f);
+            GameObject Cyl(string n, Vector3 pos, Vector3 size, Quaternion rot, bool col, Material m)
+            {
+                var go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                go.name = n; go.transform.SetParent(solid); go.transform.SetPositionAndRotation(pos, rot); go.transform.localScale = size;
+                go.GetComponent<Renderer>().sharedMaterial = m;
+                if (!col) Object.DestroyImmediate(go.GetComponent<Collider>());
+                return go;
+            }
+            // caldera central (5 m de diametro): cobertura grande alrededor de la que se mueve el jefe
+            Cyl("Boiler", new Vector3(0f, 2.5f, 76f), new Vector3(5f, 2.5f, 5f), Quaternion.identity, true, metal);
+            Cyl("BoilerCap", new Vector3(0f, 5.05f, 76f), new Vector3(5.6f, 0.15f, 5.6f), Quaternion.identity, false, metal);
+            foreach (var c in new[] { new Vector2(-8f, 70.5f), new Vector2(8f, 70.5f), new Vector2(-8f, 81.5f), new Vector2(8f, 81.5f) })
+                Cyl("Pillar", new Vector3(c.x, AH / 2f, c.y), new Vector3(1.1f, AH / 2f, 1.1f), Quaternion.identity, true, wall);
+            // tuberias pegadas al techo y a las paredes (sin colision: van por encima de la cabeza)
+            foreach (float y in new[] { 4.55f, 5.0f }) foreach (float x in new[] { -14.1f, 14.1f })
+                Cyl("Pipe", new Vector3(x, y, 75.5f), new Vector3(0.45f, 9.2f, 0.45f), Quaternion.Euler(90f, 0f, 0f), false, metal);
+            foreach (float z in new[] { 70f, 76f, 82f })
+                Cyl("PipeCross", new Vector3(0f, 5.0f, z), new Vector3(0.4f, 14.5f, 0.4f), Quaternion.Euler(0f, 0f, 90f), false, metal);
+            Prop("Crate", -12.0f, 69.0f, 20f); Prop("Crate", -11.0f, 69.6f, -8f); Prop("Crate", 11.5f, 82.0f, 35f); Prop("Crate", 12.6f, 80.9f, -20f);
+            Prop("Barrel", 12.5f, 68.5f, 0f); Prop("Barrel", 13.5f, 69.2f, 0f); Prop("Barrel", -12.5f, 82.5f, 0f); Prop("Barrel", -13.5f, 81.6f, 0f);
             var gate = Box("ExitGate", new Vector3(0f, 1.3f, 83.9f), new Vector3(4.2f, 2.6f, 0.14f), metal, solid, 1.5f);
             gate.AddComponent<ExitDoor>().requiredKey = keyFinal;
             Box("ExitGate_L", new Vector3(-2.18f, 1.3f, 83.9f), new Vector3(0.16f, 2.7f, 0.2f), metal, solid, 1f, false);
@@ -195,11 +220,11 @@ namespace Horror.EditorTools
 
             // ------------------------------------------------ luces
             var lampSrc = Object.FindObjectsByType<CeilingLamp>(FindObjectsSortMode.None).First(l => l.transform.position.y < 3.2f && l.transform.position.z < 20f);
-            CeilingLamp NewLamp(float x, float z, float intensity, float range, float fillRange, float fillIntensity, Color color, bool flicker = false)
+            CeilingLamp NewLamp(float x, float z, float intensity, float range, float fillRange, float fillIntensity, Color color, bool flicker = false, float lampY = -1f, float fillY = -1f)
             {
                 var go = (GameObject)Object.Instantiate(lampSrc.gameObject, level);
                 go.name = "Lamp";
-                go.transform.position = new Vector3(x, lampSrc.transform.position.y, z);
+                go.transform.position = new Vector3(x, lampY > 0f ? lampY : lampSrc.transform.position.y, z);
                 var l = go.GetComponent<CeilingLamp>(); var light = go.GetComponent<Light>();
                 l.ratedIntensity = intensity; light.intensity = intensity; light.range = range; light.color = color; l.flicker = flicker;
                 foreach (var f in go.GetComponentsInChildren<Light>(true))
@@ -207,7 +232,7 @@ namespace Horror.EditorTools
                     if (f == light) continue;
                     f.range = fillRange; f.intensity = fillIntensity; f.color = Color.Lerp(color, Color.white, 0.3f);
                     var fr = f.GetComponent<FillLightRating>(); if (fr != null) fr.rated = fillIntensity;
-                    var p = f.transform.position; f.transform.position = new Vector3(x, p.y, z);
+                    var p = f.transform.position; f.transform.position = new Vector3(x, fillY > 0f ? fillY : p.y, z);
                 }
                 return l;
             }
@@ -218,7 +243,14 @@ namespace Horror.EditorTools
             NewLamp(-8f, 60f, 26f, 11f, 8.5f, 20f, green, true);             // laboratorio (parpadea)
             NewLamp(0f, 60f, 22f, 8f, 5.5f, 18f, cold);                      // pasillo central
             NewLamp(8f, 60f, 26f, 11f, 8.5f, 20f, cold);                     // almacen
-            foreach (float x in new[] { -8f, 0f, 8f }) foreach (float z in new[] { 71f, 79f }) NewLamp(x, z, 28f, 14f, 9f, 22f, cold);   // arena
+            // sala de calderas: techo a 5.5 m, luz roja-naranja de emergencia, tenue; dos lamparas parpadean
+            var emergency = new Color(1f, 0.42f, 0.28f);
+            foreach (float x in new[] { -9f, 9f }) foreach (float z in new[] { 71f, 81f }) NewLamp(x, z, 52f, 17f, 11f, 20f, emergency, (x > 0f) == (z > 76f), 5.35f, 3.2f);
+            NewLamp(0f, 68.5f, 40f, 15f, 9f, 16f, emergency, false, 5.35f, 3.2f);    // entrada
+            NewLamp(0f, 83.0f, 40f, 15f, 9f, 16f, emergency, false, 5.35f, 3.2f);    // porton final
+            var boilerGlow = new GameObject("BoilerGlow").AddComponent<Light>();     // resplandor de la caldera
+            boilerGlow.transform.SetParent(extras); boilerGlow.transform.position = new Vector3(0f, 0.8f, 76f);
+            boilerGlow.type = LightType.Point; boilerGlow.color = new Color(1f, 0.3f, 0.12f); boilerGlow.range = 9f; boilerGlow.intensity = 6f; boilerGlow.shadows = LightShadows.None;
 
             // ------------------------------------------------ botin
             var itemsRoot = GameObject.Find("Items");
@@ -278,10 +310,10 @@ namespace Horror.EditorTools
                 go.name = sp.name;
                 go.transform.SetPositionAndRotation(sp.pos, Quaternion.Euler(0f, sp.yaw, 0f));
             }
-            // segundo jefe: mismo prefab que el primero (provisional); suelta la llave maestra
-            var boss = Inst("Characters/Boss.prefab", zr, new Vector3(0f, 1.4f, 77f), 180f, "Boss_2");
+            // segundo jefe: el coloso verde del pack de Pxltiger (PxlZombieKit.BuildBoss); suelta la llave maestra
+            var boss = Inst("Characters/Zombie_BossPxl.prefab", zr, new Vector3(5f, 1.55f, 79f), 200f, "Boss_2");
             var ai = boss.GetComponent<ZombieAI>();
-            ai.bossName = "COLOSSUS II"; ai.dropOnDeath = keyFinal;
+            ai.dropOnDeath = keyFinal;
             EditorUtility.SetDirty(ai);
             PrefabUtility.RecordPrefabInstancePropertyModifications(ai);
             var trigger = new GameObject("BossRoomTrigger_2");

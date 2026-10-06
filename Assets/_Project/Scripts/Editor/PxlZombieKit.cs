@@ -49,6 +49,89 @@ namespace Horror.EditorTools
 
         class Kind { public string name, fbx, walkInPlace, walkMoving, runInPlace, runMoving; public float hp, chase, damage; }
 
+
+        // ------------------------------------------------------------------ segundo jefe
+        /// <summary>
+        /// Segundo jefe: el modelo mas corpulento del pack (Zombie3) a escala 1.65 con piel verde toxica, sobre el controlador del
+        /// primer jefe (Boss.controller) con las animaciones del pack (idle, andar, correr, un ataque, caida). Lento, muy
+        /// resistente y de golpe fuerte; suelta la llave maestra. Prefab: Zombie_BossPxl.
+        /// </summary>
+        public static GameObject BuildBoss(List<string> log)
+        {
+            var bossCtrl = AssetDatabase.LoadAssetAtPath<AnimatorController>(AnimDir + "Boss.controller");
+            if (bossCtrl == null) { log.Add("falta Boss.controller"); return null; }
+            // controlador: el del jefe 1 con otros clips (el estado de baile pasa a ser un idle: este jefe espera quieto)
+            var map = new Dictionary<string, string>
+            {
+                ["B_Idle"] = "Z_Idle", ["B_MutantWalking"] = "Z_Walk_InPlace", ["B_MutantRun"] = "Z_Run_InPlace", ["B_GangnamStyle"] = "Z_Idle",
+                ["Z_ZombieScream"] = "Z_Idle", ["B_Punching"] = "Z_Attack", ["B_PunchToElbowCombo"] = "Z_Attack", ["B_SurpriseUppercut"] = "Z_Attack",
+                ["Z_ZombieDying"] = "Z_FallingBack",
+            };
+            string path = AnimDir + "Boss_Pxl.overrideController";
+            var oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(path);
+            bool isNew = oc == null;
+            if (isNew) oc = new AnimatorOverrideController(bossCtrl); else oc.runtimeAnimatorController = bossCtrl;
+            var pairs = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+            foreach (var orig in bossCtrl.animationClips)
+                pairs.Add(new KeyValuePair<AnimationClip, AnimationClip>(orig, map.TryGetValue(orig.name, out var rep) ? Clip(rep) : null));
+            oc.ApplyOverrides(pairs);
+            if (isNew) AssetDatabase.CreateAsset(oc, path); else EditorUtility.SetDirty(oc);
+
+            const float scale = 1.65f;
+            string fbxPath = "Assets/Zombie/FBXs/Zombie3.FBX";
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+            var attack = Clip("Z_Attack");
+            float eff = attack.length * 0.85f;                                   // el estado de ataque del jefe sale al 85 %
+            float impact = Mathf.Clamp(ZombieKit.ImpactTime(model, attack), 0.2f, eff);
+            var variant = new ZombieAI.AttackVariant { hitDelay = impact, damageMultiplier = 1f, cooldown = Mathf.Max(2.0f, eff + 0.6f) };
+            var spec = new ZombieKit.Spec
+            {
+                name = "Zombie_BossPxl", fbxPath = fbxPath, scale = scale, controller = oc, height = 3.0f, radius = 0.85f,
+                hp = 2600f, chase = 1.17f, damage = 60f, attackRange = 2.6f, cooldown = 2.0f, stagger = 0f, alertTime = 0.6f,
+                walkClip = Mathf.Max(0.3f, Clip("Z_Walk_InPlace").averageSpeed.magnitude, Clip("Z_Walk").averageSpeed.magnitude) * scale,
+                runClip = Clip("Z_Run").averageSpeed.magnitude * scale, runAbove = 1.8f, variants = new[] { variant }, dormant = true,
+                drop = "I_KeyFinal", bossName = "ABOMINACION",
+                headRadius = 0.22f, headLift = 0.1f, torsoRadius = 0.48f, limbRadiusScale = 2.0f,
+                headMult = 3f, torsoMult = 0.4f, limbMult = 0.2f,                // cuerpo grueso: la cabeza es el punto debil
+            };
+            var prefab = ZombieKit.BuildPrefab(spec);
+
+            // piel verde toxica: material propio (el del pack teñido y con brillo)
+            string matPath = "Assets/Zombie/Materials/Zombie_URP_Boss.mat";
+            var baseMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Zombie/Materials/Zombie_URP.mat");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+            if (mat == null) { mat = new Material(baseMat); AssetDatabase.CreateAsset(mat, matPath); }
+            mat.CopyPropertiesFromMaterial(baseMat);
+            mat.SetColor("_BaseColor", new Color(0.55f, 1f, 0.5f));
+            mat.SetTexture("_EmissionMap", null);                       // el mapa del pack solo ilumina los ojos: aqui brilla todo el cuerpo, poco
+            mat.SetColor("_EmissionColor", new Color(0.001f, 0.012f, 0.003f));
+            mat.EnableKeyword("_EMISSION");
+            EditorUtility.SetDirty(mat);
+            var root = PrefabUtility.LoadPrefabContents(PrefabDir + "Zombie_BossPxl.prefab");
+            foreach (var r in root.GetComponentsInChildren<Renderer>()) { var ms = r.sharedMaterials; for (int i = 0; i < ms.Length; i++) ms[i] = mat; r.sharedMaterials = ms; }
+            // rastro de acido: charcos que hacen dano al pisarlos
+            string puddlePath = "Assets/_Project/Materials/ToxicPuddle.mat";
+            var puddle = AssetDatabase.LoadAssetAtPath<Material>(puddlePath);
+            if (puddle == null)
+            {
+                puddle = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                AssetDatabase.CreateAsset(puddle, puddlePath);
+            }
+            puddle.SetColor("_BaseColor", new Color(0.2f, 0.55f, 0.1f));
+            puddle.SetFloat("_Smoothness", 0.9f);
+            puddle.SetColor("_EmissionColor", new Color(0.12f, 0.6f, 0.08f));
+            puddle.EnableKeyword("_EMISSION");
+            EditorUtility.SetDirty(puddle);
+            var trail = root.GetComponent<ToxicTrail>() ?? root.AddComponent<ToxicTrail>();
+            trail.puddleMaterial = puddle;
+            if (root.GetComponent<BossAttacks>() == null) root.AddComponent<BossAttacks>();
+            PrefabUtility.SaveAsPrefabAsset(root, PrefabDir + "Zombie_BossPxl.prefab");
+            PrefabUtility.UnloadPrefabContents(root);
+            AssetDatabase.SaveAssets();
+            log.Add("Boss_Pxl [golpe " + impact.ToString("F2") + "s, ciclo " + eff.ToString("F2") + "s, 2600 de vida, 60 de daño, persigue a 0,95 m/s]");
+            return prefab;
+        }
+
         [MenuItem("Horror/Construir zombis Pxltiger")]
         public static void BuildMenu() { Debug.Log("[Horror] " + Build()); }
 
@@ -82,6 +165,7 @@ namespace Horror.EditorTools
                 ZombieKit.BuildPrefab(spec);
                 log.Add(k.name + " [paso " + walkSpeed.ToString("F2") + " m/s, carrera " + runSpeed.ToString("F2") + " m/s, golpe " + variant.hitDelay.ToString("F2") + "s]");
             }
+            BuildBoss(log);
             AssetDatabase.SaveAssets();
             return string.Join(" | ", log);
         }

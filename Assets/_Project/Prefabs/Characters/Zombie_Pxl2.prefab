@@ -116,6 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Health
   maxHealth: 90
+  damageTakenMultiplier: 1
 --- !u!114 &6039550250237122469
 MonoBehaviour:
   m_ObjectHideFlags: 0

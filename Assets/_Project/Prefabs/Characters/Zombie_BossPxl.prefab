@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4842873821030000061
+--- !u!1 &1904268730557491127
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,44 +8,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7946252195178079289}
-  - component: {fileID: 6115306093835685014}
-  - component: {fileID: 3447273254153450797}
-  - component: {fileID: 2778948457543780766}
-  - component: {fileID: 1991652891558541188}
-  - component: {fileID: 972490800952314803}
-  - component: {fileID: 2851139157860159828}
-  - component: {fileID: 4551905443810991399}
+  - component: {fileID: 5030430588468665415}
+  - component: {fileID: 3774079480255745710}
+  - component: {fileID: 3360997707561141548}
+  - component: {fileID: 2813153608306386812}
+  - component: {fileID: 6509518543637489187}
+  - component: {fileID: 1263610271914112402}
+  - component: {fileID: 496292858899723512}
+  - component: {fileID: 2260927094808055405}
+  - component: {fileID: 3637666143163324377}
+  - component: {fileID: 2410277578746331674}
   m_Layer: 0
-  m_Name: Zombie_Pxl3
+  m_Name: Zombie_BossPxl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7946252195178079289
+--- !u!4 &5030430588468665415
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7575232194507713435}
+  - {fileID: 8891518099954539457}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &6115306093835685014
+--- !u!136 &3774079480255745710
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -58,40 +60,40 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.4
-  m_Height: 2
+  m_Radius: 0.85
+  m_Height: 3
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3447273254153450797
+--- !u!114 &3360997707561141548
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe121e4422c21a9479e0ebf858480093, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieHitZones
   headMultiplier: 3
-  torsoMultiplier: 1
-  limbMultiplier: 0.6
-  headRadius: 0.15
-  headLift: 0.13
-  torsoRadius: 0.2
-  limbRadiusScale: 1
---- !u!195 &2778948457543780766
+  torsoMultiplier: 0.4
+  limbMultiplier: 0.2
+  headRadius: 0.22
+  headLift: 0.1
+  torsoRadius: 0.48
+  limbRadiusScale: 2
+--- !u!195 &2813153608306386812
 NavMeshAgent:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.4
-  m_Speed: 0.34
+  m_Radius: 0.6
+  m_Speed: 1.17
   m_Acceleration: 6
   avoidancePriority: 50
   m_AngularSpeed: 200
@@ -99,31 +101,31 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 2
-  m_BaseOffset: 1
+  m_Height: 3
+  m_BaseOffset: 1.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &1991652891558541188
+--- !u!114 &6509518543637489187
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99548ff9749f20a4ba621de27f5a5d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Health
-  maxHealth: 170
+  maxHealth: 2600
   damageTakenMultiplier: 1
---- !u!114 &972490800952314803
+--- !u!114 &1263610271914112402
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 256fb512a3f2e8f41b1e1ef8540f304b, type: 3}
@@ -131,67 +133,123 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAI
   detectRange: 14
   loseRange: 22
-  attackRange: 1.6
-  attackDamage: 22
-  attackCooldown: 1.4
+  attackRange: 2.6
+  attackDamage: 60
+  attackCooldown: 2
   walkSpeed: 1.1
-  chaseSpeed: 0.34
-  staggerTime: 0.5
+  chaseSpeed: 1.17
+  staggerTime: 0
   hearingRange: 4.5
   attackVariants:
-  - hitDelay: 0.37777779
+  - hitDelay: 0.56666666
     damageMultiplier: 1
-    cooldown: 1.4
-  dormant: 0
-  dropOnDeath: {fileID: 0}
-  bossName: 
-  alertTime: 0.35
---- !u!114 &2851139157860159828
+    cooldown: 2
+  dormant: 1
+  dropOnDeath: {fileID: 11400000, guid: 11878370fe76fcf49ae21c0996261bd1, type: 2}
+  bossName: ABOMINACION
+  alertTime: 0.6
+--- !u!114 &496292858899723512
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5216742f32efcfd4683aaf471b8de50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAudio
---- !u!114 &4551905443810991399
+--- !u!114 &2260927094808055405
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4842873821030000061}
+  m_GameObject: {fileID: 1904268730557491127}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b5f63e7a6a82e14195228db8bfc6ad4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAnimation
-  animator: {fileID: 552432343062185697}
+  animator: {fileID: 1580490085607651003}
   strideSpeed: 1.4
   gaitMode: 1
-  walkClipSpeed: 0.3
-  runClipSpeed: 3.700163
-  runAbove: 1.3
+  walkClipSpeed: 0.81675
+  runClipSpeed: 10.073693
+  runAbove: 1.8
   maxWalkPlayback: 2.2
---- !u!1001 &3195890272427147393
+--- !u!114 &3637666143163324377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1904268730557491127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55db58a5436a1b840b20c6c70796e63f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ToxicTrail
+  puddleMaterial: {fileID: 2100000, guid: 9377ff0d074eb194e88fb1094fa7fef8, type: 2}
+  spacing: 1.4
+  radius: 0.85
+  lifetime: 9
+  damage: 6
+  tickTime: 0.5
+--- !u!114 &2410277578746331674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1904268730557491127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13fd8e04beb115947b749a5e6091ded4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.BossAttacks
+  chargeSpeed: 8
+  chargeDamage: 45
+  chargeWindup: 1
+  chargeMaxTime: 2.2
+  stunTime: 3
+  stunDamageMultiplier: 1.8
+  spitDamage: 12
+  spitSpeed: 12
+  spitWindup: 0.6
+  pause: {x: 3.5, y: 6}
+--- !u!1001 &4476490432744173787
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 7946252195178079289}
+    m_TransformParent: {fileID: 5030430588468665415}
     m_Modifications:
+    - target: {fileID: -6817083463627463796, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d4763389a0e7ed443871b432e74569da, type: 2}
     - target: {fileID: -6057140222963153312, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 22100000, guid: 0f5fde04344645b479f8a6cdc2793804, type: 2}
+      objectReference: {fileID: 22100000, guid: c1085c3642c0c5a4ab5b9de665b5d7b3, type: 2}
     - target: {fileID: -6057140222963153312, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.65
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.65
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.65
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
       propertyPath: m_LocalPosition.x
@@ -199,7 +257,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1
+      value: -1.5
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
       propertyPath: m_LocalPosition.z
@@ -242,13 +300,13 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
---- !u!95 &552432343062185697 stripped
+--- !u!95 &1580490085607651003 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: -6057140222963153312, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
-  m_PrefabInstance: {fileID: 3195890272427147393}
+  m_PrefabInstance: {fileID: 4476490432744173787}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &7575232194507713435 stripped
+--- !u!4 &8891518099954539457 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: a1b4b8144e2a4054199287da62cdd0da, type: 3}
-  m_PrefabInstance: {fileID: 3195890272427147393}
+  m_PrefabInstance: {fileID: 4476490432744173787}
   m_PrefabAsset: {fileID: 0}

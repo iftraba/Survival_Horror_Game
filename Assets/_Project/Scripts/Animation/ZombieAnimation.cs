@@ -23,6 +23,8 @@ namespace Horror
         [Tooltip("Velocidad real (m/s) de la animacion de correr a velocidad normal")] public float runClipSpeed = 2.84f;
         [Tooltip("A partir de esta velocidad el zombi corre en lugar de andar")] public float runAbove = 1.6f;
         public float maxWalkPlayback = 3.2f;
+        /// <summary>Velocidad (m/s) forzada para la animacion; negativa = usar la del agente.</summary>
+        [System.NonSerialized] public float speedOverride = -1f;
 
         static readonly int SpeedId = Animator.StringToHash("Speed");
         static readonly int AttackId = Animator.StringToHash("Attack");
@@ -69,7 +71,8 @@ namespace Horror
         void Update()
         {
             if (animator == null || agent == null || !agent.enabled) return;
-            float v = agent.velocity.magnitude;
+            // los ataques especiales del jefe lo mueven con agent.Move, que no actualiza agent.velocity: ellos fijan la velocidad aqui
+            float v = speedOverride >= 0f ? speedOverride : agent.velocity.magnitude;
             if (!gaitMode)
             {
                 animator.SetFloat(SpeedId, v / Mathf.Max(0.1f, strideSpeed), 0.1f, Time.deltaTime);
