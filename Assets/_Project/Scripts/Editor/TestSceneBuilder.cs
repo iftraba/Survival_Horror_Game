@@ -298,9 +298,10 @@ namespace Horror.EditorTools
             ga.stingers = new[] { Clip("sting_bang"), Clip("sting_creak"), Clip("sting_scrape") };
             pistol.heldScale = 1.3f;       // modelos nuevos de armas: escalas ajustadas a las manos del personaje
             shotgun.heldScale = 0.9f;
-            pistol.fireSound = Clip("pistol_shot");
+            // disparos generados con fal.ai (Audio/Generated); si faltan, los sintetizados
+            pistol.fireSound = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/Generated/pistol_shot_fal.mp3") ?? Clip("pistol_shot");
             pistol.reloadSound = Clip("reload");
-            shotgun.fireSound = Clip("shotgun_shot");
+            shotgun.fireSound = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/Generated/shotgun_shot_fal.mp3") ?? Clip("shotgun_shot");
             shotgun.reloadSound = Clip("reload");
             EditorUtility.SetDirty(pistol);
             EditorUtility.SetDirty(shotgun);

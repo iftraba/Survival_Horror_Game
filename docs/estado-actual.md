@@ -18,8 +18,10 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 ## IA generativa de audio (fal.ai)
 - El plugin de Unity falla con `Model schema expansion failed` (ningún modelo funciona; no es la clave ni la red).
 - El **MCP oficial de fal** está añadido a la configuración de usuario y autenticado (`claude mcp list` → fal conectado). Hace falta una **sesión nueva** para que cargue sus herramientas.
-- Primera prueba pedida por el usuario: disparos de pistola y escopeta. **Mostrar siempre el modelo y el prompt exacto al usuario antes de enviar nada** (regla permanente). Prompts propuestos: ver la conversación o `Tools/audio/sfx_prompts.md`.
-- Primero buscar con las herramientas de fal un modelo de efectos de sonido (búsqueda de solo lectura); probar un clip y juzgar antes de gastar más.
+- **Mostrar siempre el modelo y el prompt exacto al usuario antes de enviar nada** (regla permanente). Prompts: `Tools/audio/sfx_prompts.md`.
+- Modelo en uso: `fal-ai/elevenlabs/sound-effects/v2` (~0,002 USD/s; `cassetteai` ya no está en el catálogo). Se llama con las herramientas MCP `mcp__fal__*` y se descarga con curl a `Assets/_Project/Audio/Generated/`.
+- Hechos: `pistol_shot_fal.mp3` y `shotgun_shot_fal.mp3`, asignados como `fireSound` en `W_Pistol`/`W_Shotgun` (están en esos WeaponData, no en `GameAudio`). Falta que el usuario los oiga; si convencen, seguir con el resto de la lista.
+- Incidencia: una petición dio 403 `account_locked` al recuperar el resultado aunque la cuenta figuraba lista; reenviar el mismo prompt funcionó.
 
 ## Entorno
 - Unity necesita el módulo Windows Mono sano y **Smart App Control desactivado** (lo bloqueaba). Se restauró la DLL original `Unity.AspNetCore.NamedPipeSupport.dll` (existe `.bak` en la carpeta del runner).
