@@ -92,6 +92,41 @@ namespace Horror
             animator.SetBool(ArmedId, weapons != null && weapons.Equipped != null);
         }
 
+        Transform spine, rHand, lHand;
+        float aimBlend;
+
+        /// <summary>
+        /// Las poses de apuntar de Mixamo no miran justo al frente (la de la pistola queda desviada a un lado). Despues de animar,
+        /// se gira el torso para que la linea mano derecha -> mano izquierda (el canon) apunte exactamente al frente del jugador,
+        /// que es hacia donde se dispara. Con el clip de disparo, que ya apunta recto, la correccion sale casi 0.
+        /// </summary>
+        void LateUpdate()
+        {
+            if (animator == null || !animator.isHuman) return;
+            if (spine == null)
+            {
+                spine = animator.GetBoneTransform(HumanBodyBones.Spine);
+                rHand = animator.GetBoneTransform(HumanBodyBones.RightHand);
+                lHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                if (spine == null || rHand == null || lHand == null) { enabled = false; return; }
+            }
+            bool on = player.IsAiming && weapons != null && weapons.Equipped != null && (health == null || !health.IsDead);
+            aimBlend = Mathf.MoveTowards(aimBlend, on ? 1f : 0f, Time.deltaTime * 6f);
+            if (aimBlend <= 0f) return;
+            // direccion real del arma: el eje del agarre (la linea entre manos no vale con la pistola, la mano de apoyo la sujeta por debajo)
+            var socket = weapons.Equipped.twoHanded ? weapons.longSocket : weapons.handSocket;
+            var barrel = socket != null ? socket.forward : lHand.position - rHand.position;
+            if (barrel.sqrMagnitude < 1e-4f) return;
+            // hacia donde van las balas: el centro de la camara de apuntado (si no hay, el frente del jugador)
+            var cam = weapons.aimCamera;
+            var want = cam != null ? cam.transform.forward : transform.forward;
+            var fix = Quaternion.FromToRotation(barrel.normalized, want.normalized);
+            fix.ToAngleAxis(out float ang, out Vector3 axis);
+            if (ang > 180f) ang -= 360f;
+            ang = Mathf.Clamp(ang, -60f, 60f);
+            spine.rotation = Quaternion.AngleAxis(ang * aimBlend, axis) * spine.rotation;
+        }
+
         void OnFired() { CacheParams(); if (animator != null && has.Contains(ShootId)) animator.SetTrigger(ShootId); }
         void OnReload() { CacheParams(); if (animator != null && has.Contains(ReloadId)) animator.SetTrigger(ReloadId); }
         void OnDamaged(Vector3 _) { CacheParams(); if (animator != null && has.Contains(HitId)) animator.SetTrigger(HitId); }
