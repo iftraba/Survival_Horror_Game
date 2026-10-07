@@ -1,5 +1,7 @@
 # Interaction
 
+**Apertura sin incrustarse (2026-10-08)**: `Door.SwingAwayFrom` ya no abre siempre 100°. Mide cuánto puede girar la hoja hacia cada lado (`FreeAngle`: prueba un volumen algo encogido de la hoja en pasos de 8° contra el nivel y los muebles, ignorando jugador, zombis, objetos sueltos y otras puertas), elige el lado preferido si se abre del todo o el que deje más hueco, y **nunca pasa de 90°**: a más, la hoja se inclina hacia el muro de su lado y con los muros gruesos se metía hasta 11 cm (Door_Exit, Door_GarageGate, Door_Main). Resultado: la mayoría abren 90° y las de muro grueso 72-80°.
+
 **Puertas atrancables (2026-10-07)**: `Door.Seal()` cierra de golpe la puerta (si estaba abierta) y la deja atrancada (`Prompt` "Atrancada", mensaje al intentar abrirla, los zombis no la fuerzan); `Unseal()` la libera. `BossRoomTrigger.sealDoors` las atranca al empezar el combate con el jefe (no se puede huir) y las libera al morir el jefe.
 
 Objetos con los que se interactúa con **E**. Código en `Assets/_Project/Scripts/Interaction/`.

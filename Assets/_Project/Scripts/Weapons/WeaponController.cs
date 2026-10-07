@@ -70,6 +70,7 @@ namespace Horror
 
         void Update()
         {
+            if (Equipped == null && (health == null || !health.IsDead)) EnsureWeapon();
             if (GameState.InputBlocked || (health != null && health.IsDead)) return;
             var kb = Keyboard.current;
             var ms = Mouse.current;
@@ -83,8 +84,8 @@ namespace Horror
                 if (!keys[k].wasPressedThisFrame) continue;
                 var item = WeaponHotkeys.Resolve(inventory, k);
                 if (item == null) continue;
-                if (Equipped == item.weapon) { Equip(null); Hud.Message(item.displayName + " guardada"); }
-                else { Equip(item.weapon); Hud.Message(item.displayName + " equipada"); }
+                if (Equipped == item.weapon) continue;                       // siempre se lleva un arma: no se guarda
+                Equip(item.weapon); Hud.Message(item.displayName + " equipada");
             }
             if (Equipped == null) return;
 
@@ -125,6 +126,15 @@ namespace Horror
             int needed = weapon.magazineSize - mags[weapon];
             mags[weapon] += inventory.ConsumeAmmo(weapon.ammoType, needed);
             Reloading = false;
+        }
+
+        /// <summary>Siempre se lleva un arma en la mano: si no hay ninguna equipada, se equipa la de la tecla 1-4 (o la primera del inventario).</summary>
+        void EnsureWeapon()
+        {
+            ItemData pick = null;
+            for (int k = 0; k < WeaponHotkeys.Count && pick == null; k++) pick = WeaponHotkeys.Resolve(inventory, k);
+            if (pick == null) foreach (var s in inventory.slots) if (!s.IsEmpty && s.item.type == ItemType.Weapon && s.item.weapon != null) { pick = s.item; break; }
+            if (pick != null && pick.weapon != null) Equip(pick.weapon);
         }
 
         // bombeo de la escopeta: suena un momento despues del disparo si sigues con esa arma y no has empezado a recargar

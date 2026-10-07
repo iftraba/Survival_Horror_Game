@@ -28,8 +28,11 @@ namespace Horror
         }
 
         // Start y no Awake: asi funciona aunque Health se anada despues de este componente
+        WeaponController weapons;
+
         void Start()
         {
+            weapons = GetComponent<WeaponController>();
             health = GetComponent<Health>();
             if (health != null) health.Died += OnDied;
         }
@@ -61,7 +64,7 @@ namespace Horror
             {
                 input.x = (kb.dKey.isPressed ? 1f : 0f) - (kb.aKey.isPressed ? 1f : 0f);
                 input.y = (kb.wKey.isPressed ? 1f : 0f) - (kb.sKey.isPressed ? 1f : 0f);
-                IsAiming = ms.rightButton.isPressed;
+                IsAiming = ms.rightButton.isPressed && (weapons == null || weapons.Equipped != null);   // sin arma no se apunta
                 // Se puede correr en cualquier direccion (atras y de lado incluidos), no solo hacia delante
                 IsRunning = kb.leftShiftKey.isPressed && !IsAiming && input.sqrMagnitude > 0.01f;
             }

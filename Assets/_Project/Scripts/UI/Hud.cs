@@ -338,7 +338,7 @@ namespace Horror
 
         string ActionFor(ItemData item)
         {
-            if (item.type == ItemType.Weapon) return weapons != null && weapons.Equipped == item.weapon ? "Desequipar" : "Equipar";
+            if (item.type == ItemType.Weapon) return weapons != null && weapons.Equipped == item.weapon ? null : "Equipar";   // siempre se lleva un arma: no se desequipa
             if (item.type == ItemType.Healing) return "Usar";
             return null;
         }
@@ -347,12 +347,8 @@ namespace Horror
         {
             if (index < 0 || index >= inventory.slots.Length || inventory.slots[index].IsEmpty) return;
             var item = inventory.slots[index].item;
-            if (item.type == ItemType.Weapon && weapons != null && weapons.Equipped == item.weapon)
-            {
-                weapons.Equip(null);
-                Message($"{item.displayName} guardada");
-            }
-            else inventory.Use(index);
+            if (item.type == ItemType.Weapon && weapons != null && weapons.Equipped == item.weapon) return;   // ya en la mano
+            inventory.Use(index);
         }
 
         // InventoryKeys y DrawInventory (menu contextual, examinar, arrastrar) viven en HudInventory.cs

@@ -188,7 +188,7 @@ namespace Horror
             if (index < 0 || index >= slots.Length || slots[index].IsEmpty) return;
             var s = slots[index];
             var wc = GetComponent<WeaponController>();
-            if (s.item.type == ItemType.Weapon && wc != null && wc.Equipped == s.item.weapon) wc.Equip(null);
+            if (s.item.type == ItemType.Weapon && wc != null && wc.Equipped == s.item.weapon) { Hud.Message("Equipa otra arma antes de tirar la que llevas"); return; }
             slots[index] = default;
             Changed?.Invoke();
             Pickup.Spawn(s.item, s.count, transform.position + transform.forward * 0.9f + Vector3.up * 0.4f,

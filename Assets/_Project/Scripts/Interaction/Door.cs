@@ -63,7 +63,8 @@ namespace Horror
             leafColliders = GetComponentsInChildren<Collider>();
         }
 
-        Quaternion OpenRot() => closedRot * Quaternion.Euler(0f, openAngle * openSign, 0f);
+        float usedAngle = -1f;       // angulo de apertura real (limitado si hay una pared al lado)
+        Quaternion OpenRot() => closedRot * Quaternion.Euler(0f, (usedAngle > 0f ? usedAngle : openAngle) * openSign, 0f);
 
         /// <summary>Elige el sentido de giro para que la hoja se aleje de 'from'.</summary>
         void SwingAwayFrom(Vector3 from)
@@ -73,7 +74,56 @@ namespace Horror
             Vector3 center = LeafCenter();
             float side = Vector3.Dot(from - center, normal);
             // girar +Y desplaza la hoja hacia -normal (con la hoja extendida hacia +X local)
-            openSign = side >= 0f ? 1f : -1f;
+            float preferred = side >= 0f ? 1f : -1f;
+            // se mira cuanto puede abrirse hacia cada lado sin meter la hoja en una pared o un mueble: se elige el lado
+            // preferido si se abre del todo; si no, el que deje mas hueco (y se limita el angulo) para no quedar incrustada
+            float freePref = FreeAngle(preferred), freeOther = FreeAngle(-preferred);
+            float cap = Mathf.Min(openAngle, 90f);      // a mas de 90 grados la hoja se inclina hacia el muro de su lado y se mete en el (los muros gruesos, 11 cm)
+            if (freePref >= cap - 1f || freePref >= freeOther) { openSign = preferred; usedAngle = Mathf.Min(cap, freePref); }
+            else { openSign = -preferred; usedAngle = Mathf.Min(cap, freeOther); }
+            usedAngle = Mathf.Max(usedAngle, 20f);
+        }
+
+        /// <summary>Angulo (0-openAngle) hasta el que la hoja puede girar hacia 'sign' sin chocar con el nivel (paredes, muebles).</summary>
+        float FreeAngle(float sign)
+        {
+            var boxes = new System.Collections.Generic.List<BoxCollider>();
+            foreach (var c in leafColliders) if (c is BoxCollider b) boxes.Add(b);
+            if (boxes.Count == 0) return openAngle;
+            Matrix4x4 hingeWorld = transform.localToWorldMatrix;
+            var toHinge = new Matrix4x4[boxes.Count];
+            for (int i = 0; i < boxes.Count; i++) toHinge[i] = transform.worldToLocalMatrix * boxes[i].transform.localToWorldMatrix;
+            Matrix4x4 parent = transform.parent != null ? transform.parent.localToWorldMatrix : Matrix4x4.identity;
+            float free = 0f, maxA = Mathf.Min(openAngle, 90f);
+            bool clear = true;
+            for (float a = 8f; a <= maxA + 0.01f; a += 8f)
+            {
+                var rot = closedRot * Quaternion.Euler(0f, a * sign, 0f);
+                Matrix4x4 test = parent * Matrix4x4.TRS(transform.localPosition, rot, transform.localScale);
+                bool hit = false;
+                for (int i = 0; i < boxes.Count && !hit; i++)
+                {
+                    var b = boxes[i];
+                    Matrix4x4 w = test * toHinge[i];
+                    Vector3 center = w.MultiplyPoint3x4(b.center);
+                    Vector3 half = Vector3.Scale(b.size, new Vector3(w.GetColumn(0).magnitude, w.GetColumn(1).magnitude, w.GetColumn(2).magnitude)) * 0.5f;
+                    // el volumen de prueba se encoge (grosor al 60 %, ancho al 88 %): si no, la esquina de la bisagra roza el extremo de su propio muro
+                    int thin = half.x <= half.y && half.x <= half.z ? 0 : half.y <= half.z ? 1 : 2;
+                    int wide = thin == 0 ? (half.y <= half.z ? 1 : 2) : thin == 1 ? (half.x <= half.z ? 0 : 2) : (half.x <= half.y ? 0 : 1);
+                    half[thin] *= 0.6f; half[wide] *= 0.88f;
+                    foreach (var o in Physics.OverlapBox(center, half, w.rotation, ~0, QueryTriggerInteraction.Ignore))
+                    {
+                        if (o.transform.IsChildOf(transform) || o.transform.IsChildOf(transform.parent) && o.GetComponentInParent<Door>() != null) continue;   // ella misma y su marco/hoja gemela
+                        if (o is CharacterController || o.attachedRigidbody != null) continue;                                                              // el jugador y objetos sueltos
+                        if (o.GetComponentInParent<ZombieAI>() != null || o.GetComponentInParent<Pickup>() != null) continue;
+                        if (o.GetComponentInParent<Door>() != null) continue;
+                        hit = true; break;
+                    }
+                }
+                if (hit) { clear = false; break; }
+                free = a;
+            }
+            return clear ? maxA : free;
         }
 
         Vector3 LeafCenter()
