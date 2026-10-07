@@ -8,6 +8,9 @@ Cómo entran personajes, animaciones y objetos en el juego.
 - Mixamo: personaje en **T-pose, FBX for Unity**; animaciones **Without Skin, 30 fps, sin reducción de claves** (y **In Place** si existe la casilla). Detalle en `Tools/mixamo/LEEME.md`.
 - Descargas locales en `Tools/mixamo/download/` (ignorado por git); lo importado va a `Assets/_Project/Art/Mixamo/`.
 
+## Personajes de Meshy para Mixamo (2026-10-07)
+Las exportaciones de Meshy (zip con `.fbx` + 4 PNG) tienen ~600.000 caras y Mixamo quiere un único archivo. Flujo: extraer a `Tools/raw_generated/`, `Tools/blender/prepare_for_mixamo.py` (una malla, 1,8 m, solo la textura de color incrustada) y después `Tools/blender/decimate_for_mixamo.py` (Decimate colapso a ~50.000 caras, conserva UV y textura) → FBX único de ~5 MB en `Tools/mixamo/upload/`. Se usan rutas absolutas con Blender. **No uses la opción `tpose`** de `prepare_for_mixamo.py` con estos modelos: estira la camisa y los brazos. Si un personaje no viene en T/A-pose, regenerarlo en Meshy. Tras Mixamo, el personaje descargado va a `Assets/_Project/Art/Mixamo/Characters/` y se monta con un kit (ejemplo: `OficialZombieKit`). Hechos: `Meshy_Oficial.fbx` (T-pose perfecta) y `Meshy_Nuevo1.fbx` (brazos casi pegados al cuerpo; si Mixamo no coloca bien los marcadores, regenerar en pose T).
+
 ## Objetos y armas
 - Opción A: IA generativa 3D (Meshy). Skill del proyecto `pedir-modelo-ia`: redacta el prompt (≤780 caracteres, inglés).
 - Opción B: Blender por script (`Tools/blender/`, Blender 5.2). Skill `modelo-blender`.

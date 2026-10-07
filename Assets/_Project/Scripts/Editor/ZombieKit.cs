@@ -169,7 +169,7 @@ namespace Horror.EditorTools
             return c;
         }
 
-        static AnimatorOverrideController Override(string name, AnimatorController baseCtrl, Dictionary<string, string> map)
+        public static AnimatorOverrideController Override(string name, AnimatorController baseCtrl, Dictionary<string, string> map)
         {
             string path = AnimDir + name + ".overrideController";
             var oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(path);
