@@ -46,6 +46,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Enemies · Los zombis ya **no pegan a través de las paredes** (el golpe exige línea directa) y **solo te detectan si te ven** (línea de visión + cono de 140°, o pegados a ellos sin pared en medio); se quita el "oído" por proximidad que los hacía esperarte en la puerta. Los disparos alertan a través de paredes solo de cerca.
 - 2026-10-08 · Art · **Texturas de todos los objetos recogibles mejoradas en Blender** (`texture_items.py` + `ItemTextureKit`): riñonera, tarjeta y llaves pasan de colores planos a materiales horneados (metal arañado con mugre y bordes gastados, tela tejida, plástico rozado) con normales y metal/suavidad; pistola, escopeta, cajas de munición y spray ganan normales y metal/suavidad, y la escopeta tiene madera con veta en lugar de plástico naranja.
 - 2026-10-08 · Enemies/Art · Bola de ácido del jefe 2 con textura nueva (remolinos, venas brillantes, burbujas con normales), forma de gota en vuelo y estela verde.
 - 2026-10-07 · UI · **Inventario rediseñado estilo RE2** (`HudInventory.cs`): escena visible detrás, objeto 3D sin fondo, nombre/tipo/descripción bajo la rejilla, menú al hacer clic (Equipar/Usar, Examinar, Tirar, Salir) y modo **Examinar** (solo el objeto, centrado, girable con el ratón; rueda para acercar). Texto del HUD siempre blanco y estilos centrados corregidos.

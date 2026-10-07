@@ -220,7 +220,7 @@ namespace Horror
                 }
                 else slow = 0;
 
-                if (!hit && playerHealth != null && Flat(player.position - transform.position).magnitude < 1.8f && Mathf.Abs(player.position.y - transform.position.y) < 2f)
+                if (!hit && playerHealth != null && Flat(player.position - transform.position).magnitude < 1.8f && Mathf.Abs(player.position.y - transform.position.y) < 2f && ai.HasLineTo(player.position + Vector3.up * 0.4f))
                 {
                     hit = true;
                     playerHealth.TakeDamage(chargeDamage, transform.position);

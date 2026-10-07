@@ -18,8 +18,12 @@ namespace Horror
         /// <summary>Suelo de velocidad de persecucion (m/s): ningun enemigo persigue mas lento que esto (lo fija GameFlow).</summary>
         public static float MinSpeed = 0f;
         public float staggerTime = 0.45f;
-        [Tooltip("A esta distancia te oye aunque haya paredes en medio.")]
+        [Tooltip("OBSOLETO (ya no se usa): antes te detectaba a esta distancia aunque hubiera paredes en medio.")]
         public float hearingRange = 4.5f;
+        [Tooltip("Angulo de vision (grados): te ve si estas delante, dentro de este cono, a menos de detectRange y sin paredes en medio")]
+        public float viewAngle = 140f;
+        [Tooltip("Muy cerca te nota aunque estes a su espalda (pero nunca a traves de una pared)")]
+        public float closeSense = 1.8f;
 
         [System.Serializable]
         public struct AttackVariant
@@ -121,7 +125,7 @@ namespace Horror
 
             float dist = Vector3.Distance(transform.position, player.position);
             // Te detecta si te ve (sin paredes en medio) o si estas tan cerca que te oye
-            if (!chasing && (dist <= hearingRange || (dist <= detectRange && Time.time >= nextSightCheck && CanSeePlayer())))
+            if (!chasing && dist <= detectRange && Time.time >= nextSightCheck && CanSeePlayer(dist))
                 StartChase(true);
             else if (chasing && dist > loseRange) chasing = false;
 
@@ -135,7 +139,7 @@ namespace Horror
                 return;
             }
 
-            if (dist <= attackRange)
+            if (dist <= attackRange && HasLineTo(player.position + Vector3.up * 0.4f))
             {
                 if (canNav) agent.isStopped = true;
                 FaceTarget();
@@ -187,13 +191,20 @@ namespace Horror
 
         float nextSightCheck;
 
-        /// <summary>Linea de vision de los ojos al pecho del jugador; solo bloquean el nivel y los muebles.</summary>
-        bool CanSeePlayer()
+        /// <summary>Ojos: algo por encima del centro de la capsula (los jefes, mas altos, a su altura).</summary>
+        Vector3 Eye()
         {
-            nextSightCheck = Time.time + 0.25f;
-            Vector3 eye = transform.position + Vector3.up * 0.6f;
-            Vector3 chest = player.position + Vector3.up * 0.4f;
-            Vector3 d = chest - eye;
+            var cap = GetComponent<CapsuleCollider>();
+            float up = cap != null ? cap.height * 0.3f : 0.6f;
+            return transform.position + Vector3.up * up;
+        }
+
+        /// <summary>Linea directa de los ojos al punto: solo la tapan el nivel, las puertas y los muebles (no otros zombis ni objetos sueltos).</summary>
+        public bool HasLineTo(Vector3 target)
+        {
+            Vector3 eye = Eye();
+            Vector3 d = target - eye;
+            if (d.sqrMagnitude < 0.0001f) return true;
             foreach (var h in Physics.RaycastAll(eye, d.normalized, d.magnitude, ~0, QueryTriggerInteraction.Ignore))
             {
                 if (h.rigidbody != null || h.collider is CharacterController) continue;      // objetos sueltos y el jugador
@@ -201,6 +212,18 @@ namespace Horror
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Te ve si hay linea directa y estas dentro de su cono de vision (o muy cerca, aunque sea a su espalda). Una pared o una
+        /// puerta cerrada lo impiden siempre: los zombis de una sala no reaccionan hasta que entras o abres la puerta.
+        /// </summary>
+        bool CanSeePlayer(float dist)
+        {
+            nextSightCheck = Time.time + 0.2f;
+            Vector3 to = Vector3.ProjectOnPlane(player.position - transform.position, Vector3.up);
+            bool inCone = dist <= closeSense || Vector3.Angle(transform.forward, to) <= viewAngle * 0.5f;
+            return inCone && HasLineTo(player.position + Vector3.up * 0.4f);
         }
 
         /// <summary>Pasa a perseguir. Si 'scream', se queda quieto gritando un momento antes (si le disparan, no).</summary>
@@ -236,18 +259,22 @@ namespace Horror
             if (health.IsDead || playerHealth == null || playerHealth.IsDead || player == null) yield break;
             if (Time.time < staggerUntil && staggerTime > 0f && delay > 0f) yield break;      // un disparo lo interrumpe
             if (Vector3.Distance(transform.position, player.position) > attackRange * 1.35f) yield break;   // esquivado
+            if (!HasLineTo(player.position + Vector3.up * 0.4f)) yield break;                              // una pared o una puerta en medio: no hay golpe
             playerHealth.TakeDamage(damage, transform.position);
         }
 
         /// <summary>Golpea una puerta cerrada que le corta el paso (misma animacion y sonido que el ataque).</summary>
         public void BashDoor() => Attacked?.Invoke();
 
-        /// <summary>Un ruido fuerte (disparo) despierta a los zombis que esten dentro del radio, haya o no paredes.</summary>
+        /// <summary>Un ruido fuerte (disparo) alerta a los zombis del radio que tengan linea directa con el ruido; a traves de paredes
+        /// solo a los que esten muy cerca (35 % del radio).</summary>
         public static void Noise(Vector3 position, float radius)
         {
             foreach (var z in All)
             {
-                if (z == null || z.chasing || Vector3.Distance(z.transform.position, position) > radius) continue;
+                if (z == null || z.chasing) continue;
+                float d = Vector3.Distance(z.transform.position, position);
+                if (d > radius || (d > radius * 0.35f && !z.HasLineTo(position))) continue;
                 if (z.dormant) z.Wake(); else z.StartChase(true);
             }
         }

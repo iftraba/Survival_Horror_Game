@@ -7,6 +7,9 @@ Zombis y jefe. Código en `Assets/_Project/Scripts/Enemies/`. Prefabs en `Prefab
 
 **Zombis sin katana:** se retiran los del Yaku (`Zombie_Yaku` en la escena y `Z2_Yaku_Almacen`); en su sitio `Zombie_Oficial_Hall` (Oficial) y `Z2_Pxl3_Almacen`. El prefab `Zombie_Yaku` sigue existiendo pero no se usa.
 
+## Detección y golpes (2026-10-08)
+Los zombis **solo te detectan si te ven**: línea directa de los ojos a tu pecho (la tapan paredes, puertas cerradas y muebles; no otros zombis ni objetos sueltos) y dentro de su cono de visión (`viewAngle` 140°) a menos de `detectRange`; pegado a ellos (`closeSense` 1,8 m) te notan aunque estés a su espalda, pero nunca a través de una pared. Ya no hay "oído" por proximidad a través de muros (`hearingRange` queda obsoleto): los de una sala no reaccionan hasta que entras o abres la puerta. Un disparo alerta a los del radio (14 m) que tengan línea directa con él y, a través de paredes, solo a los que estén a menos del 35 % del radio. **Golpes**: solo atacan y solo conecta el golpe si hay línea directa contigo (`ZombieAI.HasLineTo`); antes bastaba la distancia y pegaban a través de las paredes. La embestida del jefe 2 también lo comprueba. Probado en Play: tras una pared a 1,8 m no te detecta y, forzado a perseguir 4 s, no hace daño; dentro de la sala, delante de él, te detecta, y a su espalda a 4 m no.
+
 ## Clases
 | Clase | Qué hace |
 |---|---|
