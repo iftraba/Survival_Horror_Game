@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Desk_baked
+    second: {fileID: 2100000, guid: d5e274efc9dc56846a72f0b7668055e7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: desk_dark
     second: {fileID: 2100000, guid: 0c37e0d4141c5eb4d9365fc5531f5b56, type: 2}
   - first:

@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Locker_baked
+    second: {fileID: 2100000, guid: 68b5d6c429ceaef4398096c4cdc21eb4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: locker_body
     second: {fileID: 2100000, guid: e0060914bdfd4e447aadb65009cba872, type: 2}
   - first:

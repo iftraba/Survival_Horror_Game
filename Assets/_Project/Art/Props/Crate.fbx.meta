@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Crate_baked
+    second: {fileID: 2100000, guid: c6903a0125d9e2242b4c0dbcf3820d56, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: crate_dark
     second: {fileID: 2100000, guid: 3ce84226fc535954980ccfdb2064fccc, type: 2}
   - first:

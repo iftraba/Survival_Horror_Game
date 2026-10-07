@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: FilingCabinet_baked
+    second: {fileID: 2100000, guid: 85b0354848d97094a8d6c27a193220a7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: cabinet_body
     second: {fileID: 2100000, guid: 2af1d75ca8aeec34195c9bb4ed31eaa6, type: 2}
   - first:

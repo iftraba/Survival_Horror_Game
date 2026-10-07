@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ namespace Horror.EditorTools
     public static class ItemTextureKit
     {
         const string T = "Assets/_Project/Art/Textures/Items/";
+        const string TP = "Assets/_Project/Art/Textures/Props/";   // muebles
 
         static readonly (string fbx, string name)[] Baked =
         {
@@ -27,6 +29,9 @@ namespace Horror.EditorTools
             ("Assets/_Project/Art/Weapons/KeyGarage.fbx", "KeyGarage"),
         };
 
+        /// <summary>Muebles (mismo metodo: madera con veta, chapa pintada desconchada, oxido, carton, tela).</summary>
+        static readonly string[] Props = { "Desk", "Chair", "Locker", "Shelf", "FilingCabinet", "Cot", "Crate", "Barrel" };
+
         static readonly (string mat, string name, bool baseColor)[] Meshy =
         {
             ("Assets/_Project/Art/Generated/MeshyPistolLow_mat.mat", "Pistol", false),
@@ -36,11 +41,12 @@ namespace Horror.EditorTools
             ("Assets/_Project/Art/Generated/MeshySprayLow_mat.mat", "Spray", false),
         };
 
-        static Texture2D Tex(string file) => AssetDatabase.LoadAssetAtPath<Texture2D>(T + file);
+        static string dir = T;
+        static Texture2D Tex(string file) => AssetDatabase.LoadAssetAtPath<Texture2D>(dir + file);
 
         static void Importers()
         {
-            foreach (var path in Directory.GetFiles(T, "*.png"))
+            foreach (var path in Directory.GetFiles(T, "*.png").Concat(Directory.Exists(TP) ? Directory.GetFiles(TP, "*.png") : new string[0]))
             {
                 var p = path.Replace('\\', '/');
                 var ti = (TextureImporter)AssetImporter.GetAtPath(p);
@@ -81,9 +87,11 @@ namespace Horror.EditorTools
             Importers();
             var log = new List<string>();
             var lit = Shader.Find("Universal Render Pipeline/Lit");
-            foreach (var (fbx, name) in Baked)
+            var all = Baked.Select(b => (b.fbx, b.name, T)).Concat(Props.Select(n => ("Assets/_Project/Art/Props/" + n + ".fbx", n, TP)));
+            foreach (var (fbx, name, folder) in all)
             {
-                string mp = T + name + "_baked.mat";
+                dir = folder;
+                string mp = folder + name + "_baked.mat";
                 var m = AssetDatabase.LoadAssetAtPath<Material>(mp);
                 if (m == null) { m = new Material(lit); AssetDatabase.CreateAsset(m, mp); }
                 m.shader = lit;
@@ -96,6 +104,7 @@ namespace Horror.EditorTools
                 imp.SaveAndReimport();
                 log.Add(name);
             }
+            dir = T;
             foreach (var (mat, name, bc) in Meshy)
             {
                 var m = AssetDatabase.LoadAssetAtPath<Material>(mat);

@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Barrel_baked
+    second: {fileID: 2100000, guid: 0f1f36902d315fd4ca798bff31bf84d0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: barrel_body
     second: {fileID: 2100000, guid: 1df26040ddd553c4788be5085db1895d, type: 2}
   - first:

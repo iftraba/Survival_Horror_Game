@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Shelf_baked
+    second: {fileID: 2100000, guid: 035d9e355feaba84bb23511a6c78a06b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: shelf_board
     second: {fileID: 2100000, guid: bf5fd2bfc1800e844b94c1e9fd7aaf0e, type: 2}
   - first:

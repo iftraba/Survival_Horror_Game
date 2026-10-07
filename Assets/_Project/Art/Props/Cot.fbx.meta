@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Cot_baked
+    second: {fileID: 2100000, guid: 037571f5efde5644ea548d9a3b1848ba, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: cot_blanket
     second: {fileID: 2100000, guid: 2f8ba169f33a9ab4c8beb28c515c5e3a, type: 2}
   - first:

@@ -138,9 +138,17 @@ class G:
 
 def kind_of(name):
     n = name.lower()
-    if any(k in n for k in ("brass", "gold", "steel", "metal", "chip")):
+    if any(k in n for k in ("wood", "board")):
+        return "wood"
+    if "cardboard" in n:
+        return "cardboard"
+    if any(k in n for k in ("rust", "iron")):
+        return "rust"
+    if "body" in n:                                   # taquilla, archivador, bidon: chapa pintada
+        return "painted"
+    if any(k in n for k in ("brass", "gold", "steel", "metal", "chip", "handle", "can", "frame")):
         return "metal"
-    if any(k in n for k in ("nylon", "webbing", "seam")):
+    if any(k in n for k in ("nylon", "webbing", "seam", "mattress", "blanket", "pillow")):
         return "fabric"
     return "plastic"
 
@@ -159,7 +167,70 @@ def build_material(mat, base_rgb, base_rough, name):
     edge = g.math("MULTIPLY", g.math("SUBTRACT", g.pointiness(), 0.52), 6.0, clamp=True)             # bordes vivos
     n1 = g.noise(55.0, 6.0, 0.6)                                                                       # manchas
     n2 = g.noise(9.0, 3.0, 0.5)                                                                        # variacion grande
-    if kind == "metal":
+    if kind == "wood":
+        # veta: lineas a lo largo de la tabla. En las caras horizontales y laterales, bandas segun Y; en las caras cuya normal
+        # es Y, segun Z (si no, esas caras saldrian lisas). Poca distorsion: con mucha sale un moteado tipo corcho.
+        tc = g.node("ShaderNodeTexCoord")
+        sepn = g.node("ShaderNodeSeparateXYZ")
+        g.link(tc.outputs["Normal"], sepn.inputs["Vector"])
+        ny = g.math("ABSOLUTE", sepn.outputs["Y"])
+        gv = g.coords((0.35, 1.0, 1.0))
+        gy = g.wave(14.0, "Y", 5.0, gv)
+        gz = g.wave(14.0, "Z", 5.0, gv)
+        grain = g.math("ADD", gy, g.math("MULTIPLY", g.math("SUBTRACT", gz, gy), ny))
+        fy = g.wave(70.0, "Y", 1.2, gv)
+        fz = g.wave(70.0, "Z", 1.2, gv)
+        fine = g.math("ADD", fy, g.math("MULTIPLY", g.math("SUBTRACT", fz, fy), ny))
+        col = g.lerp(g.vmath("SCALE", base, scale=0.66), g.vmath("SCALE", base, scale=1.1), grain)
+        col = g.vmath("SCALE", col, scale=g.math("ADD", 0.9, g.math("MULTIPLY", fine, 0.14)))
+        col = g.vmath("SCALE", col, scale=g.math("ADD", 0.92, g.math("MULTIPLY", n2, 0.16)))   # tablas algo distintas entre si
+        streaks = g.noise(1.0, 4.0, 0.6, g.coords((1.2, 22.0, 22.0)))                          # vetas alargadas de tono distinto
+        col = g.vmath("SCALE", col, scale=g.math("ADD", 0.78, g.math("MULTIPLY", streaks, 0.4)))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.38), g.math("MULTIPLY", grime, 0.65))
+        col = g.lerp(col, g.vmath("ADD", g.vmath("SCALE", base, scale=0.9), (0.1, 0.08, 0.05)), g.math("MULTIPLY", edge, 0.55))   # barniz gastado
+        rough = g.math("ADD", 0.45, g.math("MULTIPLY", n2, 0.15))
+        rough = g.math("ADD", rough, g.math("MULTIPLY", edge, 0.3))
+        rough = g.math("ADD", rough, g.math("MULTIPLY", grime, 0.2))
+        metal = g.val(0.0)
+        height = g.math("ADD", g.math("MULTIPLY", grain, 0.4), g.math("MULTIPLY", fine, 0.3))
+        bump_strength = 0.18
+    elif kind == "painted":
+        # chapa pintada: desconchones en los bordes que dejan ver el metal, oxido en huecos y chorretones verticales
+        chips_n = g.noise(26.0, 6.0, 0.7)
+        chips = g.math("GREATER_THAN", g.math("ADD", g.math("MULTIPLY", edge, 0.55), g.math("MULTIPLY", chips_n, 0.75)), 0.78)
+        streak_v = g.coords((14.0, 14.0, 1.2))                                                       # alargado en vertical
+        streak = g.math("GREATER_THAN", g.noise(1.0, 3.0, 0.5, streak_v), 0.6)
+        rust_mask = g.math("MINIMUM", g.math("ADD", g.math("MULTIPLY", grime, 0.9), g.math("MULTIPLY", streak, 0.45)), 1.0)
+        paint = g.vmath("SCALE", base, scale=g.math("ADD", 0.86, g.math("MULTIPLY", n1, 0.22)))
+        rust_col = g.lerp(g.color_const((0.25, 0.1, 0.04)), g.color_const((0.45, 0.2, 0.07)), n1)
+        col = g.lerp(paint, rust_col, g.math("MULTIPLY", rust_mask, 0.75))
+        col = g.lerp(col, g.color_const((0.5, 0.5, 0.52)), chips)                                   # metal desnudo
+        rough = g.math("ADD", 0.48, g.math("MULTIPLY", n2, 0.15))
+        rough = g.math("ADD", rough, g.math("MULTIPLY", rust_mask, 0.35))
+        rough = g.math("SUBTRACT", rough, g.math("MULTIPLY", chips, 0.2), clamp=True)
+        metal = g.math("MULTIPLY", chips, 0.9)
+        height = g.math("ADD", g.math("MULTIPLY", chips, -0.5), g.math("MULTIPLY", n1, 0.2))
+        bump_strength = 0.2
+    elif kind == "rust":
+        r1 = g.noise(18.0, 8.0, 0.65)
+        col = g.lerp(g.color_const((0.18, 0.08, 0.04)), g.color_const((0.5, 0.24, 0.08)), r1)
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.8), g.math("MULTIPLY", n2, 0.4))          # restos del color original
+        col = g.lerp(col, g.color_const((0.1, 0.06, 0.04)), g.math("MULTIPLY", grime, 0.6))
+        rough = g.math("ADD", 0.78, g.math("MULTIPLY", r1, 0.15))
+        metal = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, r1), 0.35)
+        height = g.math("MULTIPLY", g.noise(90.0, 6.0, 0.7), 0.7)
+        bump_strength = 0.35
+    elif kind == "cardboard":
+        fib = g.noise(260.0, 3.0, 0.5)
+        stain = g.math("GREATER_THAN", g.noise(4.0, 2.0, 0.5), 0.7)
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.93, g.math("MULTIPLY", fib, 0.1)))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.75), g.math("MULTIPLY", stain, 0.3))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.45), g.math("MULTIPLY", grime, 0.6))
+        rough = g.math("ADD", 0.86, g.math("MULTIPLY", fib, 0.1))
+        metal = g.val(0.0)
+        height = g.math("MULTIPLY", fib, 0.4)
+        bump_strength = 0.15
+    elif kind == "metal":
         if any(k in name.lower() for k in ("brass", "gold", "chip")):
             base = g.vmath("MULTIPLY", base, base)                                                        # laton/oro: mas saturado y profundo
         scratch_v = g.coords((260.0, 260.0, 14.0))                                                     # arañazos alargados
@@ -177,7 +248,8 @@ def build_material(mat, base_rgb, base_rough, name):
         bump_strength = 0.18
     elif kind == "fabric":
         vec = g.coords((1, 1, 1))
-        weave = g.math("MULTIPLY", g.wave(380.0, "X", 0.6, vec), g.wave(380.0, "Y", 0.6, vec))
+        ws = 140.0 if any(k in name.lower() for k in ("blanket", "mattress", "pillow")) else 380.0
+        weave = g.math("MULTIPLY", g.wave(ws, "X", 0.6, vec), g.wave(ws, "Y", 0.6, vec))
         col = g.vmath("SCALE", base, scale=g.math("ADD", 0.72, g.math("MULTIPLY", weave, 0.45)))
         col = g.vmath("SCALE", col, scale=g.math("ADD", 0.85, g.math("MULTIPLY", n2, 0.3)))
         col = g.lerp(col, g.vmath("SCALE", base, scale=0.4), g.math("MULTIPLY", grime, 0.6))

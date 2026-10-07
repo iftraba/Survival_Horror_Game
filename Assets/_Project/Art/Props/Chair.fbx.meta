@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Chair_baked
+    second: {fileID: 2100000, guid: f1487a21d3fd5bd429b771ae8e23384d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: chair_metal
     second: {fileID: 2100000, guid: 9475f9c179bf28943bb782bb1aa3c2de, type: 2}
   - first:
