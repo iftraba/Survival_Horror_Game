@@ -12,6 +12,7 @@ namespace Horror
     {
         public Material puddleMaterial;
         [Tooltip("Material de la bola de acido que escupe el jefe")] public Material spitMaterial;
+        [Tooltip("Material de la estela de la bola de acido")] public Material spitTrailMaterial;
         [Tooltip("Cada cuantos metros recorridos deja un charco")] public float spacing = 1.4f;
         public float radius = 0.85f;
         [Tooltip("Segundos que dura un charco")] public float lifetime = 9f;

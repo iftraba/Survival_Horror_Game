@@ -15,6 +15,7 @@ namespace Horror.EditorTools
         const string Dir = "Assets/_Project/Materials/";
         public const string PuddleMatPath = Dir + "ToxicPuddle.mat";
         public const string GlobMatPath = Dir + "ToxicGlob.mat";
+        public const string SpitTrailMatPath = Dir + "AcidSpitTrail.mat";
         public const string RingMatPath = Dir + "DangerRing.mat";
 
         [MenuItem("Horror/Texturas de acido")]
@@ -79,23 +80,61 @@ namespace Horror.EditorTools
             return tex;
         }
 
-        static Texture2D BuildGlob()
+        // Bola de acido v2 (512, se repite en horizontal para la esfera): fondo verde toxico profundo con remolinos (ruido deformado),
+        // venas brillantes amarillo-lima, burbujas con borde claro y centro oscuro, y motas. Devuelve color, emision (solo lo que
+        // brilla: venas y burbujas) y altura (para el mapa de normales).
+        static void BuildGlob(out Texture2D color, out Texture2D emission, out Texture2D normal)
         {
-            const int N = 256;
-            var tex = new Texture2D(N, N, TextureFormat.RGB24, false);
+            const int N = 512;
+            color = new Texture2D(N, N, TextureFormat.RGB24, false);
+            emission = new Texture2D(N, N, TextureFormat.RGB24, false);
+            var height = new float[N, N];
+            var rnd = new System.Random(5);
+            int nb = 70;
+            var bx = new float[nb]; var by = new float[nb]; var br = new float[nb];
+            for (int i = 0; i < nb; i++) { bx[i] = (float)rnd.NextDouble(); by[i] = 0.08f + (float)rnd.NextDouble() * 0.84f; br[i] = 0.008f + (float)rnd.NextDouble() * 0.028f; }
             for (int py = 0; py < N; py++)
                 for (int px = 0; px < N; px++)
                 {
-                    float u = px / (float)N * 4f, v = py / (float)N * 4f;
-                    float n = Fbm(u, v, 11f);
-                    float vein = 1f - Mathf.Abs(Fbm(u * 1.5f, v * 1.5f, 29f) * 2f - 1f);        // venas finas
-                    vein = Mathf.Pow(vein, 4f);
-                    Color col = Color.Lerp(new Color(0.06f, 0.32f, 0.05f), new Color(0.35f, 0.85f, 0.12f), Mathf.Clamp01(n * 1.6f - 0.2f));
-                    col = Color.Lerp(col, new Color(0.8f, 1f, 0.45f), vein * 0.8f);
-                    tex.SetPixel(px, py, col);
+                    float u = px / (float)N, v = py / (float)N;
+                    // ruido periodico en u (el angulo de la esfera): se muestrea sobre un circulo para que no haya costura
+                    float ang = u * Mathf.PI * 2f;
+                    float cx = Mathf.Cos(ang) * 1.6f, cy = Mathf.Sin(ang) * 1.6f;
+                    float warp = Fbm(cx + 3f, cy + v * 4f, 41f);
+                    float n = Fbm(cx * 1.3f + warp * 1.8f, cy * 1.3f + v * 5f + warp, 11f);
+                    float vein = 1f - Mathf.Abs(Fbm(cx * 2.2f + warp * 2.5f, cy * 2.2f + v * 7f, 29f) * 2f - 1f);
+                    vein = Mathf.Pow(Mathf.Clamp01(vein), 6f);
+                    Color col = Color.Lerp(new Color(0.03f, 0.18f, 0.03f), new Color(0.22f, 0.62f, 0.07f), Smooth(0.25f, 0.75f, n));
+                    col = Color.Lerp(col, new Color(0.75f, 1f, 0.25f), vein * 0.9f);
+                    float glow = vein * 0.9f, h = n * 0.5f + vein * 0.3f;
+                    for (int i = 0; i < nb; i++)                                               // burbujas
+                    {
+                        float du = Mathf.Abs(u - bx[i]); du = Mathf.Min(du, 1f - du);              // repite en u
+                        float d = Mathf.Sqrt(du * du * 4f + (v - by[i]) * (v - by[i]));            // u ocupa el doble (esfera)
+                        if (d > br[i]) continue;
+                        float rim = Smooth(br[i] * 0.6f, br[i] * 0.95f, d) * (1f - Smooth(br[i] * 0.95f, br[i], d));
+                        float inside = 1f - Smooth(br[i] * 0.5f, br[i] * 0.8f, d);
+                        col = Color.Lerp(col, new Color(0.02f, 0.12f, 0.02f), inside * 0.55f);
+                        col = Color.Lerp(col, new Color(0.85f, 1f, 0.45f), rim);
+                        glow = Mathf.Max(glow, rim * 0.8f);
+                        h += inside * 0.35f + rim * 0.2f;                                         // las burbujas sobresalen
+                    }
+                    if (rnd.NextDouble() < 0.002) { col = new Color(0.9f, 1f, 0.6f); glow = 1f; } // motas
+                    color.SetPixel(px, py, col);
+                    emission.SetPixel(px, py, new Color(0.55f, 1f, 0.2f) * glow);
+                    height[px, py] = h;
                 }
-            tex.Apply();
-            return tex;
+            color.Apply(); emission.Apply();
+            normal = new Texture2D(N, N, TextureFormat.RGB24, false);
+            for (int py = 0; py < N; py++)
+                for (int px = 0; px < N; px++)
+                {
+                    float hl = height[(px - 1 + N) % N, py], hr = height[(px + 1) % N, py];
+                    float hd = height[px, Mathf.Max(0, py - 1)], hu = height[px, Mathf.Min(N - 1, py + 1)];
+                    var nrm = new Vector3((hl - hr) * 6f, (hd - hu) * 6f, 1f).normalized;
+                    normal.SetPixel(px, py, new Color(nrm.x * 0.5f + 0.5f, nrm.y * 0.5f + 0.5f, nrm.z * 0.5f + 0.5f));
+                }
+            normal.Apply();
         }
 
         // circulo de aviso de los ataques en area (v2): halo exterior, aro grueso naranja con nucleo brillante, 24 muescas hacia dentro,
@@ -148,7 +187,14 @@ namespace Horror.EditorTools
         {
             Directory.CreateDirectory(Dir);
             var puddleTex = Save("ToxicPuddle_tex", BuildPuddle());
-            var globTex = Save("ToxicGlob_tex", BuildGlob());
+            BuildGlob(out var gColor, out var gEmis, out var gNorm);
+            var globTex = Save("ToxicGlob_tex", gColor);
+            var globEmis = Save("ToxicGlob_emis", gEmis);
+            var globNorm = Save("ToxicGlob_normal", gNorm);
+            var nimp = (TextureImporter)AssetImporter.GetAtPath(Dir + "ToxicGlob_normal.png");
+            nimp.textureType = TextureImporterType.NormalMap; nimp.wrapModeU = TextureWrapMode.Repeat; nimp.SaveAndReimport();
+            foreach (var nm in new[] { "ToxicGlob_tex", "ToxicGlob_emis" }) { var ti = (TextureImporter)AssetImporter.GetAtPath(Dir + nm + ".png"); ti.wrapModeU = TextureWrapMode.Repeat; ti.SaveAndReimport(); }
+            globNorm = AssetDatabase.LoadAssetAtPath<Texture2D>(Dir + "ToxicGlob_normal.png");
             var lit = Shader.Find("Universal Render Pipeline/Lit");
 
             var puddle = AssetDatabase.LoadAssetAtPath<Material>(PuddleMatPath);
@@ -177,11 +223,24 @@ namespace Horror.EditorTools
             if (glob == null) { glob = new Material(lit); AssetDatabase.CreateAsset(glob, GlobMatPath); }
             glob.shader = lit;
             glob.SetTexture("_BaseMap", globTex);
-            glob.SetTexture("_EmissionMap", globTex);
+            glob.SetTexture("_EmissionMap", globEmis);
+            glob.SetTexture("_BumpMap", globNorm); glob.EnableKeyword("_NORMALMAP"); glob.SetFloat("_BumpScale", 1.2f);
             glob.SetColor("_BaseColor", Color.white);
-            glob.SetColor("_EmissionColor", new Color(0.9f, 0.9f, 0.9f));
+            glob.SetColor("_EmissionColor", new Color(1.6f, 1.6f, 1.6f));   // solo brillan venas y burbujas (mapa de emision)
             glob.EnableKeyword("_EMISSION");
-            glob.SetFloat("_Smoothness", 0.9f);
+            glob.SetFloat("_Smoothness", 0.93f);   // humeda
+
+            // estela de la bola: particulas sin luz, transparente, el color lo pone el degradado del TrailRenderer
+            var unlit = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            var tm = AssetDatabase.LoadAssetAtPath<Material>(SpitTrailMatPath);
+            if (tm == null) { tm = new Material(unlit); AssetDatabase.CreateAsset(tm, SpitTrailMatPath); }
+            tm.shader = unlit;
+            tm.SetColor("_BaseColor", Color.white);
+            tm.SetFloat("_Surface", 1f); tm.SetFloat("_Blend", 0f);
+            tm.SetFloat("_SrcBlend", 5f); tm.SetFloat("_DstBlend", 10f); tm.SetFloat("_ZWrite", 0f);
+            tm.SetOverrideTag("RenderType", "Transparent"); tm.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            tm.renderQueue = 3000;
+            EditorUtility.SetDirty(tm);
             EditorUtility.SetDirty(glob);
             var ringTex = Save("DangerRing_tex", BuildRing());
             var rm = AssetDatabase.LoadAssetAtPath<Material>(RingMatPath);

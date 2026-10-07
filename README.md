@@ -46,6 +46,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Enemies/Art · Bola de ácido del jefe 2 con textura nueva (remolinos, venas brillantes, burbujas con normales), forma de gota en vuelo y estela verde.
 - 2026-10-07 · UI · **Inventario rediseñado estilo RE2** (`HudInventory.cs`): escena visible detrás, objeto 3D sin fondo, nombre/tipo/descripción bajo la rejilla, menú al hacer clic (Equipar/Usar, Examinar, Tirar, Salir) y modo **Examinar** (solo el objeto, centrado, girable con el ratón; rueda para acercar). Texto del HUD siempre blanco y estilos centrados corregidos.
 - 2026-10-07 · UI/Weapons/Player · **Inventario reordenable arrastrando** (`Inventory.Move`), **atajos de arma 1-4** asignables desde el inventario (`WeaponHotkeys`) y **giro rápido de 180° con Q**. Jefe 2: los proyectiles se detienen en lo primero que tocan (antes el barrido no estaba ordenado y podían alcanzarte a través de una máquina), el charco solo queda si cae al suelo, la lluvia de ácido exige línea de visión y sus círculos siguen al jugador y se fijan 0,35 s antes (más aviso, textura nueva con aro, muescas, franjas y gota), y la sala de calderas tiene más munición y 2 curas más.
 - 2026-10-07 · Level · **Primera arena reescrita** (a petición, tras probar el zigzag): recinto recto con islas de estanterías industriales entre las que el jefe y tú os cruzáis y rodeáis; adiós a los carriles de 3,5 m. Sin huecos inalcanzables para el jefe (`ArenaAudit`).

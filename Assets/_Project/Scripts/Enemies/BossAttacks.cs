@@ -275,6 +275,18 @@ namespace Horror
                 go.transform.position = from;
                 go.transform.localScale = Vector3.one * 0.4f;
                 if (trail != null && trail.spitMaterial != null) { var rr = go.GetComponent<Renderer>(); rr.sharedMaterial = trail.spitMaterial; rr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; }
+                if (trail != null && trail.spitTrailMaterial != null)                      // estela verde que se desvanece
+                {
+                    var tr = go.AddComponent<TrailRenderer>();
+                    tr.sharedMaterial = trail.spitTrailMaterial;
+                    tr.time = 0.22f; tr.minVertexDistance = 0.04f;
+                    tr.widthCurve = new AnimationCurve(new Keyframe(0f, 0.34f), new Keyframe(1f, 0f));
+                    var g = new Gradient();
+                    g.SetKeys(new[] { new GradientColorKey(new Color(0.75f, 1f, 0.3f), 0f), new GradientColorKey(new Color(0.15f, 0.6f, 0.05f), 1f) },
+                              new[] { new GradientAlphaKey(0.85f, 0f), new GradientAlphaKey(0f, 1f) });
+                    tr.colorGradient = g;
+                    tr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; tr.receiveShadows = false;
+                }
                 if (n <= 5)   // con muchas bolas no se pone luz a cada una (coste)
                 {
                     var glow = new GameObject("Glow").AddComponent<Light>();
@@ -435,7 +447,7 @@ namespace Horror
         public float damage = 12f;
         public ToxicTrail trail;
         public Transform owner;
-        float life;
+        float life, baseScale;
         const float Radius = 0.18f;
 
         bool Ignored(Collider c)
@@ -465,7 +477,11 @@ namespace Horror
             }
             if (life > 4f) { Destroy(gameObject); return; }
             transform.position = p + step;
-            transform.Rotate(180f * dt, 260f * dt, 0f);   // gira: se nota la textura veteada
+            // gota en vuelo: alargada en la direccion de avance, gira sobre ese eje y "late" un poco (liquido)
+            if (baseScale <= 0f) baseScale = transform.localScale.x;
+            float w = Mathf.Sin(life * 26f) * 0.08f;
+            transform.rotation = Quaternion.LookRotation(velocity.sqrMagnitude > 0.01f ? velocity : Vector3.forward) * Quaternion.Euler(0f, 0f, life * 420f);
+            transform.localScale = new Vector3(baseScale * (0.88f + w), baseScale * (0.88f - w), baseScale * 1.35f);
         }
 
         void Impact(Collider c, Vector3 point, Vector3 normal)

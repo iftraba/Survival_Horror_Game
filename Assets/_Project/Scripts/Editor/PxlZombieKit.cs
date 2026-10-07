@@ -114,6 +114,7 @@ namespace Horror.EditorTools
             var trail = root.GetComponent<ToxicTrail>() ?? root.AddComponent<ToxicTrail>();
             trail.puddleMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.PuddleMatPath);
             trail.spitMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.GlobMatPath);
+            trail.spitTrailMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.SpitTrailMatPath);
             var voice = root.GetComponent<ZombieAudio>(); if (voice != null) voice.volumeScale = 0.7f;   // voz del jefe 2 un 30 % mas baja
             var atk = root.GetComponent<BossAttacks>() ?? root.AddComponent<BossAttacks>();
             const string snd = "Assets/_Project/Audio/Generated/";

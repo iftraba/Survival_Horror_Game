@@ -16,8 +16,8 @@ GameObject:
   - component: {fileID: 1263610271914112402}
   - component: {fileID: 496292858899723512}
   - component: {fileID: 2260927094808055405}
-  - component: {fileID: 3366589804300449665}
-  - component: {fileID: 4587808351493994489}
+  - component: {fileID: 4142012253840839361}
+  - component: {fileID: 6564758948150768238}
   m_Layer: 0
   m_Name: Zombie_BossPxl
   m_TagString: Untagged
@@ -180,7 +180,7 @@ MonoBehaviour:
   runClipSpeed: 10.073693
   runAbove: 1.8
   maxWalkPlayback: 2.2
---- !u!114 &3366589804300449665
+--- !u!114 &4142012253840839361
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -194,6 +194,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ToxicTrail
   puddleMaterial: {fileID: 2100000, guid: 9377ff0d074eb194e88fb1094fa7fef8, type: 2}
   spitMaterial: {fileID: 2100000, guid: 15ab152c24d1ac742ac3e38f03d3e65b, type: 2}
+  spitTrailMaterial: {fileID: 2100000, guid: 211e6e6a2657d1046a14041447a2ddf8, type: 2}
   spacing: 1.4
   radius: 0.85
   lifetime: 9
@@ -201,7 +202,7 @@ MonoBehaviour:
   tickTime: 0.5
   sizzleSound: {fileID: 8300000, guid: 33456cef78a18da4f944a168db7e5c40, type: 3}
   soundVolume: 0.7
---- !u!114 &4587808351493994489
+--- !u!114 &6564758948150768238
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
