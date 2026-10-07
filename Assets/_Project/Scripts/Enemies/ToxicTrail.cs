@@ -17,6 +17,7 @@ namespace Horror
         [Tooltip("Segundos que dura un charco")] public float lifetime = 9f;
         [Tooltip("Dano por golpe y segundos entre golpes mientras se esta dentro")] public float damage = 6f;
         public float tickTime = 0.5f;
+        [Tooltip("Chisporroteo al pisar un charco")] public AudioClip sizzleSound;
 
         struct Puddle { public Transform t; public float born; }
         readonly List<Puddle> puddles = new List<Puddle>();
@@ -62,6 +63,7 @@ namespace Horror
                 if (d.magnitude > radius * 0.9f || Mathf.Abs(player.position.y - p.t.position.y) > 1.2f) continue;
                 playerHealth.TakeDamage(damage, p.t.position);
                 Hud.Message("Ácido");
+                if (sizzleSound != null) GameAudio.PlayClip(sizzleSound, p.t.position, 0.7f, Random.Range(0.95f, 1.08f), false);
                 nextTick = Time.time + tickTime;
                 break;
             }

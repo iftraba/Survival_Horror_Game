@@ -114,7 +114,12 @@ namespace Horror.EditorTools
             var trail = root.GetComponent<ToxicTrail>() ?? root.AddComponent<ToxicTrail>();
             trail.puddleMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.PuddleMatPath);
             trail.spitMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.GlobMatPath);
-            if (root.GetComponent<BossAttacks>() == null) root.AddComponent<BossAttacks>();
+            var atk = root.GetComponent<BossAttacks>() ?? root.AddComponent<BossAttacks>();
+            const string snd = "Assets/_Project/Audio/Generated/";
+            atk.chargeSound = AssetDatabase.LoadAssetAtPath<AudioClip>(snd + "boss_charge_fal.mp3");
+            atk.crashSound = AssetDatabase.LoadAssetAtPath<AudioClip>(snd + "boss_crash_fal.mp3");
+            atk.spitSound = AssetDatabase.LoadAssetAtPath<AudioClip>(snd + "acid_spit_fal.mp3");
+            trail.sizzleSound = AssetDatabase.LoadAssetAtPath<AudioClip>(snd + "acid_sizzle_fal.mp3");
             PrefabUtility.SaveAsPrefabAsset(root, PrefabDir + "Zombie_BossPxl.prefab");
             PrefabUtility.UnloadPrefabContents(root);
             AssetDatabase.SaveAssets();

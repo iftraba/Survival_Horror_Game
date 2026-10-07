@@ -11,6 +11,10 @@ namespace Horror
         [Tooltip("Volumen del disparo. Mas de 1 suma una segunda fuente de audio (un AudioSource no pasa de 1)")]
         [Range(0.1f, 3f)] public float fireVolume = 1f;
         public AudioClip reloadSound;
+        [Tooltip("Sonido que suena tras cada disparo (el bombeo de la escopeta). Vacio = ninguno")]
+        public AudioClip cycleSound;
+        [Tooltip("Segundos tras el disparo a los que suena el ciclo")] public float cycleDelay = 0.45f;
+        [Range(0.1f, 2f)] public float cycleVolume = 0.6f;
         [Tooltip("Escala del modelo en la mano (los personajes son bloques grandes, el arma se agranda para equilibrar)")]
         public float heldScale = 1f;
         public AmmoType ammoType = AmmoType.Handgun;

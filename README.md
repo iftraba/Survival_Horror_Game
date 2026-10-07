@@ -46,6 +46,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-07 · Audio · Bombeo de la escopeta tras cada disparo (`WeaponData.cycleSound`, `shotgun_pump_fal`); 4 sonidos nuevos de fal.ai para el jefe 2 (`boss_charge`, `boss_crash`, `acid_spit`, `acid_sizzle`) cableados en `BossAttacks`/`ToxicTrail`; el bucle del latido se recorta a dos ciclos exactos (`heartbeat_fal_loop.wav`, 3,32 s; el original de 4,08 s metía un latido de más al repetirse).
 - 2026-10-07 · Enemies/Audio · ABOMINACIÓN baja a 1800 de vida (antes 2600) y la música de fondo a 0,6 (antes 0,84) a petición del usuario; sus zonas de impacto pasan a torso ×0,65 y extremidades ×0,3 (antes 0,4 y 0,2) para igualar el esfuerzo de munición con el jefe 1.
 - 2026-10-07 · Art/Enemies · Texturas del ácido del segundo jefe (`ToxicTextures`): charco con borde irregular y burbujas, y bola de escupitajo veteada y emisiva con luz verde.
 - 2026-10-06 · Enemies · **Ataques del segundo jefe** (`BossAttacks`): embestida en línea recta (se estrella contra columnas/caldera y queda aturdido con ×1,8 de daño recibido), escupitajo de ácido (3 a la vez en la última fase) y fases al 66 % y 33 % de vida. `ZombieAI.Suspended`, `Health.damageTakenMultiplier` y `ZombieAnimation.speedOverride` son los ganchos nuevos.

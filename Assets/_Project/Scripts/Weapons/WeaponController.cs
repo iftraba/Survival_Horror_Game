@@ -114,6 +114,14 @@ namespace Horror
             Reloading = false;
         }
 
+        // bombeo de la escopeta: suena un momento despues del disparo si sigues con esa arma y no has empezado a recargar
+        IEnumerator CycleRoutine(WeaponData weapon)
+        {
+            yield return new WaitForSeconds(weapon.cycleDelay);
+            if (Equipped == weapon && !Reloading && mags[weapon] > 0)
+                GameAudio.PlayClip(weapon.cycleSound, transform.position, weapon.cycleVolume, 1f, false);
+        }
+
         void Fire()
         {
             nextShot = Time.time + 1f / Equipped.fireRate;
@@ -121,6 +129,7 @@ namespace Horror
             Fired?.Invoke();
             GameAudio.PlayClip(Equipped.fireSound, transform.position, Equipped.fireVolume, Random.Range(0.96f, 1.04f), false);
             ZombieAI.Noise(transform.position, 14f);
+            if (Equipped.cycleSound != null) StartCoroutine(CycleRoutine(Equipped));
 
             for (int p = 0; p < Equipped.pellets; p++)
             {

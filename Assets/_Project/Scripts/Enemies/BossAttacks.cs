@@ -28,6 +28,9 @@ namespace Horror
         public float spitSpeed = 12f;
         public float spitWindup = 0.6f;
 
+        [Header("Sonidos (vacio = los genericos del jefe)")]
+        public AudioClip chargeSound, crashSound, spitSound;
+
         [Header("Ritmo")]
         [Tooltip("Pausa entre ataques especiales (segundos, min-max)")] public Vector2 pause = new Vector2(3.5f, 6f);
 
@@ -154,7 +157,8 @@ namespace Horror
         {
             ai.Suspended = true;
             Tell(true);
-            GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1.1f, false);
+            if (chargeSound != null) GameAudio.PlayClip(chargeSound, transform.position, 1f, 1f, false);
+            else GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1.1f, false);
             yield return Face(chargeWindup * speedScale);
             Tell(false);
 
@@ -186,7 +190,8 @@ namespace Horror
             if (anim != null) anim.speedOverride = -1f;
             if (blocked && !health.IsDead)
             {
-                GameAudio.Play(Sfx.BossStep, transform.position, 1f, 0.6f, false);
+                if (crashSound != null) GameAudio.PlayClip(crashSound, transform.position, 1f, 1f, false);
+                else GameAudio.Play(Sfx.BossStep, transform.position, 1f, 0.6f, false);
                 Hud.Message("¡Se ha estrellado!");
                 health.damageTakenMultiplier = stunDamageMultiplier;
                 yield return new WaitForSeconds(stunTime);
@@ -200,7 +205,8 @@ namespace Horror
         {
             ai.Suspended = true;
             Tell(true);
-            GameAudio.Play(Sfx.ZombieAttack, transform.position, 1f, 0.6f, true);
+            if (spitSound != null) GameAudio.PlayClip(spitSound, transform.position, 0.9f, 1f, true);
+            else GameAudio.Play(Sfx.ZombieAttack, transform.position, 1f, 0.6f, true);
             yield return Face(spitWindup * speedScale);
             Tell(false);
             if (!health.IsDead && player != null)
