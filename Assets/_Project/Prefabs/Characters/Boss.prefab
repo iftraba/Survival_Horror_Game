@@ -116,6 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Health
   maxHealth: 1410
+  damageTakenMultiplier: 1
 --- !u!114 &1759990035966691341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,7 +150,7 @@ MonoBehaviour:
     cooldown: 2.15
   dormant: 1
   dropOnDeath: {fileID: 11400000, guid: 904b17372510e394d96479ad688098f0, type: 2}
-  bossName: EL COLOSO
+  bossName: COLOSSUS
   alertTime: 2.6
 --- !u!114 &2592790034221166130
 MonoBehaviour:

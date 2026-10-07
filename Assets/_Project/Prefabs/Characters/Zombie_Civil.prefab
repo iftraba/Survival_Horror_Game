@@ -115,7 +115,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99548ff9749f20a4ba621de27f5a5d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Health
-  maxHealth: 100
+  maxHealth: 220
+  damageTakenMultiplier: 1
 --- !u!114 &4547109340905734716
 MonoBehaviour:
   m_ObjectHideFlags: 0

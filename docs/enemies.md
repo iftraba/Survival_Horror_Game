@@ -2,9 +2,15 @@
 
 Zombis y jefe. Código en `Assets/_Project/Scripts/Enemies/`. Prefabs en `Prefabs/Characters/`: `Zombie_Civil`, `Zombie_Girl`, `Zombie_Cop`, `Zombie_Yaku`, `Boss`.
 
+## Vida y armadura de los zombis (2026-10-07)
+**Todos los zombis normales tienen 220 de vida** (`ZombieKit.GenericHp`; los números de vida de las tablas de abajo son anteriores y ya no valen; los jefes mantienen la suya). Se calculó con `BossBalance.Simulate` (dispersión real de la escopeta contra las zonas de la cabeza): un escopetazo a la cabeza hace de media ~190-265 a 2 m, ~115-155 a 3 m, ~80-105 a 4 m y ~45-60 a 6 m; con 220 mueren de **2 escopetazos a la cabeza hasta 3 m** (3 a 4 m), de **3 balas de pistola a la cabeza** (84 cada una), de 8 balas de pistola al torso y de 2-3 escopetazos al cuerpo de cerca. Los **zombis policía** (Cop, Oficial y Reptante, y cualquiera que se cree con `ZombieKit.PoliceTorsoMult`) llevan chaleco: el torso recibe ×0,5 (16 balas de pistola al torso, ~5 escopetazos al cuerpo); la cabeza no cambia, así que mueren igual de rápido a la cabeza.
+
+**Zombis sin katana:** se retiran los del Yaku (`Zombie_Yaku` en la escena y `Z2_Yaku_Almacen`); en su sitio `Zombie_Oficial_Hall` (Oficial) y `Z2_Pxl3_Almacen`. El prefab `Zombie_Yaku` sigue existiendo pero no se usa.
+
 ## Clases
 | Clase | Qué hace |
 |---|---|
+| `ZombieCripple` | Al recibir 2 disparos en las piernas (uno por disparo, aunque la escopeta meta varios perdigones; `ZombieHitZones.LegHit`) el zombi cae (animación de muerte ~1 s con la IA suspendida) y pasa a arrastrarse: controlador de arrastrarse, cápsula de 0,9 m, 1,0 m/s base y mordiscos. Lo lleva `Zombie_Carronero`. |
 | `ZombieAI` | Máquina de estados sobre `NavMeshAgent`: vagar → alerta (grito, `alertTime`) → perseguir → atacar. Ve al jugador por distancia/ángulo/visión directa y oye disparos (`Noise`). Ataque con variantes (`AttackVariant`: `hitDelay`, `damageMultiplier`, `cooldown`) y daño retardado (`LandHit`) que se cancela si muere, se aleja (1.35× alcance) o es aturdido. Fuerza puertas no bloqueadas tras `zombieForceTime`. Estático `All` (vivos) y `ActiveBoss`. |
 | `ZombieHitZones` | Cápsulas/esferas que siguen a los huesos (Humanoid o por nombre): cabeza, torso, brazos, piernas, escaladas por el tamaño del modelo. Multiplicador por zona (cabeza ×3 por defecto). |
 | `ZombieAudio` | Gruñidos (más frecuentes en persecución), ataque, quejido y muerte en 3D; gruñido de alerta al detectar al jugador; el jefe tiene voz grave, rugido al despertar (`Alerted`) y pasos pesados. |

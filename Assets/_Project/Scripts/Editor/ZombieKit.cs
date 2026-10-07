@@ -184,10 +184,15 @@ namespace Horror.EditorTools
         }
 
         // ------------------------------------------------------------------ tipos
+        /// <summary>Vida de todos los zombis normales (los jefes tienen la suya). Con ella mueren de 2 escopetazos a la cabeza y de 3 balas de pistola a la cabeza.</summary>
+        public const float GenericHp = 220f;
+        /// <summary>Multiplicador de dano al torso de los zombis policia (chaleco: aguantan mas los disparos al cuerpo; la cabeza no cambia).</summary>
+        public const float PoliceTorsoMult = 0.5f;
+
         public class Kind
         {
             public string name, fbx;
-            public float scale, hp, chase, damage, cooldownMin = 1.4f;
+            public float scale, hp, chase, damage, cooldownMin = 1.4f, torsoMult = 1f;
             public string[] idle, walk, run; // (uno solo; se toma el primero)
             public string[] attacks, hit;
             public string death = "Z_ZombieDying";
@@ -197,16 +202,16 @@ namespace Horror.EditorTools
 
         public static readonly Kind[] Kinds =
         {
-            new Kind { name = "Civil", fbx = "Zombie_Civil_Mixamo", scale = 1.0f, hp = 100f, chase = 0.8f, damage = 15f,
+            new Kind { name = "Civil", fbx = "Zombie_Civil_Mixamo", scale = 1.0f, hp = GenericHp, chase = 0.8f, damage = 15f,
                        idle = new[] { "G_ZombieIdle" }, walk = new[] { "G_ZombieStumbling" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.79f,
                        attacks = new[] { "Z_ZombieAttack", "G_ZombiePunching", "Z_ZombieBiting2" }, hit = new[] { "G_ZombieReactionHit" } },
-            new Kind { name = "Girl", fbx = "Zombie_Girl", scale = 0.84f, hp = 80f, chase = 0.7f, damage = 12f,
+            new Kind { name = "Girl", fbx = "Zombie_Girl", scale = 0.84f, hp = GenericHp, chase = 0.7f, damage = 12f,
                        idle = new[] { "G_ZombieIdle3" }, walk = new[] { "G_Walking" }, run = new[] { "G_ZombieRunning" }, walkClip = 0.50f,
                        attacks = new[] { "G_ZombieAttack", "G_ZombieHeadbutt", "G_ZombieKicking" }, hit = new[] { "G_ZombieReactionHit2" }, death = "Z_ZombieDeath" },
-            new Kind { name = "Cop", fbx = "Zombie_Cop", scale = 0.9f, hp = 140f, chase = 0.5f, damage = 18f,
+            new Kind { name = "Cop", fbx = "Zombie_Cop", scale = 0.9f, hp = GenericHp, torsoMult = PoliceTorsoMult, chase = 0.5f, damage = 18f,
                        idle = new[] { "G_ZombieScratchIdle" }, walk = new[] { "Z_ZombieWalk" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.33f,
                        attacks = new[] { "Z_ZombieNeckBite", "Z_ZombieBiting", "G_ZombiePunching2" }, hit = new[] { "G_ZombieReactionHit" } },
-            new Kind { name = "Yaku", fbx = "Zombie_Yaku", scale = 0.9f, hp = 130f, chase = 2.2f, damage = 20f,
+            new Kind { name = "Yaku", fbx = "Zombie_Yaku", scale = 0.9f, hp = GenericHp, chase = 2.2f, damage = 20f,
                        idle = new[] { "G_ZombieIdle2" }, walk = new[] { "Z_ZombieWalk" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.33f,
                        attacks = new[] { "Z_ZombieAttack", "G_ZombieKicking2", "G_ZombiePunching" }, hit = new[] { "G_ZombieReactionHit2" } },
         };
@@ -243,7 +248,7 @@ namespace Horror.EditorTools
                 {
                     name = "Zombie_" + k.name, fbx = k.fbx, scale = k.scale, controller = oc, height = 2f, radius = 0.4f,
                     hp = k.hp, chase = k.chase, damage = k.damage, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = 1.6f,
-                    walkClip = k.walkClip, runClip = k.runClip, runAbove = k.runAbove, variants = variants.ToArray(),
+                    walkClip = k.walkClip, runClip = k.runClip, runAbove = k.runAbove, variants = variants.ToArray(), torsoMult = k.torsoMult,
                 };
                 BuildPrefab(ctx);
                 log.Add(k.name + " [" + string.Join("; ", speedsInfo) + "]");
@@ -328,7 +333,7 @@ namespace Horror.EditorTools
             var spec = new Spec
             {
                 name = "Boss", fbx = "Boss", scale = scale, controller = ctrl, height = 2.8f, radius = 0.85f,
-                hp = 5000f, chase = 1.9f, damage = 55f, attackRange = 2.4f, cooldown = 1.8f, stagger = 0f, alertTime = 2.6f,
+                hp = 1410f, chase = 1.9f, damage = 55f, attackRange = 2.4f, cooldown = 1.8f, stagger = 0f, alertTime = 2.6f,
                 walkClip = 1.09f, runClip = 1.31f, runAbove = 1.2f, variants = variants.ToArray(), dormant = true,
                 drop = "I_KeyExit", bossName = "COLOSSUS",
                 headRadius = 0.19f, headLift = 0.1f, torsoRadius = 0.42f, limbRadiusScale = 2.0f,

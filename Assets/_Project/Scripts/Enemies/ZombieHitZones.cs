@@ -24,11 +24,14 @@ namespace Horror
             public Transform a, b;      // extremos del segmento (b null = esfera en a)
             public float radius;
             public float multiplier;
-            public bool isHead;
+            public bool isHead, isLeg;
             public Vector3 offset;      // desplazamiento local del centro de la esfera respecto al hueso
         }
 
         Zone[] zones;
+
+        /// <summary>Un disparo ha dado en una pierna (lo usa ZombieCripple). Se avisa una vez por impacto de bala o perdigon.</summary>
+        public event System.Action LegHit;
 
         void Awake()
         {
@@ -66,15 +69,15 @@ namespace Horror
                 float k = sc * limbRadiusScale;
                 AddLimb(list, Bone("UpperArm." + s), Bone("LowerArm." + s), 0.075f * k);
                 AddLimb(list, Bone("LowerArm." + s), Bone("Hand." + s), 0.065f * k);
-                AddLimb(list, Bone("UpperLeg." + s), Bone("LowerLeg." + s), 0.1f * k);
-                AddLimb(list, Bone("LowerLeg." + s), Bone("Foot." + s), 0.085f * k);
+                AddLimb(list, Bone("UpperLeg." + s), Bone("LowerLeg." + s), 0.1f * k, true);
+                AddLimb(list, Bone("LowerLeg." + s), Bone("Foot." + s), 0.085f * k, true);
             }
             zones = list.ToArray();
         }
 
-        void AddLimb(System.Collections.Generic.List<Zone> list, Transform a, Transform b, float r)
+        void AddLimb(System.Collections.Generic.List<Zone> list, Transform a, Transform b, float r, bool leg = false)
         {
-            if (a != null && b != null) list.Add(new Zone { a = a, b = b, radius = r, multiplier = limbMultiplier });
+            if (a != null && b != null) list.Add(new Zone { a = a, b = b, radius = r, multiplier = limbMultiplier, isLeg = leg });
         }
 
         /// <summary>Prueba un rayo contra las zonas. Devuelve false si pasa sin tocar el cuerpo.</summary>
@@ -83,6 +86,7 @@ namespace Horror
             multiplier = 1f; point = default; headshot = false;
             if (zones == null || zones.Length == 0) return false;
             float best = float.MaxValue;
+            bool leg = false;
             foreach (var z in zones)
             {
                 Vector3 p0, p1;
@@ -101,9 +105,11 @@ namespace Horror
                 best = t;
                 multiplier = z.multiplier;
                 headshot = z.isHead;
+                leg = z.isLeg;
             }
             if (best == float.MaxValue) return false;
             point = ray.GetPoint(best);
+            if (leg) LegHit?.Invoke();
             return true;
         }
 

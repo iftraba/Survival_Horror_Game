@@ -95,7 +95,7 @@ namespace Horror.EditorTools
             var prefab = ZombieKit.BuildPrefab(new ZombieKit.Spec
             {
                 name = "Zombie_Oficial", fbxPath = FbxPath, scale = scale, controller = oc, height = 2f, radius = 0.4f,
-                hp = 170f, chase = 0.55f, damage = 22f, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = 1.6f,
+                hp = ZombieKit.GenericHp, torsoMult = ZombieKit.PoliceTorsoMult, chase = 0.55f, damage = 22f, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = 1.6f,
                 walkClip = 0.33f, runClip = 2.84f, runAbove = 1.6f, variants = variants,
             });
             Recolor(prefab, mat);
@@ -115,7 +115,7 @@ namespace Horror.EditorTools
             var prefab2 = ZombieKit.BuildPrefab(new ZombieKit.Spec
             {
                 name = "Zombie_OficialReptante", fbxPath = FbxPath, scale = scale, controller = oc2, height = 0.9f, radius = 0.45f,
-                hp = 75f, chase = 1.7f, damage = 14f, attackRange = 1.4f, cooldown = 1.2f, stagger = 0.4f, alertTime = 0.8f,
+                hp = ZombieKit.GenericHp, torsoMult = ZombieKit.PoliceTorsoMult, chase = 1.7f, damage = 14f, attackRange = 1.4f, cooldown = 1.2f, stagger = 0.4f, alertTime = 0.8f,
                 walkClip = cw, runClip = cr, runAbove = 1.6f, variants = variants2,
                 headRadius = 0.17f, torsoRadius = 0.25f, limbRadiusScale = 1.2f,
             });

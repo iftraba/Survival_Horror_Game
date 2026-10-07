@@ -136,9 +136,9 @@ namespace Horror.EditorTools
             if (baseCtrl == null) return "falta ZombieHumanoid.controller (ejecuta Horror/Construir zombis y jefe)";
             var kinds = new[]
             {
-                new Kind { name = "Pxl1", fbx = "Zombie1", walkInPlace = "Z_Walk_InPlace",  walkMoving = "Z_Walk",  runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = 110f, chase = 0.42f, damage = 15f },  // equilibrado (el clip anda a 0.27 m/s: a 0.42 se reproduce a ~1.5x; a 0.6 iba a 2x y se veia nervioso)
-                new Kind { name = "Pxl2", fbx = "Zombie2", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = 90f,  chase = 2.8f, damage = 12f },  // rapido y fragil (corre: la carrera del clip va a 3.7 m/s; a 2.2 iba a camara lenta, 0.6x)
-                new Kind { name = "Pxl3", fbx = "Zombie3", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = 170f, chase = 0.34f, damage = 22f },  // lento y resistente (~1.3x)
+                new Kind { name = "Pxl1", fbx = "Zombie1", walkInPlace = "Z_Walk_InPlace",  walkMoving = "Z_Walk",  runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = ZombieKit.GenericHp, chase = 0.42f, damage = 15f },  // equilibrado (el clip anda a 0.27 m/s: a 0.42 se reproduce a ~1.5x; a 0.6 iba a 2x y se veia nervioso)
+                new Kind { name = "Pxl2", fbx = "Zombie2", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = ZombieKit.GenericHp, chase = 2.8f, damage = 12f },  // rapido y fragil (corre: la carrera del clip va a 3.7 m/s; a 2.2 iba a camara lenta, 0.6x)
+                new Kind { name = "Pxl3", fbx = "Zombie3", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = ZombieKit.GenericHp, chase = 0.34f, damage = 22f },  // lento y resistente (~1.3x)
             };
             var log = new List<string>();
             foreach (var k in kinds)
