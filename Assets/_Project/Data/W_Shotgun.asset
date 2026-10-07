@@ -20,6 +20,10 @@ MonoBehaviour:
   cycleSound: {fileID: 8300000, guid: 7edea85f3e8045248bc6d7bfa7e1f105, type: 3}
   cycleDelay: 0.45
   cycleVolume: 0.6
+  casingPrefab: {fileID: 4135506745392035752, guid: 311d0f2ef9e3e1b4eb3d715f2bfd6f8a, type: 3}
+  ejectAtCycle: 1
+  ejectOffset: {x: 0.04, y: 0.04, z: 0.1}
+  ejectSpeed: 2.3
   heldScale: 0.9
   ammoType: 2
   damage: 14

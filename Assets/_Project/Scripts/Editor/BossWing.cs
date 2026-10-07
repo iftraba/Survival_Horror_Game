@@ -225,7 +225,7 @@ namespace Horror.EditorTools
                 ("Zombie_Girl",  "Zombie_Girl_2",  new Vector3(-9.5f, 1f, -15.5f), 40f),   // vestuario (a oscuras)
                 ("Zombie_Cop",   "Zombie_Cop",     new Vector3(-12.5f, 1f, -0.8f), 60f),   // despacho del capitan (con la escopeta)
                 ("Zombie_Cop",   "Zombie_Cop_2",   new Vector3(-8.5f, 1f, -5.0f), 110f),   // oficina oeste
-                ("Zombie_Yaku",  "Zombie_Yaku",    new Vector3(11.8f, 1f, -17.2f), 30f),   // almacen (guarda la llave de la sala)
+                ("Zombie_Oficial","Zombie_Oficial_Hall", new Vector3(11.8f, 1f, -17.2f), 30f),   // almacen (guarda la llave de la sala; antes el Yaku, retirado)
             };
             foreach (var sp in spots)
             {

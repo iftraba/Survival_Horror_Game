@@ -238,11 +238,32 @@ namespace Horror
             return null;
         }
 
+        static float crosshairKick = -10f;
+        /// <summary>El disparo abre un momento la mira (lo llama WeaponController).</summary>
+        public static void CrosshairKick() { crosshairKick = Time.unscaledTime; }
+
+        // Mira de cruz: cuatro trazos con hueco central y un punto, con borde oscuro para verse sobre cualquier fondo.
+        // El hueco se abre al disparar y se cierra enseguida.
         void DrawCrosshair()
         {
             if (player == null || !player.IsAiming || GameState.InputBlocked) return;
             float cx = Screen.width / 2f, cy = Screen.height / 2f;
-            GUI.DrawTexture(new Rect(cx - 2, cy - 2, 4, 4), Texture2D.whiteTexture);
+            float s = Mathf.Max(1f, Screen.height / 1080f);                    // escala con la resolucion
+            float kick = Mathf.Clamp01(1f - (Time.unscaledTime - crosshairKick) / 0.25f);
+            float gap = (7f + 12f * kick) * s, len = 7.7f * s, th = 2f * s;   // trazos 30 % mas cortos que los 11 px iniciales
+            var tex = Texture2D.whiteTexture;
+            var old = GUI.color;
+            for (int pass = 0; pass < 2; pass++)
+            {
+                float o = pass == 0 ? 1f * s : 0f;                              // pasada 0: borde oscuro, pasada 1: trazo claro
+                GUI.color = pass == 0 ? new Color(0f, 0f, 0f, 0.75f) : new Color(1f, 1f, 1f, 0.95f);
+                GUI.DrawTexture(new Rect(cx - th * 0.5f - o, cy - gap - len - o, th + 2f * o, len + 2f * o), tex);   // arriba
+                GUI.DrawTexture(new Rect(cx - th * 0.5f - o, cy + gap - o, th + 2f * o, len + 2f * o), tex);          // abajo
+                GUI.DrawTexture(new Rect(cx - gap - len - o, cy - th * 0.5f - o, len + 2f * o, th + 2f * o), tex);    // izquierda
+                GUI.DrawTexture(new Rect(cx + gap - o, cy - th * 0.5f - o, len + 2f * o, th + 2f * o), tex);          // derecha
+                GUI.DrawTexture(new Rect(cx - 1f * s - o, cy - 1f * s - o, 2f * s + 2f * o, 2f * s + 2f * o), tex);   // punto central
+            }
+            GUI.color = old;
         }
 
         void DrawPrompt()

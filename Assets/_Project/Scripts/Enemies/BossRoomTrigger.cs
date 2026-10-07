@@ -10,6 +10,8 @@ namespace Horror
     public class BossRoomTrigger : MonoBehaviour
     {
         public ZombieAI boss;
+        [Tooltip("Puertas que se atrancan al empezar el combate (no se puede huir) y se abren al morir el jefe")] public Door[] sealDoors;
+        bool subscribed;
 
         void Reset() => GetComponent<Collider>().isTrigger = true;
 
@@ -18,6 +20,17 @@ namespace Horror
             if (boss == null || !boss.IsDormant) return;
             if (other.GetComponentInParent<PlayerController>() == null) return;
             boss.Wake();
+            if (sealDoors != null && sealDoors.Length > 0)
+            {
+                foreach (var d in sealDoors) if (d != null) d.Seal();
+                Hud.Message("La puerta se ha atrancado tras de ti");
+                if (!subscribed && boss.Hp != null) { subscribed = true; boss.Hp.Died += OnBossDied; }
+            }
+        }
+
+        void OnBossDied()
+        {
+            if (sealDoors != null) foreach (var d in sealDoors) if (d != null) d.Unseal();
         }
     }
 }

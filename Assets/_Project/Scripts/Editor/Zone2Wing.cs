@@ -203,15 +203,16 @@ namespace Horror.EditorTools
             // caldera central (5 m de diametro): cobertura grande alrededor de la que se mueve el jefe
             Cyl("Boiler", new Vector3(0f, 2.5f, 76f), new Vector3(5f, 2.5f, 5f), Quaternion.identity, true, metal);
             Cyl("BoilerCap", new Vector3(0f, 5.05f, 76f), new Vector3(5.6f, 0.15f, 5.6f), Quaternion.identity, false, metal);
-            foreach (var c in new[] { new Vector2(-8f, 70.5f), new Vector2(8f, 70.5f), new Vector2(-8f, 81.5f), new Vector2(8f, 81.5f) })
-                Cyl("Pillar", new Vector3(c.x, AH / 2f, c.y), new Vector3(1.1f, AH / 2f, 1.1f), Quaternion.identity, true, wall);
+            // bancos de maquinas en filas con pasillos de ~2,6 m y columnas (ArenaRework): hay que ir por medio de pasillos de maquinas
+            ArenaRework.MachineBanks(solid);
             // tuberias pegadas al techo y a las paredes (sin colision: van por encima de la cabeza)
             foreach (float y in new[] { 4.55f, 5.0f }) foreach (float x in new[] { -14.1f, 14.1f })
                 Cyl("Pipe", new Vector3(x, y, 75.5f), new Vector3(0.45f, 9.2f, 0.45f), Quaternion.Euler(90f, 0f, 0f), false, metal);
             foreach (float z in new[] { 70f, 76f, 82f })
                 Cyl("PipeCross", new Vector3(0f, 5.0f, z), new Vector3(0.4f, 14.5f, 0.4f), Quaternion.Euler(0f, 0f, 90f), false, metal);
-            Prop("Crate", -12.0f, 69.0f, 20f); Prop("Crate", -11.0f, 69.6f, -8f); Prop("Crate", 11.5f, 82.0f, 35f); Prop("Crate", 12.6f, 80.9f, -20f);
-            Prop("Barrel", 12.5f, 68.5f, 0f); Prop("Barrel", 13.5f, 69.2f, 0f); Prop("Barrel", -12.5f, 82.5f, 0f); Prop("Barrel", -13.5f, 81.6f, 0f);
+            // cajas con municion al fondo de los pasillos ciegos (riesgo/recompensa) y en el ultimo carril
+            Prop("Crate", -13.2f, 72.3f, 0f); Prop("Crate", 13.2f, 76.7f, 0f); Prop("Crate", 11.5f, 82.6f, 35f); Prop("Crate", -12.5f, 82.0f, -20f);
+            Prop("Barrel", -13.6f, 76.7f, 0f); Prop("Barrel", 13.6f, 72.3f, 0f); Prop("Barrel", 12.6f, 81.3f, 0f); Prop("Barrel", -13.5f, 83.0f, 0f);
             var gate = Box("ExitGate", new Vector3(0f, 1.3f, 83.9f), new Vector3(4.2f, 2.6f, 0.14f), metal, solid, 1.5f);
             gate.AddComponent<ExitDoor>().requiredKey = keyFinal;
             Box("ExitGate_L", new Vector3(-2.18f, 1.3f, 83.9f), new Vector3(0.16f, 2.7f, 0.2f), metal, solid, 1f, false);
@@ -245,7 +246,9 @@ namespace Horror.EditorTools
             NewLamp(8f, 60f, 26f, 11f, 8.5f, 20f, cold);                     // almacen
             // sala de calderas: techo a 5.5 m, luz roja-naranja de emergencia, tenue; dos lamparas parpadean
             var emergency = new Color(1f, 0.42f, 0.28f);
-            foreach (float x in new[] { -9f, 9f }) foreach (float z in new[] { 71f, 81f }) NewLamp(x, z, 52f, 17f, 11f, 20f, emergency, (x > 0f) == (z > 76f), 5.35f, 3.2f);
+            // una lampara por pasillo entre bancos (a 3 m del suelo la luz de relleno: si no, los bancos de 2,4-2,7 m las tapan) y otra en el ultimo carril
+            foreach (float x in new[] { -9.5f, 9.5f }) foreach (float z in new[] { 72.3f, 76.7f }) NewLamp(x, z, 52f, 17f, 11f, 20f, emergency, (x > 0f) == (z > 74.5f), 5.35f, 3.0f);
+            NewLamp(-6.5f, 82.0f, 46f, 15f, 9f, 18f, emergency, false, 5.35f, 3.2f); NewLamp(6.5f, 82.0f, 46f, 15f, 9f, 18f, emergency, false, 5.35f, 3.2f);
             NewLamp(0f, 68.5f, 40f, 15f, 9f, 16f, emergency, false, 5.35f, 3.2f);    // entrada
             NewLamp(0f, 83.0f, 40f, 15f, 9f, 16f, emergency, false, 5.35f, 3.2f);    // porton final
             var boilerGlow = new GameObject("BoilerGlow").AddComponent<Light>();     // resplandor de la caldera
@@ -261,8 +264,8 @@ namespace Horror.EditorTools
             Put("I_KeyCard", 1, -8.5f, 0.95f, 64.8f);                                                        // laboratorio: tarjeta
             Put("I_Spray", 1, -12.0f, 0.95f, 64.8f);
             Put("I_ShotgunAmmo", 8, 6.0f, 1.0f, 62.0f); Put("I_HandgunAmmo", 12, 7.2f, 1.0f, 62.4f); Put("I_ShotgunAmmo", 6, 10.5f, 1.0f, 57.0f);   // almacen
-            Put("I_ShotgunAmmo", 8, -12.0f, 1.0f, 69.0f); Put("I_HandgunAmmo", 12, -11.0f, 1.0f, 69.6f);    // arena: municion antes del combate
-            Put("I_Spray", 1, 11.5f, 1.0f, 82.0f); Put("I_Spray", 1, 12.5f, 0.95f, 68.5f);
+            Put("I_ShotgunAmmo", 8, -13.2f, 1.0f, 72.3f); Put("I_HandgunAmmo", 12, 13.2f, 1.0f, 76.7f);    // arena: municion en los pasillos ciegos
+            Put("I_Spray", 1, 11.5f, 1.0f, 82.6f); Put("I_ShotgunAmmo", 6, -12.5f, 1.0f, 82.0f);
             var bag = Item("I_Bag");
             if (bag != null) { var pk = Pickup.Spawn(bag, 1, locker.transform.TransformPoint(new Vector3(0f, 1.42f, 0.02f))); if (itemsRoot != null) pk.transform.SetParent(itemsRoot.transform); }
 
@@ -311,7 +314,7 @@ namespace Horror.EditorTools
                 go.transform.SetPositionAndRotation(sp.pos, Quaternion.Euler(0f, sp.yaw, 0f));
             }
             // segundo jefe: el coloso verde del pack de Pxltiger (PxlZombieKit.BuildBoss); suelta la llave maestra
-            var boss = Inst("Characters/Zombie_BossPxl.prefab", zr, new Vector3(5f, 1.55f, 79f), 200f, "Boss_2");
+            var boss = Inst("Characters/Zombie_BossPxl.prefab", zr, new Vector3(2f, 1.55f, 82.2f), 180f, "Boss_2");   // en el ultimo carril, tras la fila de maquinas
             var ai = boss.GetComponent<ZombieAI>();
             ai.dropOnDeath = keyFinal;
             EditorUtility.SetDirty(ai);
@@ -320,7 +323,9 @@ namespace Horror.EditorTools
             trigger.transform.SetParent(zr);
             trigger.transform.position = new Vector3(0f, 1.5f, 67.6f);
             var bc = trigger.AddComponent<BoxCollider>(); bc.isTrigger = true; bc.size = new Vector3(28f, 3f, 2f);
-            trigger.AddComponent<BossRoomTrigger>().boss = ai;
+            var brt2 = trigger.AddComponent<BossRoomTrigger>(); brt2.boss = ai;
+            var doorA2 = GameObject.Find("Door_Arena2");
+            if (doorA2 != null) brt2.sealDoors = new[] { doorA2.GetComponentInChildren<Door>() };   // la puerta se atranca al empezar el combate
 
             log.Add("zona 2 creada: " + spots.Length + " zombis + jefe 2; codigo del almacen " + StoreCode);
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());

@@ -91,7 +91,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.4
-  m_Speed: 0.55
+  m_Speed: 0.84
   m_Acceleration: 6
   avoidancePriority: 50
   m_AngularSpeed: 200
@@ -135,7 +135,7 @@ MonoBehaviour:
   attackDamage: 22
   attackCooldown: 1.4
   walkSpeed: 1.1
-  chaseSpeed: 0.55
+  chaseSpeed: 0.84
   staggerTime: 0.5
   hearingRange: 4.5
   attackVariants:

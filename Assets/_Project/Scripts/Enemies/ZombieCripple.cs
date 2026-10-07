@@ -16,7 +16,7 @@ namespace Horror
         public int legHitsToCripple = 2;
         [Tooltip("Segundos de caida antes de empezar a arrastrarse")] public float fallTime = 1.0f;
         public float crawlHeight = 0.9f, crawlRadius = 0.45f;
-        [Tooltip("Velocidad de persecucion arrastrandose (la global la multiplica)")] public float crawlChase = 1.0f;
+        [Tooltip("Velocidad de persecucion arrastrandose (la global la multiplica)")] public float crawlChase = 0.84f;
         public float crawlAttackRange = 1.4f;
         [Tooltip("Velocidad (m/s, a escala 1) de las zancadas de los clips de arrastrarse")] public float crawlWalkClip = 0.5f, crawlRunClip = 1.6f;
         public ZombieAI.AttackVariant[] crawlVariants;
@@ -81,7 +81,7 @@ namespace Horror
             if (za != null && anim != null)
             {
                 float sc = anim.transform.lossyScale.y;
-                za.walkClipSpeed = crawlWalkClip * sc; za.runClipSpeed = crawlRunClip * sc; za.runAbove = 1.0f;
+                za.walkClipSpeed = crawlWalkClip * sc; za.runClipSpeed = crawlRunClip * sc; za.runAbove = 0.9f;
             }
             ai.Suspended = false;
         }

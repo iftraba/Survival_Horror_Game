@@ -1,16 +1,19 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace Horror
 {
     /// <summary>
-    /// Ataques especiales del segundo jefe, ademas del golpe a cuerpo a cuerpo de ZombieAI:
-    /// - Embestida: se para y ruge (el cuerpo brilla en rojo), echa a correr en linea recta hacia donde estabas y,
-    ///   si choca con una columna o la caldera, se queda aturdido (recibe mas dano).
-    /// - Escupitajo de acido: proyectil que hace dano y deja un charco donde cae (3 a la vez en la ultima fase).
-    /// - Fases: al 66 % y al 33 % de vida se enfurece (mas rapido, ataques mas seguidos, rastro mas denso).
-    /// Mientras ejecuta un ataque la IA normal queda suspendida (ZombieAI.Suspended).
+    /// Ataques especiales del segundo jefe, ademas del golpe a cuerpo a cuerpo de ZombieAI. Mientras ejecuta uno de los
+    /// suyos la IA normal queda suspendida (ZombieAI.Suspended). Cada ataque avisa antes (el cuerpo brilla en rojo y, los de
+    /// area, un circulo rojo en el suelo):
+    /// - Embestida: carga en linea recta; si choca con una columna o una maquina se aturde (recibe mas dano).
+    /// - Escupitajo: abanico de bolas de acido (3 / 5 / 7 segun la fase, en 1-3 oleadas) que dejan charcos.
+    /// - Pisotón: onda en area alrededor del jefe; la tapa cualquier muro o maquina que haya en medio.
+    /// - Lluvia de acido: circulos de aviso alrededor (y debajo) del jugador que explotan al cabo de un segundo.
+    /// - Fases al 66 % y 33 % de vida: mas rapido, ataques mas seguidos, mas bolas y mas oleadas.
     /// </summary>
     [RequireComponent(typeof(ZombieAI))]
     public class BossAttacks : MonoBehaviour
@@ -27,12 +30,26 @@ namespace Horror
         public float spitDamage = 12f;
         public float spitSpeed = 12f;
         public float spitWindup = 0.6f;
+        [Tooltip("Bolas por oleada en cada fase")] public int[] spitCount = { 3, 5, 7 };
+        [Tooltip("Oleadas seguidas en cada fase")] public int[] spitWaves = { 1, 2, 3 };
+
+        [Header("Pisoton (area alrededor del jefe)")]
+        public float slamRadius = 5.2f;
+        public float slamDamage = 40f;
+        public float slamWindup = 0.9f;
+
+        [Header("Lluvia de acido")]
+        public int rainCount = 5;
+        public float rainRadius = 1.5f;
+        public float rainDamage = 30f;
+        public float rainDelay = 1.1f;
 
         [Header("Sonidos (vacio = los genericos del jefe)")]
         public AudioClip chargeSound, crashSound, spitSound;
+        [Tooltip("Material del circulo rojo de aviso")] public Material warningMaterial;
 
         [Header("Ritmo")]
-        [Tooltip("Pausa entre ataques especiales (segundos, min-max)")] public Vector2 pause = new Vector2(3.5f, 6f);
+        [Tooltip("Pausa entre ataques especiales (segundos, min-max)")] public Vector2 pause = new Vector2(2.5f, 4.5f);
 
         public int Phase { get; private set; } = 1;
 
@@ -44,11 +61,12 @@ namespace Horror
         Transform player;
         Health playerHealth;
         Renderer[] renderers;
-        MaterialPropertyBlock mpb;
+        MaterialPropertyBlock mpb, mpbRing;
         float nextAction, speedScale = 1f;
         int pendingPhase = 1;
 
         static readonly int EmissionId = Shader.PropertyToID("_EmissionColor");
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         void Awake()
         {
@@ -59,6 +77,7 @@ namespace Horror
             anim = GetComponent<ZombieAnimation>();
             renderers = GetComponentsInChildren<Renderer>();
             mpb = new MaterialPropertyBlock();
+            mpbRing = new MaterialPropertyBlock();
         }
 
         void Start()
@@ -98,7 +117,7 @@ namespace Horror
         {
             foreach (var r in renderers)
             {
-                if (r == null) continue;
+                if (r == null || r.GetComponent<ParticleSystem>() != null) continue;
                 if (on) { mpb.SetColor(EmissionId, new Color(2.2f, 0.12f, 0.08f)); r.SetPropertyBlock(mpb); }
                 else r.SetPropertyBlock(null);
             }
@@ -114,6 +133,18 @@ namespace Horror
             }
         }
 
+        float GroundY(Vector3 at)
+        {
+            float y = float.NegativeInfinity;
+            foreach (var h in Physics.RaycastAll(at + Vector3.up * 3f, Vector3.down, 8f, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (h.rigidbody != null || h.collider is CharacterController || h.collider.GetComponentInParent<ZombieAI>() != null) continue;
+                if (h.normal.y > 0.5f) y = Mathf.Max(y, h.point.y);
+            }
+            return float.IsNegativeInfinity(y) ? transform.position.y - 1f : y;
+        }
+
+        // ---------------------------------------------------------------- bucle de decision
         IEnumerator Run()
         {
             while (!health.IsDead)
@@ -125,13 +156,21 @@ namespace Horror
                 if (Time.time < nextAction) continue;
 
                 float dist = Flat(player.position - transform.position).magnitude;
-                if (dist <= ai.attackRange + 0.6f) { nextAction = Time.time + 0.8f; continue; }   // pegado a el: manda el golpe normal
-                if (!LineClear()) { nextAction = Time.time + 0.8f; continue; }
+                bool los = LineClear();
+                var options = new List<int>();   // 0 embestida, 1 escupitajo, 2 pisoton, 3 lluvia
+                if (los && dist >= 5f && dist <= 18f) { options.Add(0); options.Add(0); }
+                if (los && dist >= 4f) { options.Add(1); options.Add(1); }
+                if (dist <= slamRadius + 1.2f) { options.Add(2); options.Add(2); if (dist <= ai.attackRange + 1.5f) options.Add(2); }
+                if (dist >= 3f) { options.Add(3); options.Add(3); }
+                if (options.Count == 0) { nextAction = Time.time + 0.6f; continue; }
 
-                if (dist >= 5f && dist <= 18f && Random.value < 0.55f) yield return Charge();
-                else if (dist >= 6f) yield return Spit();
-                else { nextAction = Time.time + 0.8f; continue; }
-
+                switch (options[Random.Range(0, options.Count)])
+                {
+                    case 0: yield return Charge(); break;
+                    case 1: yield return Spit(); break;
+                    case 2: yield return Slam(); break;
+                    default: yield return Rain(); break;
+                }
                 nextAction = Time.time + Random.Range(pause.x, pause.y) / (1f + 0.3f * (Phase - 1));
             }
         }
@@ -150,9 +189,10 @@ namespace Horror
             speedScale *= 0.85f;
             if (trail != null) trail.spacing *= 0.8f;
             ai.Suspended = false;
-            nextAction = Time.time + 1.5f;
+            nextAction = Time.time + 1.2f;
         }
 
+        // ---------------------------------------------------------------- embestida
         IEnumerator Charge()
         {
             ai.Suspended = true;
@@ -201,6 +241,7 @@ namespace Horror
             ai.Suspended = false;
         }
 
+        // ---------------------------------------------------------------- escupitajo en abanico
         IEnumerator Spit()
         {
             ai.Suspended = true;
@@ -208,32 +249,161 @@ namespace Horror
             if (spitSound != null) GameAudio.PlayClip(spitSound, transform.position, 0.9f, 1f, true);
             else GameAudio.Play(Sfx.ZombieAttack, transform.position, 1f, 0.6f, true);
             yield return Face(spitWindup * speedScale);
-            Tell(false);
-            if (!health.IsDead && player != null)
+            int ph = Mathf.Clamp(Phase, 1, 3) - 1;
+            int n = spitCount[Mathf.Min(ph, spitCount.Length - 1)], waves = spitWaves[Mathf.Min(ph, spitWaves.Length - 1)];
+            for (int w = 0; w < waves && !health.IsDead && player != null; w++)
             {
-                Vector3 from = transform.position + Vector3.up * 2.2f + transform.forward * 0.6f;
-                Vector3 aim = (player.position + Vector3.up * 1f - from).normalized;
-                int n = Phase >= 3 ? 3 : 1;
-                for (int i = 0; i < n; i++)
-                {
-                    float yaw = n == 1 ? 0f : (i - 1) * 13f;
-                    var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    go.name = "AcidSpit";
-                    Destroy(go.GetComponent<Collider>());
-                    go.transform.position = from;
-                    go.transform.localScale = Vector3.one * 0.4f;
-                    if (trail != null && trail.spitMaterial != null) { var rr = go.GetComponent<Renderer>(); rr.sharedMaterial = trail.spitMaterial; rr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; }
-                    var glow = new GameObject("Glow").AddComponent<Light>();     // brillo verde: la bola ilumina lo que cruza
-                    glow.transform.SetParent(go.transform, false); glow.type = LightType.Point; glow.color = new Color(0.4f, 1f, 0.2f); glow.range = 4f; glow.intensity = 3f; glow.shadows = LightShadows.None;
-                    var s = go.AddComponent<AcidSpit>();
-                    s.velocity = Quaternion.Euler(0f, yaw, 0f) * aim * spitSpeed;
-                    s.damage = spitDamage;
-                    s.trail = trail;
-                    s.owner = transform;
-                }
+                FireFan(n, 9f);
+                if (w < waves - 1) yield return Face(0.45f);                // vuelve a apuntar entre oleadas
             }
+            Tell(false);
             yield return new WaitForSeconds(0.4f);
             ai.Suspended = false;
+        }
+
+        void FireFan(int n, float stepDeg)
+        {
+            Vector3 from = transform.position + Vector3.up * 2.2f + transform.forward * 0.6f;
+            Vector3 aim = (player.position + Vector3.up * 1f - from).normalized;
+            for (int i = 0; i < n; i++)
+            {
+                float yaw = (i - (n - 1) * 0.5f) * stepDeg + Random.Range(-2f, 2f);
+                var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                go.name = "AcidSpit";
+                Destroy(go.GetComponent<Collider>());
+                go.transform.position = from;
+                go.transform.localScale = Vector3.one * 0.4f;
+                if (trail != null && trail.spitMaterial != null) { var rr = go.GetComponent<Renderer>(); rr.sharedMaterial = trail.spitMaterial; rr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; }
+                if (n <= 5)   // con muchas bolas no se pone luz a cada una (coste)
+                {
+                    var glow = new GameObject("Glow").AddComponent<Light>();
+                    glow.transform.SetParent(go.transform, false); glow.type = LightType.Point; glow.color = new Color(0.4f, 1f, 0.2f); glow.range = 4f; glow.intensity = 3f; glow.shadows = LightShadows.None;
+                }
+                var s = go.AddComponent<AcidSpit>();
+                s.velocity = Quaternion.Euler(0f, yaw, 0f) * aim * spitSpeed * Random.Range(0.92f, 1.1f);
+                s.damage = spitDamage;
+                s.trail = trail;
+                s.owner = transform;
+            }
+        }
+
+        // ---------------------------------------------------------------- pisoton (area)
+        IEnumerator Slam()
+        {
+            ai.Suspended = true;
+            Tell(true);
+            GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 0.8f, false);
+            var ring = SpawnWarning(transform.position, slamRadius);
+            float wind = slamWindup * speedScale;
+            for (float t = 0f; t < wind && !health.IsDead; t += Time.deltaTime)
+            {
+                PulseWarning(ring, t / wind);
+                yield return null;
+            }
+            if (ring != null) Destroy(ring.gameObject);
+            Tell(false);
+            if (health.IsDead) { ai.Suspended = false; yield break; }
+
+            if (crashSound != null) GameAudio.PlayClip(crashSound, transform.position, 1f, 0.9f, false);
+            else GameAudio.Play(Sfx.BossStep, transform.position, 1f, 0.5f, false);
+            Vector3 c = transform.position + Vector3.up * 1.2f;
+            if (playerHealth != null && Flat(player.position - transform.position).magnitude <= slamRadius && Mathf.Abs(player.position.y - transform.position.y) < 2.5f && AreaReaches(c, player.position + Vector3.up * 1f))
+            {
+                playerHealth.TakeDamage(slamDamage, transform.position);
+                Hud.Message("¡Onda de choque!");
+            }
+            if (trail != null)                                                        // anillos de acido que dejan el suelo peligroso
+                for (int ringIdx = 0; ringIdx < 2; ringIdx++)
+                {
+                    float rad = slamRadius * (ringIdx == 0 ? 0.45f : 0.8f); int k = ringIdx == 0 ? 6 : 9;
+                    for (int i = 0; i < k; i++)
+                    {
+                        float a = (i + ringIdx * 0.5f) / k * Mathf.PI * 2f;
+                        Vector3 p = transform.position + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * rad;
+                        if (AreaReaches(c, p + Vector3.up * 0.5f)) trail.AddPuddle(p);
+                    }
+                }
+            yield return new WaitForSeconds(0.6f);
+            ai.Suspended = false;
+        }
+
+        // la onda no atraviesa muros ni maquinas: sirve resguardarse detras
+        bool AreaReaches(Vector3 from, Vector3 to)
+        {
+            Vector3 d = to - from;
+            foreach (var h in Physics.RaycastAll(from, d.normalized, d.magnitude, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (h.rigidbody != null || h.collider is CharacterController) continue;
+                if (h.collider.GetComponentInParent<ZombieAI>() != null) continue;
+                if (h.collider.GetComponentInParent<EjectedCasing>() != null) continue;
+                return false;
+            }
+            return true;
+        }
+
+        // ---------------------------------------------------------------- lluvia de acido
+        IEnumerator Rain()
+        {
+            ai.Suspended = true;
+            Tell(true);
+            if (spitSound != null) GameAudio.PlayClip(spitSound, transform.position, 1f, 0.8f, true);
+            else GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1.2f, false);
+            yield return Face(0.7f * speedScale);
+            Tell(false);
+            ai.Suspended = false;                                                   // el jefe sigue persiguiendo mientras caen
+            if (player == null) yield break;
+            int n = rainCount + (Phase - 1) * 2;
+            for (int i = 0; i < n; i++)
+            {
+                Vector3 center = player.position;
+                if (i >= 2) { var off = Random.insideUnitCircle * 5.5f; center += new Vector3(off.x, 0f, off.y); }
+                else if (i == 1) center += Flat(player.forward) * 2f;                // uno por delante del jugador
+                StartCoroutine(RainStrike(center, 0.15f * i));
+            }
+        }
+
+        IEnumerator RainStrike(Vector3 center, float delay)
+        {
+            if (delay > 0f) yield return new WaitForSeconds(delay);
+            center.y = GroundY(center);
+            var ring = SpawnWarning(center, rainRadius);
+            float wait = rainDelay;
+            for (float t = 0f; t < wait; t += Time.deltaTime) { PulseWarning(ring, t / wait); yield return null; }
+            if (ring != null) Destroy(ring.gameObject);
+            if (playerHealth != null && !playerHealth.IsDead && Flat(player.position - center).magnitude <= rainRadius && Mathf.Abs(player.position.y - center.y) < 2.5f)
+            {
+                playerHealth.TakeDamage(rainDamage, center);
+                Hud.Message("Ácido");
+            }
+            if (trail != null)
+            {
+                trail.AddPuddle(center);
+                if (trail.sizzleSound != null) GameAudio.PlayClip(trail.sizzleSound, center, 0.8f, Random.Range(0.9f, 1.1f), true);
+            }
+        }
+
+        // ---------------------------------------------------------------- circulos de aviso
+        Transform SpawnWarning(Vector3 at, float radius)
+        {
+            var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            q.name = "AcidWarning";
+            Destroy(q.GetComponent<Collider>());
+            q.transform.position = new Vector3(at.x, GroundY(at) + 0.04f, at.z);
+            q.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            q.transform.localScale = new Vector3(radius * 2f, radius * 2f, 1f);
+            var r = q.GetComponent<Renderer>();
+            if (warningMaterial != null) r.sharedMaterial = warningMaterial;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return q.transform;
+        }
+
+        void PulseWarning(Transform ring, float k)
+        {
+            if (ring == null) return;
+            var r = ring.GetComponent<Renderer>();
+            float a = Mathf.Lerp(0.35f, 1f, k) * (0.8f + 0.2f * Mathf.Sin(Time.time * 18f));
+            mpbRing.SetColor(BaseColorId, new Color(1f, 1f, 1f, a));
+            r.SetPropertyBlock(mpbRing);
         }
 
         void OnDisable()
@@ -262,6 +432,7 @@ namespace Horror
             {
                 if (owner != null && h.collider.transform.IsChildOf(owner)) continue;
                 if (h.collider.GetComponentInParent<ZombieAI>() != null) continue;
+                if (h.collider.GetComponentInParent<EjectedCasing>() != null) continue;
                 var pc = h.collider.GetComponentInParent<PlayerController>();
                 if (pc != null)
                 {

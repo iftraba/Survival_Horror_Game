@@ -15,6 +15,12 @@ namespace Horror
         public AudioClip cycleSound;
         [Tooltip("Segundos tras el disparo a los que suena el ciclo")] public float cycleDelay = 0.45f;
         [Range(0.1f, 2f)] public float cycleVolume = 0.6f;
+        [Header("Casquillos")]
+        [Tooltip("Casquillo/cartucho vacio que sale del arma (vacio = ninguno)")] public GameObject casingPrefab;
+        [Tooltip("true = sale al bombear (escopeta); false = sale al disparar (pistola)")] public bool ejectAtCycle;
+        [Tooltip("Donde sale respecto a la mano del arma, en ejes de la camara de apuntado (derecha, arriba, delante), en metros")]
+        public Vector3 ejectOffset = new Vector3(0.02f, 0.05f, 0.15f);
+        [Tooltip("Velocidad de salida (m/s) hacia la derecha; la salida hacia arriba es algo menor")] public float ejectSpeed = 2.2f;
         [Tooltip("Escala del modelo en la mano (los personajes son bloques grandes, el arma se agranda para equilibrar)")]
         public float heldScale = 1f;
         public AmmoType ammoType = AmmoType.Handgun;

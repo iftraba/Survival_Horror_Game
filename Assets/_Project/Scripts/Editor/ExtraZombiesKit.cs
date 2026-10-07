@@ -130,7 +130,7 @@ namespace Horror.EditorTools
             {
                 ["Z_ZombieIdle"] = "Z_ZombieBiting2", ["Z_ZombieWalk"] = girl.walk[0], ["Z_ZombieRun"] = girl.run[0],
                 ["Z_ZombieAttack"] = girl.attacks[0], ["Z_ZombieBiting"] = girl.attacks[1], ["Z_ZombieNeckBite"] = girl.attacks[2],
-                ["G_ZombieReactionHit"] = girl.hit[0], ["Z_ZombieDying"] = girl.death,
+                ["G_ZombieReactionHit"] = "Z_ZombieBiting2", ["Z_ZombieDying"] = girl.death,   // al recibir un disparo sigue en el bucle de morder
             });
             // ---- arrastrandose (cuando le rompen las piernas)
             var crawlAttacks = new[] { "Z_ZombieBiting", "Z_ZombieBiting2", "Z_ZombieNeckBite" };
@@ -138,7 +138,7 @@ namespace Horror.EditorTools
             {
                 ["Z_ZombieIdle"] = "Z_ZombieCrawl", ["Z_ZombieWalk"] = "Z_ZombieCrawl", ["Z_ZombieRun"] = "Z_RunningCrawl",
                 ["Z_ZombieAttack"] = crawlAttacks[0], ["Z_ZombieBiting"] = crawlAttacks[1], ["Z_ZombieNeckBite"] = crawlAttacks[2],
-                ["G_ZombieReactionHit"] = girl.hit[0], ["Z_ZombieDying"] = girl.death,
+                ["G_ZombieReactionHit"] = "Z_ZombieCrawl", ["Z_ZombieScream"] = "Z_ZombieCrawl", ["Z_ZombieDying"] = girl.death,
             });
             var variants = new List<ZombieAI.AttackVariant>();
             foreach (var a in girl.attacks)
@@ -157,14 +157,14 @@ namespace Horror.EditorTools
             var prefab = ZombieKit.BuildPrefab(new ZombieKit.Spec
             {
                 name = "Zombie_Carronero", fbx = girl.fbx, scale = girl.scale, controller = oc, height = 2f, radius = 0.4f,
-                hp = ZombieKit.GenericHp, chase = girl.chase, damage = girl.damage, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = 0.8f,
+                hp = ZombieKit.GenericHp, chase = ZombieKit.BaseChase, damage = girl.damage, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = 0.8f,
                 walkClip = girl.walkClip, runClip = girl.runClip, runAbove = girl.runAbove, variants = variants.ToArray(),
             });
             string path = AssetDatabase.GetAssetPath(prefab);
             var root = PrefabUtility.LoadPrefabContents(path);
             var cr = root.GetComponent<ZombieCripple>() ?? root.AddComponent<ZombieCripple>();
             cr.crawlController = ocCrawl; cr.crawlVariants = crawlVariants.ToArray();
-            cr.legHitsToCripple = 2; cr.fallTime = 1.0f; cr.crawlChase = 1.0f;
+            cr.legHitsToCripple = 2; cr.fallTime = 1.0f; cr.crawlChase = ZombieKit.BaseChase;
             PrefabUtility.SaveAsPrefabAsset(root, path);
             PrefabUtility.UnloadPrefabContents(root);
             return prefab;

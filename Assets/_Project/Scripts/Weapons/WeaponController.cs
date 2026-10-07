@@ -118,8 +118,28 @@ namespace Horror
         IEnumerator CycleRoutine(WeaponData weapon)
         {
             yield return new WaitForSeconds(weapon.cycleDelay);
-            if (Equipped == weapon && !Reloading && mags[weapon] > 0)
+            if (Equipped != weapon) yield break;
+            if (weapon.ejectAtCycle) EjectCasing(weapon);          // el cartucho vacio sale al bombear, aunque fuera el ultimo
+            if (!Reloading && mags[weapon] > 0)
                 GameAudio.PlayClip(weapon.cycleSound, transform.position, weapon.cycleVolume, 1f, false);
+        }
+
+        // Casquillo o cartucho vacio: sale de la mano del arma hacia la derecha de la camara, con fisica
+        void EjectCasing(WeaponData w)
+        {
+            if (w.casingPrefab == null || heldInstance == null || aimCamera == null) return;
+            var ct = aimCamera.transform;
+            Vector3 pos = heldInstance.transform.position + ct.right * w.ejectOffset.x + Vector3.up * w.ejectOffset.y + ct.forward * w.ejectOffset.z;
+            var go = Instantiate(w.casingPrefab, pos, Random.rotation);
+            var rb = go.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = ct.right * (w.ejectSpeed * Random.Range(0.75f, 1.2f)) + Vector3.up * Random.Range(1.1f, 1.9f) - ct.forward * Random.Range(0f, 0.5f);
+                rb.angularVelocity = Random.insideUnitSphere * 25f;
+            }
+            // no choca con el jugador (si no se le atascaria en los pies)
+            var cc = player != null ? player.GetComponent<CharacterController>() : null;
+            if (cc != null) foreach (var col in go.GetComponentsInChildren<Collider>()) Physics.IgnoreCollision(col, cc);
         }
 
         void Fire()
@@ -127,9 +147,11 @@ namespace Horror
             nextShot = Time.time + 1f / Equipped.fireRate;
             mags[Equipped]--;
             Fired?.Invoke();
+            Hud.CrosshairKick();
             GameAudio.PlayClip(Equipped.fireSound, transform.position, Equipped.fireVolume, Random.Range(0.96f, 1.04f), false);
             ZombieAI.Noise(transform.position, 14f);
-            if (Equipped.cycleSound != null) StartCoroutine(CycleRoutine(Equipped));
+            if (Equipped.cycleSound != null || Equipped.ejectAtCycle) StartCoroutine(CycleRoutine(Equipped));
+            if (!Equipped.ejectAtCycle) EjectCasing(Equipped);
 
             for (int p = 0; p < Equipped.pellets; p++)
             {

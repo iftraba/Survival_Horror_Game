@@ -17,6 +17,10 @@ Escena `Assets/Scenes/Comisaria.unity` (índice 1 de compilación). Es la **fuen
 ## Reparto de objetos (resumen)
 Pistola al empezar; **la llave de la sala está en la planta superior**; escopeta en el escritorio del capitán; cartuchos y balas repartidos (almacén, escritorios, sala segura, taquilla de la arena); sprays; la llave de salida **la suelta el jefe**; la **llave del garaje** está en la sala de control (final); riñoneras: una en la taquilla de reuniones (arriba, código 4719) y otra en la sala de control (código 0316, pista en la sala segura 4).
 
+## Rediseño de las arenas (2026-10-07)
+- **Arena del primer jefe** (`ArenaRework.Arena1`, menú *Horror/Redisenar arena del primer jefe*): ya no es una sala abierta de 29 × 11 m. Dos muros largos (z 12,5 con paso al este y z 16 con paso al oeste) forman **tres carriles de 3,5 m en zigzag**: la ruta de la puerta a la salida pasa de ~11 m a **~48 m** y no hay vueltas que dar. Columnas en x ±5,5 y un obstáculo por sección (el NavMesh resta ~0,45 m a cada lado: con más obstáculos el carril se cierra). El jefe empieza en el carril 2. **Al entrar se atranca la puerta de la sala** (`Door_Boss`) hasta que muere.
+- **Sala de calderas** (segundo jefe, `ArenaRework.MachineBanks` desde `Zone2Wing`): tres filas de **bancos de máquinas** (2,4-2,7 m de alto, con tanques, luces de estado y rejillas) con pasillos de ~2,6 m, la caldera en medio (dos pasos de ~2,5 m alrededor) y columnas en los pasillos; los pasillos ciegos laterales guardan cajas con munición (riesgo/recompensa) y detrás de la última fila queda un carril hacia el portón. Una lámpara roja por pasillo. **`Door_Arena2` se atranca al empezar el combate.** El jefe empieza en el último carril.
+
 ## Navegación
 `RuntimeNavMesh` en `Start`, `useGeometry = PhysicsColliders`; los muebles no caminables llevan `NavMeshModifier`. Las puertas llevan `NavMeshObstacle` con carve.
 

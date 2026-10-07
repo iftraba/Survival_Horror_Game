@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 23398216804465479}
-  - component: {fileID: 1153793442786301566}
+  - component: {fileID: 8446970134904523615}
   m_Layer: 0
   m_Name: Cadaver_Civil
   m_TagString: Untagged
@@ -33,7 +33,7 @@ Transform:
   - {fileID: 4115976920951141711}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1153793442786301566
+--- !u!114 &8446970134904523615
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

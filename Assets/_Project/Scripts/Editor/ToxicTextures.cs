@@ -15,6 +15,7 @@ namespace Horror.EditorTools
         const string Dir = "Assets/_Project/Materials/";
         public const string PuddleMatPath = Dir + "ToxicPuddle.mat";
         public const string GlobMatPath = Dir + "ToxicGlob.mat";
+        public const string RingMatPath = Dir + "DangerRing.mat";
 
         [MenuItem("Horror/Texturas de acido")]
         public static void Menu() { EnsureMaterials(); Debug.Log("Texturas de acido creadas"); }
@@ -97,6 +98,29 @@ namespace Horror.EditorTools
             return tex;
         }
 
+        // circulo de aviso de los ataques en area: borde rojo brillante, relleno tenue y marcas radiales
+        static Texture2D BuildRing()
+        {
+            const int N = 256;
+            var tex = new Texture2D(N, N, TextureFormat.RGBA32, false);
+            for (int py = 0; py < N; py++)
+                for (int px = 0; px < N; px++)
+                {
+                    float u = px / (N - 1f) * 2f - 1f, v = py / (N - 1f) * 2f - 1f;
+                    float r = Mathf.Sqrt(u * u + v * v);
+                    if (r > 1f) { tex.SetPixel(px, py, new Color(1f, 0.1f, 0.06f, 0f)); continue; }
+                    float edge = Smooth(0.86f, 0.93f, r) * (1f - Smooth(0.97f, 1.0f, r));              // aro exterior
+                    float inner = Smooth(0.5f, 0.54f, r) * (1f - Smooth(0.56f, 0.6f, r)) * 0.55f;        // aro intermedio
+                    float ang = Mathf.Atan2(v, u);
+                    float spokes = (Mathf.Abs(Mathf.Sin(ang * 6f)) > 0.97f ? 0.35f : 0f) * (r > 0.2f && r < 0.86f ? 1f : 0f);
+                    float fill = 0.22f * (1f - r * 0.4f);
+                    float a = Mathf.Clamp01(Mathf.Max(Mathf.Max(edge, inner), Mathf.Max(spokes, fill)));
+                    tex.SetPixel(px, py, new Color(1f, 0.1f + 0.12f * edge, 0.06f, a));
+                }
+            tex.Apply();
+            return tex;
+        }
+
         /// <summary>Crea (o reutiliza) los dos materiales con sus texturas.</summary>
         public static void EnsureMaterials()
         {
@@ -137,6 +161,17 @@ namespace Horror.EditorTools
             glob.EnableKeyword("_EMISSION");
             glob.SetFloat("_Smoothness", 0.9f);
             EditorUtility.SetDirty(glob);
+            var ringTex = Save("DangerRing_tex", BuildRing());
+            var rm = AssetDatabase.LoadAssetAtPath<Material>(RingMatPath);
+            if (rm == null) { rm = new Material(Shader.Find("Universal Render Pipeline/Unlit")); AssetDatabase.CreateAsset(rm, RingMatPath); }
+            rm.shader = Shader.Find("Universal Render Pipeline/Unlit");
+            rm.SetTexture("_BaseMap", ringTex); rm.SetColor("_BaseColor", Color.white);
+            rm.SetFloat("_Cull", 0f); rm.SetFloat("_Surface", 1f); rm.SetFloat("_Blend", 0f);
+            rm.SetFloat("_SrcBlend", 5f); rm.SetFloat("_DstBlend", 10f); rm.SetFloat("_ZWrite", 0f);
+            rm.SetOverrideTag("RenderType", "Transparent");
+            rm.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); rm.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            rm.renderQueue = 3000;
+            EditorUtility.SetDirty(rm);
             AssetDatabase.SaveAssets();
         }
     }

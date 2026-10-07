@@ -36,8 +36,13 @@ namespace Horror
         [Tooltip("Objetivo que se muestra cuando se abre la puerta por primera vez")]
         public string openedObjective;
 
-        public string Prompt => moving ? "" : open ? "E  Cerrar puerta" : requiredKey != null ? "E  Abrir puerta (cerrada con llave)" : "E  Abrir puerta";
+        public string Prompt => moving ? "" : Sealed ? "Atrancada" : open ? "E  Cerrar puerta" : requiredKey != null ? "E  Abrir puerta (cerrada con llave)" : "E  Abrir puerta";
         public bool IsOpen => open;
+        /// <summary>Atrancada: se cierra de golpe y no se puede abrir (el combate con el jefe encierra al jugador). Unseal() la libera.</summary>
+        public bool Sealed { get; private set; }
+        bool prevForce;
+        public void Seal() { if (Sealed) return; Sealed = true; prevForce = zombiesCanForce; zombiesCanForce = false; if (partner != null) partner.Seal(); }
+        public void Unseal() { if (!Sealed) return; Sealed = false; zombiesCanForce = prevForce; if (partner != null) partner.Unseal(); }
         public bool IsUnlocked => requiredKey == null;
 
         /// <summary>Restaura el estado al cargar una partida, sin animacion ni sonido.</summary>
@@ -80,6 +85,12 @@ namespace Horror
         public void Interact(GameObject who)
         {
             if (moving) return;
+            if (Sealed)
+            {
+                Hud.Message("La puerta se ha atrancado");
+                GameAudio.Play(Sfx.DoorLocked, transform.position);
+                return;
+            }
             if (!open && requiredKey != null)
             {
                 var inv = who.GetComponent<Inventory>();
@@ -120,6 +131,8 @@ namespace Horror
 
         void Update()
         {
+            // atrancada: si estaba abierta, se cierra de golpe
+            if (Sealed && open && !moving) { open = false; bashTime = 0f; StartCoroutine(Swing(closedRot)); return; }
             if (open || moving || requiredKey != null || !zombiesCanForce) { bashTime = 0f; return; }
             // Zombis que te persiguen y estan pegados a la puerta cerrada: la golpean hasta abrirla
             ZombieAI basher = null;

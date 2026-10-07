@@ -91,7 +91,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.45
-  m_Speed: 1.7
+  m_Speed: 0.84
   m_Acceleration: 6
   avoidancePriority: 50
   m_AngularSpeed: 200
@@ -135,7 +135,7 @@ MonoBehaviour:
   attackDamage: 14
   attackCooldown: 1.2
   walkSpeed: 1.1
-  chaseSpeed: 1.7
+  chaseSpeed: 0.84
   staggerTime: 0.4
   hearingRange: 4.5
   attackVariants:
@@ -181,7 +181,7 @@ MonoBehaviour:
   gaitMode: 1
   walkClipSpeed: 0.47822666
   runClipSpeed: 1.5303253
-  runAbove: 1.6
+  runAbove: 0.9
   maxWalkPlayback: 2.2
 --- !u!1001 &5873144086540728376
 PrefabInstance:

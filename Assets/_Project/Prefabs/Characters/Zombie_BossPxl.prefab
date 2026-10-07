@@ -16,8 +16,8 @@ GameObject:
   - component: {fileID: 1263610271914112402}
   - component: {fileID: 496292858899723512}
   - component: {fileID: 2260927094808055405}
-  - component: {fileID: 1300267687335047092}
-  - component: {fileID: 3277058634984797984}
+  - component: {fileID: 5482774811362286232}
+  - component: {fileID: 9023455320787384415}
   m_Layer: 0
   m_Name: Zombie_BossPxl
   m_TagString: Untagged
@@ -179,7 +179,7 @@ MonoBehaviour:
   runClipSpeed: 10.073693
   runAbove: 1.8
   maxWalkPlayback: 2.2
---- !u!114 &1300267687335047092
+--- !u!114 &5482774811362286232
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -199,7 +199,7 @@ MonoBehaviour:
   damage: 6
   tickTime: 0.5
   sizzleSound: {fileID: 8300000, guid: 33456cef78a18da4f944a168db7e5c40, type: 3}
---- !u!114 &3277058634984797984
+--- !u!114 &9023455320787384415
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -220,10 +220,20 @@ MonoBehaviour:
   spitDamage: 12
   spitSpeed: 12
   spitWindup: 0.6
+  spitCount: 030000000500000007000000i
+  spitWaves: 010000000200000003000000i
+  slamRadius: 5.2
+  slamDamage: 40
+  slamWindup: 0.9
+  rainCount: 5
+  rainRadius: 1.5
+  rainDamage: 30
+  rainDelay: 1.1
   chargeSound: {fileID: 8300000, guid: 45ff499fa16c6624b92d3375084a72e1, type: 3}
   crashSound: {fileID: 8300000, guid: 42b327b2400a0b9429e7e2032a09804d, type: 3}
   spitSound: {fileID: 8300000, guid: 142a6686583e9a54eb61a9703a068475, type: 3}
-  pause: {x: 3.5, y: 6}
+  warningMaterial: {fileID: 2100000, guid: 5fa3033b5c10470469489cd8fbcf3dc3, type: 2}
+  pause: {x: 2.5, y: 4.5}
 --- !u!1001 &4476490432744173787
 PrefabInstance:
   m_ObjectHideFlags: 0

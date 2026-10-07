@@ -18,9 +18,9 @@ namespace Horror
         public float fov = 62f;
 
         [Header("Apuntando")]
-        public float aimDistance = 1.7f;
-        public float aimShoulder = 0.65f;
-        public float aimFov = 48f;
+        public float aimDistance = 1.2f;
+        public float aimShoulder = 0.6f;
+        public float aimFov = 44f;
 
         public float minPitch = -40f;
         public float maxPitch = 60f;

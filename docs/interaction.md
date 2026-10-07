@@ -1,5 +1,7 @@
 # Interaction
 
+**Puertas atrancables (2026-10-07)**: `Door.Seal()` cierra de golpe la puerta (si estaba abierta) y la deja atrancada (`Prompt` "Atrancada", mensaje al intentar abrirla, los zombis no la fuerzan); `Unseal()` la libera. `BossRoomTrigger.sealDoors` las atranca al empezar el combate con el jefe (no se puede huir) y las libera al morir el jefe.
+
 Objetos con los que se interactúa con **E**. Código en `Assets/_Project/Scripts/Interaction/`.
 
 ## Clases

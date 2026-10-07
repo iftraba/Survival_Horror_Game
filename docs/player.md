@@ -6,7 +6,7 @@ Control, cámara y sonido del protagonista. Código en `Assets/_Project/Scripts/
 | Clase | Qué hace |
 |---|---|
 | `PlayerController` | Movimiento con `CharacterController`: andar (`walkSpeed` 2.4), correr (`runSpeed` 4.4, Mayús, no mientras apunta) y apuntar (`aimSpeed` 1.7, la velocidad de los pasos laterales de Mixamo). Al apuntar, el cuerpo se orienta a la cámara. Empuja objetos con `pushPower`. `IsAiming` y `IsRunning` son de solo lectura. |
-| `ThirdPersonCamera` | Cámara al hombro estilo RE2. Se acerca y desplaza al apuntar. La sensibilidad se multiplica por `GameSettings.Sensitivity`. Expone `Yaw`/`SetYaw` para guardar y cargar. |
+| `ThirdPersonCamera` | Cámara al hombro estilo RE2. Se acerca y desplaza al apuntar (apuntando: distancia 1,2 m, hombro 0,6, FOV 44; antes 1,7 / 0,65 / 48). La sensibilidad se multiplica por `GameSettings.Sensitivity`. Expone `Yaw`/`SetYaw` para guardar y cargar. |
 | `Flashlight` | Linterna (F) con parpadeo leve. |
 | `PlayerFootsteps` | Pasos por distancia recorrida: más rápidos y fuertes al correr, sigilosos al apuntar. |
 | `PlayerAudio` | Quejidos al recibir daño, muerte y latido con poca vida. |
