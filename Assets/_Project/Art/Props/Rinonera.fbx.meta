@@ -3,7 +3,12 @@ guid: 8c9afdcda5dc95e41b999040c4766c35
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rinonera_baked
+    second: {fileID: 2100000, guid: 5aabe41cd4ff59b4a8aafffe6928dccb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

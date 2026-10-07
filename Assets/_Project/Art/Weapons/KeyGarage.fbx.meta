@@ -3,7 +3,12 @@ guid: 7a8092795f88ab4478d9015fb103bc1e
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KeyGarage_baked
+    second: {fileID: 2100000, guid: 77d7f26903cdf514ab7b8daf771d5201, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

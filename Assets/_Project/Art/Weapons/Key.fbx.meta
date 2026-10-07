@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Key_baked
+    second: {fileID: 2100000, guid: 2136c16f988fd5342b59796e79f5944d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: key_brass
     second: {fileID: 2100000, guid: ea1a1ebee76f2984cba9da5292f65cbe, type: 2}
   - first:
