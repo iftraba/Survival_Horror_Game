@@ -269,6 +269,9 @@ namespace Horror.EditorTools
             Put("I_ShotgunAmmo", 8, 6.0f, 1.0f, 62.0f); Put("I_HandgunAmmo", 12, 7.2f, 1.0f, 62.4f); Put("I_ShotgunAmmo", 6, 10.5f, 1.0f, 57.0f);   // almacen
             Put("I_ShotgunAmmo", 8, -13.9f, 1.0f, 70.0f); Put("I_HandgunAmmo", 12, 13.9f, 1.0f, 73.8f);    // arena: municion sobre las cajas de los muros
             Put("I_Spray", 1, 13.9f, 1.0f, 82.4f); Put("I_ShotgunAmmo", 6, -13.9f, 1.0f, 83.2f);
+            // mas municion y curas para el combate (sobre las mismas cajas de los muros)
+            Put("I_HandgunAmmo", 12, -13.9f, 1.0f, 69.5f); Put("I_Spray", 1, 13.9f, 1.0f, 74.4f); Put("I_ShotgunAmmo", 8, 13.9f, 1.0f, 81.9f);
+            Put("I_HandgunAmmo", 12, -13.9f, 1.0f, 82.7f); Put("I_Spray", 1, -13.9f, 1.0f, 83.7f); Put("I_ShotgunAmmo", 6, -13.9f, 1.0f, 70.5f);
             var bag = Item("I_Bag");
             if (bag != null) { var pk = Pickup.Spawn(bag, 1, locker.transform.TransformPoint(new Vector3(0f, 1.42f, 0.02f))); if (itemsRoot != null) pk.transform.SetParent(itemsRoot.transform); }
 

@@ -81,7 +81,7 @@ namespace Horror
                 if (h.rigidbody != null || h.collider is CharacterController || h.collider.GetComponentInParent<ZombieAI>() != null) continue;
                 y = Mathf.Max(y, h.point.y);
             }
-            if (float.IsNegativeInfinity(y)) return;
+            if (float.IsNegativeInfinity(y) || y > at.y + 0.7f) return;   // solo en el suelo bajo el punto (no sobre una maquina o caja)
             // quad plano con la textura del charco (borde irregular y burbujas), girado al azar para que no se repitan
             var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
             go.name = "ToxicPuddle";

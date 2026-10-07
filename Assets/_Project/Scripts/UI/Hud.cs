@@ -297,6 +297,10 @@ namespace Horror
         }
 
         const int InvCols = 4;
+        // arrastrar para reordenar el inventario
+        int dragFrom = -1;
+        bool dragging;
+        Vector2 dragStart;
 
         static void Fill(Rect r, Color c)
         {
@@ -345,6 +349,16 @@ namespace Horror
             if (kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame) selected = (selected - InvCols + n) % n;
             if (kb.enterKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame) DoAction(selected);
             if (kb.xKey.wasPressedThisFrame) inventory.Drop(selected);
+            // 1-4: asigna el arma seleccionada a esa tecla de atajo (la misma tecla otra vez la libera)
+            var digits = new[] { kb.digit1Key, kb.digit2Key, kb.digit3Key, kb.digit4Key };
+            for (int d = 0; d < digits.Length; d++)
+            {
+                if (!digits[d].wasPressedThisFrame) continue;
+                if (selected < 0 || selected >= n || inventory.slots[selected].IsEmpty || inventory.slots[selected].item.type != ItemType.Weapon)
+                { Message("Selecciona un arma para asignarle una tecla"); continue; }
+                var wi = inventory.slots[selected].item;
+                Message(WeaponHotkeys.Assign(d, wi) ? wi.displayName + " asignada a la tecla " + (d + 1) : "Tecla " + (d + 1) + " liberada");
+            }
         }
 
         void DrawInventory()
@@ -365,19 +379,23 @@ namespace Horror
             GUI.color = new Color(0.9f, 0.78f, 0.45f);
             GUI.Label(new Rect(gx, gy - 52, 400, 34), "INVENTARIO", title);
             GUI.color = new Color(1f, 1f, 1f, 0.55f);
-            GUI.Label(new Rect(gx, gy - 24, 700, 22), "Flechas/WASD: mover    Enter/E: usar o equipar    X: tirar    Tab: cerrar", new GUIStyle(label) { fontSize = 13 });
+            GUI.Label(new Rect(gx, gy - 24, 700, 22), "Flechas/WASD: mover    Enter/E: usar o equipar    X: tirar    Arrastrar: reordenar    1-4: asignar atajo al arma    Tab: cerrar", new GUIStyle(label) { fontSize = 13 });
             GUI.color = Color.white;
 
             var countStyle = new GUIStyle(label) { fontSize = 15, fontStyle = FontStyle.Bold, alignment = TextAnchor.LowerRight };
             var nameStyle = new GUIStyle(label) { fontSize = 11, alignment = TextAnchor.UpperLeft, wordWrap = true };
+            int hover = -1;
             for (int i = 0; i < inventory.slots.Length; i++)
             {
                 var r = new Rect(gx + (i % InvCols) * (size + gap), gy + (i / InvCols) * (size + gap), size, size);
                 var s = inventory.slots[i];
                 bool sel = i == selected;
+                if (r.Contains(Event.current.mousePosition)) hover = i;
+                bool beingDragged = dragging && i == dragFrom;
                 Fill(r, sel ? new Color(0.22f, 0.2f, 0.12f, 0.95f) : new Color(0.1f, 0.11f, 0.12f, 0.95f));
                 if (!s.IsEmpty)
                 {
+                    if (beingDragged) GUI.color = new Color(1f, 1f, 1f, 0.3f);                  // el origen se atenua mientras se arrastra
                     if (s.item.icon != null)
                         GUI.DrawTexture(new Rect(r.x + 6, r.y + 6, size - 12, size - 12), s.item.icon.texture, ScaleMode.ScaleToFit, true);
                     else
@@ -385,6 +403,14 @@ namespace Horror
                         GUI.color = new Color(1f, 1f, 1f, 0.8f);
                         GUI.Label(new Rect(r.x + 6, r.y + 6, size - 12, 40), s.item.displayName, nameStyle);
                         GUI.color = Color.white;
+                    }
+                    GUI.color = Color.white;
+                    int hk = s.item.type == ItemType.Weapon ? WeaponHotkeys.SlotOf(s.item) : -1;
+                    if (hk >= 0)                                                                    // insignia con la tecla de atajo
+                    {
+                        var kr = new Rect(r.xMax - 24, r.y + 4, 20, 20);
+                        Fill(kr, new Color(0.15f, 0.45f, 0.2f, 0.95f));
+                        GUI.Label(kr, (hk + 1).ToString(), new GUIStyle(label) { fontSize = 13, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter });
                     }
                     if (s.item.maxStack > 1) GUI.Label(new Rect(r.x, r.y, size - 6, size - 2), s.count.ToString(), countStyle);
                     if (s.item.type == ItemType.Weapon && weapons != null && weapons.Equipped == s.item.weapon)
@@ -399,7 +425,37 @@ namespace Horror
                 {
                     if (selected == i && Event.current.clickCount > 1) DoAction(i);
                     selected = i;
+                    if (!s.IsEmpty) { dragFrom = i; dragging = false; dragStart = Event.current.mousePosition; }   // puede ser el inicio de un arrastre
                     Event.current.Use();
+                }
+            }
+
+            // Arrastrar y soltar: al moverse mas de 6 px con el boton pulsado empieza el arrastre; al soltar sobre otra casilla se mueve,
+            // se apila o se intercambia (Inventory.Move)
+            if (dragFrom >= 0)
+            {
+                var ev = Event.current;
+                if (!dragging && (ev.type == EventType.MouseDrag || ev.type == EventType.Repaint) && Vector2.Distance(ev.mousePosition, dragStart) > 6f && (Mouse.current != null && Mouse.current.leftButton.isPressed)) dragging = true;
+                if (ev.rawType == EventType.MouseUp || Mouse.current == null || !Mouse.current.leftButton.isPressed)
+                {
+                    if (dragging && hover >= 0 && hover != dragFrom && inventory.Move(dragFrom, hover)) selected = hover;
+                    dragFrom = -1; dragging = false;
+                }
+                else if (dragging)
+                {
+                    if (hover >= 0 && hover != dragFrom)                                         // destino resaltado
+                    {
+                        var tr = new Rect(gx + (hover % InvCols) * (size + gap), gy + (hover / InvCols) * (size + gap), size, size);
+                        Frame(tr, new Color(0.4f, 1f, 0.5f), 3f);
+                    }
+                    var ds = inventory.slots[dragFrom];
+                    if (!ds.IsEmpty && ds.item.icon != null && ev.type == EventType.Repaint)
+                    {
+                        var dr = new Rect(ev.mousePosition.x - size * 0.4f, ev.mousePosition.y - size * 0.4f, size * 0.8f, size * 0.8f);
+                        GUI.color = new Color(1f, 1f, 1f, 0.9f);
+                        GUI.DrawTexture(dr, ds.item.icon.texture, ScaleMode.ScaleToFit, true);
+                        GUI.color = Color.white;
+                    }
                 }
             }
 

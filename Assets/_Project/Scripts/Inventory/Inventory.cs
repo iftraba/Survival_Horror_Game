@@ -83,6 +83,31 @@ namespace Horror
             Changed?.Invoke();
         }
 
+        /// <summary>
+        /// Mueve la pila de 'from' a 'to' (arrastrar en el inventario): a una casilla vacia la traslada, sobre el mismo objeto apilable
+        /// suma hasta el tope de pila y en cualquier otro caso intercambia las dos. Devuelve false si no hacia nada.
+        /// </summary>
+        public bool Move(int from, int to)
+        {
+            if (from == to || from < 0 || to < 0 || from >= slots.Length || to >= slots.Length || slots[from].IsEmpty) return false;
+            var a = slots[from]; var b = slots[to];
+            if (!b.IsEmpty && b.item == a.item && a.item.maxStack > 1)
+            {
+                int room = a.item.maxStack - b.count;
+                if (room > 0)
+                {
+                    int mv = room < a.count ? room : a.count;
+                    slots[to].count += mv; slots[from].count -= mv;
+                    if (slots[from].count <= 0) slots[from] = default;
+                    Changed?.Invoke();
+                    return true;
+                }
+            }
+            slots[from] = b; slots[to] = a;
+            Changed?.Invoke();
+            return true;
+        }
+
         public void RemoveAt(int index, int count = 1)
         {
             if (index < 0 || index >= slots.Length || slots[index].IsEmpty) return;

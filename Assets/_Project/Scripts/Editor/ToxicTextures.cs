@@ -98,24 +98,46 @@ namespace Horror.EditorTools
             return tex;
         }
 
-        // circulo de aviso de los ataques en area: borde rojo brillante, relleno tenue y marcas radiales
+        // circulo de aviso de los ataques en area (v2): halo exterior, aro grueso naranja con nucleo brillante, 24 muescas hacia dentro,
+        // aro interior fino, relleno con franjas diagonales de peligro y una gota de acido en el centro
         static Texture2D BuildRing()
         {
-            const int N = 256;
+            const int N = 512;
             var tex = new Texture2D(N, N, TextureFormat.RGBA32, false);
             for (int py = 0; py < N; py++)
                 for (int px = 0; px < N; px++)
                 {
                     float u = px / (N - 1f) * 2f - 1f, v = py / (N - 1f) * 2f - 1f;
-                    float r = Mathf.Sqrt(u * u + v * v);
-                    if (r > 1f) { tex.SetPixel(px, py, new Color(1f, 0.1f, 0.06f, 0f)); continue; }
-                    float edge = Smooth(0.86f, 0.93f, r) * (1f - Smooth(0.97f, 1.0f, r));              // aro exterior
-                    float inner = Smooth(0.5f, 0.54f, r) * (1f - Smooth(0.56f, 0.6f, r)) * 0.55f;        // aro intermedio
-                    float ang = Mathf.Atan2(v, u);
-                    float spokes = (Mathf.Abs(Mathf.Sin(ang * 6f)) > 0.97f ? 0.35f : 0f) * (r > 0.2f && r < 0.86f ? 1f : 0f);
-                    float fill = 0.22f * (1f - r * 0.4f);
-                    float a = Mathf.Clamp01(Mathf.Max(Mathf.Max(edge, inner), Mathf.Max(spokes, fill)));
-                    tex.SetPixel(px, py, new Color(1f, 0.1f + 0.12f * edge, 0.06f, a));
+                    float r = Mathf.Sqrt(u * u + v * v), ang = Mathf.Atan2(v, u);
+                    if (r > 1f) { tex.SetPixel(px, py, new Color(1f, 0.3f, 0.05f, 0f)); continue; }
+                    float a = 0f; Color col = new Color(1f, 0.28f, 0.06f);
+                    // halo exterior suave
+                    a = Mathf.Max(a, 0.30f * Mathf.Exp(-Mathf.Pow((r - 0.975f) / 0.04f, 2f)));
+                    // aro principal (0,88-0,96) con nucleo amarillo
+                    float band = Smooth(0.875f, 0.895f, r) * (1f - Smooth(0.945f, 0.965f, r));
+                    float core = Smooth(0.905f, 0.92f, r) * (1f - Smooth(0.93f, 0.945f, r));
+                    if (band > 0f) { a = Mathf.Max(a, band); col = Color.Lerp(col, new Color(1f, 0.85f, 0.25f), core); }
+                    // 24 muescas triangulares hacia dentro (0,74-0,875)
+                    float tooth = Mathf.Abs(Mathf.Repeat(ang * 24f / (2f * Mathf.PI), 1f) - 0.5f) * 2f;            // 0 en el centro del diente, 1 en el valle
+                    float depth = Mathf.InverseLerp(0.875f, 0.74f, r);
+                    if (r > 0.74f && r < 0.88f && tooth < depth * 0.9f + 0.05f && depth > 0f) { a = Mathf.Max(a, 0.95f); col = Color.Lerp(col, new Color(1f, 0.55f, 0.1f), depth * 0.5f); }
+                    // aro interior fino (0,52-0,545)
+                    float inner = Smooth(0.52f, 0.527f, r) * (1f - Smooth(0.538f, 0.545f, r));
+                    a = Mathf.Max(a, inner * 0.75f);
+                    // relleno: franjas diagonales de peligro, mas intensas hacia el borde
+                    if (r < 0.74f)
+                    {
+                        float stripe = Mathf.Repeat((u + v) * 9f, 1f) < 0.5f ? 1f : 0f;
+                        float fill = Mathf.Lerp(0.07f, 0.26f, Smooth(0.2f, 0.74f, r)) * Mathf.Lerp(0.55f, 1f, stripe);
+                        a = Mathf.Max(a, fill);
+                    }
+                    // gota de acido central con dos burbujas
+                    float drop = 1f - Smooth(0.075f, 0.09f, r);
+                    float b1 = 1f - Smooth(0.022f, 0.03f, Mathf.Sqrt((u - 0.13f) * (u - 0.13f) + (v - 0.05f) * (v - 0.05f)));
+                    float b2 = 1f - Smooth(0.016f, 0.024f, Mathf.Sqrt((u + 0.1f) * (u + 0.1f) + (v + 0.12f) * (v + 0.12f)));
+                    float dots = Mathf.Max(drop, Mathf.Max(b1, b2));
+                    if (dots > 0f) { a = Mathf.Max(a, dots); col = Color.Lerp(col, new Color(0.55f, 1f, 0.25f), dots); }   // verde: es acido
+                    tex.SetPixel(px, py, new Color(col.r, col.g, col.b, Mathf.Clamp01(a)));
                 }
             tex.Apply();
             return tex;

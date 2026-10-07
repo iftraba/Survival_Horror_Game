@@ -70,10 +70,23 @@ namespace Horror
 
         void Update()
         {
-            if (Equipped == null || GameState.InputBlocked || (health != null && health.IsDead)) return;
+            if (GameState.InputBlocked || (health != null && health.IsDead)) return;
             var kb = Keyboard.current;
             var ms = Mouse.current;
             if (kb == null || ms == null) return;
+
+            // atajos de arma 1-4 (las asigna el jugador en el inventario): equipa, o guarda si ya esta en la mano
+            WeaponHotkeys.EnsureDefaults(inventory);
+            var keys = new[] { kb.digit1Key, kb.digit2Key, kb.digit3Key, kb.digit4Key };
+            for (int k = 0; k < keys.Length; k++)
+            {
+                if (!keys[k].wasPressedThisFrame) continue;
+                var item = WeaponHotkeys.Resolve(inventory, k);
+                if (item == null) continue;
+                if (Equipped == item.weapon) { Equip(null); Hud.Message(item.displayName + " guardada"); }
+                else { Equip(item.weapon); Hud.Message(item.displayName + " equipada"); }
+            }
+            if (Equipped == null) return;
 
             if (kb.rKey.wasPressedThisFrame) TryReload();
 

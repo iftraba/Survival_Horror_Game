@@ -30,6 +30,8 @@ namespace Horror
         Camera cam;
 
         public float Yaw => yaw;
+        /// <summary>Gira la camara (el giro rapido del jugador la mueve junto al personaje).</summary>
+        public void AddYaw(float degrees) => yaw += degrees;
         public void SetYaw(float newYaw, float newPitch = 12f)
         {
             yaw = newYaw;

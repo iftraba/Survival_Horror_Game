@@ -161,7 +161,7 @@ namespace Horror
                 if (los && dist >= 5f && dist <= 18f) { options.Add(0); options.Add(0); }
                 if (los && dist >= 4f) { options.Add(1); options.Add(1); }
                 if (dist <= slamRadius + 1.2f) { options.Add(2); options.Add(2); if (dist <= ai.attackRange + 1.5f) options.Add(2); }
-                if (dist >= 3f) { options.Add(3); options.Add(3); }
+                if (los && dist >= 3f) { options.Add(3); options.Add(3); }   // la lluvia solo si te ve
                 if (options.Count == 0) { nextAction = Time.time + 0.6f; continue; }
 
                 switch (options[Random.Range(0, options.Count)])
@@ -263,7 +263,7 @@ namespace Horror
 
         void FireFan(int n, float stepDeg)
         {
-            Vector3 from = transform.position + Vector3.up * 2.2f + transform.forward * 0.6f;
+            Vector3 from = transform.position + Vector3.up * 1.1f + transform.forward * 0.7f;   // la boca: ~2,6 m del suelo (la capsula del jefe esta centrada a 1,5 m)
             Vector3 aim = (player.position + Vector3.up * 1f - from).normalized;
             for (int i = 0; i < n; i++)
             {
@@ -356,19 +356,30 @@ namespace Horror
             for (int i = 0; i < n; i++)
             {
                 Vector3 center = player.position;
+                bool track = i < 2;                                                  // los dos primeros persiguen al jugador
                 if (i >= 2) { var off = Random.insideUnitCircle * 5.5f; center += new Vector3(off.x, 0f, off.y); }
-                else if (i == 1) center += Flat(player.forward) * 2f;                // uno por delante del jugador
-                StartCoroutine(RainStrike(center, 0.15f * i));
+                StartCoroutine(RainStrike(center, 0.15f * i, track));
             }
         }
 
-        IEnumerator RainStrike(Vector3 center, float delay)
+        IEnumerator RainStrike(Vector3 center, float delay, bool track)
         {
             if (delay > 0f) yield return new WaitForSeconds(delay);
             center.y = GroundY(center);
             var ring = SpawnWarning(center, rainRadius);
-            float wait = rainDelay;
-            for (float t = 0f; t < wait; t += Time.deltaTime) { PulseWarning(ring, t / wait); yield return null; }
+            float wait = rainDelay + (track ? 0.5f : 0f);
+            for (float t = 0f; t < wait; t += Time.deltaTime)
+            {
+                // sigue al jugador (algo mas despacio de lo que anda) y se fija en los ultimos 0,35 s: se puede esquivar
+                if (track && t < wait - 0.35f && player != null)
+                {
+                    Vector3 goal = new Vector3(player.position.x, center.y, player.position.z);
+                    center = Vector3.MoveTowards(center, goal, 3.4f * Time.deltaTime);
+                    if (ring != null) ring.position = new Vector3(center.x, GroundY(center) + 0.04f, center.z);
+                }
+                PulseWarning(ring, t / wait);
+                yield return null;
+            }
             if (ring != null) Destroy(ring.gameObject);
             if (playerHealth != null && !playerHealth.IsDead && Flat(player.position - center).magnitude <= rainRadius && Mathf.Abs(player.position.y - center.y) < 2.5f)
             {
@@ -400,8 +411,9 @@ namespace Horror
         void PulseWarning(Transform ring, float k)
         {
             if (ring == null) return;
+            ring.Rotate(Vector3.forward, 70f * Time.deltaTime, Space.Self);   // la marca gira
             var r = ring.GetComponent<Renderer>();
-            float a = Mathf.Lerp(0.35f, 1f, k) * (0.8f + 0.2f * Mathf.Sin(Time.time * 18f));
+            float a = Mathf.Lerp(0.45f, 1f, k) * (0.8f + 0.2f * Mathf.Sin(Time.time * 18f));
             mpbRing.SetColor(BaseColorId, new Color(1f, 1f, 1f, a));
             r.SetPropertyBlock(mpbRing);
         }
@@ -412,7 +424,10 @@ namespace Horror
         }
     }
 
-    /// <summary>Proyectil de acido del jefe: avanza en linea recta, hace dano al jugador y deja un charco donde cae.</summary>
+    /// <summary>
+    /// Proyectil de acido del jefe: avanza en linea recta y se detiene en lo PRIMERO que toca (muros, maquinas, columnas...); si es
+    /// el jugador le hace dano. Solo deja un charco si cae al suelo (superficie horizontal a ras de suelo), no en paredes ni maquinas.
+    /// </summary>
     public class AcidSpit : MonoBehaviour
     {
         public Vector3 velocity;
@@ -420,6 +435,13 @@ namespace Horror
         public ToxicTrail trail;
         public Transform owner;
         float life;
+        const float Radius = 0.18f;
+
+        bool Ignored(Collider c)
+        {
+            if (owner != null && c.transform.IsChildOf(owner)) return true;
+            return c.GetComponentInParent<ZombieAI>() != null || c.GetComponentInParent<EjectedCasing>() != null || c.GetComponentInParent<Pickup>() != null;
+        }
 
         void Update()
         {
@@ -427,25 +449,36 @@ namespace Horror
             life += dt;
             Vector3 step = velocity * dt;
             Vector3 p = transform.position;
-            bool hitSomething = false;
-            foreach (var h in Physics.SphereCastAll(p, 0.18f, step.normalized, step.magnitude, ~0, QueryTriggerInteraction.Ignore))
+
+            // 1) ya esta dentro de algo (nace pegada a una maquina o una pared): impacto inmediato
+            foreach (var c in Physics.OverlapSphere(p, Radius, ~0, QueryTriggerInteraction.Ignore))
+                if (!Ignored(c)) { Impact(c, p, Vector3.up); return; }
+            // 2) barrido ordenado por distancia: el primer obstaculo manda (antes se tomaba el primero del array, sin ordenar)
+            var hits = Physics.SphereCastAll(p, Radius, step.normalized, step.magnitude, ~0, QueryTriggerInteraction.Ignore);
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            foreach (var h in hits)
             {
-                if (owner != null && h.collider.transform.IsChildOf(owner)) continue;
-                if (h.collider.GetComponentInParent<ZombieAI>() != null) continue;
-                if (h.collider.GetComponentInParent<EjectedCasing>() != null) continue;
-                var pc = h.collider.GetComponentInParent<PlayerController>();
-                if (pc != null)
-                {
-                    var hp = pc.GetComponent<Health>();
-                    if (hp != null) hp.TakeDamage(damage, p);
-                }
-                if (trail != null) trail.AddPuddle(h.point == Vector3.zero ? p : h.point);
-                hitSomething = true;
-                break;
+                if (Ignored(h.collider)) continue;
+                Impact(h.collider, h.distance <= 0f ? p : h.point, h.normal);
+                return;
             }
-            if (hitSomething || life > 4f) { Destroy(gameObject); return; }
+            if (life > 4f) { Destroy(gameObject); return; }
             transform.position = p + step;
             transform.Rotate(180f * dt, 260f * dt, 0f);   // gira: se nota la textura veteada
+        }
+
+        void Impact(Collider c, Vector3 point, Vector3 normal)
+        {
+            var pc = c.GetComponentInParent<PlayerController>();
+            if (pc != null)
+            {
+                var hp = pc.GetComponent<Health>();
+                if (hp != null) hp.TakeDamage(damage, transform.position);
+            }
+            // charco solo si cae al suelo: superficie casi horizontal y a ras de suelo (no en paredes, tapas de maquinas ni cajas)
+            bool floor = normal.y > 0.7f && point.y < 0.4f;
+            if (trail != null && (floor || pc != null)) trail.AddPuddle(pc != null ? new Vector3(point.x, 0f, point.z) : point);
+            Destroy(gameObject);
         }
     }
 }

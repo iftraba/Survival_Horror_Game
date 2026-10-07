@@ -68,7 +68,7 @@ namespace Horror
                 y += h + gap;
                 if (GUI.Button(new Rect(x, y, w, h), "Salir")) Quit();
                 GUI.Label(new Rect(x, sh - 70, 500, 24), "WASD mover - Mayus correr - Clic dcho apuntar - Clic izq disparar", small);
-                GUI.Label(new Rect(x, sh - 46, 500, 24), "E interactuar - R recargar - Tab inventario - Esc pausa", small);
+                GUI.Label(new Rect(x, sh - 46, 500, 24), "E interactuar - R recargar - Q girar - 1-4 armas - Tab inventario - Esc pausa", small);
             }
             else
             {

@@ -19,6 +19,8 @@ namespace Horror
         CharacterController controller;
         Health health;
         float verticalVelocity;
+        [Tooltip("Duracion (s) del giro rapido de 180 grados (tecla Q)")] public float quickTurnTime = 0.22f;
+        float turnRemaining;
 
         void Awake()
         {
@@ -64,6 +66,16 @@ namespace Horror
                 IsRunning = kb.leftShiftKey.isPressed && !IsAiming && input.sqrMagnitude > 0.01f;
             }
 
+            // Giro de 180 grados (Q): gira el personaje y la camara a la vez
+            if (!blocked && kb.qKey.wasPressedThisFrame && turnRemaining <= 0f) turnRemaining = 180f;
+            if (turnRemaining > 0f)
+            {
+                float step = Mathf.Min(turnRemaining, 180f / Mathf.Max(0.05f, quickTurnTime) * Time.deltaTime);
+                transform.Rotate(0f, step, 0f, Space.World);
+                if (cam != null) cam.AddYaw(step);
+                turnRemaining -= step;
+            }
+
             var camT = cam != null ? cam.transform : Camera.main.transform;
             Vector3 fwd = Vector3.ProjectOnPlane(camT.forward, Vector3.up).normalized;
             Vector3 right = Vector3.ProjectOnPlane(camT.right, Vector3.up).normalized;
@@ -72,7 +84,8 @@ namespace Horror
 
             float speed = IsAiming ? aimSpeed : IsRunning ? runSpeed : walkSpeed;
 
-            if (IsAiming)
+            if (turnRemaining > 0f) { }                 // durante el giro rapido no se reorienta
+            else if (IsAiming)
                 Face(fwd);
             else if (move.sqrMagnitude > 0.01f)
                 Face(move);
