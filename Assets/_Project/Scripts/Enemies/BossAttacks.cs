@@ -216,7 +216,9 @@ namespace Horror
                     Destroy(go.GetComponent<Collider>());
                     go.transform.position = from;
                     go.transform.localScale = Vector3.one * 0.4f;
-                    if (trail != null && trail.puddleMaterial != null) go.GetComponent<Renderer>().sharedMaterial = trail.puddleMaterial;
+                    if (trail != null && trail.spitMaterial != null) { var rr = go.GetComponent<Renderer>(); rr.sharedMaterial = trail.spitMaterial; rr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; }
+                    var glow = new GameObject("Glow").AddComponent<Light>();     // brillo verde: la bola ilumina lo que cruza
+                    glow.transform.SetParent(go.transform, false); glow.type = LightType.Point; glow.color = new Color(0.4f, 1f, 0.2f); glow.range = 4f; glow.intensity = 3f; glow.shadows = LightShadows.None;
                     var s = go.AddComponent<AcidSpit>();
                     s.velocity = Quaternion.Euler(0f, yaw, 0f) * aim * spitSpeed;
                     s.damage = spitDamage;
@@ -266,6 +268,7 @@ namespace Horror
             }
             if (hitSomething || life > 4f) { Destroy(gameObject); return; }
             transform.position = p + step;
+            transform.Rotate(180f * dt, 260f * dt, 0f);   // gira: se nota la textura veteada
         }
     }
 }

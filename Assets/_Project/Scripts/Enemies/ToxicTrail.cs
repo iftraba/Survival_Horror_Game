@@ -11,6 +11,7 @@ namespace Horror
     public class ToxicTrail : MonoBehaviour
     {
         public Material puddleMaterial;
+        [Tooltip("Material de la bola de acido que escupe el jefe")] public Material spitMaterial;
         [Tooltip("Cada cuantos metros recorridos deja un charco")] public float spacing = 1.4f;
         public float radius = 0.85f;
         [Tooltip("Segundos que dura un charco")] public float lifetime = 9f;
@@ -51,7 +52,7 @@ namespace Horror
                 if (age >= lifetime) { Destroy(puddles[i].t.gameObject); puddles.RemoveAt(i); continue; }
                 // se encoge al final de su vida
                 float k = Mathf.Clamp01((lifetime - age) / 2f);
-                puddles[i].t.localScale = new Vector3(radius * 2f * k, 0.01f, radius * 2f * k);
+                puddles[i].t.localScale = new Vector3(radius * 2.4f * k, radius * 2.4f * k, 1f);
             }
 
             if (player == null || playerHealth == null || playerHealth.IsDead || Time.time < nextTick) return;
@@ -79,12 +80,14 @@ namespace Horror
                 y = Mathf.Max(y, h.point.y);
             }
             if (float.IsNegativeInfinity(y)) return;
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            // quad plano con la textura del charco (borde irregular y burbujas), girado al azar para que no se repitan
+            var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
             go.name = "ToxicPuddle";
             Destroy(go.GetComponent<Collider>());
             go.transform.position = new Vector3(at.x, y + 0.02f, at.z);
-            go.transform.localScale = new Vector3(radius * 2f, 0.01f, radius * 2f);
-            if (puddleMaterial != null) go.GetComponent<Renderer>().sharedMaterial = puddleMaterial;
+            go.transform.rotation = Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
+            go.transform.localScale = new Vector3(radius * 2.4f, radius * 2.4f, 1f);
+            if (puddleMaterial != null) { var rr = go.GetComponent<Renderer>(); rr.sharedMaterial = puddleMaterial; rr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; }
             puddles.Add(new Puddle { t = go.transform, born = Time.time });
         }
 

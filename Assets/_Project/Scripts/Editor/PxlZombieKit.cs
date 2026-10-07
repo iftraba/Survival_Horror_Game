@@ -87,12 +87,12 @@ namespace Horror.EditorTools
             var spec = new ZombieKit.Spec
             {
                 name = "Zombie_BossPxl", fbxPath = fbxPath, scale = scale, controller = oc, height = 3.0f, radius = 0.85f,
-                hp = 2600f, chase = 1.17f, damage = 60f, attackRange = 2.6f, cooldown = 2.0f, stagger = 0f, alertTime = 0.6f,
+                hp = 1800f, chase = 1.17f, damage = 60f, attackRange = 2.6f, cooldown = 2.0f, stagger = 0f, alertTime = 0.6f,
                 walkClip = Mathf.Max(0.3f, Clip("Z_Walk_InPlace").averageSpeed.magnitude, Clip("Z_Walk").averageSpeed.magnitude) * scale,
                 runClip = Clip("Z_Run").averageSpeed.magnitude * scale, runAbove = 1.8f, variants = new[] { variant }, dormant = true,
                 drop = "I_KeyFinal", bossName = "ABOMINACION",
                 headRadius = 0.22f, headLift = 0.1f, torsoRadius = 0.48f, limbRadiusScale = 2.0f,
-                headMult = 3f, torsoMult = 0.4f, limbMult = 0.2f,                // cuerpo grueso: la cabeza es el punto debil
+                headMult = 3f, torsoMult = 0.65f, limbMult = 0.3f,                // cuerpo grueso: la cabeza es el punto debil
             };
             var prefab = ZombieKit.BuildPrefab(spec);
 
@@ -109,21 +109,11 @@ namespace Horror.EditorTools
             EditorUtility.SetDirty(mat);
             var root = PrefabUtility.LoadPrefabContents(PrefabDir + "Zombie_BossPxl.prefab");
             foreach (var r in root.GetComponentsInChildren<Renderer>()) { var ms = r.sharedMaterials; for (int i = 0; i < ms.Length; i++) ms[i] = mat; r.sharedMaterials = ms; }
-            // rastro de acido: charcos que hacen dano al pisarlos
-            string puddlePath = "Assets/_Project/Materials/ToxicPuddle.mat";
-            var puddle = AssetDatabase.LoadAssetAtPath<Material>(puddlePath);
-            if (puddle == null)
-            {
-                puddle = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                AssetDatabase.CreateAsset(puddle, puddlePath);
-            }
-            puddle.SetColor("_BaseColor", new Color(0.2f, 0.55f, 0.1f));
-            puddle.SetFloat("_Smoothness", 0.9f);
-            puddle.SetColor("_EmissionColor", new Color(0.12f, 0.6f, 0.08f));
-            puddle.EnableKeyword("_EMISSION");
-            EditorUtility.SetDirty(puddle);
+            // rastro y escupitajo de acido: materiales con textura (ToxicTextures)
+            ToxicTextures.EnsureMaterials();
             var trail = root.GetComponent<ToxicTrail>() ?? root.AddComponent<ToxicTrail>();
-            trail.puddleMaterial = puddle;
+            trail.puddleMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.PuddleMatPath);
+            trail.spitMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.GlobMatPath);
             if (root.GetComponent<BossAttacks>() == null) root.AddComponent<BossAttacks>();
             PrefabUtility.SaveAsPrefabAsset(root, PrefabDir + "Zombie_BossPxl.prefab");
             PrefabUtility.UnloadPrefabContents(root);

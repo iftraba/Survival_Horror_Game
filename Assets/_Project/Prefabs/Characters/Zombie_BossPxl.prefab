@@ -16,8 +16,8 @@ GameObject:
   - component: {fileID: 1263610271914112402}
   - component: {fileID: 496292858899723512}
   - component: {fileID: 2260927094808055405}
-  - component: {fileID: 3637666143163324377}
-  - component: {fileID: 2410277578746331674}
+  - component: {fileID: 6888743811297397172}
+  - component: {fileID: 8865643439565140175}
   m_Layer: 0
   m_Name: Zombie_BossPxl
   m_TagString: Untagged
@@ -77,8 +77,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieHitZones
   headMultiplier: 3
-  torsoMultiplier: 0.4
-  limbMultiplier: 0.2
+  torsoMultiplier: 0.65
+  limbMultiplier: 0.3
   headRadius: 0.22
   headLift: 0.1
   torsoRadius: 0.48
@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99548ff9749f20a4ba621de27f5a5d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Health
-  maxHealth: 2600
+  maxHealth: 1800
   damageTakenMultiplier: 1
 --- !u!114 &1263610271914112402
 MonoBehaviour:
@@ -179,7 +179,7 @@ MonoBehaviour:
   runClipSpeed: 10.073693
   runAbove: 1.8
   maxWalkPlayback: 2.2
---- !u!114 &3637666143163324377
+--- !u!114 &6888743811297397172
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -192,12 +192,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ToxicTrail
   puddleMaterial: {fileID: 2100000, guid: 9377ff0d074eb194e88fb1094fa7fef8, type: 2}
+  spitMaterial: {fileID: 2100000, guid: 15ab152c24d1ac742ac3e38f03d3e65b, type: 2}
   spacing: 1.4
   radius: 0.85
   lifetime: 9
   damage: 6
   tickTime: 0.5
---- !u!114 &2410277578746331674
+--- !u!114 &8865643439565140175
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
