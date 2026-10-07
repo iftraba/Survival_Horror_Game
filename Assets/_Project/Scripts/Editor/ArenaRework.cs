@@ -44,50 +44,62 @@ namespace Horror.EditorTools
         }
 
         // ------------------------------------------------------------------ bancos de maquinas (arena 2)
-        /// <summary>Un banco de maquinas: cuerpo macizo (colision), tapa, tuberias/depositos encima y luces de estado a los dos lados.</summary>
+        /// <summary>Una maquina: cuerpo macizo (colision), tapa, depositos encima y luces de estado y rejillas en las dos caras largas.</summary>
         public static void Machine(Transform parent, string name, float cx, float cz, float sx, float sz, float h, Material metal, Material wall, Material red, Material green)
         {
             Call<GameObject>("Box", name, new Vector3(cx, h * 0.5f, cz), new Vector3(sx, h, sz), metal, parent, 1.5f, true);
             Call<GameObject>("Box", name + "_Cap", new Vector3(cx, h + 0.08f, cz), new Vector3(sx + 0.12f, 0.16f, sz + 0.12f), wall, parent, 1.5f, false);
-            // depositos y tuberias sobre el banco (sin colision: van por encima de la cabeza)
-            int tanks = Mathf.Max(1, Mathf.RoundToInt(sx / 3.2f));
+            bool alongX = sx >= sz;                                            // eje largo de la maquina
+            float len = alongX ? sx : sz, thick = alongX ? sz : sx;
+            int tanks = Mathf.Max(1, Mathf.RoundToInt(len / 3.2f));
             for (int i = 0; i < tanks; i++)
             {
-                float tx = cx - sx * 0.5f + (i + 0.5f) * sx / tanks;
-                float th = 0.7f + ((i * 37 + (int)(cx * 3f)) % 5) * 0.12f;
-                Cyl(name + "_Tank", parent, new Vector3(tx, h + 0.16f + th * 0.5f, cz), new Vector3(Mathf.Min(sz * 0.8f, 1.1f), th * 0.5f, Mathf.Min(sz * 0.8f, 1.1f)), false, metal);
+                float off = -len * 0.5f + (i + 0.5f) * len / tanks;
+                float th = 0.7f + ((i * 37 + (int)(cx * 3f + cz)) % 5) * 0.12f;
+                float d = Mathf.Min(thick * 0.8f, 1.1f);
+                Vector3 pos = alongX ? new Vector3(cx + off, h + 0.16f + th * 0.5f, cz) : new Vector3(cx, h + 0.16f + th * 0.5f, cz + off);
+                Cyl(name + "_Tank", parent, pos, new Vector3(d, th * 0.5f, d), false, metal);
             }
-            // luces de estado a ambos lados (hacia los pasillos)
-            int lights = Mathf.Max(2, Mathf.RoundToInt(sx / 1.8f));
+            int lights = Mathf.Max(2, Mathf.RoundToInt(len / 1.8f));
             for (int i = 0; i < lights; i++)
             {
-                float lx = cx - sx * 0.5f + (i + 0.5f) * sx / lights;
-                var mat = (i + (int)(cz)) % 3 == 0 ? red : green;
+                float off = -len * 0.5f + (i + 0.5f) * len / lights;
+                var mat = (i + (int)cz) % 3 == 0 ? red : green;
                 foreach (float side in new[] { -1f, 1f })
-                    Call<GameObject>("Box", name + "_Led", new Vector3(lx, 1.45f, cz + side * (sz * 0.5f + 0.012f)), new Vector3(0.16f, 0.1f, 0.03f), mat, parent, 1f, false);
+                {
+                    Vector3 pos = alongX ? new Vector3(cx + off, 1.45f, cz + side * (sz * 0.5f + 0.012f)) : new Vector3(cx + side * (sx * 0.5f + 0.012f), 1.45f, cz + off);
+                    Vector3 size = alongX ? new Vector3(0.16f, 0.1f, 0.03f) : new Vector3(0.03f, 0.1f, 0.16f);
+                    Call<GameObject>("Box", name + "_Led", pos, size, mat, parent, 1f, false);
+                }
             }
-            // rendijas de ventilacion oscuras en la cara: un par de tiras por cada lado
             foreach (float side in new[] { -1f, 1f })
-                Call<GameObject>("Box", name + "_Vent", new Vector3(cx, 0.55f, cz + side * (sz * 0.5f + 0.01f)), new Vector3(sx * 0.7f, 0.45f, 0.02f), wall, parent, 1f, false);
+            {
+                Vector3 pos = alongX ? new Vector3(cx, 0.55f, cz + side * (sz * 0.5f + 0.01f)) : new Vector3(cx + side * (sx * 0.5f + 0.01f), 0.55f, cz);
+                Vector3 size = alongX ? new Vector3(sx * 0.7f, 0.45f, 0.02f) : new Vector3(0.02f, 0.45f, sz * 0.7f);
+                Call<GameObject>("Box", name + "_Vent", pos, size, wall, parent, 1f, false);
+            }
         }
 
-        /// <summary>Filas de maquinas de la sala de calderas (z 66-85). Devuelve la lista de bancos creados.</summary>
+        /// <summary>
+        /// Sala de calderas (z 66-85): ISLAS de maquinas sueltas, de tamanos distintos y colocadas sin simetria, con la caldera
+        /// descentrada. Ninguna toca un muro y entre todo queda >= 2 m: se puede rodear cada maquina por los cuatro lados (nunca
+        /// un callejon sin salida donde el jefe te encierre) y no hay recta larga para correr.
+        /// </summary>
         public static void MachineBanks(Transform parent)
         {
             var metal = M("Env_Metal"); var wall = M("Env_Wall");
             var red = Emissive("Machine_LedRed", new Color(1f, 0.15f, 0.08f)); var green = Emissive("Machine_LedGreen", new Color(0.2f, 1f, 0.35f));
-            // fila 1 (entrada): deja un pasillo central de ~5 m
-            Machine(parent, "Bank_1W", -8.5f, 70.1f, 11.8f, 1.8f, 2.4f, metal, wall, red, green);
-            Machine(parent, "Bank_1E", 8.5f, 70.1f, 11.8f, 1.8f, 2.4f, metal, wall, red, green);
-            // fila 2: alrededor de la caldera quedan dos pasos de ~2,5 m
-            Machine(parent, "Bank_2W", -9.7f, 74.5f, 9.6f, 1.8f, 2.7f, metal, wall, red, green);
-            Machine(parent, "Bank_2E", 9.7f, 74.5f, 9.6f, 1.8f, 2.7f, metal, wall, red, green);
-            // fila 3: tras la caldera; detras queda el ultimo carril hacia el porton
-            Machine(parent, "Bank_3W", -9.7f, 78.9f, 9.6f, 1.8f, 2.4f, metal, wall, red, green);
-            Machine(parent, "Bank_3E", 9.7f, 78.9f, 9.6f, 1.8f, 2.4f, metal, wall, red, green);
-            // columnas en los pasillos: obligan a zigzaguear y paran las embestidas
-            foreach (var c in new[] { new Vector2(-9.7f, 72.3f), new Vector2(9.7f, 72.3f), new Vector2(-9.7f, 76.7f), new Vector2(9.7f, 76.7f) })
-                Cyl("Pillar", parent, new Vector3(c.x, 2.75f, c.y), new Vector3(1.0f, 2.75f, 1.0f), true, wall);
+            Machine(parent, "Mach_A", -1.0f, 70.8f, 3.4f, 1.8f, 2.4f, metal, wall, red, green);    // frente a la puerta: obliga a elegir lado
+            Machine(parent, "Mach_B", -8.0f, 70.2f, 4.2f, 2.4f, 2.7f, metal, wall, red, green);
+            Machine(parent, "Mach_C", 7.5f, 70.5f, 6.0f, 2.0f, 2.4f, metal, wall, red, green);
+            Machine(parent, "Mach_D", -10.0f, 76.5f, 4.5f, 2.0f, 2.4f, metal, wall, red, green);
+            Machine(parent, "Mach_E", 9.5f, 76.2f, 2.2f, 5.5f, 2.5f, metal, wall, red, green);     // larga en vertical
+            Machine(parent, "Mach_F", 2.5f, 80.5f, 7.0f, 2.2f, 2.6f, metal, wall, red, green);
+            Machine(parent, "Mach_G", -10.5f, 80.8f, 3.0f, 1.8f, 2.4f, metal, wall, red, green);
+            // deposito cilindrico suelto y una columna estructural, fuera de eje
+            Cyl("Tank_Island", parent, new Vector3(4.5f, 1.5f, 74.5f), new Vector3(2.0f, 1.5f, 2.0f), true, metal);
+            Cyl("Tank_IslandCap", parent, new Vector3(4.5f, 3.05f, 74.5f), new Vector3(2.2f, 0.08f, 2.2f), false, wall);
+            Cyl("Pillar", parent, new Vector3(-5.8f, 2.75f, 80.2f), new Vector3(1.0f, 2.75f, 1.0f), true, wall);
         }
 
         // ------------------------------------------------------------------ arena 1
@@ -161,6 +173,7 @@ namespace Horror.EditorTools
                 EditorUtility.SetDirty(brt);
                 log.Add("puerta del jefe atrancable");
             }
+            log.Add(ArenaAudit.Run(true).Replace("\n", " "));   // huecos donde el jugador cabe y el jefe no: se sellan
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             return string.Join(" | ", log);
         }

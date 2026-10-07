@@ -18,7 +18,7 @@ namespace Horror
         int selected = -1;
         GUIStyle label, big, center;
         int saveSel = 1, overwriteSlot;   // menu de guardado: slot elegido y slot pendiente de confirmar sobrescritura
-        bool pauseLoadList;
+        bool pauseLoadList, pauseOptions;
 
         public static void Message(string text)
         {
@@ -59,6 +59,7 @@ namespace Horror
             if (kb.escapeKey.wasPressedThisFrame)
             {
                 pauseLoadList = false;
+                if (pauseOptions) { GameSettings.Save(); pauseOptions = false; }
                 if (GameState.InventoryOpen) { GameState.SetInventoryOpen(false); ItemPreview.Get().Show(null); }
                 else GameState.SetPaused(!GameState.Paused);
                 return;
@@ -178,12 +179,28 @@ namespace Horror
                 return;
             }
 
+            // Opciones (volumen y sensibilidad, las mismas que en el menu principal; se guardan al salir)
+            if (pauseOptions)
+            {
+                GUI.Label(new Rect(x, y, w, 26), "Volumen  " + Mathf.RoundToInt(GameSettings.Volume * 100f) + "%", center);
+                GameSettings.Volume = GUI.HorizontalSlider(new Rect(x, y + 32, w, 20), GameSettings.Volume, 0f, 1f);
+                y += 76f;
+                GUI.Label(new Rect(x, y, w, 26), "Sensibilidad del raton  " + GameSettings.Sensitivity.ToString("0.00") + "x", center);
+                GameSettings.Sensitivity = GUI.HorizontalSlider(new Rect(x, y + 32, w, 20), GameSettings.Sensitivity, 0.3f, 2.5f);
+                y += 84f;
+                if (GUI.Button(new Rect(x, y, w, h), "Volver")) { GameSettings.Save(); pauseOptions = false; }
+                return;
+            }
+
             if (GUI.Button(new Rect(x, y, w, h), "Reanudar")) GameState.SetPaused(false);
             y += h + gap;
 
             GUI.enabled = SaveSystem.HasAnySave;
             if (GUI.Button(new Rect(x, y, w, h), SaveSystem.HasAnySave ? "Cargar partida" : "Cargar partida  (sin guardados)")) pauseLoadList = true;
             GUI.enabled = true;
+            y += h + gap;
+
+            if (GUI.Button(new Rect(x, y, w, h), "Opciones")) pauseOptions = true;
             y += h + gap;
 
             if (GUI.Button(new Rect(x, y, w, h), "Reiniciar")) Restart();
