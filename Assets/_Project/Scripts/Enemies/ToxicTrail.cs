@@ -63,7 +63,7 @@ namespace Horror
                 if (d.magnitude > radius * 0.9f || Mathf.Abs(player.position.y - p.t.position.y) > 1.2f) continue;
                 playerHealth.TakeDamage(damage, p.t.position);
                 Hud.Message("Ácido");
-                if (sizzleSound != null) GameAudio.PlayClip(sizzleSound, p.t.position, 0.7f, Random.Range(0.95f, 1.08f), false);
+                if (sizzleSound != null) GameAudio.PlayClip(sizzleSound, p.t.position, soundVolume * 0.7f, Random.Range(0.95f, 1.08f), false);
                 nextTick = Time.time + tickTime;
                 break;
             }

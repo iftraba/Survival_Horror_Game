@@ -6,6 +6,7 @@ namespace Horror
     [RequireComponent(typeof(ZombieAI))]
     public class ZombieAudio : MonoBehaviour
     {
+        [Tooltip("Multiplica el volumen de toda la voz de este enemigo (el jefe 2 usa 0,7)")] public float volumeScale = 1f;
         ZombieAI ai;
         Health health;
         Transform player;
@@ -47,8 +48,8 @@ namespace Horror
         void OnAlerted()
         {
             if (health.IsDead) return;
-            if (!string.IsNullOrEmpty(ai.bossName)) GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1f, false);   // el rugido se oye en toda la sala
-            else GameAudio.Play(Sfx.ZombieGroan, transform.position, GroanVolume, voicePitch * 0.92f);
+            if (!string.IsNullOrEmpty(ai.bossName)) GameAudio.Play(Sfx.BossRoar, transform.position, volumeScale * 1f, 1f, false);   // el rugido se oye en toda la sala
+            else GameAudio.Play(Sfx.ZombieGroan, transform.position, volumeScale * GroanVolume, voicePitch * 0.92f);
         }
 
         void Update()
@@ -57,7 +58,7 @@ namespace Horror
             if (!string.IsNullOrEmpty(ai.bossName) && !health.IsDead && agent != null && agent.enabled && agent.velocity.magnitude > 0.5f && Time.time >= nextStep)
             {
                 nextStep = Time.time + Mathf.Clamp(1.1f / agent.velocity.magnitude, 0.4f, 0.9f);
-                GameAudio.Play(Sfx.BossStep, transform.position, 1f, Random.Range(0.92f, 1.08f));
+                GameAudio.Play(Sfx.BossStep, transform.position, volumeScale * 1f, Random.Range(0.92f, 1.08f));
             }
             if (health.IsDead || Time.time < nextGroan) return;
             nextGroan = Time.time + (ai.IsChasing ? Random.Range(2.5f, 5f) : Random.Range(6f, 14f));
@@ -68,19 +69,19 @@ namespace Horror
                 if (pc != null) player = pc.transform;
             }
             if (player != null && (player.position - transform.position).sqrMagnitude < 32f * 32f)
-                GameAudio.Play(Sfx.ZombieGroan, transform.position, GroanVolume, voicePitch);
+                GameAudio.Play(Sfx.ZombieGroan, transform.position, volumeScale * GroanVolume, voicePitch);
         }
 
         // Los zombis suenan por debajo de los disparos (que ya van al maximo y no pueden subir mas)
         const float GroanVolume = 0.5f;
 
-        void OnAttacked() => GameAudio.Play(Sfx.ZombieAttack, transform.position, 0.65f, voicePitch);
+        void OnAttacked() => GameAudio.Play(Sfx.ZombieAttack, transform.position, volumeScale * 0.65f, voicePitch);
 
         void OnDamaged(Vector3 _)
         {
-            if (!health.IsDead) GameAudio.Play(Sfx.ZombieHurt, transform.position, 0.55f, voicePitch);
+            if (!health.IsDead) GameAudio.Play(Sfx.ZombieHurt, transform.position, volumeScale * 0.55f, voicePitch);
         }
 
-        void OnDied() => GameAudio.Play(Sfx.ZombieDeath, transform.position, 0.6f, voicePitch);
+        void OnDied() => GameAudio.Play(Sfx.ZombieDeath, transform.position, volumeScale * 0.6f, voicePitch);
     }
 }

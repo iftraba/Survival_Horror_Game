@@ -45,6 +45,7 @@ namespace Horror
         public float rainDelay = 1.1f;
 
         [Header("Sonidos (vacio = los genericos del jefe)")]
+        [Tooltip("Multiplica el volumen de todos los efectos de los ataques del jefe (0,7 = 30 % mas bajos)")] [Range(0f, 1f)] public float soundVolume = 0.7f;
         public AudioClip chargeSound, crashSound, spitSound;
         [Tooltip("Material del circulo rojo de aviso")] public Material warningMaterial;
 
@@ -180,7 +181,7 @@ namespace Horror
             ai.Suspended = true;
             Phase = phase;
             Tell(true);
-            GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 0.9f, false);
+            GameAudio.Play(Sfx.BossRoar, transform.position, soundVolume * 1f, 0.9f, false);
             Hud.Message(phase == 2 ? "La abominación se enfurece" : "La abominación está fuera de sí");
             yield return Face(1.4f);
             Tell(false);
@@ -197,8 +198,8 @@ namespace Horror
         {
             ai.Suspended = true;
             Tell(true);
-            if (chargeSound != null) GameAudio.PlayClip(chargeSound, transform.position, 1f, 1f, false);
-            else GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1.1f, false);
+            if (chargeSound != null) GameAudio.PlayClip(chargeSound, transform.position, soundVolume * 1f, 1f, false);
+            else GameAudio.Play(Sfx.BossRoar, transform.position, soundVolume * 1f, 1.1f, false);
             yield return Face(chargeWindup * speedScale);
             Tell(false);
 
@@ -230,8 +231,8 @@ namespace Horror
             if (anim != null) anim.speedOverride = -1f;
             if (blocked && !health.IsDead)
             {
-                if (crashSound != null) GameAudio.PlayClip(crashSound, transform.position, 1f, 1f, false);
-                else GameAudio.Play(Sfx.BossStep, transform.position, 1f, 0.6f, false);
+                if (crashSound != null) GameAudio.PlayClip(crashSound, transform.position, soundVolume * 1f, 1f, false);
+                else GameAudio.Play(Sfx.BossStep, transform.position, soundVolume * 1f, 0.6f, false);
                 Hud.Message("¡Se ha estrellado!");
                 health.damageTakenMultiplier = stunDamageMultiplier;
                 yield return new WaitForSeconds(stunTime);
@@ -246,8 +247,8 @@ namespace Horror
         {
             ai.Suspended = true;
             Tell(true);
-            if (spitSound != null) GameAudio.PlayClip(spitSound, transform.position, 0.9f, 1f, true);
-            else GameAudio.Play(Sfx.ZombieAttack, transform.position, 1f, 0.6f, true);
+            if (spitSound != null) GameAudio.PlayClip(spitSound, transform.position, soundVolume * 0.9f, 1f, true);
+            else GameAudio.Play(Sfx.ZombieAttack, transform.position, soundVolume * 1f, 0.6f, true);
             yield return Face(spitWindup * speedScale);
             int ph = Mathf.Clamp(Phase, 1, 3) - 1;
             int n = spitCount[Mathf.Min(ph, spitCount.Length - 1)], waves = spitWaves[Mathf.Min(ph, spitWaves.Length - 1)];
@@ -292,7 +293,7 @@ namespace Horror
         {
             ai.Suspended = true;
             Tell(true);
-            GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 0.8f, false);
+            GameAudio.Play(Sfx.BossRoar, transform.position, soundVolume * 1f, 0.8f, false);
             var ring = SpawnWarning(transform.position, slamRadius);
             float wind = slamWindup * speedScale;
             for (float t = 0f; t < wind && !health.IsDead; t += Time.deltaTime)
@@ -304,8 +305,8 @@ namespace Horror
             Tell(false);
             if (health.IsDead) { ai.Suspended = false; yield break; }
 
-            if (crashSound != null) GameAudio.PlayClip(crashSound, transform.position, 1f, 0.9f, false);
-            else GameAudio.Play(Sfx.BossStep, transform.position, 1f, 0.5f, false);
+            if (crashSound != null) GameAudio.PlayClip(crashSound, transform.position, soundVolume * 1f, 0.9f, false);
+            else GameAudio.Play(Sfx.BossStep, transform.position, soundVolume * 1f, 0.5f, false);
             Vector3 c = transform.position + Vector3.up * 1.2f;
             if (playerHealth != null && Flat(player.position - transform.position).magnitude <= slamRadius && Mathf.Abs(player.position.y - transform.position.y) < 2.5f && AreaReaches(c, player.position + Vector3.up * 1f))
             {
@@ -346,8 +347,8 @@ namespace Horror
         {
             ai.Suspended = true;
             Tell(true);
-            if (spitSound != null) GameAudio.PlayClip(spitSound, transform.position, 1f, 0.8f, true);
-            else GameAudio.Play(Sfx.BossRoar, transform.position, 1f, 1.2f, false);
+            if (spitSound != null) GameAudio.PlayClip(spitSound, transform.position, soundVolume * 1f, 0.8f, true);
+            else GameAudio.Play(Sfx.BossRoar, transform.position, soundVolume * 1f, 1.2f, false);
             yield return Face(0.7f * speedScale);
             Tell(false);
             ai.Suspended = false;                                                   // el jefe sigue persiguiendo mientras caen
@@ -389,7 +390,7 @@ namespace Horror
             if (trail != null)
             {
                 trail.AddPuddle(center);
-                if (trail.sizzleSound != null) GameAudio.PlayClip(trail.sizzleSound, center, 0.8f, Random.Range(0.9f, 1.1f), true);
+                if (trail.sizzleSound != null) GameAudio.PlayClip(trail.sizzleSound, center, soundVolume * 0.8f, Random.Range(0.9f, 1.1f), true);
             }
         }
 
