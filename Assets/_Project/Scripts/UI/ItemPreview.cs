@@ -16,6 +16,11 @@ namespace Horror
         GameObject model;
         ItemData shown;
         public RenderTexture Texture { get; private set; }
+        /// <summary>Examen: el jugador gira el objeto (Yaw/Pitch en grados) y lo acerca (Zoom); si es false gira solo.</summary>
+        public bool Manual { get; set; }
+        public float Yaw { get; set; }
+        public float Pitch { get; set; }
+        public float Zoom { get; set; } = 1f;
 
         static readonly Vector3 StudioPos = new Vector3(0f, -400f, 0f);
 
@@ -31,7 +36,7 @@ namespace Horror
 
         void Build()
         {
-            Texture = new RenderTexture(512, 512, 24, RenderTextureFormat.ARGB32) { name = "ItemPreview", antiAliasing = 4 };
+            Texture = new RenderTexture(1024, 1024, 24, RenderTextureFormat.ARGB32) { name = "ItemPreview", antiAliasing = 4 };
             var camGo = new GameObject("PreviewCamera");
             camGo.transform.SetParent(transform, false);
             camGo.transform.localPosition = new Vector3(0f, 0.12f, -1.1f);
@@ -78,9 +83,9 @@ namespace Horror
             model = Instantiate(item.worldPrefab, pivot);
             foreach (var c in model.GetComponentsInChildren<Collider>()) Destroy(c);
             foreach (var r in model.GetComponentsInChildren<Rigidbody>()) Destroy(r);
-            // encuadre: centrado en el pivote y escalado para que su lado mayor mida 0.42 m
+            // encuadre: centrado en el pivote y escalado para que su lado mayor mida 0.32 m (con 0.42 un arma larga se cortaba al girar)
             var b = Bounds(model);
-            float k = 0.42f / Mathf.Max(0.001f, Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z)));
+            float k = 0.32f / Mathf.Max(0.001f, Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z)));
             model.transform.localScale *= k;
             b = Bounds(model);
             model.transform.position += pivot.position - b.center;
@@ -88,8 +93,17 @@ namespace Horror
 
         void Update()
         {
-            if (pivot != null && cam.enabled)
+            if (pivot == null || !cam.enabled) return;
+            if (Manual)
+            {
+                pivot.localRotation = Quaternion.Euler(Pitch, Yaw, 0f);
+                cam.transform.localPosition = new Vector3(0f, 0.12f, -1.1f / Mathf.Max(0.3f, Zoom));   // acercar = camara mas cerca
+            }
+            else
+            {
                 pivot.localRotation = Quaternion.Euler(18f * Mathf.Sin(Time.unscaledTime * 0.7f), Time.unscaledTime * 40f, 0f);
+                cam.transform.localPosition = new Vector3(0f, 0.12f, -1.1f);
+            }
         }
 
         static Bounds Bounds(GameObject go)

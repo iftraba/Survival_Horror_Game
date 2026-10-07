@@ -60,7 +60,13 @@ namespace Horror
             {
                 pauseLoadList = false;
                 if (pauseOptions) { GameSettings.Save(); pauseOptions = false; }
-                if (GameState.InventoryOpen) { GameState.SetInventoryOpen(false); ItemPreview.Get().Show(null); }
+                if (GameState.InventoryOpen)
+                {
+                    // Esc cierra primero el examen, luego el menu del objeto y por ultimo el inventario
+                    if (examining) { examining = false; ItemPreview.Get().Manual = false; }
+                    else if (invMenu) invMenu = false;
+                    else { CloseInventoryPanels(); GameState.SetInventoryOpen(false); ItemPreview.Get().Show(null); }
+                }
                 else GameState.SetPaused(!GameState.Paused);
                 return;
             }
@@ -68,7 +74,7 @@ namespace Horror
             if (kb.tabKey.wasPressedThisFrame && !GameState.Paused)
             {
                 GameState.SetInventoryOpen(!GameState.InventoryOpen);
-                if (!GameState.InventoryOpen) ItemPreview.Get().Show(null);   // apaga la camara del visor
+                if (!GameState.InventoryOpen) { CloseInventoryPanels(); ItemPreview.Get().Show(null); }   // apaga la camara del visor
                 return;
             }
             if (!GameState.InventoryOpen) archiveTab = false;
@@ -103,22 +109,34 @@ namespace Horror
 
         void Styles()
         {
-            if (label != null) return;
+            if (label != null)
+            {
+                // el color se reasigna en cada OnGUI: en el editor el skin lo devuelve a negro (tema claro) despues de crear los estilos
+                label.normal.textColor = Color.white; big.normal.textColor = Color.white; center.normal.textColor = Color.white;
+                return;
+            }
             label = new GUIStyle(GUI.skin.label) { fontSize = 16 };
             big = new GUIStyle(GUI.skin.label) { fontSize = 48, alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
             center = new GUIStyle(GUI.skin.label) { fontSize = 18, alignment = TextAnchor.MiddleCenter };
+            // texto blanco explicito: sin esto hereda el color del skin (negro con el tema claro del editor)
+            label.normal.textColor = Color.white; big.normal.textColor = Color.white; center.normal.textColor = Color.white;
         }
 
         void OnGUI()
         {
             Styles();
-            DrawHealth();
-            DrawAmmo();
-            DrawCrosshair();
-            DrawPrompt();
-            DrawMessage();
-            DrawObjective();
-            DrawBossBar();
+            // al examinar un objeto solo se ve el objeto (sin vida, municion, objetivo ni pestanas)
+            bool examineView = GameState.InventoryOpen && examining && !archiveTab;
+            if (!examineView)
+            {
+                DrawHealth();
+                DrawAmmo();
+                DrawCrosshair();
+                DrawPrompt();
+                DrawMessage();
+                DrawObjective();
+                DrawBossBar();
+            }
             if (GameState.InventoryOpen) DrawInventory();
             if (GameState.BoxOpen) DrawItemBox();
             if (GameState.SaveMenuOpen) DrawSaveMenu();
@@ -337,168 +355,7 @@ namespace Horror
             else inventory.Use(index);
         }
 
-        /// <summary>Navegacion por teclado dentro del inventario (flechas/WASD, Enter/E usar, X tirar).</summary>
-        void InventoryKeys(Keyboard kb)
-        {
-            if (inventory == null) return;
-            int n = inventory.slots.Length;
-            if (selected < 0) selected = 0;
-            if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame) selected = (selected + 1) % n;
-            if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame) selected = (selected - 1 + n) % n;
-            if (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame) selected = (selected + InvCols) % n;
-            if (kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame) selected = (selected - InvCols + n) % n;
-            if (kb.enterKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame) DoAction(selected);
-            if (kb.xKey.wasPressedThisFrame) inventory.Drop(selected);
-            // 1-4: asigna el arma seleccionada a esa tecla de atajo (la misma tecla otra vez la libera)
-            var digits = new[] { kb.digit1Key, kb.digit2Key, kb.digit3Key, kb.digit4Key };
-            for (int d = 0; d < digits.Length; d++)
-            {
-                if (!digits[d].wasPressedThisFrame) continue;
-                if (selected < 0 || selected >= n || inventory.slots[selected].IsEmpty || inventory.slots[selected].item.type != ItemType.Weapon)
-                { Message("Selecciona un arma para asignarle una tecla"); continue; }
-                var wi = inventory.slots[selected].item;
-                Message(WeaponHotkeys.Assign(d, wi) ? wi.displayName + " asignada a la tecla " + (d + 1) : "Tecla " + (d + 1) + " liberada");
-            }
-        }
-
-        void DrawInventory()
-        {
-            Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0.01f, 0.015f, 0.02f, 0.86f));
-            DrawInvTabs();
-            if (archiveTab) { DrawArchive(); ItemPreview.Get().Show(null); return; }
-            if (inventory == null) return;
-
-            const int size = 104, gap = 10;
-            float gridW = InvCols * size + (InvCols - 1) * gap;
-            float totalW = gridW + 40f + 420f;
-            // La rejilla crece con las bolsas: se sube para que quepa (la base son 2 filas)
-            int rows = Mathf.Max(2, (inventory.slots.Length + InvCols - 1) / InvCols);
-            float gx = Screen.width / 2f - totalW / 2f, gy = Mathf.Max(120f, Screen.height / 2f - 170f - (rows - 2) * (size + gap) / 2f);
-
-            var title = new GUIStyle(label) { fontSize = 22, fontStyle = FontStyle.Bold };
-            GUI.color = new Color(0.9f, 0.78f, 0.45f);
-            GUI.Label(new Rect(gx, gy - 52, 400, 34), "INVENTARIO", title);
-            GUI.color = new Color(1f, 1f, 1f, 0.55f);
-            GUI.Label(new Rect(gx, gy - 24, 700, 22), "Flechas/WASD: mover    Enter/E: usar o equipar    X: tirar    Arrastrar: reordenar    1-4: asignar atajo al arma    Tab: cerrar", new GUIStyle(label) { fontSize = 13 });
-            GUI.color = Color.white;
-
-            var countStyle = new GUIStyle(label) { fontSize = 15, fontStyle = FontStyle.Bold, alignment = TextAnchor.LowerRight };
-            var nameStyle = new GUIStyle(label) { fontSize = 11, alignment = TextAnchor.UpperLeft, wordWrap = true };
-            int hover = -1;
-            for (int i = 0; i < inventory.slots.Length; i++)
-            {
-                var r = new Rect(gx + (i % InvCols) * (size + gap), gy + (i / InvCols) * (size + gap), size, size);
-                var s = inventory.slots[i];
-                bool sel = i == selected;
-                if (r.Contains(Event.current.mousePosition)) hover = i;
-                bool beingDragged = dragging && i == dragFrom;
-                Fill(r, sel ? new Color(0.22f, 0.2f, 0.12f, 0.95f) : new Color(0.1f, 0.11f, 0.12f, 0.95f));
-                if (!s.IsEmpty)
-                {
-                    if (beingDragged) GUI.color = new Color(1f, 1f, 1f, 0.3f);                  // el origen se atenua mientras se arrastra
-                    if (s.item.icon != null)
-                        GUI.DrawTexture(new Rect(r.x + 6, r.y + 6, size - 12, size - 12), s.item.icon.texture, ScaleMode.ScaleToFit, true);
-                    else
-                    {
-                        GUI.color = new Color(1f, 1f, 1f, 0.8f);
-                        GUI.Label(new Rect(r.x + 6, r.y + 6, size - 12, 40), s.item.displayName, nameStyle);
-                        GUI.color = Color.white;
-                    }
-                    GUI.color = Color.white;
-                    int hk = s.item.type == ItemType.Weapon ? WeaponHotkeys.SlotOf(s.item) : -1;
-                    if (hk >= 0)                                                                    // insignia con la tecla de atajo
-                    {
-                        var kr = new Rect(r.xMax - 24, r.y + 4, 20, 20);
-                        Fill(kr, new Color(0.15f, 0.45f, 0.2f, 0.95f));
-                        GUI.Label(kr, (hk + 1).ToString(), new GUIStyle(label) { fontSize = 13, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter });
-                    }
-                    if (s.item.maxStack > 1) GUI.Label(new Rect(r.x, r.y, size - 6, size - 2), s.count.ToString(), countStyle);
-                    if (s.item.type == ItemType.Weapon && weapons != null && weapons.Equipped == s.item.weapon)
-                    {
-                        var eq = new Rect(r.x + 4, r.y + 4, 20, 18);
-                        Fill(eq, new Color(0.85f, 0.65f, 0.15f));
-                        GUI.Label(eq, "E", new GUIStyle(label) { fontSize = 12, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter });
-                    }
-                }
-                Frame(r, sel ? new Color(1f, 0.82f, 0.3f) : new Color(1f, 1f, 1f, 0.12f), sel ? 3f : 1f);
-                if (Event.current.type == EventType.MouseDown && r.Contains(Event.current.mousePosition))
-                {
-                    if (selected == i && Event.current.clickCount > 1) DoAction(i);
-                    selected = i;
-                    if (!s.IsEmpty) { dragFrom = i; dragging = false; dragStart = Event.current.mousePosition; }   // puede ser el inicio de un arrastre
-                    Event.current.Use();
-                }
-            }
-
-            // Arrastrar y soltar: al moverse mas de 6 px con el boton pulsado empieza el arrastre; al soltar sobre otra casilla se mueve,
-            // se apila o se intercambia (Inventory.Move)
-            if (dragFrom >= 0)
-            {
-                var ev = Event.current;
-                if (!dragging && (ev.type == EventType.MouseDrag || ev.type == EventType.Repaint) && Vector2.Distance(ev.mousePosition, dragStart) > 6f && (Mouse.current != null && Mouse.current.leftButton.isPressed)) dragging = true;
-                if (ev.rawType == EventType.MouseUp || Mouse.current == null || !Mouse.current.leftButton.isPressed)
-                {
-                    if (dragging && hover >= 0 && hover != dragFrom && inventory.Move(dragFrom, hover)) selected = hover;
-                    dragFrom = -1; dragging = false;
-                }
-                else if (dragging)
-                {
-                    if (hover >= 0 && hover != dragFrom)                                         // destino resaltado
-                    {
-                        var tr = new Rect(gx + (hover % InvCols) * (size + gap), gy + (hover / InvCols) * (size + gap), size, size);
-                        Frame(tr, new Color(0.4f, 1f, 0.5f), 3f);
-                    }
-                    var ds = inventory.slots[dragFrom];
-                    if (!ds.IsEmpty && ds.item.icon != null && ev.type == EventType.Repaint)
-                    {
-                        var dr = new Rect(ev.mousePosition.x - size * 0.4f, ev.mousePosition.y - size * 0.4f, size * 0.8f, size * 0.8f);
-                        GUI.color = new Color(1f, 1f, 1f, 0.9f);
-                        GUI.DrawTexture(dr, ds.item.icon.texture, ScaleMode.ScaleToFit, true);
-                        GUI.color = Color.white;
-                    }
-                }
-            }
-
-            // Panel de examen: modelo 3D girando + datos
-            float px = gx + gridW + 40f;
-            var panel = new Rect(px, gy, 420, 2 * size + gap + 150);
-            Fill(panel, new Color(0.06f, 0.07f, 0.08f, 0.95f));
-            Frame(panel, new Color(1f, 1f, 1f, 0.1f), 1f);
-            ItemData selItem = selected >= 0 && selected < inventory.slots.Length && !inventory.slots[selected].IsEmpty ? inventory.slots[selected].item : null;
-            var preview = ItemPreview.Get();
-            preview.Show(selItem);
-            if (selItem == null)
-            {
-                GUI.color = new Color(1f, 1f, 1f, 0.35f);
-                GUI.Label(new Rect(panel.x, panel.y + 90, panel.width, 30), "Casilla vacia", center);
-                GUI.color = Color.white;
-                return;
-            }
-            GUI.DrawTexture(new Rect(panel.x + 70, panel.y + 6, 280, 200), preview.Texture, ScaleMode.ScaleAndCrop, true);
-            float ty = panel.y + 210;
-            GUI.color = new Color(0.95f, 0.85f, 0.55f);
-            GUI.Label(new Rect(panel.x + 16, ty, panel.width - 32, 26), selItem.displayName, new GUIStyle(label) { fontSize = 19, fontStyle = FontStyle.Bold });
-            GUI.color = Color.white;
-            string extra = "";
-            if (selItem.type == ItemType.Weapon && selItem.weapon != null && weapons != null)
-            {
-                int mag = 0;
-                foreach (var kv in weapons.Magazines) if (kv.Key == selItem.weapon) mag = kv.Value;
-                extra = $"Cargador {mag}/{selItem.weapon.magazineSize}";
-            }
-            else if (selItem.maxStack > 1) extra = $"Cantidad {inventory.slots[selected].count}";
-            if (extra != "")
-            {
-                GUI.color = new Color(1f, 1f, 1f, 0.6f);
-                GUI.Label(new Rect(panel.x + 16, ty + 24, panel.width - 32, 20), extra, new GUIStyle(label) { fontSize = 13 });
-                GUI.color = Color.white;
-            }
-            GUI.Label(new Rect(panel.x + 16, ty + 46, panel.width - 32, 50), selItem.description, new GUIStyle(label) { fontSize = 14, wordWrap = true });
-            float by = panel.yMax - 46;
-            string action = ActionFor(selItem);
-            if (action != null && GUI.Button(new Rect(panel.x + 16, by, 150, 34), action)) DoAction(selected);
-            if (GUI.Button(new Rect(panel.x + 176, by, 110, 34), "Tirar")) inventory.Drop(selected);
-        }
+        // InventoryKeys y DrawInventory (menu contextual, examinar, arrastrar) viven en HudInventory.cs
 
         // ------------------------------------------------------------------ sala segura: guardado y baul
 
@@ -533,7 +390,7 @@ namespace Horror
             bool confirming = overwriteSlot != 0;
             GUI.Label(new Rect(panel.x, panel.y + 48, panel.width, 24),
                 confirming ? $"El slot {overwriteSlot} ya tiene una partida: pulsa otra vez para sobrescribirla" : "Elige un slot  (flechas + Enter, o clic)",
-                new GUIStyle(center) { fontSize = 14 });
+                new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 14 });
             GUI.color = Color.white;
             int clicked = SaveSlotsGUI.Draw(panel.x + 30, panel.y + 80, panel.width - 60, true, saveSel);
             if (clicked > 0) TrySave(clicked);

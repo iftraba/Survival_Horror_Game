@@ -72,7 +72,7 @@ namespace Horror
             if (TabButton(new Rect(x, y, w, h), "OBJETOS", !archiveTab)) { archiveTab = false; }
             if (TabButton(new Rect(x + w + 12f, y, w, h), "ARCHIVO  (" + NoteArchive.Read.Count + ")", archiveTab)) { archiveTab = true; }
             GUI.color = new Color(1f, 1f, 1f, 0.45f);
-            GUI.Label(new Rect(0, y + h + 2f, Screen.width, 20f), "Q: cambiar de pestaña", new GUIStyle(center) { fontSize = 12 });
+            GUI.Label(new Rect(0, y + h + 2f, Screen.width, 20f), "Q: cambiar de pestaña", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 12 });
             GUI.color = Color.white;
         }
 
@@ -194,7 +194,7 @@ namespace Horror
             DrawNotePage(r, n, 1f);
             GUI.matrix = m;
             GUI.color = new Color(1f, 1f, 1f, 0.6f);
-            GUI.Label(new Rect(0, r.yMax + 24f, Screen.width, 24f), "E / Esc: cerrar    -    queda guardada en el Archivo (Tab)", new GUIStyle(center) { fontSize = 14 });
+            GUI.Label(new Rect(0, r.yMax + 24f, Screen.width, 24f), "E / Esc: cerrar    -    queda guardada en el Archivo (Tab)", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 14 });
             GUI.color = Color.white;
         }
 
@@ -211,23 +211,23 @@ namespace Horror
             float size = Mathf.Min(420f, Screen.height - 330f);
             float cx = Screen.width / 2f, top = Mathf.Max(30f, Screen.height / 2f - size / 2f - 110f);
             GUI.color = new Color(1f, 1f, 1f, 0.55f);
-            GUI.Label(new Rect(0, top, Screen.width, 26f), "OBJETO CONSEGUIDO", new GUIStyle(center) { fontSize = 14, fontStyle = FontStyle.Bold });
+            GUI.Label(new Rect(0, top, Screen.width, 26f), "OBJETO CONSEGUIDO", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 14, fontStyle = FontStyle.Bold });
             GUI.color = new Color(0.95f, 0.82f, 0.45f);
-            GUI.Label(new Rect(0, top + 24f, Screen.width, 46f), item.displayName, new GUIStyle(center) { fontSize = 34, fontStyle = FontStyle.Bold });
+            GUI.Label(new Rect(0, top + 24f, Screen.width, 46f), item.displayName, new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 34, fontStyle = FontStyle.Bold });
             GUI.color = Color.white;
             GUI.DrawTexture(new Rect(cx - size / 2f, top + 76f, size, size), preview.Texture, ScaleMode.ScaleToFit, true);
             float ty = top + 76f + size + 8f;
             if (!string.IsNullOrEmpty(ItemShowcase.Detail))
             {
                 GUI.color = new Color(0.55f, 1f, 0.6f);
-                GUI.Label(new Rect(0, ty, Screen.width, 30f), ItemShowcase.Detail, new GUIStyle(center) { fontSize = 20, fontStyle = FontStyle.Bold });
+                GUI.Label(new Rect(0, ty, Screen.width, 30f), ItemShowcase.Detail, new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 20, fontStyle = FontStyle.Bold });
                 ty += 32f;
             }
             GUI.color = new Color(1f, 1f, 1f, 0.75f);
             float dw = Mathf.Min(640f, Screen.width - 60f);
-            GUI.Label(new Rect(cx - dw / 2f, ty, dw, 60f), item.description, new GUIStyle(center) { fontSize = 16, wordWrap = true });
+            GUI.Label(new Rect(cx - dw / 2f, ty, dw, 60f), item.description, new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 16, wordWrap = true });
             GUI.color = new Color(1f, 1f, 1f, 0.45f);
-            GUI.Label(new Rect(0, Screen.height - 50f, Screen.width, 24f), "E / Esc: continuar", new GUIStyle(center) { fontSize = 14 });
+            GUI.Label(new Rect(0, Screen.height - 50f, Screen.width, 24f), "E / Esc: continuar", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 14 });
             GUI.color = Color.white;
         }
 
@@ -246,7 +246,7 @@ namespace Horror
             GUI.color = new Color(0.85f, 0.88f, 0.92f);
             GUI.Label(new Rect(panel.x, panel.y + 14f, panel.width, 30f), "TAQUILLA CERRADA", title);
             GUI.color = new Color(1f, 1f, 1f, 0.55f);
-            GUI.Label(new Rect(panel.x, panel.y + 44f, panel.width, 22f), "Introduce el código", new GUIStyle(center) { fontSize = 14 });
+            GUI.Label(new Rect(panel.x, panel.y + 44f, panel.width, 22f), "Introduce el código", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 14 });
             GUI.color = Color.white;
 
             // pantallita con los digitos
@@ -265,7 +265,7 @@ namespace Horror
             if (wrong)
             {
                 GUI.color = new Color(0.95f, 0.35f, 0.3f);
-                GUI.Label(new Rect(panel.x, dy + 78f, panel.width, 24f), "Código incorrecto", new GUIStyle(center) { fontSize = 15 });
+                GUI.Label(new Rect(panel.x, dy + 78f, panel.width, 24f), "Código incorrecto", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 15 });
                 GUI.color = Color.white;
             }
 
@@ -281,7 +281,7 @@ namespace Horror
                 else Keypad.Press(i == 10 ? 0 : i + 1);
             }
             GUI.color = new Color(1f, 1f, 1f, 0.45f);
-            GUI.Label(new Rect(panel.x, panel.yMax - 30f, panel.width, 22f), "Teclado numérico o ratón  -  Esc: salir", new GUIStyle(center) { fontSize = 12 });
+            GUI.Label(new Rect(panel.x, panel.yMax - 30f, panel.width, 22f), "Teclado numérico o ratón  -  Esc: salir", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 12 });
             GUI.color = Color.white;
         }
     }

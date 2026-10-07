@@ -1,5 +1,7 @@
 # UI
 
+**Inventario rediseñado (2026-10-07, estilo RE2, `HudInventory.cs`)**: la escena sigue visible detrás con un velo oscuro; el objeto seleccionado se ve en 3D **sin fondo** a la izquierda (`ItemPreview`, textura 1024 con alfa 0), la rejilla de casillas de 84 px a la derecha y debajo el **nombre, el tipo (Arma, Munición, Curación, Llave...) y la descripción**. **Clic** en un objeto abre un menú con *Equipar/Desequipar/Usar* (según el objeto), *Examinar*, *Tirar* y *Salir* (ratón o W/S + Enter; Esc lo cierra); arrastrar reordena. **Examinar** muestra solo el objeto, centrado y grande, que se gira arrastrando con el ratón (rueda: acercar; Esc o clic derecho: salir), sin vida, munición, objetivo ni pestañas, para buscar pistas. Los textos del HUD se fuerzan a blanco en cada `OnGUI` (el skin del editor los devolvía a negro con el tema claro) y los estilos `new GUIStyle(center)` llevan la alineación explícita.
+
 Interfaz. Código en `Assets/_Project/Scripts/UI/`. Todo es **IMGUI** provisional (`OnGUI`).
 
 ## Clases
