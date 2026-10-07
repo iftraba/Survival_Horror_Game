@@ -158,6 +158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5216742f32efcfd4683aaf471b8de50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAudio
+  volumeScale: 1
 --- !u!114 &1276482114143172692
 MonoBehaviour:
   m_ObjectHideFlags: 0

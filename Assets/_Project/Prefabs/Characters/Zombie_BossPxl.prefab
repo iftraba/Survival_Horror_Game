@@ -16,8 +16,8 @@ GameObject:
   - component: {fileID: 1263610271914112402}
   - component: {fileID: 496292858899723512}
   - component: {fileID: 2260927094808055405}
-  - component: {fileID: 8470353229383737746}
-  - component: {fileID: 9119468263917052673}
+  - component: {fileID: 3366589804300449665}
+  - component: {fileID: 4587808351493994489}
   m_Layer: 0
   m_Name: Zombie_BossPxl
   m_TagString: Untagged
@@ -160,6 +160,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5216742f32efcfd4683aaf471b8de50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAudio
+  volumeScale: 0.7
 --- !u!114 &2260927094808055405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -179,7 +180,7 @@ MonoBehaviour:
   runClipSpeed: 10.073693
   runAbove: 1.8
   maxWalkPlayback: 2.2
---- !u!114 &8470353229383737746
+--- !u!114 &3366589804300449665
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -199,7 +200,8 @@ MonoBehaviour:
   damage: 6
   tickTime: 0.5
   sizzleSound: {fileID: 8300000, guid: 33456cef78a18da4f944a168db7e5c40, type: 3}
---- !u!114 &9119468263917052673
+  soundVolume: 0.7
+--- !u!114 &4587808351493994489
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -229,6 +231,7 @@ MonoBehaviour:
   rainRadius: 1.5
   rainDamage: 30
   rainDelay: 1.1
+  soundVolume: 0.7
   chargeSound: {fileID: 8300000, guid: 45ff499fa16c6624b92d3375084a72e1, type: 3}
   crashSound: {fileID: 8300000, guid: 42b327b2400a0b9429e7e2032a09804d, type: 3}
   spitSound: {fileID: 8300000, guid: 142a6686583e9a54eb61a9703a068475, type: 3}

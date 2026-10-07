@@ -18,6 +18,7 @@ namespace Horror
         [Tooltip("Dano por golpe y segundos entre golpes mientras se esta dentro")] public float damage = 6f;
         public float tickTime = 0.5f;
         [Tooltip("Chisporroteo al pisar un charco")] public AudioClip sizzleSound;
+        [Range(0f, 1f)] public float soundVolume = 0.7f;   // 30 % mas bajo (volumen de los efectos del jefe 2)
 
         struct Puddle { public Transform t; public float born; }
         readonly List<Puddle> puddles = new List<Puddle>();
