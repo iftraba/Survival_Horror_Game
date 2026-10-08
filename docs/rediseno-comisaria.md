@@ -257,3 +257,51 @@ Kit `ComisariaV2Progress` (menú *Horror/Comisaria v2/6 Recorrido*).
 - El ascensor sin llave no va; con llave, se pone en marcha y lleva al sótano. El jugador queda en el suelo y recupera el control.
 - El portón sin llave maestra no abre; con ella, victoria.
 - NavMesh: rutas completas de la planta baja al archivo por la escalera de servicio y a todas las salas.
+
+---
+# Ampliación: comisaría grande (2026-10-09)
+Al probarla, el usuario vio que la dificultad era nula: un zombi por sala, salas enormes y vacías, y el jefe 1 al alcance enseguida. Pidió:
+- un edificio más grande y de pasillos, con muchas más salas;
+- más puzles de puertas (candados que romper, tarjeta de seguridad, tarjeta del jefe de seguridad para los calabozos, puerta sin corriente antes del jefe 2 con fusibles);
+- taquillas normales y con código;
+- una escalera exterior que lleve a una planta con una llave o pieza.
+
+Las fases 1 a 6 anteriores se rehacen sobre la misma escena `Comisaria_v2`. Los kits viejos (`ComisariaV2*`) quedan de referencia.
+
+## Plan
+| Bloqueo | Se abre con | Dónde está |
+|---|---|---|
+| Candados (puerta este del vestíbulo, pasillo sur en x 8, puerta del callejón) | Cizalla | Garaje (planta baja) |
+| Puerta de seguridad (pasillo este → pasillo norte) | Tarjeta de seguridad | Oficina de seguridad (planta baja, tras el candado) |
+| Calabozos | Tarjeta del jefe de seguridad | Su despacho (primera planta), solo por la escalera de incendios |
+| Taquillas con código | Códigos en notas y pizarras | Repartidas |
+| Memorial: 3 medallones | Calabozos, taquilla con código de la biblioteca, caseta de la azotea | Abren la escalera del archivo (jefe 1) |
+| Ascensor al sótano | Llave del ascensor | La suelta el jefe 1 |
+| Puerta sin corriente del pasillo de calderas | 3 fusibles en el cuadro eléctrico | Almacén, laboratorio (taquilla con código), sala de máquinas |
+| Portón del túnel | Llave maestra | La suelta el jefe 2 |
+
+Fases: **A** estructura → **B** exterior e intro → **C** mobiliario por salas → **D** puzles, llaves y taquillas → **E** botín y zombis (2-4 por zona, emboscadas) → **F** pruebas y equilibrio.
+
+## Fase A hecha: estructura (`ComisariaGrande`, menú *Horror/Comisaria grande/1 Estructura*)
+La planta se describe **con datos** en `ComisariaGrande.Define()`:
+- **Salas:** rectángulo, cota de suelo y techo, tipo y grupo (los espacios del mismo grupo no llevan pared entre sí).
+- **Puertas:** posición, tipo (madera, doble, candado, tarjeta, tarjeta del jefe, sin corriente, chapa, fija) y ancho.
+- **Huecos de escalera** en las losas.
+
+El constructor saca solo lo demás:
+- **Paredes:** en cada borde de la rejilla de 0,5 m entre dos espacios distintos. Son exteriores de 0,35 m e interiores de 0,2 m, y llevan rodapié por el lado de las salas.
+- **Puertas:** su hueco con dintel y la puerta.
+- **Suelos y techos:** por sala.
+- **Lámparas:** según el tamaño de la sala (129).
+
+**Edificio:** 64 × 44 m (x -32..32, z 0..44). Cada planta tiene una fila de salas al sur, un pasillo, otra fila, otro pasillo y otra fila al norte.
+- **Planta baja** (14 espacios): sala segura, sala de espera, vestíbulo con la caracol, oficina de recepción, armería, garaje, sala de pruebas, aseos, vestíbulo del ascensor, oficina de seguridad, sala de descanso, pasillo de seguridad, vestuarios, calabozos, escalera norte, almacén y taller.
+  - Fuera, al oeste, el **callejón** con la **escalera de incendios**: tramo al balcón de la primera planta (puerta del despacho del jefe de seguridad) y tramo a la azotea.
+- **Primera:** despacho del comisario, conferencias, memorial (llega la caracol), dos oficinas, despacho del jefe de seguridad (sin puerta interior), biblioteca, descanso, detectives, aseos, interrogatorios, escalera del archivo, depósito de pruebas, escalera norte, registro y sala del sindicato.
+- **Segunda:** la antesala (llega la escalera del archivo) y el **archivo** (36 × 29,5 m, techo a 14). El resto es **azotea** con pretil, y en ella hay una caseta.
+- **Sótano:** bombas, depósitos, máquinas, taller, almacén, sala segura, vestíbulo del ascensor, laboratorio, cuadro eléctrico, sala de control, galería de tuberías y la sala de calderas hundida 2 m (rellano y escalera). Un pasillo de calderas queda separado por la puerta sin corriente.
+- **Ascensor:** hueco en x 5-8, z 23-26,5, del sótano a la primera planta.
+
+**Comprobado:**
+- Con las puertas abiertas, NavMesh completo a todas las salas de las cuatro plantas, al callejón, al balcón, a la azotea y a la caseta.
+- En el sótano, desde el vestíbulo del ascensor, también al foso de calderas.

@@ -1,0 +1,633 @@
+#if UNITY_EDITOR
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Unity.AI.Navigation;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+
+namespace Horror.EditorTools
+{
+    /// <summary>
+    /// Comisaria grande (2026-10-09, rama rediseno-comisaria): reconstruye el nivel de Comisaria_v2 con una planta de 64 x 44 m
+    /// hecha de pasillos y salas pequenas, como pidio el usuario (antes eran naves grandes y casi vacias).
+    /// La planta se describe con DATOS (lista de salas por piso, puertas y huecos) y el constructor saca solo las paredes
+    /// (en el borde entre dos espacios distintos), los huecos de paso con su dintel, rodapies, suelos, techos y lamparas.
+    /// Pisos: sotano (-4,5), baja (0), primera (4), segunda (7,5: archivo, antesala y la azotea al aire libre).
+    /// Fuera, al oeste, un callejon con la escalera de incendios que sube al balcon de la primera planta y a la azotea.
+    /// Menu: Horror/Comisaria grande/1 Estructura. Repetible: rehace la escena desde la comisaria original.
+    /// </summary>
+    public static class ComisariaGrande
+    {
+        public const string ScenePath = "Assets/Scenes/Comisaria_v2.unity";
+        const string Mats = "Assets/_Project/Materials/";
+        const string Pre = "Assets/_Project/Prefabs/";
+        public const float B = -4.5f, G = 0f, F1 = 4f, F2 = 7.5f;
+        public const float X0 = -32f, X1 = 32f, Z0 = 0f, Z1 = 44f;
+        const float DoorH = 2.45f, Grid = 0.5f;
+
+        // ------------------------------------------------------------------ datos
+        public enum Kind { Room, Corridor, Outdoor, Shaft }
+        public class Room
+        {
+            public string id, label, type, group;
+            public Rect r; public float floor, ceil; public Kind kind = Kind.Room;
+            public Color light = new Color(1f, 0.93f, 0.82f);
+            public bool Indoor => kind == Kind.Room || kind == Kind.Corridor;
+        }
+        public enum DoorKind { Wood, Double, Opening, Padlock, Card, ChiefCard, Power, Metal, Fixed }
+        public class DoorDef { public string name; public Vector2 p; public DoorKind kind; public float width = 1.6f; public float floor; }
+
+        public static readonly List<Room> Rooms = new List<Room>();
+        public static readonly List<DoorDef> Doors = new List<DoorDef>();
+        /// <summary>Huecos en las losas (escaleras): rect y la cota de la losa que atraviesan (techo del piso de abajo / suelo del de arriba).</summary>
+        static readonly List<(Rect r, float y)> SlabHoles = new List<(Rect, float)>();
+
+        public static readonly Vector3 SpiralC = new Vector3(4.0f, 0f, 6.5f);
+        public const float SpiralR = 2.2f;
+        public static Rect SpiralHole => new Rect(SpiralC.x - 2.5f, SpiralC.z - 2.5f, 5f, 5f);
+        public static readonly Rect Shaft = Rect.MinMaxRect(5f, 23f, 8f, 26.5f);
+
+        static Room R(string id, string label, string type, float x0, float z0, float x1, float z1, float floor, float ceil, Kind k = Kind.Room, string group = null)
+        {
+            var room = new Room { id = id, label = label, type = type, r = Rect.MinMaxRect(x0, z0, x1, z1), floor = floor, ceil = ceil, kind = k, group = group ?? id };
+            if (k == Kind.Corridor) room.light = new Color(0.86f, 0.93f, 1f);
+            Rooms.Add(room);
+            return room;
+        }
+        static void D(string name, float x, float z, float floor, DoorKind k = DoorKind.Wood, float w = 1.6f) =>
+            Doors.Add(new DoorDef { name = name, p = new Vector2(x, z), floor = floor, kind = k, width = w });
+
+        public static void Define()
+        {
+            Rooms.Clear(); Doors.Clear(); SlabHoles.Clear();
+            float gC = 3.5f, fC = 7.0f, bC = -1.0f;
+
+            // ===== PLANTA BAJA (y 0) =====
+            R("G_Safe", "Sala segura", "safe", -32, 0, -26, 12, G, gC).light = new Color(1f, 0.82f, 0.6f);
+            R("G_Wait", "Sala de espera", "waiting", -26, 0, -8, 12, G, gC);
+            R("G_Lobby", "Vestibulo", "lobby", -8, 0, 8, 12, G, gC);
+            R("G_OffE", "Oficina de recepcion", "office", 8, 0, 20, 12, G, gC);
+            R("G_Armory", "Armeria", "armory", 20, 0, 32, 12, G, gC);
+            R("G_C1W", "Pasillo sur", "corridor", -32, 12, 8, 14.5f, G, gC, Kind.Corridor);
+            R("G_C1E", "Pasillo sur (este)", "corridor", 8, 12, 32, 14.5f, G, gC, Kind.Corridor);
+            R("G_Garage", "Garaje", "garage", -32, 14.5f, -20, 26.5f, G, gC);
+            R("G_Dark", "Sala de pruebas", "darkroom", -20, 14.5f, -8, 26.5f, G, gC);
+            R("G_WC", "Aseos", "restroom", -8, 14.5f, 0, 26.5f, G, gC);
+            R("G_Elev", "Vestibulo del ascensor", "elevator", 0, 14.5f, 5, 26.5f, G, gC, Kind.Room, "G_Elev");
+            R("G_ElevB", "Vestibulo del ascensor", "elevator", 5, 14.5f, 8, 23, G, gC, Kind.Room, "G_Elev");
+            R("G_Shaft", "Ascensor", "shaft", Shaft.xMin, Shaft.yMin, Shaft.xMax, Shaft.yMax, G, gC, Kind.Shaft);
+            R("G_Sec", "Oficina de seguridad", "security", 8, 14.5f, 20, 26.5f, G, gC);
+            R("G_Break", "Sala de descanso", "breakroom", 20, 14.5f, 29.5f, 26.5f, G, gC);
+            R("G_CE", "Pasillo de seguridad", "corridor", 29.5f, 14.5f, 32, 26.5f, G, gC, Kind.Corridor, "G_C2");
+            R("G_C2", "Pasillo norte", "corridor", -32, 26.5f, 32, 29, G, gC, Kind.Corridor, "G_C2");
+            R("G_Lock", "Vestuarios", "lockers", -32, 29, -18, 44, G, gC);
+            R("G_Cells", "Calabozos", "cells", -18, 29, 4, 44, G, gC);
+            R("G_Stair2", "Escalera de servicio norte", "stairwell", 4, 29, 10, 44, G, gC);
+            R("G_Store", "Almacen", "storage", 10, 29, 22, 44, G, gC);
+            R("G_Work", "Taller", "workshop", 22, 29, 32, 44, G, gC);
+            R("G_Alley", "Callejon", "alley", -40, 8, -32, 44, G, 0f, Kind.Outdoor);
+
+            D("Puerta_Principal", 0, 0, G, DoorKind.Double, 3f);
+            D("Puerta_Espera_Vestibulo", -8, 6, G);
+            D("Puerta_Vestibulo_E", 8, 6, G, DoorKind.Padlock);
+            D("Puerta_Segura", -29, 12, G);
+            D("Puerta_Espera_Pasillo", -17, 12, G);
+            D("Puerta_Recepcion_Pasillo", 14, 12, G);
+            D("Puerta_Recepcion_Armeria", 20, 6, G);
+            D("Puerta_Pasillo_Candado", 8, 13.25f, G, DoorKind.Padlock);
+            D("Puerta_Garaje", -26, 14.5f, G);
+            D("Puerta_Pruebas", -14, 14.5f, G);
+            D("Puerta_Aseos", -4, 14.5f, G);
+            D("Puerta_Ascensor_Baja", 2.5f, 14.5f, G);
+            D("Puerta_Seguridad", 14, 14.5f, G);
+            D("Puerta_Descanso", 25, 14.5f, G);
+            D("Puerta_Tarjeta", 30.75f, 14.5f, G, DoorKind.Card);
+            D("Puerta_Vestuarios", -25, 29, G);
+            D("Puerta_Calabozos", -7, 29, G, DoorKind.ChiefCard);
+            D("Puerta_Escalera_Norte", 7, 29, G);
+            D("Puerta_Almacen", 16, 29, G);
+            D("Puerta_Taller", 27, 29, G);
+            D("Puerta_Callejon", -32, 40, G, DoorKind.Padlock);
+            D("Ascensor_Baja", Shaft.xMin, 24.75f, G, DoorKind.Fixed, 1.4f);
+
+            // ===== PRIMERA PLANTA (y 4) =====
+            R("F_Comm", "Despacho del comisario", "commissioner", -32, 0, -20, 12, F1, fC).light = new Color(1f, 0.85f, 0.65f);
+            R("F_Conf", "Sala de conferencias", "conference", -20, 0, -8, 12, F1, fC);
+            R("F_Mem", "Memorial", "memorial", -8, 0, 8, 12, F1, fC);
+            R("F_OffA", "Oficinas", "offices", 8, 0, 20, 12, F1, fC);
+            R("F_OffB", "Oficinas (este)", "offices", 20, 0, 32, 12, F1, fC);
+            R("F_C1", "Pasillo sur (primera)", "corridor", -32, 12, 32, 14.5f, F1, fC, Kind.Corridor, "F_C");
+            R("F_Chief", "Despacho del jefe de seguridad", "chief", -32, 14.5f, -20, 26.5f, F1, fC);
+            R("F_Lib", "Biblioteca", "library", -20, 14.5f, -8, 26.5f, F1, fC);
+            R("F_Break", "Sala de descanso (primera)", "breakroom", -8, 14.5f, 5, 26.5f, F1, fC, Kind.Room, "F_Break");
+            R("F_BreakB", "Sala de descanso (primera)", "breakroom", 5, 14.5f, 8, 23, F1, fC, Kind.Room, "F_Break");
+            R("F_Shaft", "Ascensor", "shaft", Shaft.xMin, Shaft.yMin, Shaft.xMax, Shaft.yMax, F1, fC, Kind.Shaft);
+            R("F_Det", "Sala de detectives", "offices", 8, 14.5f, 29.5f, 26.5f, F1, fC);
+            R("F_CE", "Pasillo este (primera)", "corridor", 29.5f, 14.5f, 32, 26.5f, F1, fC, Kind.Corridor, "F_C");
+            R("F_C2", "Pasillo norte (primera)", "corridor", -32, 26.5f, 32, 29, F1, fC, Kind.Corridor, "F_C");
+            R("F_WC", "Aseos (primera)", "restroom", -32, 29, -24, 44, F1, fC);
+            R("F_Inter", "Interrogatorios", "interrogation", -24, 29, -14, 44, F1, fC);
+            R("F_Serv", "Escalera del archivo", "servicestair", -14, 29, -4, 44, F1, fC);
+            R("F_Evid", "Deposito de pruebas", "evidence", -4, 29, 4, 44, F1, fC);
+            R("F_Stair2", "Escalera de servicio norte", "stairwell", 4, 29, 10, 44, F1, fC);
+            R("F_Records", "Registro", "records", 10, 29, 22, 44, F1, fC);
+            R("F_Lounge", "Sala del sindicato", "lounge", 22, 29, 32, 44, F1, fC);
+            R("F_Balcony", "Escalera de incendios", "fireescape", -36, 17, -32, 26, F1, 0f, Kind.Outdoor, "F_Balcony");
+
+            D("Puerta_Comisario", -26, 12, F1);
+            D("Puerta_Conferencias", -14, 12, F1);
+            D("Puerta_Conf_Memorial", -8, 6, F1);
+            D("Puerta_Memorial_Pasillo", 0, 12, F1);
+            D("Puerta_Memorial_Oficinas", 8, 6, F1);
+            D("Puerta_Oficinas_Pasillo", 14, 12, F1);
+            D("Puerta_Oficinas_Este", 20, 6, F1);
+            D("Puerta_OficinasB_Pasillo", 26, 12, F1);
+            D("Puerta_Biblioteca", -14, 14.5f, F1);
+            D("Puerta_Descanso_Primera", -2, 14.5f, F1);
+            D("Puerta_Detectives", 20, 14.5f, F1);
+            D("Puerta_JefeSeguridad_Balcon", -32, 20, F1);
+            D("Puerta_Aseos_Primera", -28, 29, F1);
+            D("Puerta_Interrogatorios", -19, 29, F1);
+            D("Puerta_Escalera_Archivo", -9, 29, F1);
+            D("Puerta_Pruebas_Primera", 0, 29, F1);
+            D("Puerta_Escalera_Norte_Primera", 7, 29, F1);
+            D("Puerta_Registro", 16, 29, F1);
+            D("Puerta_Sindicato", 27, 29, F1);
+            D("Ascensor_Primera", Shaft.xMin, 24.75f, F1, DoorKind.Fixed, 1.4f);
+
+            // ===== SEGUNDA PLANTA (y 7,5): antesala y archivo; el resto es azotea =====
+            R("S_Ante", "Antesala del archivo", "ante", -14, 29, -4, 44, F2, 11f);
+            R("S_Arch", "Archivo", "archive", -4, 14.5f, 32, 44, F2, 14f);
+            R("S_Shed", "Caseta de la azotea", "shed", -24, 30, -20, 34, F2, 10f);
+            foreach (var (n, a, b, c, d) in new[] { ("S_RoofA", -32f, 0f, -14f, 30f), ("S_RoofB", -32f, 34f, -14f, 44f), ("S_RoofC", -32f, 30f, -24f, 34f), ("S_RoofD", -20f, 30f, -14f, 34f), ("S_RoofE", -14f, 0f, 32f, 14.5f), ("S_RoofF", -14f, 14.5f, -4f, 29f) })
+                R(n, "Azotea", "roof", a, b, c, d, F2, 0f, Kind.Outdoor, "S_Roof");
+            R("S_Escape", "Escalera de incendios", "fireescape", -36, 6, -32, 11, F2, 0f, Kind.Outdoor, "S_Roof");
+            D("Puerta_Archivo", -4, 36, F2);
+            D("Puerta_Caseta", -22, 30, F2);
+            D("Azotea_Escalera", -32, 8.5f, F2, DoorKind.Opening, 2f);
+
+            // ===== SOTANO (y -4,5) =====
+            R("B_Pump", "Cuarto de bombas", "pumps", -32, 0, -14, 12, B, bC);
+            R("B_Tanks", "Depositos", "tanks", -14, 0, 0, 12, B, bC);
+            R("B_Mach", "Sala de maquinas", "machines", 0, 0, 18, 12, B, bC);
+            R("B_Work", "Taller de mantenimiento", "workshop", 18, 0, 32, 12, B, bC);
+            R("B_C1", "Pasillo del sotano", "corridor", -32, 12, 32, 14.5f, B, bC, Kind.Corridor, "B_C");
+            R("B_Store", "Almacen del sotano", "storage", -32, 14.5f, -14, 26.5f, B, bC);
+            R("B_Safe", "Sala segura del sotano", "safe", -14, 14.5f, 0, 26.5f, B, bC).light = new Color(1f, 0.82f, 0.6f);
+            R("B_Elev", "Vestibulo del ascensor (sotano)", "elevator", 0, 14.5f, 5, 26.5f, B, bC, Kind.Room, "B_Elev");
+            R("B_ElevB", "Vestibulo del ascensor (sotano)", "elevator", 5, 14.5f, 8, 23, B, bC, Kind.Room, "B_Elev");
+            R("B_Shaft", "Ascensor", "shaft", Shaft.xMin, Shaft.yMin, Shaft.xMax, Shaft.yMax, B, bC, Kind.Shaft);
+            R("B_Lab", "Laboratorio", "lab", 8, 14.5f, 22, 26.5f, B, bC);
+            R("B_Fuse", "Cuadro electrico", "fuse", 22, 14.5f, 29.5f, 26.5f, B, bC);
+            R("B_CE", "Pasillo del sotano (este)", "corridor", 29.5f, 14.5f, 32, 26.5f, B, bC, Kind.Corridor, "B_C");
+            R("B_C2E", "Pasillo norte del sotano", "corridor", -12, 26.5f, 32, 29, B, bC, Kind.Corridor, "B_C");
+            R("B_C2W", "Pasillo de las calderas", "corridor", -32, 26.5f, -12, 29, B, bC, Kind.Corridor);
+            R("B_Boiler", "Sala de calderas", "boiler", -32, 29, -12, 44, -6.5f, bC).light = new Color(1f, 0.55f, 0.4f);
+            R("B_Control", "Sala de control", "control", -12, 29, 4, 44, B, bC);
+            R("B_Pipes", "Galeria de tuberias", "pipes", 4, 29, 32, 44, B, bC);
+
+            D("Puerta_Bombas", -23, 12, B);
+            D("Puerta_Depositos", -7, 12, B);
+            D("Puerta_Maquinas", 9, 12, B);
+            D("Puerta_TallerS", 25, 12, B);
+            D("Puerta_AlmacenS", -23, 14.5f, B);
+            D("Puerta_SeguraS", -7, 14.5f, B);
+            D("Puerta_AscensorS", 2.5f, 14.5f, B);
+            D("Puerta_Laboratorio", 15, 14.5f, B);
+            D("Puerta_Cuadro", 26, 14.5f, B);
+            D("Puerta_Sin_Corriente", -12, 27.75f, B, DoorKind.Power);
+            D("Puerta_Calderas", -22, 29, B, DoorKind.Metal);
+            D("Puerta_Control", -4, 29, B);
+            D("Puerta_Tuberias", 18, 29, B);
+            D("Ascensor_Sotano", Shaft.xMin, 24.75f, B, DoorKind.Fixed, 1.4f);
+
+            // huecos en las losas para las escaleras
+            SlabHoles.Add((SpiralHole, F1));                                         // caracol del vestibulo
+            SlabHoles.Add((Rect.MinMaxRect(4f, 31.6f, 6.4f, 40.0f), F1));           // escalera norte
+            SlabHoles.Add((Rect.MinMaxRect(-14f, 31.6f, -11.4f, 39.0f), F2));       // escalera del archivo
+        }
+
+        // ------------------------------------------------------------------ utilidades
+        static Material wall, floorM, ceil, wood, metal, outdoorM, grating;
+        static Transform level, details, structure;
+        static readonly List<GameObject> leaves = new List<GameObject>();
+        static int lamps;
+
+        static T Call<T>(string method, params object[] args) => (T)typeof(TestSceneBuilder).GetMethod(method, BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, args);
+
+        public static GameObject Box(string name, Transform parent, Vector3 c, Vector3 s, Material m, float tile, bool collider = true)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.name = name; go.transform.SetParent(parent);
+            go.transform.position = c; go.transform.localScale = s;
+            go.GetComponent<Renderer>().sharedMaterial = m;
+            if (tile > 0f) go.GetComponent<MeshFilter>().sharedMesh = Call<Mesh>("TiledUnitCube", c, s, tile);
+            if (!collider) Object.DestroyImmediate(go.GetComponent<Collider>());
+            go.isStatic = true;
+            return go;
+        }
+
+        static void SlabRect(string name, Rect r, float y0, float y1, IEnumerable<Rect> holes, Material m, float tile)
+        {
+            var hs = holes.Where(h => h.Overlaps(r)).ToList();
+            var xs = new List<float> { r.xMin, r.xMax }; var zs = new List<float> { r.yMin, r.yMax };
+            foreach (var h in hs) { xs.Add(Mathf.Clamp(h.xMin, r.xMin, r.xMax)); xs.Add(Mathf.Clamp(h.xMax, r.xMin, r.xMax)); zs.Add(Mathf.Clamp(h.yMin, r.yMin, r.yMax)); zs.Add(Mathf.Clamp(h.yMax, r.yMin, r.yMax)); }
+            xs = xs.Distinct().OrderBy(v => v).ToList(); zs = zs.Distinct().OrderBy(v => v).ToList();
+            for (int i = 0; i < xs.Count - 1; i++)
+                for (int j = 0; j < zs.Count - 1; j++)
+                {
+                    var cell = Rect.MinMaxRect(xs[i], zs[j], xs[i + 1], zs[j + 1]);
+                    if (cell.width < 0.01f || cell.height < 0.01f || hs.Any(h => h.Contains(cell.center))) continue;
+                    Box(name, structure, new Vector3(cell.center.x, (y0 + y1) / 2f, cell.center.y), new Vector3(cell.width, y1 - y0, cell.height), m, tile);
+                }
+        }
+
+        // ------------------------------------------------------------------ paredes a partir de las salas
+        /// <summary>Altura a la que llega la pared de una sala (tapa la losa de encima).</summary>
+        static float Top(Room a) => a.kind == Kind.Outdoor ? a.floor + (a.type == "alley" ? 3.2f : a.type == "fireescape" ? 0f : 1.1f) : a.ceil + 0.5f;
+
+        struct Seg { public bool alongX; public float c, s0, s1, y0, y1, t, floorA, floorB; public bool skirtA, skirtB; }
+
+        /// <summary>Saca las paredes de todos los pisos: borde a borde de la rejilla de 0,5 m entre espacios distintos.</summary>
+        static List<Seg> BuildSegments()
+        {
+            var segs = new List<Seg>();
+            float minX = Rooms.Min(r => r.r.xMin) - 1, maxX = Rooms.Max(r => r.r.xMax) + 1, minZ = Rooms.Min(r => r.r.yMin) - 1, maxZ = Rooms.Max(r => r.r.yMax) + 1;
+            int nx = Mathf.RoundToInt((maxX - minX) / Grid), nz = Mathf.RoundToInt((maxZ - minZ) / Grid);
+            // un "piso" por cota de suelo de referencia: los espacios se agrupan por el piso en el que estan
+            var levels = new[] { (B, -7f, -0.6f), (G, -0.6f, 3.9f), (F1, 3.9f, 7.3f), (F2, 7.3f, 20f) };
+            foreach (var (lv, lo, hi) in levels)
+            {
+                var rooms = Rooms.Where(r => r.floor > lo - 0.01f && r.floor < hi).ToList();
+                if (lv == B) rooms = Rooms.Where(r => r.floor < -0.6f).ToList();
+                var lab = new int[nx, nz];
+                for (int i = 0; i < nx; i++)
+                    for (int j = 0; j < nz; j++)
+                    {
+                        var p = new Vector2(minX + (i + 0.5f) * Grid, minZ + (j + 0.5f) * Grid);
+                        lab[i, j] = rooms.FindIndex(r => r.r.Contains(p));
+                    }
+                // aristas verticales (pared a lo largo de Z en x = minX + (i+1)*Grid) y horizontales
+                for (int pass = 0; pass < 2; pass++)
+                {
+                    bool alongX = pass == 1;
+                    int lines = alongX ? nz - 1 : nx - 1, len = alongX ? nx : nz;
+                    for (int L = 0; L < lines; L++)
+                    {
+                        Seg? cur = null;
+                        for (int k = 0; k <= len; k++)
+                        {
+                            Seg? s = null;
+                            if (k < len)
+                            {
+                                int a = alongX ? lab[k, L] : lab[L, k], b = alongX ? lab[k, L + 1] : lab[L + 1, k];
+                                if (a != b)
+                                {
+                                    Room ra = a >= 0 ? rooms[a] : null, rb = b >= 0 ? rooms[b] : null;
+                                    if (!(ra != null && rb != null && ra.group == rb.group) && !(ra == null && rb != null && rb.kind == Kind.Outdoor && rb.type == "fireescape") && !(rb == null && ra != null && ra.kind == Kind.Outdoor && ra.type == "fireescape"))
+                                    {
+                                        bool outA = ra == null || ra.kind == Kind.Outdoor, outB = rb == null || rb.kind == Kind.Outdoor;
+                                        float y0 = Mathf.Min(ra != null ? ra.floor : 99f, rb != null ? rb.floor : 99f) - 0.3f;
+                                        float y1 = Mathf.Max(ra != null ? Top(ra) : -99f, rb != null ? Top(rb) : -99f);
+                                        if (ra != null && rb != null && ra.kind == Kind.Outdoor && rb.kind == Kind.Outdoor) y1 = Mathf.Max(Top(ra), Top(rb));
+                                        if (y1 > y0 + 0.2f)
+                                            s = new Seg { alongX = alongX, c = (alongX ? minZ : minX) + (L + 1) * Grid, s0 = (alongX ? minX : minZ) + k * Grid, s1 = (alongX ? minX : minZ) + (k + 1) * Grid, y0 = y0, y1 = y1,
+                                                t = (outA || outB) ? 0.35f : 0.2f, floorA = ra != null ? ra.floor : float.NaN, floorB = rb != null ? rb.floor : float.NaN,
+                                                skirtA = ra != null && ra.Indoor, skirtB = rb != null && rb.Indoor };
+                                    }
+                                }
+                            }
+                            if (cur.HasValue && s.HasValue && Mathf.Approximately(cur.Value.y0, s.Value.y0) && Mathf.Approximately(cur.Value.y1, s.Value.y1) && Mathf.Approximately(cur.Value.t, s.Value.t)
+                                && cur.Value.skirtA == s.Value.skirtA && cur.Value.skirtB == s.Value.skirtB && Mathf.Abs(cur.Value.s1 - s.Value.s0) < 0.01f)
+                            { var c = cur.Value; c.s1 = s.Value.s1; cur = c; continue; }
+                            if (cur.HasValue) segs.Add(cur.Value);
+                            cur = s;
+                        }
+                        if (cur.HasValue) segs.Add(cur.Value);
+                    }
+                }
+            }
+            return segs;
+        }
+
+        static void EmitWalls(List<Seg> segs)
+        {
+            foreach (var sg in segs)
+            {
+                // huecos de las puertas que caen en este tramo
+                var gaps = Doors.Where(d => (sg.alongX ? Mathf.Abs(d.p.y - sg.c) < 0.05f && d.p.x > sg.s0 && d.p.x < sg.s1 : Mathf.Abs(d.p.x - sg.c) < 0.05f && d.p.y > sg.s0 && d.p.y < sg.s1)
+                                             && d.floor >= sg.y0 - 0.01f && d.floor < sg.y1 - 1f)
+                                .OrderBy(d => sg.alongX ? d.p.x : d.p.y).ToList();
+                var cuts = new List<(float a, float b, DoorDef d)>();
+                float s = sg.s0;
+                foreach (var d in gaps)
+                {
+                    float m = sg.alongX ? d.p.x : d.p.y, g0 = m - d.width / 2f, g1 = m + d.width / 2f;
+                    if (g0 > s) cuts.Add((s, g0, null));
+                    cuts.Add((g0, g1, d));
+                    s = g1;
+                }
+                if (s < sg.s1) cuts.Add((s, sg.s1, null));
+                foreach (var (a, b, d) in cuts)
+                {
+                    float len = b - a, mid = (a + b) / 2f;
+                    if (d == null)
+                    {
+                        WallBox(sg, mid, len, sg.y0, sg.y1, true);
+                    }
+                    else
+                    {
+                        // tramo bajo el hueco (si la puerta esta en el piso de arriba de una pared que viene de abajo) y dintel encima
+                        if (d.floor - 0.3f > sg.y0 + 0.05f) WallBox(sg, mid, len, sg.y0, d.floor - 0.3f, false);
+                        if (sg.y1 > d.floor + DoorH + 0.02f) WallBox(sg, mid, len, d.floor + DoorH, sg.y1, false);
+                    }
+                }
+            }
+        }
+
+        static void WallBox(Seg sg, float mid, float len, float y0, float y1, bool skirting)
+        {
+            var c = sg.alongX ? new Vector3(mid, (y0 + y1) / 2f, sg.c) : new Vector3(sg.c, (y0 + y1) / 2f, mid);
+            var size = sg.alongX ? new Vector3(len, y1 - y0, sg.t) : new Vector3(sg.t, y1 - y0, len);
+            Box("Pared", structure, c, size, wall, 3f);
+            if (!skirting) return;
+            foreach (int side in new[] { -1, 1 })
+            {
+                bool has = side < 0 ? sg.skirtA : sg.skirtB; float fy = side < 0 ? sg.floorA : sg.floorB;
+                if (!has || float.IsNaN(fy) || fy + 0.14f > y1) continue;
+                var off = sg.alongX ? new Vector3(0, 0, side * (sg.t / 2 + 0.02f)) : new Vector3(side * (sg.t / 2 + 0.02f), 0, 0);
+                var bs = sg.alongX ? new Vector3(len, 0.14f, 0.04f) : new Vector3(0.04f, 0.14f, len);
+                Box("Rodapie", details, new Vector3(c.x, fy + 0.07f, c.z) + off, bs, wood, 1f, false);
+            }
+        }
+
+        // ------------------------------------------------------------------ puertas
+        static void EmitDoors()
+        {
+            var w150 = AssetDatabase.LoadAssetAtPath<GameObject>(Pre + "Doors/Door_Wood_150.prefab");
+            foreach (var d in Doors)
+            {
+                if (d.kind == DoorKind.Opening) continue;
+                // eje de la pared: si hay un tramo de pared a lo largo de X en z = p.y, es una puerta en pared a lo largo de X
+                bool alongX = Rooms.Any(r => Mathf.Abs(r.r.yMin - d.p.y) < 0.05f || Mathf.Abs(r.r.yMax - d.p.y) < 0.05f) &&
+                              !Rooms.Any(r => (Mathf.Abs(r.r.xMin - d.p.x) < 0.05f || Mathf.Abs(r.r.xMax - d.p.x) < 0.05f) && d.p.y > r.r.yMin && d.p.y < r.r.yMax && Mathf.Abs(r.floor - d.floor) < 0.6f);
+                var center = new Vector3(d.p.x, d.floor, d.p.y);
+                if (d.kind == DoorKind.Fixed)
+                {
+                    Box(d.name, structure, center + Vector3.up * 1.2f, alongX ? new Vector3(1.4f, 2.4f, 0.06f) : new Vector3(0.06f, 2.4f, 1.4f), metal, 1f);
+                    continue;
+                }
+                if (d.kind == DoorKind.Double)
+                {
+                    var l = (GameObject)PrefabUtility.InstantiatePrefab(w150, level); l.name = d.name + "_O";
+                    l.transform.SetPositionAndRotation(center - new Vector3(1.5f, 0, 0), Quaternion.identity);
+                    var r2 = (GameObject)PrefabUtility.InstantiatePrefab(w150, level); r2.name = d.name + "_E";
+                    r2.transform.SetPositionAndRotation(center + new Vector3(1.5f, 0, 0), Quaternion.Euler(0, 180f, 0));
+                    var d1 = l.GetComponentInChildren<Door>(); var d2 = r2.GetComponentInChildren<Door>(); d1.partner = d2; d2.partner = d1;
+                    foreach (var t in l.GetComponentsInChildren<Transform>().Concat(r2.GetComponentsInChildren<Transform>())) if (t.name == "Leaf") leaves.Add(t.gameObject);
+                    continue;
+                }
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(w150, level);
+                go.name = d.name;
+                go.transform.SetPositionAndRotation(alongX ? center - new Vector3(0.75f, 0, 0) : center - new Vector3(0, 0, 0.75f), Quaternion.Euler(0, alongX ? 0f : -90f, 0));
+                foreach (var t in go.GetComponentsInChildren<Transform>()) if (t.name == "Leaf") leaves.Add(t.gameObject);
+            }
+        }
+
+        // ------------------------------------------------------------------ suelos, techos y luces
+        static void EmitSlabs()
+        {
+            foreach (var r in Rooms)
+            {
+                if (r.kind == Kind.Shaft) { if (r.floor < -1f) Box("Ascensor_Fondo", structure, new Vector3(r.r.center.x, r.floor - 0.15f, r.r.center.y), new Vector3(r.r.width, 0.3f, r.r.height), metal, 1f); continue; }
+                if (r.type == "fireescape") continue;                                   // la escalera de incendios es de rejilla (FireEscape)
+                var fh = SlabHoles.Where(h => Mathf.Abs(h.y - r.floor) < 0.05f).Select(h => h.r);
+                SlabRect(r.id + "_Suelo", r.r, r.floor - 0.3f, r.floor, fh, r.kind == Kind.Outdoor ? outdoorM : floorM, 4f);
+                if (r.kind == Kind.Outdoor) continue;
+                var ch = SlabHoles.Where(h => Mathf.Abs(h.y - (r.ceil + 0.5f)) < 0.05f || (r.ceil < h.y && h.y - r.ceil < 0.9f)).Select(h => h.r);
+                SlabRect(r.id + "_Techo", r.r, r.ceil, r.ceil + 0.12f, ch, ceil, 2.4f);
+                // cubierta del archivo y de las salas de la segunda planta
+                if (r.floor >= F2 - 0.01f) Box(r.id + "_Cubierta", structure, new Vector3(r.r.center.x, r.ceil + 0.35f, r.r.center.y), new Vector3(r.r.width + 0.4f, 0.3f, r.r.height + 0.4f), wall, 3f);
+            }
+        }
+
+        static void EmitLamps()
+        {
+            foreach (var r in Rooms.Where(r => r.Indoor))
+            {
+                float spacing = r.kind == Kind.Corridor ? 10f : 9.5f;
+                int nx = Mathf.Max(1, Mathf.RoundToInt(r.r.width / spacing)), nz = Mathf.Max(1, Mathf.RoundToInt(r.r.height / spacing));
+                if (r.r.width < 3.1f) nx = 1; if (r.r.height < 3.1f) nz = 1;
+                for (int i = 0; i < nx; i++)
+                    for (int j = 0; j < nz; j++)
+                    {
+                        var xz = new Vector3(r.r.xMin + r.r.width * (i + 0.5f) / nx, 0f, r.r.yMin + r.r.height * (j + 0.5f) / nz);
+                        if (SlabHoles.Any(h => h.r.Contains(new Vector2(xz.x, xz.z)))) continue;
+                        float inten = r.kind == Kind.Corridor ? 22f : 28f;
+                        var lamp = Call<CeilingLamp>("Lamp", level, xz, r.light, inten, Mathf.Min(14f, r.ceil - r.floor + 6f), false, 5f, 8f);
+                        lamp.transform.position += Vector3.up * (r.ceil - 3.0f);
+                        lamp.name = "Lamp_" + r.id;
+                        lamps++;
+                    }
+            }
+        }
+
+        // ------------------------------------------------------------------ escaleras
+        /// <summary>Escalera recta a lo largo de Z (de z0 a z1, subiendo de y0 a y1) entre x0 y x1: peldanos (decorado) y rampa invisible.</summary>
+        public static Transform StraightStairZ(string name, float x0, float x1, float z0, float z1, float y0, float y1, Material m)
+        {
+            var root = new GameObject(name).transform; root.SetParent(structure);
+            int n = Mathf.Max(4, Mathf.RoundToInt(Mathf.Abs(y1 - y0) / 0.2f));
+            float run = (z1 - z0) / n, rise = (y1 - y0) / n, xc = (x0 + x1) / 2f, w = x1 - x0;
+            float baseY = Mathf.Min(y0, y1) - 0.3f;
+            for (int k = 0; k < n; k++)
+            {
+                float top = y0 + rise * (k + 0.5f), za = z0 + run * k, zb = za + run;
+                Box("Peldano", root, new Vector3(xc, (top + baseY) / 2f, (za + zb) / 2f), new Vector3(w, top - baseY, Mathf.Abs(run)), m, 1f, false);
+            }
+            float len = Mathf.Sqrt((z1 - z0) * (z1 - z0) + (y1 - y0) * (y1 - y0)), ang = -Mathf.Atan2(y1 - y0, z1 - z0) * Mathf.Rad2Deg;
+            var ramp = new GameObject("Rampa"); ramp.transform.SetParent(root);
+            ramp.transform.SetPositionAndRotation(new Vector3(xc, (y0 + y1) / 2f + 0.02f, (z0 + z1) / 2f), Quaternion.Euler(ang, 0, 0));
+            var rc = ramp.AddComponent<BoxCollider>(); rc.size = new Vector3(w, 0.1f, len); rc.center = new Vector3(0, -0.05f, 0); ramp.isStatic = true;
+            return root;
+        }
+
+        public static void Rail(Transform parent, Vector3 a, Vector3 b, bool bars = true)
+        {
+            var g = new GameObject("Barandilla").transform; g.SetParent(parent);
+            Vector3 d = b - a; float len = d.magnitude; if (len < 0.05f) return;
+            var rot = Quaternion.LookRotation(d / len);
+            int posts = Mathf.Max(1, Mathf.CeilToInt(len / 1.2f));
+            for (int i = 0; i <= posts; i++) Box("Pie", g, Vector3.Lerp(a, b, i / (float)posts) + Vector3.up * 0.5f, new Vector3(0.05f, 1.0f, 0.05f), metal, 0f, false);
+            var top = Box("Pasamanos", g, (a + b) / 2f + Vector3.up * 1.0f, new Vector3(0.07f, 0.05f, len), wood, 0f, false); top.transform.rotation = rot;
+            var mid = Box("Barra", g, (a + b) / 2f + Vector3.up * 0.15f, new Vector3(0.04f, 0.04f, len), metal, 0f, false); mid.transform.rotation = rot;
+            if (bars) { int nb = Mathf.FloorToInt(len / 0.12f); for (int i = 1; i < nb; i++) Box("Barrote", g, Vector3.Lerp(a, b, i / (float)nb) + Vector3.up * 0.58f, new Vector3(0.022f, 0.84f, 0.022f), metal, 0f, false); }
+            var col = new GameObject("Colision"); col.transform.SetParent(g);
+            col.transform.SetPositionAndRotation((a + b) / 2f + Vector3.up * 0.6f, rot);
+            col.AddComponent<BoxCollider>().size = new Vector3(0.08f, 1.2f, len); col.isStatic = true;
+        }
+
+        /// <summary>Caracol del vestibulo (de la planta baja a la primera), igual que la de la fase 1 pero en el vestibulo nuevo.</summary>
+        static void SpiralStair()
+        {
+            var root = new GameObject("EscaleraCaracol").transform; root.SetParent(structure);
+            var C = SpiralC; float R0 = SpiralR, inner = 0.3f;
+            float rise = F1 - G, turn = 360f, start = 180f, sgn = -1f; int steps = 22;
+            float Ang(float k) => start + sgn * turn * k;
+            int seg = 64; var v = new List<Vector3>(); var tris = new List<int>();
+            for (int i = 0; i <= seg; i++)
+            {
+                float k = i / (float)seg, a = Ang(k) * Mathf.Deg2Rad, y = G + rise * k;
+                var dir = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a));
+                v.Add(C + dir * inner + Vector3.up * y); v.Add(C + dir * R0 + Vector3.up * y);
+                if (i > 0) { int b = v.Count - 4; tris.AddRange(new[] { b, b + 2, b + 1, b + 1, b + 2, b + 3 }); tris.AddRange(new[] { b, b + 1, b + 2, b + 1, b + 3, b + 2 }); }
+            }
+            var mesh = new Mesh { name = "RampaCaracolGrande" }; mesh.SetVertices(v); mesh.SetTriangles(tris, 0); mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            string mp = "Assets/_Project/Art/Props/RampaCaracolGrande.asset";
+            var old = AssetDatabase.LoadAssetAtPath<Mesh>(mp);
+            if (old == null) AssetDatabase.CreateAsset(mesh, mp); else { old.Clear(); old.SetVertices(v); old.SetTriangles(tris, 0); old.RecalculateNormals(); old.RecalculateBounds(); EditorUtility.SetDirty(old); mesh = old; }
+            var ramp = new GameObject("Rampa"); ramp.transform.SetParent(root); ramp.AddComponent<MeshCollider>().sharedMesh = mesh;
+            for (int i = 0; i < steps; i++)
+            {
+                float a = Ang((i + 0.5f) / steps), y = G + rise * (i + 1) / steps;
+                var dir = Quaternion.Euler(0, -a, 0) * Vector3.right;
+                var step = Box("Peldano", root, C + dir * ((inner + R0) / 2f) + Vector3.up * (y - 0.03f), new Vector3(R0 - inner, 0.05f, 0.36f), metal, 0f, false);
+                step.transform.rotation = Quaternion.Euler(0, -a, 0);
+                for (int j = 0; j < 3; j++)
+                {
+                    float aj = Ang((i + j / 3f) / steps), yj = G + rise * (i + j / 3f + 0.5f) / steps;
+                    var dj = Quaternion.Euler(0, -aj, 0) * Vector3.right;
+                    Box(j == 0 ? "PieDerecho" : "Barrote", root, C + dj * (R0 - 0.05f) + Vector3.up * (yj + 0.47f), j == 0 ? new Vector3(0.045f, 0.94f, 0.045f) : new Vector3(0.022f, 0.9f, 0.022f), metal, 0f, false);
+                }
+            }
+            Box("Columna", root, C + Vector3.up * (rise / 2f + 0.5f), new Vector3(0.24f, rise + 1f, 0.24f), metal, 0f);
+            int hs = steps * 2;
+            for (int i = 0; i < hs - 1; i++)
+            {
+                float k0 = (i + 0.5f) / hs, k1 = (i + 1.5f) / hs;
+                var p0 = C + Quaternion.Euler(0, -Ang(k0), 0) * Vector3.right * (R0 - 0.05f) + Vector3.up * (G + rise * k0 + 0.95f);
+                var p1 = C + Quaternion.Euler(0, -Ang(k1), 0) * Vector3.right * (R0 - 0.05f) + Vector3.up * (G + rise * k1 + 0.95f);
+                var h = Box("Pasamanos", root, (p0 + p1) / 2f, new Vector3(0.06f, 0.05f, Vector3.Distance(p0, p1) + 0.03f), wood, 0f, false);
+                h.transform.rotation = Quaternion.LookRotation(p1 - p0);
+            }
+            var hole = SpiralHole;
+            float rx0 = hole.xMin, rx1 = C.x - inner, rz0 = C.z, rz1 = hole.yMax;
+            Box("Rellano", root, new Vector3((rx0 + rx1) / 2f, F1 - 0.15f, (rz0 + rz1) / 2f), new Vector3(rx1 - rx0, 0.3f, rz1 - rz0), floorM, 4f);
+            float yf = F1;
+            Rail(root, new Vector3(hole.xMin, yf, hole.yMin), new Vector3(hole.xMax, yf, hole.yMin));
+            Rail(root, new Vector3(hole.xMax, yf, hole.yMin), new Vector3(hole.xMax, yf, hole.yMax));
+            Rail(root, new Vector3(rx1, yf, hole.yMax), new Vector3(hole.xMax, yf, hole.yMax));
+            Rail(root, new Vector3(hole.xMin, yf, hole.yMin), new Vector3(hole.xMin, yf, rz0));
+            Rail(root, new Vector3(rx1, yf, rz0), new Vector3(rx1, yf, hole.yMax));
+        }
+
+        /// <summary>Escalera de servicio norte (baja -> primera) y la del archivo (primera -> segunda), con barandillas en el hueco.</summary>
+        static void Stairs()
+        {
+            var n = StraightStairZ("EscaleraNorte", 4.2f, 6.2f, 32f, 40f, G, F1, metal);
+            Rail(n, new Vector3(6.3f, G, 32f), new Vector3(6.3f, F1, 40f));                            // lado abierto, subiendo
+            Rail(n, new Vector3(6.4f, F1, 31.6f), new Vector3(6.4f, F1, 40.0f));                       // hueco arriba
+            Rail(n, new Vector3(4f, F1, 31.6f), new Vector3(6.4f, F1, 31.6f));
+            var a = StraightStairZ("EscaleraArchivo", -13.8f, -11.8f, 32f, 39f, F1, F2, metal);
+            Rail(a, new Vector3(-11.7f, F1, 31.4f), new Vector3(-11.7f, F2, 39f));
+            Rail(a, new Vector3(-11.4f, F2, 31.6f), new Vector3(-11.4f, F2, 39.0f));
+            Rail(a, new Vector3(-14f, F2, 31.6f), new Vector3(-11.4f, F2, 31.6f));
+            // sala de calderas (hundida 2 m): rellano junto a la puerta y escalera hacia el norte hasta el foso
+            var c = StraightStairZ("EscaleraCalderas", -23f, -21f, 31.5f, 35.5f, B, -6.5f, metal);
+            Box("Rellano_Calderas", c, new Vector3(-22f, (B - 0.3f + -6.8f) / 2f + 0.15f, 30.25f), new Vector3(4f, B - (-6.8f), 2.5f), floorM, 4f);
+            Rail(c, new Vector3(-24f, B, 31.5f), new Vector3(-23.1f, B, 31.5f));
+            Rail(c, new Vector3(-20.9f, B, 31.5f), new Vector3(-20f, B, 31.5f));
+            Rail(c, new Vector3(-24f, B, 29.2f), new Vector3(-24f, B, 31.5f));
+            Rail(c, new Vector3(-20f, B, 29.2f), new Vector3(-20f, B, 31.5f));
+            Rail(c, new Vector3(-23.1f, B, 31.5f), new Vector3(-23.1f, -6.5f, 35.5f));
+            Rail(c, new Vector3(-20.9f, B, 31.5f), new Vector3(-20.9f, -6.5f, 35.5f));
+        }
+
+        /// <summary>Escalera de incendios de chapa en la fachada oeste: callejon -> balcon de la primera (puerta del jefe de seguridad) -> azotea.</summary>
+        static void FireEscape()
+        {
+            var root = new GameObject("EscaleraIncendios").transform; root.SetParent(structure);
+            float xa = -35.6f, xb = -33.6f;                                       // tramos, a 1,6 m de la fachada
+            // tramo 1: del callejon (z 34) sube hacia el sur hasta el balcon (z 26, y 4)
+            var t1 = StraightStairZ("Tramo1", xa, xb, 34f, 26f, G, F1, grating); t1.SetParent(root);
+            // balcon (x -36..-32, z 17..26) y rellano de arriba (x -36..-32, z 6..11)
+            Box("Balcon", root, new Vector3(-34f, F1 - 0.06f, 21.5f), new Vector3(4f, 0.12f, 9f), grating, 1f);
+            var t2 = StraightStairZ("Tramo2", xa, xb, 17f, 11f, F1, F2, grating); t2.SetParent(root);
+            Box("Rellano_Azotea", root, new Vector3(-34f, F2 - 0.06f, 8.5f), new Vector3(4f, 0.12f, 5f), grating, 1f);
+            // barandillas: borde exterior de todo y el lado de los tramos que da al vacio
+            Rail(root, new Vector3(-36f, F1, 17f), new Vector3(-36f, F1, 26f), false);
+            Rail(root, new Vector3(-33.4f, F1, 26f), new Vector3(-32f, F1, 26f), false);      // borde norte del balcon, junto al tramo que llega
+            Rail(root, new Vector3(-36f, F2, 6f), new Vector3(-36f, F2, 11f), false);
+            Rail(root, new Vector3(-36f, F2, 6f), new Vector3(-32f, F2, 6f), false);
+            Rail(root, new Vector3(-33.5f, F2, 11f), new Vector3(-32f, F2, 11f), false);
+            Rail(root, new Vector3(-35.8f, G, 34f), new Vector3(-35.8f, F1, 26f), false);
+            Rail(root, new Vector3(-33.4f, G, 34f), new Vector3(-33.4f, F1, 26.3f), false);
+            Rail(root, new Vector3(-35.8f, F1, 17f), new Vector3(-35.8f, F2, 11f), false);
+            Rail(root, new Vector3(-33.4f, F1, 17f), new Vector3(-33.4f, F2, 11f), false);
+            // pies derechos que lo sujetan
+            foreach (var (x, z, top) in new[] { (-36f, 17f, F1), (-36f, 26f, F1), (-36f, 6f, F2), (-36f, 11f, F2) })
+                Box("Pilar", root, new Vector3(x, top / 2f, z), new Vector3(0.12f, top, 0.12f), metal, 0f);
+        }
+
+        // ------------------------------------------------------------------ entrada
+        [MenuItem("Horror/Comisaria grande/1 Estructura")]
+        public static void Menu() { Debug.Log("[Horror] " + Build()); }
+
+        public static string Build()
+        {
+            if (EditorApplication.isPlaying) return "no con el editor en Play";
+            Define();
+            EditorSceneManager.SaveOpenScenes();
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null) AssetDatabase.CopyAsset("Assets/Scenes/Comisaria.unity", ScenePath);
+            var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            foreach (var go in scene.GetRootGameObjects())
+                if (go.name == "--- LEVEL ---" || go.name == "Details" || go.name == "Items" || go.name == "Zombies" || go.name == "ArenaBlockers" || go.name == "--- COMISARIA V2 ---")
+                    Object.DestroyImmediate(go);
+            wall = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Wall.mat");
+            floorM = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Floor.mat");
+            ceil = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Ceiling.mat");
+            wood = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Wood.mat");
+            metal = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Metal.mat");
+            outdoorM = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Sidewalk.mat") ?? floorM;
+            grating = metal;
+            leaves.Clear(); lamps = 0;
+
+            var rootGo = new GameObject("--- COMISARIA V2 ---");
+            level = rootGo.transform;
+            structure = new GameObject("Estructura").transform; structure.SetParent(level);
+            details = new GameObject("Details").transform; details.SetParent(level);
+            new GameObject("Zombies").transform.SetParent(level);
+            new GameObject("Items").transform.SetParent(level);
+            var props = new GameObject("Props"); props.transform.SetParent(level);
+            var nw = props.AddComponent<NavMeshModifier>(); nw.overrideArea = true; nw.area = 1; nw.applyToChildren = true;
+
+            var segs = BuildSegments();
+            EmitWalls(segs);
+            EmitSlabs();
+            EmitDoors();
+            EmitLamps();
+            SpiralStair();
+            Stairs();
+            FireEscape();
+
+            var surface = rootGo.AddComponent<NavMeshSurface>();
+            surface.collectObjects = CollectObjects.Children;
+            surface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
+            surface.overrideVoxelSize = true; surface.voxelSize = 0.1f;
+            Physics.SyncTransforms();
+            foreach (var l in leaves) l.SetActive(false);
+            surface.BuildNavMesh();
+            foreach (var l in leaves) l.SetActive(true);
+            var rt = rootGo.AddComponent<RuntimeNavMesh>(); rt.surface = surface; rt.disableDuringBake = leaves.ToArray();
+
+            var pc = Object.FindFirstObjectByType<PlayerController>();
+            if (pc != null) { pc.transform.SetPositionAndRotation(new Vector3(0f, G + 1.05f, 1.6f), Quaternion.identity); var cam = pc.cam; if (cam != null) cam.SetYaw(0f); }
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            return "comisaria grande: " + Rooms.Count + " espacios, " + segs.Count + " tramos de pared, " + Doors.Count + " puertas, " + lamps + " lamparas";
+        }
+    }
+}
+#endif
