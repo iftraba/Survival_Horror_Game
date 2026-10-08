@@ -34,3 +34,6 @@ Lámparas de techo (`CeilingLamp`) con interruptores (`LightSwitch`): cada inter
 
 ## Pendiente
 Sonido de pasos distinto en la escalera, ventanas y azotea.
+
+## Paredes vestidas (2026-10-08)
+Las salas tenían las paredes lisas. `WallDressingKit` añade molduras junto al techo (110), tuberías en algunas paredes largas (125 tramos) y atrezzo de pared modelado en Blender (unos 130: tablones, radiadores, rejillas, extintores, cuadros eléctricos y relojes), solo donde no tapa puertas, muebles ni interruptores. No tienen colisión: no cambian por dónde se anda. Si se reconstruye una zona, hay que repetir el menú.
