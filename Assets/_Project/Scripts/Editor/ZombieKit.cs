@@ -148,7 +148,7 @@ namespace Horror.EditorTools
             return c;
         }
 
-        static readonly string[] ReactionStates = { "HeadHit", "Stun", "KnockFall", "Situp", "Downed", "Grab", "Death1", "Death2", "Death3" };
+        static readonly string[] ReactionStates = { "Attack3", "Attack4", "HeadHit", "Stun", "KnockFall", "Situp", "Downed", "Grab", "Death1", "Death2", "Death3" };
         static readonly string[] ReactionParams = { "HeadHit", "Stun", "Knockdown", "Grab", "DeathVariant" };
 
         /// <summary>
@@ -171,6 +171,9 @@ namespace Horror.EditorTools
             c.AddParameter("DeathVariant", AnimatorControllerParameterType.Int);
 
             var loco = sm.states.First(s => s.state.name == "Locomotion").state;
+            // ataques 3 y 4 (patada y ataque de Mixamo): solo los usan los tipos cuyo attackVariants tiene 5 entradas
+            Any(sm, Oneshot(sm, loco, "Attack3", Clip("Z_ZombieKick"), 1.5f, 0.62f), "Attack", 3);
+            Any(sm, Oneshot(sm, loco, "Attack4", Clip("Z_ZombieAttack2"), 1.5f, 0.62f), "Attack", 4);
             Any(sm, Oneshot(sm, loco, "HeadHit", Clip("Z_HeadHit"), 1.15f, 0.85f), "HeadHit");
             Any(sm, Oneshot(sm, loco, "Stun", Clip("Z_GroinB"), 1.1f, 0.92f), "Stun");
             AnimationClip fallBack = null;
@@ -220,9 +223,35 @@ namespace Horror.EditorTools
             float[] exit = { 0.85f, 0.45f, 0.5f };           // los combos largos traen cola de reposo: se cortan antes
             for (int i = 0; i < atk.Length; i++) Any(sm, Oneshot(sm, loco, "Attack" + i, Clip(atk[i]), 1f, exit[i]), "Attack", i);
             DeathState(sm, Clip("Z_ZombieDying"));
+            AddBossCreature(c);
             EditorUtility.SetDirty(c);
             AssetDatabase.SaveAssets();
             return c;
+        }
+
+        /// <summary>
+        /// Creature Pack (2026-10-08) sobre el controlador de los jefes, repetible: estado JumpAttack (disparador "Leap", lo lanza
+        /// BossLeap) y salidas de los ataques 0 y 1 ajustadas a los clips del mutante (punetazo y zarpazo). El jefe 2 no salta y solo
+        /// usa el ataque 0 (su override pone el ataque del pack Pxltiger en todos).
+        /// </summary>
+        public static void AddBossCreature(AnimatorController c)
+        {
+            var sm = c.layers[0].stateMachine;
+            foreach (var cs in sm.states.ToArray()) if (cs.state.name == "JumpAttack") sm.RemoveState(cs.state);
+            foreach (var t in sm.anyStateTransitions.ToArray()) if (t.destinationState == null) sm.RemoveAnyStateTransition(t);
+            var ps = c.parameters;
+            for (int i = ps.Length - 1; i >= 0; i--) if (ps[i].name == "Leap") c.RemoveParameter(i);
+            c.AddParameter("Leap", AnimatorControllerParameterType.Trigger);
+            var loco = sm.states.First(s => s.state.name == "Locomotion").state;
+            Any(sm, Oneshot(sm, loco, "JumpAttack", Clip("B_MutantJumpAttack"), 1.1f, 0.78f), "Leap");
+            float[] exits = { 0.9f, 0.8f };
+            for (int i = 0; i < exits.Length; i++)
+            {
+                var st = sm.states.FirstOrDefault(s => s.state.name == "Attack" + i).state;
+                if (st == null) continue;
+                foreach (var tr in st.transitions) if (tr.destinationState == loco) tr.exitTime = exits[i];
+            }
+            EditorUtility.SetDirty(c);
         }
 
         public static AnimatorOverrideController Override(string name, AnimatorController baseCtrl, Dictionary<string, string> map)

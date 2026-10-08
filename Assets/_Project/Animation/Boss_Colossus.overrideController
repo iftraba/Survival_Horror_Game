@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Boss_Colossus
+  m_Controller: {fileID: 9100000, guid: 07aa4876443dc70479a4d7b767ea9f98, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 30e6ff8b1c9e3b04390428a83163b2e4, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 4632ecf739be96743863cdb891e368d4, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: c9a29ec3c99c61e4aa9e9bc0b25a5b84, type: 3}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 07d058e3ec336534f9ed9a5fe448ecd7, type: 3}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 63e89f5e2e66d5044a45748a08667f3a, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 263e60a03e1373842ac9063e20604c41, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 79490eeefe0454e458d7fed8a95e163f, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 548efb5542c34624798d71c99bb602df, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 2bfced6d8417403419819c8ba1221328, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 680119eb3438f2048b80caa93812ac3f, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 7205b74de337de447bafa4ce202bdbc8, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: 89cb213d4f908d34286327553845c3da, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: b895edae037e33440a7124ffd37bd966, type: 3}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: 754e4ff41d8d01745a295e494f443040, type: 3}
+    m_OverrideClip: {fileID: -203655887218126122, guid: ca0c80fb95b677d4a8c2a16549016d7c, type: 3}
+  - m_OriginalClip: {fileID: -203655887218126122, guid: dbe5e97874790b44fae045091f925ac4, type: 3}
+    m_OverrideClip: {fileID: 0}

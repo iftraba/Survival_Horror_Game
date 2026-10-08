@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1759990035966691341}
   - component: {fileID: 2592790034221166130}
   - component: {fileID: 8903936621735217585}
+  - component: {fileID: 5315788496284740472}
   m_Layer: 0
   m_Name: Boss
   m_TagString: Untagged
@@ -138,20 +139,28 @@ MonoBehaviour:
   chaseSpeed: 1.9
   staggerTime: 0
   hearingRange: 4.5
+  viewAngle: 140
+  closeSense: 1.8
   attackVariants:
-  - hitDelay: 0.48437503
+  - hitDelay: 0.26666668
     damageMultiplier: 1
     cooldown: 1.6
-  - hitDelay: 1.06
+  - hitDelay: 1.3000001
     damageMultiplier: 1
-    cooldown: 2.6500003
+    cooldown: 2.5333335
   - hitDelay: 1.1226416
     damageMultiplier: 1
     cooldown: 2.15
+  knockdownRange: 2.6
+  knockdownTime: 4.5
+  stunChance: 0.3
+  stunTime: 2.4
+  grabChance: 0.3
+  grabRange: 1.1
   dormant: 1
   dropOnDeath: {fileID: 11400000, guid: 904b17372510e394d96479ad688098f0, type: 2}
   bossName: COLOSSUS
-  alertTime: 2.6
+  alertTime: 4.6
 --- !u!114 &2592790034221166130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,6 +173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5216742f32efcfd4683aaf471b8de50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAudio
+  volumeScale: 1
 --- !u!114 &8903936621735217585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,6 +193,29 @@ MonoBehaviour:
   runClipSpeed: 1.7685
   runAbove: 1.2
   maxWalkPlayback: 2.2
+--- !u!114 &5315788496284740472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1bb80a4cce698247a17c19f242f3e24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.BossLeap
+  minDistance: 4.5
+  maxDistance: 11
+  cooldown: {x: 7, y: 11}
+  damage: 45
+  radius: 2.6
+  animSpeed: 1.1
+  takeoff: 0.55
+  land: 1.6
+  recover: 2.7
+  landShort: 1
+  warningMaterial: {fileID: 2100000, guid: 5fa3033b5c10470469489cd8fbcf3dc3, type: 2}
 --- !u!1001 &3231017023443510192
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -250,7 +283,7 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 07aa4876443dc70479a4d7b767ea9f98, type: 2}
+      objectReference: {fileID: 22100000, guid: ad35c15607acccf4ba7a84ce64d37d2e, type: 2}
     - target: {fileID: 5866666021909216657, guid: 9764b9515bd640c4093a05adb0459737, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0

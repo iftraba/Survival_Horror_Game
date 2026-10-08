@@ -139,6 +139,8 @@ MonoBehaviour:
   chaseSpeed: 0.84
   staggerTime: 0.5
   hearingRange: 4.5
+  viewAngle: 140
+  closeSense: 1.8
   attackVariants:
   - hitDelay: 0.52952385
     damageMultiplier: 1
@@ -149,6 +151,18 @@ MonoBehaviour:
   - hitDelay: 0.44444445
     damageMultiplier: 1
     cooldown: 1.7415557
+  - hitDelay: 0.59433967
+    damageMultiplier: 1
+    cooldown: 1.7966667
+  - hitDelay: 0.52952385
+    damageMultiplier: 1
+    cooldown: 2.2651112
+  knockdownRange: 2.6
+  knockdownTime: 4.5
+  stunChance: 0.3
+  stunTime: 2.4
+  grabChance: 0.3
+  grabRange: 1.1
   dormant: 0
   dropOnDeath: {fileID: 0}
   bossName: 
@@ -165,6 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5216742f32efcfd4683aaf471b8de50e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAudio
+  volumeScale: 1
 --- !u!114 &5601004473132271377
 MonoBehaviour:
   m_ObjectHideFlags: 0

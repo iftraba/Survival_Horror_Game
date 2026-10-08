@@ -46,6 +46,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Enemies · **Primer jefe con el Creature Pack**: saca músculo mientras espera, ruge al despertar, nuevos puñetazo y zarpazo, muerte propia y **ataque en salto** (cae donde estabas, marcado con un círculo rojo; se aplana en techos bajos). Los zombis de pie tienen además una patada y otro ataque.
 - 2026-10-08 · Animation · **14 animaciones nuevas de Mixamo** (`AnimPackKit`): el jugador abre las puertas con la mano, entra en la sala del jefe cruzando la puerta (no se puede asomar y salir), gira 180° derrapando si corre (Q), hace una voltereta al caer de altura y sube escaleras corriendo. Los zombis caen de espaldas y se levantan con un escopetazo de cerca, a veces se quedan aturdidos con uno de lejos (30 %), reaccionan al disparo en la cabeza, tienen tres muertes nuevas (vientre/torso, desplomarse, tambalearse) y pueden agarrarte y morderte el cuello (pulsa E para soltarte). Los Pxltiger tienen un segundo ataque (puñetazo) y los reptantes una animación nueva y ya no se hunden en el suelo.
 - 2026-10-08 · Enemies · **Zombis Pxltiger y jefe 2 con grito y reacción al disparo**: les faltaban esas animaciones (se quedaban en reposo); ahora usan las de Mixamo, que se adaptan a su esqueleto.
 - 2026-10-08 · Core · **Luces sin sonido**: quitados el zumbido de las lámparas y el chasquido de los apagones.
