@@ -6,7 +6,8 @@ namespace Horror
 {
     /// <summary>
     /// Ataque en salto del primer jefe (clip "Mutant Jump Attack" del Creature Pack, 2026-10-08): si el jugador esta a media
-    /// distancia y a la vista, se agacha, salta y cae donde estabas al despegar (un circulo rojo lo marca: da tiempo a apartarse).
+    /// distancia y a la vista, se agacha, salta y cae donde estabas al despegar (sin aviso en el suelo: hay que verle saltar y apartarse).
+    /// Al caer destroza los muebles de alrededor (PropBreaker).
     /// El clip sube el cuerpo; el avance lo hace este script. Mientras, la IA normal queda suspendida.
     /// </summary>
     [RequireComponent(typeof(ZombieAI))]
@@ -20,11 +21,10 @@ namespace Horror
         [Tooltip("Velocidad del estado JumpAttack del controlador (los tiempos de abajo se dividen por ella)")] public float animSpeed = 1.1f;
         [Tooltip("Segundos del clip (a velocidad 1): despega, aterriza y vuelve a estar listo")] public float takeoff = 0.55f, land = 1.6f, recover = 2.7f;
         [Tooltip("Cae un poco antes del punto marcado (no encima del jugador)")] public float landShort = 1.0f;
-        public Material warningMaterial;
+        [Tooltip("Ya no se usa: el salto no avisa con un circulo en el suelo")] public Material warningMaterial;
         [Tooltip("Subida de la cadera en el clip a escala 1 (m): el salto se aplana para no atravesar el techo")] public float clipRise = 2.0f;
 
         static readonly int LeapId = Animator.StringToHash("Leap");
-        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         ZombieAI ai;
         Health health;
@@ -35,6 +35,10 @@ namespace Horror
         Health playerHealth;
         float next;
         bool busy, wasDormant = true;
+        BossRush rush;
+        public bool Busy => busy;
+        /// <summary>Retrasa el siguiente salto (lo llama la embestida para no encadenarlos).</summary>
+        public void Delay(float seconds) => next = Mathf.Max(next, Time.time + seconds);
         // aplanado del salto: la altura la pone el clip y en las salas con techo bajo se reduce en proporcion
         Transform model, hips;
         float hipsRest, riseScale = 1f, shift;
@@ -45,6 +49,7 @@ namespace Horror
             health = GetComponent<Health>();
             agent = GetComponent<NavMeshAgent>();
             za = GetComponent<ZombieAnimation>();
+            rush = GetComponent<BossRush>();
             anim = GetComponentInChildren<Animator>();
             if (anim != null) { model = anim.transform; if (anim.isHuman) hips = anim.GetBoneTransform(HumanBodyBones.Hips); }
         }
@@ -62,10 +67,11 @@ namespace Horror
             if (wasDormant && !ai.IsDormant) next = Mathf.Max(next, Time.time + ai.alertTime + 1.5f);
             wasDormant = ai.IsDormant;
             if (busy || health.IsDead || ai.IsDormant || !ai.IsChasing || ai.Suspended || player == null || playerHealth == null || playerHealth.IsDead) return;
-            if (Time.time < next) return;
+            if (Time.time < next || (rush != null && rush.Busy)) return;
             Vector3 d = player.position - transform.position; d.y = 0f;
             float dist = d.magnitude;
-            if (dist < minDistance || dist > maxDistance || Mathf.Abs(player.position.y - transform.position.y) > 1.5f || !ai.HasLineTo(player.position + Vector3.up * 0.4f))
+            if (dist < minDistance || dist > maxDistance || Mathf.Abs(player.position.y - transform.position.y) > 1.5f
+                || !PropBreaker.ClearForBoss(transform.position + Vector3.up * 1.6f, player.position + Vector3.up * 0.6f, transform, 2.6f))   // te ve por encima de las estanterias
             {
                 next = Time.time + 0.5f;
                 return;
@@ -87,7 +93,7 @@ namespace Horror
             dir = len > 0.01f ? dir / len : transform.forward;
             Vector3 landAt = from + dir * Mathf.Max(0f, len - landShort);
             if (NavMesh.SamplePosition(landAt, out var hit, 2f, NavMesh.AllAreas)) landAt = new Vector3(hit.position.x, landAt.y, hit.position.z);
-            var ring = Warning(target);
+            if (rush != null) rush.Delay(3f);
             // techo: cuanto puede subir sin meterse en el
             if (hips != null)
             {
@@ -112,7 +118,6 @@ namespace Horror
             for (float t = 0f; t < t0 && !health.IsDead; t += Time.deltaTime)
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 12f * Time.deltaTime);
-                Pulse(ring, t / (land / animSpeed));
                 yield return null;
             }
             // en el aire: avance horizontal hasta el punto de caida (la altura la pone el clip)
@@ -123,10 +128,8 @@ namespace Horror
                 float k = Mathf.SmoothStep(0f, 1f, t / air);
                 var p = Vector3.Lerp(from, landAt, k); p.y = from.y;
                 transform.position = p;
-                Pulse(ring, (t0 + t) / (land / animSpeed));
                 yield return null;
             }
-            if (ring != null) Destroy(ring.gameObject);
             if (agent != null)
             {
                 agent.enabled = true;
@@ -135,6 +138,7 @@ namespace Horror
             if (!health.IsDead)
             {
                 GameAudio.Play(Sfx.BossStep, transform.position, 1f, 0.45f, false);
+                PropBreaker.BreakInSphere(transform.position, radius * 0.85f, transform.position);   // aplasta los muebles donde cae
                 Vector3 pd = player.position - transform.position; pd.y = 0f;
                 if (pd.magnitude <= radius && Mathf.Abs(player.position.y - transform.position.y) < 2f && !playerHealth.IsDead)
                 {
@@ -159,31 +163,6 @@ namespace Horror
             float excess = Mathf.Max(0f, hips.position.y - transform.position.y - hipsRest);
             shift = excess * (1f - riseScale);
             model.localPosition -= Vector3.up * shift;
-        }
-
-        Transform Warning(Vector3 at)
-        {
-            var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            q.name = "LeapWarning";
-            Destroy(q.GetComponent<Collider>());
-            q.transform.position = new Vector3(at.x, at.y + 0.05f, at.z);
-            q.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-            q.transform.localScale = new Vector3(radius * 2f, radius * 2f, 1f);
-            var r = q.GetComponent<Renderer>();
-            if (warningMaterial != null) r.sharedMaterial = warningMaterial;
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            return q.transform;
-        }
-
-        MaterialPropertyBlock mpb;
-        void Pulse(Transform ring, float k)
-        {
-            if (ring == null) return;
-            if (mpb == null) mpb = new MaterialPropertyBlock();
-            ring.Rotate(Vector3.forward, 90f * Time.deltaTime, Space.Self);
-            float a = Mathf.Lerp(0.4f, 1f, k) * (0.8f + 0.2f * Mathf.Sin(Time.time * 20f));
-            mpb.SetColor(BaseColorId, new Color(1f, 1f, 1f, a));
-            ring.GetComponent<Renderer>().SetPropertyBlock(mpb);
         }
     }
 }

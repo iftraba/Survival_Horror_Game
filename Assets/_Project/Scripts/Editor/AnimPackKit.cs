@@ -137,7 +137,10 @@ namespace Horror.EditorTools
                 ai.alertTime = 4.6f;                                  // el rugido del mutante dura 5,4 s (sale al 90 %)
             }
             var leap = root.GetComponent<BossLeap>() ?? root.AddComponent<BossLeap>();
-            leap.warningMaterial = AssetDatabase.LoadAssetAtPath<Material>(ToxicTextures.RingMatPath);
+            leap.warningMaterial = null;                                 // el salto ya no avisa con un circulo
+            var rush = root.GetComponent<BossRush>() ?? root.AddComponent<BossRush>();
+            rush.crashSound = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/Generated/boss_crash_fal.mp3");
+            if (ai != null) ai.attackRange = 2.0f;                      // se acerca mas antes de golpear (antes 2,4: parecia pegar al aire)
             PrefabUtility.SaveAsPrefabAsset(root, path);
             PrefabUtility.UnloadPrefabContents(root);
             return "jefe 1: " + string.Join(", ", info);

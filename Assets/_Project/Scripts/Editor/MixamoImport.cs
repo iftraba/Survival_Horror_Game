@@ -110,7 +110,9 @@ namespace Horror.EditorTools
                 c.loopTime = loop; c.loopPose = loop;
                 c.lockRootPositionXZ = false;
                 c.lockRootHeightY = true; c.keepOriginalPositionY = true;
-                c.lockRootRotation = bakeRotation; c.keepOriginalOrientation = true;
+                // sin giro horneado, la orientacion de la raiz sigue al cuerpo: asi todos los clips miran hacia delante (si no, los de
+                // cobertura de distintos packs salen girados y el personaje se desliza de cara a la pared)
+                c.lockRootRotation = bakeRotation; c.keepOriginalOrientation = bakeRotation;
             }
             imp.clipAnimations = clips;
             imp.SaveAndReimport();

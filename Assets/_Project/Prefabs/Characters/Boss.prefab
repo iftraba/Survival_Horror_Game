@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 2592790034221166130}
   - component: {fileID: 8903936621735217585}
   - component: {fileID: 5315788496284740472}
+  - component: {fileID: 7189751528181557613}
   m_Layer: 0
   m_Name: Boss
   m_TagString: Untagged
@@ -132,7 +133,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieAI
   detectRange: 14
   loseRange: 22
-  attackRange: 2.4
+  attackRange: 2
   attackDamage: 55
   attackCooldown: 1.8
   walkSpeed: 1.1
@@ -215,8 +216,30 @@ MonoBehaviour:
   land: 1.6
   recover: 2.7
   landShort: 1
-  warningMaterial: {fileID: 2100000, guid: 5fa3033b5c10470469489cd8fbcf3dc3, type: 2}
+  warningMaterial: {fileID: 0}
   clipRise: 2
+--- !u!114 &7189751528181557613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2467731812086957362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18e88e083798f824e803eaec3e48a1ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.BossRush
+  minDistance: 5
+  maxDistance: 16
+  cooldown: {x: 6, y: 10}
+  speed: 7.5
+  maxTime: 2.2
+  windup: 0.6
+  damage: 35
+  knockback: 2.2
+  wallStun: 1.6
+  crashSound: {fileID: 8300000, guid: 42b327b2400a0b9429e7e2032a09804d, type: 3}
 --- !u!1001 &3231017023443510192
 PrefabInstance:
   m_ObjectHideFlags: 0

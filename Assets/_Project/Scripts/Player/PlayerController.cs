@@ -99,12 +99,7 @@ namespace Horror
             CrouchingNow = IsCrouching && (health == null || !health.IsDead);
 
             // Giro de 180 grados (Q): gira el personaje y la camara a la vez
-            // corriendo sin apuntar: giro con derrape (animacion); si no, el giro rapido de siempre
-            if (!blocked && kb.qKey.wasPressedThisFrame && turnRemaining <= 0f)
-            {
-                if (IsRunning && actions != null) actions.RunTurn(runSpeed);
-                else turnRemaining = 180f;
-            }
+            if (!blocked && kb.qKey.wasPressedThisFrame && turnRemaining <= 0f) turnRemaining = 180f;   // (el giro con derrape corriendo se quito a peticion del usuario)
             if (turnRemaining > 0f)
             {
                 float step = Mathf.Min(turnRemaining, 180f / Mathf.Max(0.05f, quickTurnTime) * Time.deltaTime);

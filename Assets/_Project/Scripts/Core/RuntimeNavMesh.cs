@@ -26,5 +26,14 @@ namespace Horror
             surface.BuildNavMesh();
             foreach (var g in disableDuringBake) if (g != null) g.SetActive(true);
         }
+
+        /// <summary>Rehace el NavMesh en segundo plano (al romper muebles el jefe): las fuentes se recogen ahora, con las puertas fuera.</summary>
+        public void Refresh()
+        {
+            if (surface == null || surface.navMeshData == null) return;
+            foreach (var g in disableDuringBake) if (g != null) g.SetActive(false);
+            surface.UpdateNavMesh(surface.navMeshData);
+            foreach (var g in disableDuringBake) if (g != null) g.SetActive(true);
+        }
     }
 }

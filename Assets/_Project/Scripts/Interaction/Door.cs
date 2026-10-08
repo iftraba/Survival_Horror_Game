@@ -178,6 +178,16 @@ namespace Horror
 
         /// <summary>Centro de la hoja (para mirar hacia la puerta).</summary>
         public Vector3 Center => LeafCenter();
+        /// <summary>Normal de la hoja cerrada (horizontal): hacia un lado de la puerta.</summary>
+        public Vector3 Normal
+        {
+            get
+            {
+                Vector3 n = (transform.parent != null ? transform.parent.rotation : Quaternion.identity) * closedRot * Vector3.forward;
+                n.y = 0f;
+                return n.sqrMagnitude > 0.001f ? n.normalized : Vector3.forward;
+            }
+        }
 
         /// <summary>Disparador de la sala de un jefe todavia dormido que esta al otro lado de esta puerta (null si no hay).</summary>
         BossRoomTrigger BossBehind(Vector3 from, out Vector3 inside)

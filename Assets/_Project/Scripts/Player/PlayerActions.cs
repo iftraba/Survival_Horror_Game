@@ -22,6 +22,7 @@ namespace Horror
         public float doorAnimSpeed = 1.8f;
         [Tooltip("Segundos hasta que la mano llega al pomo y la hoja empieza a girar")] public float doorSwingAt = 0.75f;
         [Tooltip("Segundos hasta devolver el control")] public float doorUnlockAt = 1.4f;
+        [Tooltip("Velocidad al acercarse a la puerta antes de abrirla")] public float doorWalkSpeed = 1.8f;
 
         [Header("Entrar en la sala del jefe (clip Opening Door Inwards)")]
         public float enterSpeed = 1.25f;
@@ -100,9 +101,25 @@ namespace Horror
         IEnumerator OpenDoorRoutine(Door door, System.Action swing)
         {
             locked = true;
+            // primero se acerca andando hasta quedar delante del pomo (a 0,6 m de la hoja, en su lado), y se gira hacia la puerta
+            Vector3 c = door.Center;
+            Vector3 handle = door.transform.position + (c - door.transform.position) * 1.4f;      // la hoja va de la bisagra al pomo
+            Vector3 normal = door.Normal;
+            if (Vector3.Dot(transform.position - c, normal) < 0f) normal = -normal;
+            Vector3 stand = handle + normal * 0.6f; stand.y = transform.position.y;
+            for (float t = 0f; t < 1.6f; t += Time.deltaTime)
+            {
+                Vector3 to = stand - transform.position; to.y = 0f;
+                if (to.magnitude < 0.06f) break;
+                Vector3 step = Vector3.ClampMagnitude(to, doorWalkSpeed * Time.deltaTime);
+                body.Move(step + Vector3.down * 0.05f);
+                if (to.magnitude > 0.25f) FaceTowards(transform.position + to, 10f * Time.deltaTime);
+                if (health != null && health.IsDead) break;
+                yield return null;
+            }
+            for (float t = 0f; t < 0.2f; t += Time.deltaTime) { FaceTowards(handle - normal * 0.5f, 14f * Time.deltaTime); yield return null; }
             Trigger("OpenDoor");
             weapons?.SetHeldVisible(false);                  // la mano derecha va al pomo
-            Vector3 c = door.Center;
             bool swung = false;
             for (float t = 0f; t < doorUnlockAt; t += Time.deltaTime)
             {
