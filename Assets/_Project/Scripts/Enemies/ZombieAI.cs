@@ -53,6 +53,8 @@ namespace Horror
         [Header("Jefe / estados especiales")]
         [Tooltip("Letargo: no detecta ni persigue hasta que se le despierte (Wake), le disparen o haya un ruido fuerte cerca. El jefe baila.")]
         public bool dormant;
+        [Tooltip("En letargo solo despierta si le disparan (no por ruidos ni por verte): el que se come un cadaver")]
+        public bool wakeOnlyWhenShot;
         [Tooltip("Objeto que suelta al morir (la llave de salida)")] public ItemData dropOnDeath;
         [Tooltip("Nombre para la barra de vida (solo jefes)")] public string bossName;
 
@@ -356,7 +358,8 @@ namespace Horror
                 if (z == null || z.chasing) continue;
                 float d = Vector3.Distance(z.transform.position, position);
                 if (d > radius || (d > radius * 0.35f && !z.HasLineTo(position))) continue;
-                if (z.dormant) z.Wake(); else z.StartChase(true);
+                if (z.dormant) { if (!z.wakeOnlyWhenShot) z.Wake(); }
+                else z.StartChase(true);
             }
         }
 

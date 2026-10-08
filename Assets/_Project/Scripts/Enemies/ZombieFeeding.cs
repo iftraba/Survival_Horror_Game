@@ -5,8 +5,8 @@ namespace Horror
     /// <summary>
     /// Zombi que empieza en el suelo comiendose un cadaver (2026-10-08). Vale para cualquier modelo: el componente va en todos los
     /// prefabs de zombi de pie y se activa marcando 'feeding' en la instancia de la escena. Al empezar cambia su reposo por el bucle
-    /// de morder, pone un cadaver y un charco de sangre delante; cuando te ve, le disparan o hay un ruido, se levanta y vuelve a su
-    /// controlador normal.
+    /// de morder y pone un cadaver (con el pecho justo bajo su cabeza, medido con los huesos: vale para cualquier modelo) y un charco
+    /// de sangre. No le distrae nada: ni verte ni los ruidos; solo se levanta cuando le disparas (letargo que solo rompe un disparo).
     /// </summary>
     [RequireComponent(typeof(ZombieAI))]
     public class ZombieFeeding : MonoBehaviour
@@ -43,7 +43,9 @@ namespace Horror
             oc.ApplyOverrides(pairs);
             anim.runtimeAnimatorController = oc;
             anim.Play(0, 0, Random.value);
-            if (spawnCorpse) SpawnCorpse();
+            ai.dormant = true;                                  // sigue comiendo pase lo que pase...
+            ai.wakeOnlyWhenShot = true;                         // ...hasta que le disparan
+            if (spawnCorpse) StartCoroutine(SpawnCorpse());
             ai.Alerted += OnAlerted;
             health.Damaged += OnDamaged;
         }
@@ -59,11 +61,6 @@ namespace Horror
         // al cambiar de controlador se pierde el disparador del grito que acaba de lanzar la animacion: se repite
         void OnAlerted() { bool was = done; StandUp(); if (!was && anim != null && !health.IsDead) anim.SetTrigger("Alert"); }
 
-        void Update()
-        {
-            if (!done && ai.IsChasing) StandUp();               // tambien si le despierta un ruido
-        }
-
         void StandUp()
         {
             if (done || anim == null) return;
@@ -72,25 +69,44 @@ namespace Horror
             anim.runtimeAnimatorController = original;          // de pie con su juego de siempre
         }
 
-        // cadaver y sangre delante de la boca (las mismas medidas que el carronero de la sala de maquinas)
-        void SpawnCorpse()
+        // cadaver y sangre: el pecho del cadaver queda justo bajo la cabeza del zombi mientras muerde
+        System.Collections.IEnumerator SpawnCorpse()
         {
             Vector3 ground = transform.position;
             var cap = GetComponent<CapsuleCollider>();
             if (cap != null) ground.y += cap.center.y - cap.height * 0.5f;
             var parent = transform.parent;
+            Vector3 chestAt = ground + transform.forward * 0.6f;
             if (corpsePrefab != null)
             {
-                var c = Instantiate(corpsePrefab, ground + transform.right * -1.1f + transform.forward * 0.58f, transform.rotation * Quaternion.Euler(0f, 90f, 0f), parent);
+                // tumbado de traves delante del zombi
+                var c = Instantiate(corpsePrefab, ground + transform.forward * 0.6f, transform.rotation * Quaternion.Euler(0f, 90f, 0f), parent);
                 c.name = name + "_Cadaver";
+                var ca0 = c.GetComponentInChildren<Animator>();
+                if (ca0 != null) { ca0.Play(0, 0, 1f); ca0.Update(0f); }   // ya tumbado (ultimo fotograma de su caida), sin verle caer
+                var cull = anim.cullingMode;
+                anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;    // fuera de camara tambien hay que medir los huesos
+                yield return null;                                       // ya animados: el zombi mordiendo y el cadaver tumbado
+                anim.Update(0f);
+                anim.cullingMode = cull;
+                var za = anim.GetBoneTransform(HumanBodyBones.Head);
+                var ca = c.GetComponentInChildren<Animator>();
+                var chest = ca != null && ca.isHuman ? (ca.GetBoneTransform(HumanBodyBones.Chest) ?? ca.GetBoneTransform(HumanBodyBones.Spine)) : null;
+                if (za != null && chest != null)
+                {
+                    Vector3 d = za.position - chest.position; d.y = 0f;
+                    c.transform.position += d;                           // pecho bajo la boca
+                    chestAt = chest.position;
+                }
             }
+            chestAt.y = ground.y;
             if (bloodMaterial != null)
             {
                 var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
                 q.name = name + "_Sangre";
                 Destroy(q.GetComponent<Collider>());
                 q.transform.SetParent(parent);
-                q.transform.SetPositionAndRotation(ground + transform.right * -0.2f + transform.forward * 0.5f + Vector3.up * 0.015f, Quaternion.Euler(90f, transform.eulerAngles.y + 20f, 0f));
+                q.transform.SetPositionAndRotation(chestAt + Vector3.up * 0.015f, Quaternion.Euler(90f, transform.eulerAngles.y + 20f, 0f));
                 q.transform.localScale = new Vector3(3.4f, 3.4f, 1f);
                 var r = q.GetComponent<Renderer>();
                 r.sharedMaterial = bloodMaterial;
