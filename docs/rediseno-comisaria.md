@@ -314,3 +314,28 @@ El constructor saca solo lo demás:
 - **Alrededor:** edificios en las cuatro manzanas, fuegos, columnas de humo, escombros y 10 zombis agolpados tras la verja.
 - **Escena de cámara:** radio de 52 m y altura de 34, centrada en el edificio (comprobada en Play con capturas). La puerta principal se atranca al entrar. Objetivo: «Explora la comisaría y busca una salida».
 - **Pendiente:** algunas lámparas del archivo iluminan sus muros por fuera (luces sin sombra). Se corrige en el pase de luces.
+
+## Fase C hecha: mobiliario (`ComisariaGrandeProps`, menú *Horror/Comisaria grande/3 Mobiliario*)
+**8 modelos nuevos** (`Tools/blender/build_station.py`, en `Art/Props/Station`): cabina de aseo con inodoro, encimera con lavabos y espejo, mesa de vigilancia con 9 monitores, sofá, máquina expendedora, encimera de office (fregadero, microondas, cafetera), armero con armas encadenadas y pila de neumáticos.
+
+**Amueblado por tipo de sala** (una función por tipo):
+- Para colocar cosas contra la pared usa `AlongWall`, que se salta las puertas. Para muebles sueltos usa `At`, que comprueba que caben.
+- Nunca se tapa la zona delante de cada puerta, las escaleras ni el ascensor.
+
+| Sala | Contenido |
+|---|---|
+| Oficinas | Islas de mesas |
+| Vestuarios | Filas de taquillas y bancos |
+| Calabozos | 4 celdas con rejas y catres |
+| Biblioteca | Estanterías de libros, mesas de lectura y fichero |
+| Aseos | Cabinas y lavabos |
+| Seguridad | Mesa de monitores |
+| Armería | Armeros |
+| Garaje | Coche, neumáticos y banco |
+| Descanso | Office, máquinas y sofá |
+| Archivo | Laberinto de estanterías de obra alrededor de una sala central (arena del jefe 1), con estanterías rompibles en los pasillos |
+| Sótano | Bombas, depósitos, generadores, laboratorio, cuadros eléctricos, sala de control, galería de tuberías y calderas |
+| Pasillos | Muebles sueltos contra una pared, sin estrechar el paso por debajo de 1,9 m |
+
+- 1.227 muebles y 47 piezas fijas.
+- **Comprobado:** con las puertas abiertas se llega a las 70 salas (ruta de NavMesh a cada una) y las capturas de 9 salas se ven bien.
