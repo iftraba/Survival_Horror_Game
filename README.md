@@ -47,6 +47,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Level/Art · **Comisaría nueva, fase 3 (primera planta)**: oficinas con islas de mesas (ordenador o portátil, papeles, lámparas, sillas giratorias), despacho del comisario (mesa y sillón, librerías, vitrina, alfombra, mesa de reuniones, banderas) y sala de conferencias (filas de sillas, estrado con atril y micrófono, plano de la ciudad y cuatro banderas). 17 modelos nuevos en Blender y variedad de tono y colocación en cada mueble (`PropVariant`).
 - 2026-10-08 · Level · **Comisaría nueva, ajustes**: la escalera de caracol empieza de cara a la entrada y está separada de las paredes, barandillas de barrotes de verdad, el jugador empieza fuera entre la verja y la comisaría (la puerta se atranca al entrar), y la verja y los edificios están mucho más cerca.
 - 2026-10-08 · Level · **Comisaría nueva, fase 2**: vestíbulo con mostrador de recepción y bancos; exterior con fachada, verja con zombis agolpados detrás, coche patrulla ardiendo, farolas, edificios alrededor, fuegos y humo; escena de cámara del principio que acaba con el jugador dentro y la puerta atrancada.
 - 2026-10-08 · Level · **Comisaría nueva, fase 1 (estructura)**: escena `Comisaria_v2` con sótano, planta baja (vestíbulo con puertas a los lados y escalera de caracol), primera planta (oficinas, despacho del comisario, sala de conferencias) y archivo de techo alto, más el hueco del ascensor. Ver `docs/rediseno-comisaria.md`.

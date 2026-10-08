@@ -107,3 +107,34 @@ Repetible: rehace los grupos `Exterior`, `Vestibulo_Props` e `Intro` y vuelve a 
   - La verja está a 8 m de la fachada delante y a 2,5 m por los lados y por detrás.
   - La calle tiene 8 m, con los edificios de enfrente al otro lado y callejones de 3,5 m a los lados.
   - Edificios de 10 a 20 m. La cámara de la intro gira a 34 m y a 26 m de altura.
+
+## Fase 3: primera planta (2026-10-08)
+Kit `ComisariaV2Office` (menú *Horror/Comisaria v2/3 Primera planta*). Se puede repetir: rehace `Props/Primera_Props` y `Primera_Estrado` con la misma semilla.
+
+**Modelos nuevos** (Blender, `Tools/blender/build_office.py`, en `Art/Props/Office`, texturas horneadas con `texture_items.py`; registrados en `ItemTextureKit.OfficeProps`):
+- ordenador de sobremesa (monitor, teclado y ratón), portátil, papeles, lámpara de mesa, papelera, fuente de agua, pizarra, silla giratoria, perchero;
+- mesa y sillón de despacho, librería, vitrina de trofeos, alfombra;
+- silla de auditorio, atril con micrófono, mástil de bandera.
+
+**Texturas** (`Tools/blender/build_flag_map_textures.py`): bandera de la policía (azul con franja dorada y estrella de seis puntas), bandera de la ciudad (franjas granate y blanca con torre) y plano de la ciudad (río, avenidas, parque, la comisaría marcada en rojo y chinchetas).
+
+**Oficinas** (x -8..8, z 0..16):
+- Islas de dos mesas enfrentadas. Cada puesto lleva al azar silla giratoria o normal, ordenador o portátil (o nada), papeles, lámpara, teléfono y papelera.
+- Archivadores, estanterías, pizarra, fuente de agua, perchero y una caja.
+- Pasillos anchos entre islas y libre el paso al este del hueco de la escalera.
+
+**Despacho del comisario** (x -20..-8):
+- Mesa grande con sillón de piel, dos sillas de visita, alfombra, ordenador, teléfono y lámpara.
+- Mesa de reuniones con cuatro sillas, cuatro librerías, vitrina de trofeos, archivador, banco, pizarra, fuente de agua, taquilla y perchero.
+- Bandera de la policía y de la ciudad.
+
+**Sala de conferencias** (x 8..20, z 0..12):
+- Estrado de madera al fondo con dos escalones, atril con micrófono en el centro y el plano de la ciudad enmarcado en la pared.
+- **Cuatro banderas**, dos a cada lado del mapa. La tela es una malla generada que cuelga con pliegues.
+- Seis filas de sillas mirando al estrado con un pasillo central; falta alguna y alguna está volcada.
+
+**Variedad** (`PropVariant`): cada mueble lleva un pequeño giro y desplazamiento al azar y un tono propio (±15 %, aplicado con MaterialPropertyBlock, sin materiales nuevos). 162 objetos con tono.
+
+**NavMesh:**
+- Toda la planta es alcanzable desde la planta baja por la escalera: oficinas, despacho, conferencias, estrado y vestíbulo del ascensor (comprobado con una rejilla de rutas).
+- El estrado va fuera de `Props` porque ese grupo es «no transitable» para el NavMesh.

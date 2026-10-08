@@ -148,7 +148,7 @@ def kind_of(name):
         return "painted"
     if any(k in n for k in ("brass", "gold", "steel", "metal", "chip", "handle", "can", "frame")):
         return "metal"
-    if any(k in n for k in ("nylon", "webbing", "seam", "mattress", "blanket", "pillow")):
+    if any(k in n for k in ("nylon", "webbing", "seam", "mattress", "blanket", "pillow", "fabric")):
         return "fabric"
     return "plastic"
 
