@@ -55,7 +55,7 @@ namespace Horror
         static readonly SlotInfo[] infos = new SlotInfo[SlotCount + 1];
         static bool migrated;
 
-        static string PathFor(int slot) => Path.Combine(Application.persistentDataPath, "savegame_" + slot + ".json");
+        static string PathFor(int slot) => Path.Combine(Application.persistentDataPath, (GameSettings.IsV2 ? "savegame_v2_" : "savegame_") + slot + ".json");
 
         /// <summary>Ultimo slot usado para guardar o cargar (1..SlotCount).</summary>
         public static int CurrentSlot

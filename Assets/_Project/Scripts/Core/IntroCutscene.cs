@@ -28,6 +28,9 @@ namespace Horror
         bool skip;
         GUIStyle big, small;
 
+        // al cargar una partida guardada no se repite la escena de camara (Awake va antes de que GameFlow aplique el guardado)
+        void Awake() { if (SaveSystem.Pending != null) skip = true; }
+
         void Start()
         {
             cam = Camera.main;
