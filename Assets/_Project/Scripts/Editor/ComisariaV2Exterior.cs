@@ -180,16 +180,18 @@ namespace Horror.EditorTools
             var calle = level.Find("Calle"); if (calle != null) Object.DestroyImmediate(calle.gameObject);
 
             // suelos: patio y aceras alrededor de la comisaria (dentro de la verja), acera de fuera, calzada y acera de enfrente
-            Box("Patio", ext, new Vector3(0, -0.1f, -6f), new Vector3(48f, 0.2f, 12f), sidewalk, 4f);
-            Box("Patio_O", ext, new Vector3(-22f, -0.1f, 16f), new Vector3(4f, 0.2f, 44f), sidewalk, 4f);
-            Box("Patio_E", ext, new Vector3(22f, -0.1f, 16f), new Vector3(4f, 0.2f, 44f), sidewalk, 4f);
-            Box("Patio_N", ext, new Vector3(0, -0.1f, 35f), new Vector3(48f, 0.2f, 6f), sidewalk, 4f);
-            Box("Acera", ext, new Vector3(0, -0.1f, -14f), new Vector3(140f, 0.2f, 4f), sidewalk, 4f);
-            Box("Calzada", ext, new Vector3(0, -0.15f, -23f), new Vector3(140f, 0.2f, 14f), asphalt, 4f);
-            Box("Acera_Enfrente", ext, new Vector3(0, -0.1f, -32f), new Vector3(140f, 0.2f, 4f), sidewalk, 4f);
-            Box("Bordillo", ext, new Vector3(0, 0.0f, -15.95f), new Vector3(140f, 0.2f, 0.12f), wall, 3f);
-            foreach (float sx in new[] { -1f, 1f })                                                     // terreno a los lados
-                Box("Solar", ext, new Vector3(sx * 52f, -0.12f, 16f), new Vector3(56f, 0.2f, 44f), asphalt, 4f);
+            // la verja va pegada a la comisaria: patio de 8 m delante (donde empieza el jugador) y 2,5 m a los lados y detras
+            Box("Patio", ext, new Vector3(0, -0.1f, -4f), new Vector3(45f, 0.2f, 8f), sidewalk, 4f);
+            Box("Patio_O", ext, new Vector3(-21.25f, -0.1f, 16f), new Vector3(2.5f, 0.2f, 32f), sidewalk, 4f);
+            Box("Patio_E", ext, new Vector3(21.25f, -0.1f, 16f), new Vector3(2.5f, 0.2f, 32f), sidewalk, 4f);
+            Box("Patio_N", ext, new Vector3(0, -0.1f, 33.25f), new Vector3(45f, 0.2f, 2.5f), sidewalk, 4f);
+            Box("Acera", ext, new Vector3(0, -0.1f, -9f), new Vector3(140f, 0.2f, 2f), sidewalk, 4f);
+            Box("Calzada", ext, new Vector3(0, -0.15f, -14f), new Vector3(140f, 0.2f, 8f), asphalt, 4f);
+            Box("Acera_Enfrente", ext, new Vector3(0, -0.1f, -19f), new Vector3(140f, 0.2f, 2f), sidewalk, 4f);
+            Box("Bordillo", ext, new Vector3(0, 0.0f, -9.95f), new Vector3(140f, 0.2f, 0.12f), wall, 3f);
+            foreach (float sx in new[] { -1f, 1f })                                                     // callejones a los lados
+                Box("Solar", ext, new Vector3(sx * 41f, -0.12f, 22f), new Vector3(37f, 0.2f, 60f), asphalt, 4f);
+            Box("Solar_N", ext, new Vector3(0, -0.12f, 44f), new Vector3(45f, 0.2f, 19f), asphalt, 4f);
 
             // fachada de la comisaria: hormigon con ventanas, a 5 cm de los muros, con el hueco de la puerta principal
             float top = ComisariaV2Builder.ArchiveY + 7.2f;
@@ -221,24 +223,24 @@ namespace Horror.EditorTools
                     var mf = seg.GetComponentInChildren<MeshFilter>(); bc.center = mf.sharedMesh.bounds.center; bc.size = Vector3.Scale(mf.sharedMesh.bounds.size, new Vector3(1f, 6f, 1f));
                 }
             }
-            FenceLine(new Vector3(-24, 0, -12), new Vector3(24, 0, -12));
-            FenceLine(new Vector3(-24, 0, -12), new Vector3(-24, 0, 38));
-            FenceLine(new Vector3(24, 0, -12), new Vector3(24, 0, 38));
-            FenceLine(new Vector3(-24, 0, 38), new Vector3(24, 0, 38));
+            FenceLine(new Vector3(-22.5f, 0, -8), new Vector3(22.5f, 0, -8));
+            FenceLine(new Vector3(-22.5f, 0, -8), new Vector3(-22.5f, 0, 34.5f));
+            FenceLine(new Vector3(22.5f, 0, -8), new Vector3(22.5f, 0, 34.5f));
+            FenceLine(new Vector3(-22.5f, 0, 34.5f), new Vector3(22.5f, 0, 34.5f));
 
             // coche patrulla ardiendo en la entrada y otro abandonado en la calle
-            Model(Ext + "PoliceCar.fbx", ext, new Vector3(4.2f, 0f, -6.5f), 25f, true, "CochePatrulla");
-            Fire(ext, new Vector3(4.0f, 1.1f, -7.6f), 1.0f, fire, smoke);
-            Model(Ext + "PoliceCar.fbx", ext, new Vector3(-13f, 0f, -21.5f), 100f, true, "CocheAbandonado");
-            Fire(ext, new Vector3(-12f, 0.6f, -21.8f), 0.6f, fire, smoke);
+            Model(Ext + "PoliceCar.fbx", ext, new Vector3(4.6f, 0f, -4.4f), 25f, true, "CochePatrulla");
+            Fire(ext, new Vector3(4.4f, 1.1f, -5.5f), 1.0f, fire, smoke);
+            Model(Ext + "PoliceCar.fbx", ext, new Vector3(-13f, 0f, -14f), 100f, true, "CocheAbandonado");
+            Fire(ext, new Vector3(-12f, 0.6f, -14.3f), 0.6f, fire, smoke);
 
             // farolas a lo largo de la acera de fuera (una de cada tres, fundida)
             for (int i = 0; i < 9; i++)
             {
                 float x = -48f + i * 12f;
-                Model(Ext + "StreetLamp.fbx", ext, new Vector3(x, 0f, -15.2f), 0f, true, "Farola");
+                Model(Ext + "StreetLamp.fbx", ext, new Vector3(x, 0f, -9.3f), 0f, true, "Farola");
                 if (i % 3 == 1) continue;
-                var lg = new GameObject("Luz_Farola"); lg.transform.SetParent(ext); lg.transform.position = new Vector3(x, 5.7f, -16.5f);
+                var lg = new GameObject("Luz_Farola"); lg.transform.SetParent(ext); lg.transform.position = new Vector3(x, 5.7f, -10.6f);
                 var l = lg.AddComponent<Light>(); l.type = LightType.Spot; l.spotAngle = 110f; l.color = new Color(1f, 0.78f, 0.5f); l.intensity = 9f; l.range = 13f;
                 lg.transform.rotation = Quaternion.Euler(90, 0, 0);
             }
@@ -251,26 +253,26 @@ namespace Horror.EditorTools
                 Box(n, ext, new Vector3((x0 + x1) / 2f, h / 2f, (z0 + z1) / 2f), new Vector3(x1 - x0, h, z1 - z0), m, 6f);
                 Box(n + "_Azotea", ext, new Vector3((x0 + x1) / 2f, h + 0.4f, (z0 + z1) / 2f), new Vector3(x1 - x0 + 0.4f, 0.8f, z1 - z0 + 0.4f), wall, 3f, false);
             }
-            float[] fx = { -66f, -44f, -24f, -4f, 14f, 34f, 52f, 70f };
+            float[] fx = { -62f, -42f, -24f, -6f, 12f, 30f, 48f, 66f };
             for (int i = 0; i < fx.Length - 1; i++)
-                Building("Edificio_Frente_" + i, fx[i] + 0.5f, fx[i + 1] - 0.5f, -50f, -34.5f, 12f + (float)rng.NextDouble() * 18f);
-            Building("Edificio_O", -64f, -32f, -6f, 22f, 24f);
-            Building("Edificio_O2", -64f, -34f, 24f, 46f, 16f);
-            Building("Edificio_E", 32f, 62f, -6f, 18f, 18f);
-            Building("Edificio_E2", 34f, 64f, 20f, 46f, 28f);
-            Building("Edificio_N", -30f, 30f, 46f, 62f, 22f);
+                Building("Edificio_Frente_" + i, fx[i] + 0.5f, fx[i + 1] - 0.5f, -34f, -20.5f, 10f + (float)rng.NextDouble() * 10f);
+            Building("Edificio_O", -50f, -26f, -8f, 15f, 18f);
+            Building("Edificio_O2", -50f, -26f, 17f, 40f, 13f);
+            Building("Edificio_E", 26f, 50f, -8f, 13f, 15f);
+            Building("Edificio_E2", 26f, 50f, 15f, 40f, 20f);
+            Building("Edificio_N", -24f, 24f, 38f, 52f, 17f);
             // caos: fuegos en la calle, columnas de humo a lo lejos, escombros, cajas y bidones volcados
-            Fire(ext, new Vector3(22f, 0.3f, -26f), 0.8f, fire, smoke);
-            Fire(ext, new Vector3(-30f, 0.3f, -18f), 0.7f, fire, smoke);
-            foreach (var p in new[] { new Vector3(-40f, 28f, 10f), new Vector3(46f, 20f, -40f), new Vector3(10f, 24f, 55f) })
+            Fire(ext, new Vector3(22f, 0.3f, -16f), 0.8f, fire, smoke);
+            Fire(ext, new Vector3(-23f, 0.3f, -12f), 0.7f, fire, smoke);
+            foreach (var p in new[] { new Vector3(-38f, 24f, 4f), new Vector3(40f, 22f, -28f), new Vector3(8f, 24f, 46f) })
                 Particles("Columna_Humo", ext, p, smoke, 6f, new Vector2(8f, 14f), new Vector2(2f, 4f), new Vector2(6f, 12f),
                           new Color(0.08f, 0.08f, 0.08f, 0.6f), new Color(0.2f, 0.2f, 0.2f, 0.2f), 3f, -0.03f, 80);
             var junk = new (string path, Vector3 p, float yaw)[]
             {
-                (Props + "Rubble.fbx", new Vector3(-8f, 0f, -20f), 30f), (Props + "Rubble.fbx", new Vector3(18f, 0f, -24f), 140f),
-                (Props + "Barrel.fbx", new Vector3(-5f, 0f, -18.5f), 0f), (Props + "Barrel.fbx", new Vector3(28f, 0f, -19f), 0f),
-                (Props + "Crate.fbx", new Vector3(9f, 0f, -18.2f), 35f), (Props + "Crate.fbx", new Vector3(-18f, 0f, -9f), 10f),
-                (Props + "Crate.fbx", new Vector3(14f, 0f, -9.5f), 60f), (Props + "Rubble.fbx", new Vector3(-10f, 0f, -4f), 80f),
+                (Props + "Rubble.fbx", new Vector3(-8f, 0f, -14f), 30f), (Props + "Rubble.fbx", new Vector3(18f, 0f, -16f), 140f),
+                (Props + "Barrel.fbx", new Vector3(-5f, 0f, -12.6f), 0f), (Props + "Barrel.fbx", new Vector3(28f, 0f, -12.8f), 0f),
+                (Props + "Crate.fbx", new Vector3(9f, 0f, -12.4f), 35f), (Props + "Crate.fbx", new Vector3(-18f, 0f, -5f), 10f),
+                (Props + "Crate.fbx", new Vector3(14f, 0f, -6f), 60f), (Props + "Rubble.fbx", new Vector3(-10f, 0f, -3f), 80f),
             };
             foreach (var (path, p, yaw) in junk) Model(path, ext, p, yaw, true);
         }
@@ -286,7 +288,7 @@ namespace Horror.EditorTools
                 var pf = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Characters/" + types[i] + ".prefab");
                 var z = (GameObject)PrefabUtility.InstantiatePrefab(pf, zr);
                 z.name = "Verja_" + types[i];
-                z.transform.SetPositionAndRotation(new Vector3(xs[i] + (i % 2) * 0.4f, 1f, -12.75f - (i % 3) * 0.25f), Quaternion.identity);
+                z.transform.SetPositionAndRotation(new Vector3(xs[i] + (i % 2) * 0.4f, 1f, -8.75f - (i % 3) * 0.25f), Quaternion.identity);
                 var fr = z.AddComponent<FenceRattler>(); fr.faceDir = Vector3.forward;
             }
         }
@@ -320,9 +322,19 @@ namespace Horror.EditorTools
             // escena de camara del principio; al acabar atranca la puerta principal
             var intro = new GameObject("Intro"); intro.transform.SetParent(level);
             var ic = intro.AddComponent<IntroCutscene>();
-            ic.sealOnEnd = new[] { "Puerta_Principal_O", "Puerta_Principal_E" }.Select(n => level.Find(n)).Where(t => t != null).Select(t => t.GetComponentInChildren<Door>()).ToArray();
+            ic.radius = 34f; ic.height = 26f; ic.endPoint = new Vector3(0f, 2.0f, -7.2f);
+            var mainDoors = new[] { "Puerta_Principal_O", "Puerta_Principal_E" }.Select(n => level.Find(n)).Where(t => t != null).Select(t => t.GetComponentInChildren<Door>()).ToArray();
+            ic.sealOnEnd = new Door[0];
+            // empieza fuera, en el patio entre la verja (con los zombis) y la comisaria, mirando a la puerta
             var pc = Object.FindFirstObjectByType<PlayerController>();
-            if (pc != null) pc.transform.SetPositionAndRotation(new Vector3(0f, 1.05f, 2.4f), Quaternion.identity);
+            if (pc != null) pc.transform.SetPositionAndRotation(new Vector3(-1.2f, 1.05f, -5.6f), Quaternion.identity);
+            var flow = Object.FindFirstObjectByType<GameFlow>();
+            if (flow != null) { flow.startObjective = "Entra en la comisaría."; EditorUtility.SetDirty(flow); }
+            // al pasar la puerta principal se cierra y se atranca detras
+            var seal = new GameObject("Atrancar_Entrada"); seal.transform.SetParent(intro.transform);
+            seal.transform.position = new Vector3(0f, 1.5f, 2.6f);
+            var sbc = seal.AddComponent<BoxCollider>(); sbc.isTrigger = true; sbc.size = new Vector3(3.4f, 3f, 1.2f);
+            seal.AddComponent<SealOnEnter>().doors = mainDoors;
 
             // NavMesh otra vez (muebles, verja y exterior), con las hojas de las puertas fuera
             var surface = rootGo.GetComponent<NavMeshSurface>(); var rt = rootGo.GetComponent<RuntimeNavMesh>();

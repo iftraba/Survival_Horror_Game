@@ -47,6 +47,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Level · **Comisaría nueva, ajustes**: la escalera de caracol empieza de cara a la entrada y está separada de las paredes, barandillas de barrotes de verdad, el jugador empieza fuera entre la verja y la comisaría (la puerta se atranca al entrar), y la verja y los edificios están mucho más cerca.
 - 2026-10-08 · Level · **Comisaría nueva, fase 2**: vestíbulo con mostrador de recepción y bancos; exterior con fachada, verja con zombis agolpados detrás, coche patrulla ardiendo, farolas, edificios alrededor, fuegos y humo; escena de cámara del principio que acaba con el jugador dentro y la puerta atrancada.
 - 2026-10-08 · Level · **Comisaría nueva, fase 1 (estructura)**: escena `Comisaria_v2` con sótano, planta baja (vestíbulo con puertas a los lados y escalera de caracol), primera planta (oficinas, despacho del comisario, sala de conferencias) y archivo de techo alto, más el hueco del ascensor. Ver `docs/rediseno-comisaria.md`.
 - 2026-10-08 · Player · **Rama `rediseno-comisaria`**: salto desactivado (se conserva la animación), abrir puertas más rápido (2,7× en vez de 1,8×; control a los 0,9 s). Plan del rediseño de la comisaría en `docs/rediseno-comisaria.md`.

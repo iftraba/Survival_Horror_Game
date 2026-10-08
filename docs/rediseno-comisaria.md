@@ -92,3 +92,18 @@ Repetible: rehace los grupos `Exterior`, `Vestibulo_Props` e `Intro` y vuelve a 
 - Funde a negro y el jugador queda en el vestíbulo con la **puerta principal atrancada** (ya no se puede salir).
 - Durante la escena, el jugador no se mueve y el HUD no se ve. Se salta con Espacio, E, Esc o clic.
 - Comprobado en Play con capturas.
+
+## Ajustes tras la revisión del usuario (2026-10-08)
+- **Escalera de caracol** (centro x 3,5, z 11,5; hueco x 1-6, z 9-14):
+  - Ahora empieza en su lado oeste mirando al norte. Quien entra por la puerta principal y anda recto pisa el primer peldaño sin rodearla.
+  - Da una vuelta entera en el sentido de las agujas del reloj y arriba sale otra vez hacia el norte, a un rellano que da a las oficinas.
+  - Está a 2 m de las paredes: la barandilla ya no tapa la puerta del ascensor de la primera planta.
+  - Comprobado andando: desde la entrada se sube recto y se sale a las oficinas.
+- **Barandillas de verdad** (`Railing`): pies derechos cada 1,2 m, pasamanos de madera, barra intermedia y barrotes cada 12 cm, con una colisión fina invisible. La de la escalera lleva barrotes y pasamanos de madera siguiendo la hélice.
+- **Inicio fuera:**
+  - Tras la escena de cámara, el jugador está en el patio, entre la verja con los zombis y la comisaría, delante del coche ardiendo (objetivo: «Entra en la comisaría»).
+  - Al cruzar la puerta principal se cierra y se atranca detrás (`SealOnEnter`, «La puerta se ha atrancado tras de ti»). Comprobado.
+- **Más cerca:**
+  - La verja está a 8 m de la fachada delante y a 2,5 m por los lados y por detrás.
+  - La calle tiene 8 m, con los edificios de enfrente al otro lado y callejones de 3,5 m a los lados.
+  - Edificios de 10 a 20 m. La cámara de la intro gira a 34 m y a 26 m de altura.

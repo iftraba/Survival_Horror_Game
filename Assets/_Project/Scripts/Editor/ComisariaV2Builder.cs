@@ -31,7 +31,7 @@ namespace Horror.EditorTools
         const float DoorH = 2.45f;                                     // altura del hueco de paso
 
         // escalera de caracol del vestibulo (planta baja -> primera) y ascensor
-        public static readonly Vector3 StairC = new Vector3(5f, 0f, 12f);
+        public static readonly Vector3 StairC = new Vector3(3.5f, 0f, 11.5f);   // a 2 m de las paredes: la barandilla no tapa ninguna puerta
         const float StairR = 2.2f;
         static readonly Rect StairHole = new Rect(StairC.x - 2.5f, StairC.z - 2.5f, 5f, 5f);
         static readonly Rect Shaft = new Rect(17f, 12f, 3f, 3f);       // hueco del ascensor (x 17-20, z 12-15)
@@ -149,22 +149,54 @@ namespace Horror.EditorTools
 
         // ------------------------------------------------------------------ escalera de caracol
         /// <summary>
-        /// Escalera de caracol de la planta baja a la primera: peldanos de chapa (decorado), columna central y barandilla; la
-        /// colision es una rampa helicoidal invisible (el jugador sube sin tropezar y el NavMesh deja subir a los zombis).
-        /// Llega a un rellano orientado hacia el oeste (al centro de las oficinas).
+        /// Barandilla de barrotes de 'a' a 'b' (en planta, a la altura y): pies derechos cada ~1,2 m, pasamanos de madera, barra
+        /// intermedia y barrotes cada 12 cm. La colision es una caja fina invisible (no se cae nadie por el hueco).
+        /// </summary>
+        static void Railing(Transform parent, Vector3 a, Vector3 b, float y)
+        {
+            Vector3 d = b - a; d.y = 0f; float len = d.magnitude; if (len < 0.05f) return;
+            var rot = Quaternion.LookRotation(d / len);
+            Vector3 mid = (a + b) / 2f; mid.y = y;
+            var top = Box("Pasamanos", parent, mid + Vector3.up * 1.0f, new Vector3(0.07f, 0.05f, len), wood, 0f, false); top.transform.rotation = rot;
+            var midRail = Box("Barra", parent, mid + Vector3.up * 0.15f, new Vector3(0.04f, 0.04f, len), metal, 0f, false); midRail.transform.rotation = rot;
+            int posts = Mathf.Max(1, Mathf.CeilToInt(len / 1.2f));
+            for (int i = 0; i <= posts; i++)
+            {
+                var p = a + d * (i / (float)posts); p.y = y + 0.5f;
+                Box("PieDerecho", parent, p, new Vector3(0.06f, 1.0f, 0.06f), metal, 0f, false);
+            }
+            int bars = Mathf.FloorToInt(len / 0.12f);
+            for (int i = 1; i < bars; i++)
+            {
+                var p = a + d * (i / (float)bars); p.y = y + 0.58f;
+                Box("Barrote", parent, p, new Vector3(0.022f, 0.84f, 0.022f), metal, 0f, false);
+            }
+            var col = new GameObject("Barandilla_Colision"); col.transform.SetParent(parent);
+            col.transform.SetPositionAndRotation(mid + Vector3.up * 0.55f, rot);
+            col.AddComponent<BoxCollider>().size = new Vector3(0.08f, 1.1f, len);
+            col.isStatic = true;
+        }
+
+        /// <summary>
+        /// Escalera de caracol de la planta baja a la primera. Empieza en su lado oeste mirando al norte: quien entra por la
+        /// puerta principal (andando hacia el norte) sube sin rodearla. Da una vuelta entera en el sentido de las agujas del reloj
+        /// (vista desde arriba) y arriba sale otra vez hacia el norte, a un rellano junto a las oficinas. Peldanos, columna y
+        /// barandilla son decorado; la colision es una rampa helicoidal invisible (el jugador no tropieza y los zombis tienen
+        /// NavMesh para subir).
         /// </summary>
         static void SpiralStair()
         {
             var root = new GameObject("EscaleraCaracol").transform; root.SetParent(level);
-            float rise = FirstY - GroundY, turn = 400f, end = 180f, start = end - turn;   // vuelta y algo: pendiente suave para que los zombis puedan subir; termina mirando a -X
-            int steps = 24;
+            float rise = FirstY - GroundY, turn = 360f, start = 180f, sgn = -1f;     // angulo(k) = start + sgn * turn * k
+            int steps = 22;
             float inner = 0.3f;
+            float Ang(float k) => start + sgn * turn * k;
             // rampa (malla helicoidal)
-            int seg = 60;
+            int seg = 64;
             var v = new List<Vector3>(); var tris = new List<int>();
             for (int i = 0; i <= seg; i++)
             {
-                float k = i / (float)seg, a = (start + turn * k) * Mathf.Deg2Rad, y = GroundY + rise * k;
+                float k = i / (float)seg, a = Ang(k) * Mathf.Deg2Rad, y = GroundY + rise * k;
                 var dir = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a));
                 v.Add(StairC + dir * inner + Vector3.up * y);
                 v.Add(StairC + dir * StairR + Vector3.up * y);
@@ -176,39 +208,42 @@ namespace Horror.EditorTools
             if (old == null) AssetDatabase.CreateAsset(mesh, mp); else { old.Clear(); old.SetVertices(v); old.SetTriangles(tris, 0); old.RecalculateNormals(); old.RecalculateBounds(); EditorUtility.SetDirty(old); mesh = old; }
             var ramp = new GameObject("Rampa"); ramp.transform.SetParent(root);
             ramp.AddComponent<MeshCollider>().sharedMesh = mesh;
-            // peldanos, columna y barandilla
+            // peldanos y barrotes del borde exterior
             for (int i = 0; i < steps; i++)
             {
-                float k = (i + 0.5f) / steps, a = start + turn * k, y = GroundY + rise * (i + 1) / steps;
+                float a = Ang((i + 0.5f) / steps), y = GroundY + rise * (i + 1) / steps;
                 var dir = Quaternion.Euler(0, -a, 0) * Vector3.right;
-                var c = StairC + dir * ((inner + StairR) / 2f) + Vector3.up * (y - 0.03f);
-                var step = Box("Peldano", root, c, new Vector3(StairR - inner, 0.05f, 0.34f), metal, 0f, false);
+                var step = Box("Peldano", root, StairC + dir * ((inner + StairR) / 2f) + Vector3.up * (y - 0.03f), new Vector3(StairR - inner, 0.05f, 0.36f), metal, 0f, false);
                 step.transform.rotation = Quaternion.Euler(0, -a, 0);
-                var post = Box("Balaustre", root, StairC + dir * (StairR - 0.05f) + Vector3.up * (y + 0.45f), new Vector3(0.035f, 0.9f, 0.035f), metal, 0f, false);
+                for (int j = 0; j < 3; j++)
+                {
+                    float aj = Ang((i + j / 3f) / steps), yj = GroundY + rise * (i + j / 3f + 0.5f) / steps;
+                    var dj = Quaternion.Euler(0, -aj, 0) * Vector3.right;
+                    Box(j == 0 ? "PieDerecho" : "Barrote", root, StairC + dj * (StairR - 0.05f) + Vector3.up * (yj + 0.47f), j == 0 ? new Vector3(0.045f, 0.94f, 0.045f) : new Vector3(0.022f, 0.9f, 0.022f), metal, 0f, false);
+                }
             }
             Box("Columna", root, StairC + Vector3.up * (rise / 2f + 0.5f), new Vector3(0.24f, rise + 1f, 0.24f), metal, 0f);
-            for (int i = 0; i < steps; i++)                       // pasamanos: tramos entre balaustres
+            int hs = steps * 2;
+            for (int i = 0; i < hs - 1; i++)                      // pasamanos de madera siguiendo la helice
             {
-                float a0 = start + turn * (i + 0.5f) / steps, a1 = start + turn * Mathf.Min(steps - 0.5f, i + 1.5f) / steps;
-                float y0 = GroundY + rise * (i + 1) / steps + 0.9f, y1 = GroundY + rise * Mathf.Min(steps, i + 2) / steps + 0.9f;
-                var p0 = StairC + Quaternion.Euler(0, -a0, 0) * Vector3.right * (StairR - 0.05f) + Vector3.up * y0;
-                var p1 = StairC + Quaternion.Euler(0, -a1, 0) * Vector3.right * (StairR - 0.05f) + Vector3.up * y1;
-                if (i == steps - 1) break;
-                var h = Box("Pasamanos", root, (p0 + p1) / 2f, new Vector3(0.05f, 0.05f, Vector3.Distance(p0, p1) + 0.02f), wood, 0f, false);
+                float k0 = (i + 0.5f) / hs, k1 = (i + 1.5f) / hs;
+                var p0 = StairC + Quaternion.Euler(0, -Ang(k0), 0) * Vector3.right * (StairR - 0.05f) + Vector3.up * (GroundY + rise * k0 + 0.95f);
+                var p1 = StairC + Quaternion.Euler(0, -Ang(k1), 0) * Vector3.right * (StairR - 0.05f) + Vector3.up * (GroundY + rise * k1 + 0.95f);
+                var h = Box("Pasamanos", root, (p0 + p1) / 2f, new Vector3(0.06f, 0.05f, Vector3.Distance(p0, p1) + 0.03f), wood, 0f, false);
                 h.transform.rotation = Quaternion.LookRotation(p1 - p0);
             }
-            // rellano de llegada (hacia -X) y barandilla alrededor del hueco en la primera planta
-            var endDir = Quaternion.Euler(0, -end, 0) * Vector3.right;
-            // al final la rampa avanza hacia -Z (tangente a 180 grados): el rellano va a continuacion, no encima de su ultimo tramo
-            Box("Rellano", root, new Vector3(StairHole.xMin + 1.1f, FirstY - 0.15f, StairC.z - 1.0f), new Vector3(2.2f, 0.3f, 2.0f), floorM, 4f);
-            float yr = FirstY + 0.5f;
-            Box("Barandilla_N", root, new Vector3(StairHole.center.x, yr, StairHole.yMax), new Vector3(StairHole.width, 1.0f, 0.06f), metal, 0f);
-            Box("Barandilla_S", root, new Vector3(StairHole.center.x, yr, StairHole.yMin), new Vector3(StairHole.width, 1.0f, 0.06f), metal, 0f);
-            Box("Barandilla_E", root, new Vector3(StairHole.xMax, yr, StairHole.center.y), new Vector3(0.06f, 1.0f, StairHole.height), metal, 0f);
-            // al oeste queda la salida del rellano: barandilla solo en los tramos que no dan a el
-            float gap0 = StairC.z - 2.0f, gap1 = StairC.z;
-            if (gap0 - StairHole.yMin > 0.1f) Box("Barandilla_O1", root, new Vector3(StairHole.xMin, yr, (StairHole.yMin + gap0) / 2f), new Vector3(0.06f, 1.0f, gap0 - StairHole.yMin), metal, 0f);
-            if (StairHole.yMax - gap1 > 0.1f) Box("Barandilla_O2", root, new Vector3(StairHole.xMin, yr, (gap1 + StairHole.yMax) / 2f), new Vector3(0.06f, 1.0f, StairHole.yMax - gap1), metal, 0f);
+            // rellano: la rampa acaba en su lado oeste avanzando hacia el norte; el rellano va a continuacion (al norte del final) y
+            // toca el borde oeste y el norte del hueco, por donde se sale a las oficinas
+            float rx0 = StairHole.xMin, rx1 = StairC.x - inner, rz0 = StairC.z, rz1 = StairHole.yMax;
+            Box("Rellano", root, new Vector3((rx0 + rx1) / 2f, FirstY - 0.15f, (rz0 + rz1) / 2f), new Vector3(rx1 - rx0, 0.3f, rz1 - rz0), floorM, 4f);
+            // barandilla alrededor del hueco en la primera planta, menos donde da el rellano
+            float yf = FirstY;
+            var h0 = StairHole;
+            Railing(root, new Vector3(h0.xMin, yf, h0.yMin), new Vector3(h0.xMax, yf, h0.yMin), yf);              // sur
+            Railing(root, new Vector3(h0.xMax, yf, h0.yMin), new Vector3(h0.xMax, yf, h0.yMax), yf);              // este
+            Railing(root, new Vector3(rx1, yf, h0.yMax), new Vector3(h0.xMax, yf, h0.yMax), yf);                 // norte (fuera del rellano)
+            Railing(root, new Vector3(h0.xMin, yf, h0.yMin), new Vector3(h0.xMin, yf, rz0), yf);                 // oeste (fuera del rellano)
+            Railing(root, new Vector3(rx1, yf, rz0), new Vector3(rx1, yf, h0.yMax), yf);                         // borde este del rellano, hacia el hueco
         }
 
         // ------------------------------------------------------------------ ascensor (hueco)
