@@ -24,6 +24,18 @@ namespace Horror
         static readonly int MoveXId = Animator.StringToHash("MoveX");
         static readonly int MoveYId = Animator.StringToHash("MoveY");
         static readonly int StairsId = Animator.StringToHash("Stairs");
+        static readonly int CrouchId = Animator.StringToHash("Crouch");
+        static readonly int GroundedId = Animator.StringToHash("Grounded");
+        static readonly int FallingId = Animator.StringToHash("Falling");
+        static readonly int CoverId = Animator.StringToHash("Cover");
+        static readonly int CoverMoveId = Animator.StringToHash("CoverMove");
+        static readonly int FidgetId = Animator.StringToHash("Fidget");
+        static readonly int FidgetIndexId = Animator.StringToHash("FidgetIndex");
+        static readonly int DeathVariantId = Animator.StringToHash("DeathVariant");
+        PlayerActions actions;
+        WeaponData lastWeapon;
+        float idleTime, nextFidget = 12f;
+        Vector3 lastHitFrom;
 
         // parametros que tiene el controlador actual (el de Mixamo no tiene recarga ni golpe hasta que haya esos clips)
         readonly HashSet<int> has = new HashSet<int>();
@@ -48,6 +60,7 @@ namespace Horror
             body = GetComponent<CharacterController>();
             health = GetComponent<Health>();
             weapons = GetComponent<WeaponController>();
+            actions = GetComponent<PlayerActions>();
             if (animator == null) animator = GetComponentInChildren<Animator>();
             if (animator != null) animator.applyRootMotion = false;
         }
@@ -56,13 +69,17 @@ namespace Horror
         {
             if (weapons != null) { weapons.Fired += OnFired; weapons.ReloadStarted += OnReload; }
             if (health != null) { health.Damaged += OnDamaged; health.Died += OnDied; }
+            if (player != null) player.Jumped += OnJumped;
         }
 
         void OnDisable()
         {
             if (weapons != null) { weapons.Fired -= OnFired; weapons.ReloadStarted -= OnReload; }
             if (health != null) { health.Damaged -= OnDamaged; health.Died -= OnDied; }
+            if (player != null) player.Jumped -= OnJumped;
         }
+
+        void OnJumped() => Trigger("Jump");
 
         void Update()
         {
@@ -91,6 +108,35 @@ namespace Horror
             }
             if (has.Contains(LongGunId)) animator.SetBool(LongGunId, longGun);
             if (has.Contains(StairsId)) animator.SetBool(StairsId, player.OnStairs && !PlayerActions.Locked);
+            if (actions == null) actions = GetComponent<PlayerActions>();
+            if (has.Contains(CrouchId)) animator.SetBool(CrouchId, player.IsCrouching);
+            if (has.Contains(GroundedId)) animator.SetBool(GroundedId, player.IsGrounded);
+            if (has.Contains(FallingId)) animator.SetBool(FallingId, player.IsFalling);
+            if (has.Contains(CoverId) && actions != null)
+            {
+                animator.SetInteger(CoverId, actions.CoverType);
+                animator.SetFloat(CoverMoveId, actions.CoverMove, 0.1f, Time.deltaTime);
+            }
+            // sacar / guardar la escopeta al cambiar de arma
+            var eq = weapons != null ? weapons.Equipped : null;
+            if (eq != lastWeapon)
+            {
+                if (lastWeapon != null)
+                {
+                    if (eq != null && eq.twoHanded) Trigger("Draw");
+                    else if (lastWeapon.twoHanded) Trigger("Holster");
+                }
+                lastWeapon = eq;
+            }
+            // gestos en reposo: tras un rato quieto con la pistola, mira alrededor, se estira...
+            bool still = v.magnitude < 0.1f && !player.IsAiming && !player.IsCrouching && player.IsGrounded && !PlayerActions.Locked && !longGun && (health == null || !health.IsDead);
+            idleTime = still ? idleTime + Time.deltaTime : 0f;
+            if (still && idleTime > nextFidget && has.Contains(FidgetId))
+            {
+                animator.SetInteger(FidgetIndexId, Random.Range(0, 4));
+                animator.SetTrigger(FidgetId);
+                idleTime = 0f; nextFidget = Random.Range(14f, 24f);
+            }
             animator.SetBool(AimingId, player.IsAiming);
             animator.SetBool(ArmedId, weapons != null && weapons.Equipped != null);
         }
@@ -152,7 +198,25 @@ namespace Horror
 
         void OnFired() { recoil = 1f; CacheParams(); if (animator != null && has.Contains(ShootId)) animator.SetTrigger(ShootId); }
         void OnReload() { CacheParams(); if (animator != null && has.Contains(ReloadId)) animator.SetTrigger(ReloadId); }
-        void OnDamaged(Vector3 _) { CacheParams(); if (animator != null && has.Contains(HitId)) animator.SetTrigger(HitId); }
-        void OnDied() => animator?.SetBool(DeadId, true);
+        void OnDamaged(Vector3 from) { lastHitFrom = from; CacheParams(); if (animator != null && has.Contains(HitId)) animator.SetTrigger(HitId); }
+
+        /// <summary>Muerte segun de donde llega el golpe: de frente (1), por la espalda (2), por la derecha (3); por la izquierda, la de siempre (0).</summary>
+        void OnDied()
+        {
+            if (animator == null) return;
+            CacheParams();
+            if (has.Contains(DeathVariantId))
+            {
+                Vector3 d = Vector3.ProjectOnPlane(lastHitFrom - transform.position, Vector3.up);
+                int variant = 0;
+                if (d.sqrMagnitude > 0.01f)
+                {
+                    float a = Vector3.SignedAngle(transform.forward, d, Vector3.up);
+                    variant = Mathf.Abs(a) < 55f ? 1 : Mathf.Abs(a) > 125f ? 2 : a > 0f ? 3 : 0;
+                }
+                animator.SetInteger(DeathVariantId, variant);
+            }
+            animator.SetBool(DeadId, true);
+        }
     }
 }

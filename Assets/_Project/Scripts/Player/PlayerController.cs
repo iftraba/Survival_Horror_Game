@@ -18,6 +18,18 @@ namespace Horror
         /// <summary>Subiendo escaleras corriendo (animacion propia).</summary>
         public bool OnStairs => stairsTimer > 0f;
         [Tooltip("Caida (m) a partir de la cual aterriza con una voltereta")] public float rollFallHeight = 1.6f;
+        [Tooltip("Caida (m) a partir de la cual el aterrizaje es duro (se queda un momento agachado)")] public float hardLandHeight = 3.5f;
+        [Tooltip("Velocidad agachado (C)")] public float crouchSpeed = 1.2f;
+        [Tooltip("Velocidad vertical del salto (espacio): ~0,6 m de altura")] public float jumpSpeed = 4.8f;
+        /// <summary>Agachado (C): mas lento y mas dificil de ver para los zombis.</summary>
+        public bool IsCrouching { get; private set; }
+        public static bool CrouchingNow { get; private set; }
+        public bool IsGrounded => controller != null && controller.isGrounded;
+        /// <summary>Lleva un rato en el aire (caida o salto): animacion de caer.</summary>
+        public bool IsFalling => airTime > 0.35f;
+        public event System.Action Jumped;
+        float airTime;
+        bool jumpRequest;
         float stairsTimer, airTopY;
         bool wasGrounded = true;
         PlayerActions actions;
@@ -74,7 +86,17 @@ namespace Horror
                 IsAiming = ms.rightButton.isPressed && (weapons == null || weapons.Equipped != null);   // sin arma no se apunta
                 // Se puede correr en cualquier direccion (atras y de lado incluidos), no solo hacia delante
                 IsRunning = kb.leftShiftKey.isPressed && !IsAiming && input.sqrMagnitude > 0.01f;
+                if (IsRunning) IsCrouching = false;                                   // echar a correr levanta al personaje
+                if (kb.cKey.wasPressedThisFrame && controller.isGrounded) IsCrouching = !IsCrouching;
+                if (kb.spaceKey.wasPressedThisFrame && controller.isGrounded && !IsAiming && turnRemaining <= 0f)
+                {
+                    if (IsCrouching) IsCrouching = false;                              // espacio agachado: se levanta
+                    else jumpRequest = true;
+                }
+                // cubrirse (V): contra la pared o el obstaculo que tenga delante
+                if (kb.vKey.wasPressedThisFrame && controller.isGrounded && !IsAiming && actions != null) actions.TryCover(IsCrouching);
             }
+            CrouchingNow = IsCrouching && (health == null || !health.IsDead);
 
             // Giro de 180 grados (Q): gira el personaje y la camara a la vez
             // corriendo sin apuntar: giro con derrape (animacion); si no, el giro rapido de siempre
@@ -98,6 +120,7 @@ namespace Horror
             if (move.sqrMagnitude > 1f) move.Normalize();
 
             float speed = IsAiming ? aimSpeed : IsRunning ? runSpeed : walkSpeed;
+            if (IsCrouching) speed = Mathf.Min(speed, crouchSpeed);
 
             if (turnRemaining > 0f) { }                 // durante el giro rapido no se reorienta
             else if (IsAiming)
@@ -105,8 +128,11 @@ namespace Horror
             else if (move.sqrMagnitude > 0.01f)
                 Face(move);
 
-            verticalVelocity = controller.isGrounded ? -1f : verticalVelocity + gravity * Time.deltaTime;
+            if (controller.isGrounded && jumpRequest) { verticalVelocity = jumpSpeed; Jumped?.Invoke(); }
+            else verticalVelocity = controller.isGrounded ? -1f : verticalVelocity + gravity * Time.deltaTime;
+            jumpRequest = false;
             controller.Move((move * speed + Vector3.up * verticalVelocity) * Time.deltaTime);
+            airTime = controller.isGrounded ? 0f : airTime + Time.deltaTime;
 
             // escaleras: corriendo y subiendo (el escalon eleva al controlador)
             if (IsRunning && controller.isGrounded && controller.velocity.y > 0.5f) stairsTimer = 0.25f;
@@ -115,7 +141,10 @@ namespace Horror
             bool grounded = controller.isGrounded;
             if (!grounded) airTopY = wasGrounded ? transform.position.y : Mathf.Max(airTopY, transform.position.y);
             else if (!wasGrounded && airTopY - transform.position.y >= rollFallHeight && actions != null && !PlayerActions.Locked && (health == null || !health.IsDead))
-                actions.Roll();
+            {
+                if (airTopY - transform.position.y >= hardLandHeight) actions.HardLand();   // muy alta: aterrizaje duro
+                else actions.Roll();
+            }
             wasGrounded = grounded;
         }
 

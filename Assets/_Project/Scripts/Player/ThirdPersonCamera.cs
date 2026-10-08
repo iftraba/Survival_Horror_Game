@@ -26,6 +26,7 @@ namespace Horror
         public float maxPitch = 60f;
 
         float yaw, pitch = 12f;
+        float crouchDrop;
         float curDistance, curShoulder, curFov;
         Camera cam;
 
@@ -72,7 +73,9 @@ namespace Horror
             cam.fieldOfView = curFov;
 
             var rot = Quaternion.Euler(pitch, yaw, 0f);
-            Vector3 pivot = target.position + Vector3.up * pivotHeight;
+            // agachado: el punto de mira de la camara baja con el personaje
+            crouchDrop = Mathf.Lerp(crouchDrop, player != null && player.IsCrouching ? 0.45f : 0f, 8f * Time.unscaledDeltaTime);
+            Vector3 pivot = target.position + Vector3.up * (pivotHeight - crouchDrop);
             Vector3 desired = pivot + rot * new Vector3(curShoulder, 0f, -curDistance);
 
             // Evita atravesar paredes

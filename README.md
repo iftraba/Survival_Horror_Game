@@ -5,7 +5,8 @@ salas seguras con guardado y baúl compartido, inventario por huecos.
 
 ## Cómo se juega
 WASD mover · Mayús correr · clic derecho apuntar · clic izquierdo disparar · E interactuar · R recargar · F linterna ·
-Tab inventario · Esc pausa.
+C agacharse · Espacio saltar · V cubrirse (contra la pared de delante; A/D para moverse pegado a ella) · Q giro de 180° ·
+1-4 armas asignadas · Tab inventario · Esc pausa.
 
 ## Documentación por módulos
 | Módulo | Doc | Contenido |
@@ -46,6 +47,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Player · **Pro Rifle Pack y Action Adventure Pack**: con la escopeta el personaje se mueve con las animaciones de rifle (reposo, andar y correr con el arma a dos manos) y saca o guarda la escopeta al cambiar de arma. Nuevo: **agacharse** (C, más lento y los zombis te ven peor de lejos), **saltar** (espacio) con caída y aterrizaje (duro si cae de muy alto), **coberturas** (V: de espaldas a la pared, A/D para deslizarse; agachado si el obstáculo es bajo), gestos en reposo con la pistola y muertes según de dónde llegue el golpe.
 - 2026-10-08 · Enemies · **Primer jefe con el Creature Pack**: saca músculo mientras espera, ruge al despertar, nuevos puñetazo y zarpazo, muerte propia y **ataque en salto** (cae donde estabas, marcado con un círculo rojo; se aplana en techos bajos). Los zombis de pie tienen además una patada y otro ataque.
 - 2026-10-08 · Animation · **14 animaciones nuevas de Mixamo** (`AnimPackKit`): el jugador abre las puertas con la mano, entra en la sala del jefe cruzando la puerta (no se puede asomar y salir), gira 180° derrapando si corre (Q), hace una voltereta al caer de altura y sube escaleras corriendo. Los zombis caen de espaldas y se levantan con un escopetazo de cerca, a veces se quedan aturdidos con uno de lejos (30 %), reaccionan al disparo en la cabeza, tienen tres muertes nuevas (vientre/torso, desplomarse, tambalearse) y pueden agarrarte y morderte el cuello (pulsa E para soltarte). Los Pxltiger tienen un segundo ataque (puñetazo) y los reptantes una animación nueva y ya no se hunden en el suelo.
 - 2026-10-08 · Enemies · **Zombis Pxltiger y jefe 2 con grito y reacción al disparo**: les faltaban esas animaciones (se quedaban en reposo); ahora usan las de Mixamo, que se adaptan a su esqueleto.

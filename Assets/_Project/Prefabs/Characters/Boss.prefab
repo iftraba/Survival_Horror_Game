@@ -216,6 +216,7 @@ MonoBehaviour:
   recover: 2.7
   landShort: 1
   warningMaterial: {fileID: 2100000, guid: 5fa3033b5c10470469489cd8fbcf3dc3, type: 2}
+  clipRise: 2
 --- !u!1001 &3231017023443510192
 PrefabInstance:
   m_ObjectHideFlags: 0

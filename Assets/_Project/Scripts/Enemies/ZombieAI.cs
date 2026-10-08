@@ -247,6 +247,8 @@ namespace Horror
         {
             nextSightCheck = Time.time + 0.2f;
             Vector3 to = Vector3.ProjectOnPlane(player.position - transform.position, Vector3.up);
+            // agachado y algo lejos, no te distingue (sigilo); de cerca te nota igual
+            if (PlayerController.CrouchingNow && dist > detectRange * 0.55f) return false;
             bool inCone = dist <= closeSense || Vector3.Angle(transform.forward, to) <= viewAngle * 0.5f;
             return inCone && HasLineTo(player.position + Vector3.up * 0.4f);
         }

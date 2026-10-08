@@ -37,6 +37,34 @@ namespace Horror.EditorTools
 
         const string PrefabDir = "Assets/_Project/Prefabs/Characters/";
 
+        // coberturas: la raiz no gira (cada pack viene orientado distinto; el codigo pone al personaje de espaldas a la pared)
+        static readonly string[] CoverClips =
+        {
+            "A_StandToCover", "A_StandToCover2", "A_CoverToStand", "A_CoverToStand2", "L_CoverIdle", "L_CoverIdle1",
+            "A_LeftCoverSneak", "A_RightCoverSneak", "A_CrouchedSneakingLeft", "A_CrouchedSneakingRight",
+        };
+
+        /// <summary>
+        /// Pro Rifle Pack (R_), Action Adventure Pack (A_) y clips sueltos de rifle y coberturas (L_), en PlayerAnims. Ciclicos los de
+        /// reposo, andar, correr, esprintar, deslizarse en cobertura y caer.
+        /// </summary>
+        static int ConfigurePlayerPacks()
+        {
+            int n = 0;
+            foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { M + "PlayerAnims" }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                string name = System.IO.Path.GetFileNameWithoutExtension(path);
+                if (!(name.StartsWith("R_") || name.StartsWith("A_") || name.StartsWith("L_"))) continue;
+                string l = name.ToLowerInvariant();
+                bool loop = (l.Contains("idle") || l.Contains("walk") || (l.Contains("run") && !l.Contains("stop")) || l.Contains("sprint")
+                             || l.Contains("sneak") || l.Contains("jumploop") || l.Contains("fallingidle")) && !l.Contains("death");
+                MixamoImport.ConfigureAnimation(path, loop, System.Array.IndexOf(CoverClips, name) < 0);
+                n++;
+            }
+            return n;
+        }
+
         static GameObject ModelOf(GameObject prefabRoot)
         {
             var m = prefabRoot.transform.Find("Model");
@@ -140,7 +168,16 @@ namespace Horror.EditorTools
 
             var zc = AssetDatabase.LoadAssetAtPath<AnimatorController>(AnimDir + "ZombieHumanoid.controller");
             if (zc != null) { ZombieKit.AddReactions(zc); log.Add("zombis: reacciones y muertes nuevas"); }
-            PlayerKit.BuildController(log);
+            log.Add(ConfigurePlayerPacks() + " clips de los packs del jugador");
+            var playerCtrl = PlayerKit.BuildController(log);
+            // escopeta: locomocion del Pro Rifle Pack (override)
+            var longOc = PlayerKit.LongGunOverride(playerCtrl);
+            var proot = PrefabUtility.LoadPrefabContents(PrefabDir + "Player.prefab");
+            var pa = proot.GetComponent<PlayerAnimation>();
+            if (pa != null) { pa.handgunController = playerCtrl; pa.longGunController = longOc; }
+            PrefabUtility.SaveAsPrefabAsset(proot, PrefabDir + "Player.prefab");
+            PrefabUtility.UnloadPrefabContents(proot);
+            log.Add("escopeta: PlayerHumanoid_Long");
             log.Add(PxlZombieKit.UpdateAnimations());
             // reptantes: la animacion nueva de arrastrarse para andar (la carrera sigue siendo Running Crawl)
             SetOverride("Zombie_OficialReptante", "Z_ZombieWalk", "Z_Crawling");

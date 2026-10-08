@@ -25,5 +25,8 @@ Baile (Gangnam Style) por defecto → Alert → Locomotion; tres ataques con tie
 - **Pxltiger**: segundo ataque con *Zombie Punching* (variante 1). **Reptantes** (`Zombie_OficialReptante`, `Zombie_Carronero_Reptante`): andan con *Crawling*.
 - **Reptantes que se hundían**: los clips de arrastrarse dejan el cuerpo hasta 30 cm bajo la raíz (la cabeza se metía en el suelo y no se le podía dar). `ZombieAnimation.LateUpdate` mide los huesos tras animar y eleva el modelo lo justo (comprobado: cabeza a 45 cm del suelo). El `heightOffset` del importador no sirve con clips humanoides.
 
+## Packs del jugador (2026-10-08)
+90 clips en `PlayerAnims` con prefijo: `R_` (Pro Rifle Pack), `A_` (Action Adventure Pack), `L_` (sueltos de rifle y coberturas). `PlayerKit.BuildMovementPack` añade a la capa base `Crouch` (árbol 2D), `JumpUp`/`Airborne`/`Land`/`HardLand`, coberturas (`CoverEnter1/2`, `CoverStand`/`CoverCrouch` con el parámetro `CoverMove`, salidas), `Fidget0-3` y `Death1-4` (`DeathVariant`); a la capa del torso, `DrawLong`/`HolsterLong`. `PlayerKit.LongGunOverride` crea `PlayerHumanoid_Long`. No se usan (de momento): esprintar, giros de 90°, carreras laterales y diagonales del pack de rifle, *Run To Stop*, *Firing Rifle* (el retroceso sigue siendo por código), cambiar de cobertura y girar en ella.
+
 ## Estructura de clips
 `Assets/_Project/Art/Mixamo/{PlayerAnims, ZombieAnims, GenericAnims, BossAnims}`. Prefijos `P_`, `Z_`, `G_`, `B_`. Importación en `MixamoImport` (ver `editor-tools.md`).

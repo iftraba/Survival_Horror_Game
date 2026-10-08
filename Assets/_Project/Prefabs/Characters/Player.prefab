@@ -146,6 +146,11 @@ MonoBehaviour:
   aimSpeed: 1.7
   turnSpeed: 12
   gravity: -20
+  rollFallHeight: 1.6
+  hardLandHeight: 3.5
+  crouchSpeed: 1.2
+  jumpSpeed: 4.8
+  quickTurnTime: 0.22
   pushPower: 2.2
 --- !u!114 &7775246276366263216
 MonoBehaviour:
@@ -160,6 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Health
   maxHealth: 100
+  damageTakenMultiplier: 1
 --- !u!114 &1854987497642364326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,6 +207,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Inventory
   slotCount: 8
+  maxBagSlots: 6
   slots: []
 --- !u!114 &7323300788575840168
 MonoBehaviour:
@@ -246,7 +253,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Horror.PlayerAnimation
   animator: {fileID: 5586286681972580549}
   handgunController: {fileID: 9100000, guid: 1c3a730fd76f7be49ade80b564562e27, type: 2}
-  longGunController: {fileID: 9100000, guid: 1c3a730fd76f7be49ade80b564562e27, type: 2}
+  longGunController: {fileID: 22100000, guid: 030221514884f644d9b630de14480983, type: 2}
 --- !u!1001 &2084304104485035348
 PrefabInstance:
   m_ObjectHideFlags: 0

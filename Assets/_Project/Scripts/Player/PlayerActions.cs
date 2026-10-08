@@ -32,6 +32,14 @@ namespace Horror
         public float rollTime = 1.3f;
         public float rollDistance = 1.4f;
 
+        [Header("Coberturas (V)")]
+        [Tooltip("Velocidad al moverse pegado a la pared (de pie / agachado)")] public float coverSpeed = 1.1f, coverCrouchSpeed = 0.9f;
+        [Tooltip("Distancia del centro del jugador a la pared en cobertura")] public float coverGap = 0.42f;
+        /// <summary>0 sin cobertura, 1 de pie (pared alta), 2 agachado (obstaculo bajo).</summary>
+        public int CoverType { get; private set; }
+        /// <summary>Direccion del desplazamiento en cobertura para la animacion: +1 hacia su izquierda, -1 hacia su derecha.</summary>
+        public float CoverMove { get; private set; }
+
         [Header("Agarre")]
         public int mashNeeded = 10;
         public float grabTime = 4f;
@@ -203,6 +211,100 @@ namespace Horror
                 float sp = rollDistance / rollTime * 2f * (1f - t / rollTime);
                 body.Move((fwd * sp + Vector3.down * 2f) * Time.deltaTime);
                 yield return null;
+            }
+            locked = false;
+        }
+
+        /// <summary>Aterrizaje de una caida muy alta: se queda un momento agachado amortiguando el golpe.</summary>
+        public void HardLand()
+        {
+            if (locked) return;
+            StartCoroutine(HardLandRoutine());
+        }
+
+        IEnumerator HardLandRoutine()
+        {
+            locked = true;
+            Trigger("HardLand");
+            for (float t = 0f; t < 1.3f; t += Time.deltaTime) { body.Move(Vector3.down * 2f * Time.deltaTime); yield return null; }
+            locked = false;
+        }
+
+        // ------------------------------------------------------------------ coberturas
+        static bool IsLevel(Collider c) => c != null && c.attachedRigidbody == null && !(c is CharacterController)
+            && c.GetComponentInParent<ZombieAI>() == null && c.GetComponentInParent<Pickup>() == null;
+
+        /// <summary>Busca una pared u obstaculo justo delante y se cubre en el (de pie si es alto; agachado si es bajo o va agachado).</summary>
+        public void TryCover(bool crouching)
+        {
+            if (locked) return;
+            Vector3 low = transform.position + Vector3.down * 0.45f, high = transform.position + Vector3.up * 0.5f;
+            Vector3 dir = transform.forward;
+            if (!Physics.Raycast(low, dir, out var hit, 1.3f, ~0, QueryTriggerInteraction.Ignore) || !IsLevel(hit.collider) || Mathf.Abs(hit.normal.y) > 0.3f)
+            {
+                Hud.Message("No hay donde cubrirse");
+                return;
+            }
+            bool tall = Physics.Raycast(high, dir, out var hh, 1.6f, ~0, QueryTriggerInteraction.Ignore) && IsLevel(hh.collider);
+            StartCoroutine(CoverRoutine(hit.point, hit.normal, tall && !crouching ? 1 : 2));
+        }
+
+        IEnumerator CoverRoutine(Vector3 point, Vector3 normal, int type)
+        {
+            locked = true;
+            CoverType = type;
+            CoverMove = 0f;
+            Trigger("CoverIn");
+            Vector3 n = Vector3.ProjectOnPlane(normal, Vector3.up).normalized;
+            Vector3 target = point + n * coverGap; target.y = transform.position.y;
+            Quaternion from = transform.rotation, to = Quaternion.LookRotation(n);     // de espaldas a la pared
+            const float enter = 0.85f;
+            for (float t = 0f; t < enter; t += Time.deltaTime)
+            {
+                float k = Mathf.SmoothStep(0f, 1f, t / enter);
+                MoveTo(Vector3.Lerp(transform.position, target, k));
+                transform.rotation = Quaternion.Slerp(from, to, k);
+                yield return null;
+            }
+            transform.rotation = to;
+            Vector3 side = Vector3.Cross(Vector3.up, n);                              // su derecha (mirando hacia fuera de la pared)
+            float sp = type == 1 ? coverSpeed : coverCrouchSpeed;
+            bool aimOut = false;
+            while (true)
+            {
+                if (health != null && health.IsDead) break;
+                var kb = Keyboard.current; var ms = Mouse.current;
+                if (GameState.InputBlocked || kb == null) { yield return null; continue; }
+                if (ms != null && ms.rightButton.isPressed) { aimOut = true; break; }    // apuntar: sale al momento
+                if (kb.vKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame) break;
+                // A/D (segun la camara) mueven a lo largo de la pared; solo si la pared sigue (en el borde se para)
+                var camT = player != null && player.cam != null ? player.cam.transform : Camera.main.transform;
+                Vector3 cf = Vector3.ProjectOnPlane(camT.forward, Vector3.up).normalized, cr = Vector3.ProjectOnPlane(camT.right, Vector3.up).normalized;
+                float ix = (kb.dKey.isPressed ? 1f : 0f) - (kb.aKey.isPressed ? 1f : 0f), iy = (kb.wKey.isPressed ? 1f : 0f) - (kb.sKey.isPressed ? 1f : 0f);
+                Vector3 want = cr * ix + cf * iy;
+                float along = Vector3.Dot(want, side);
+                if (Vector3.Dot(want, n) > 0.7f && Mathf.Abs(along) < 0.3f) break;       // empujar hacia fuera de la pared: sale
+                float move = 0f;
+                if (Mathf.Abs(along) > 0.2f)
+                {
+                    Vector3 next = transform.position + side * (Mathf.Sign(along) * sp * Time.deltaTime);
+                    Vector3 probe = next + side * (Mathf.Sign(along) * 0.25f) + Vector3.down * 0.45f;
+                    if (Physics.Raycast(probe, -n, out var wall, coverGap + 0.4f, ~0, QueryTriggerInteraction.Ignore) && IsLevel(wall.collider))
+                    {
+                        body.Move(next - transform.position + Vector3.down * 0.05f);
+                        move = Mathf.Sign(along);
+                    }
+                }
+                CoverMove = Mathf.MoveTowards(CoverMove, -move, 6f * Time.deltaTime);    // +1 = hacia su izquierda
+                yield return null;
+            }
+            CoverType = 0;
+            CoverMove = 0f;
+            if (!aimOut && (health == null || !health.IsDead))
+            {
+                Trigger("CoverOut");
+                Vector3 away = transform.position + n * 0.35f;
+                for (float t = 0f; t < 0.5f; t += Time.deltaTime) { MoveTo(Vector3.Lerp(transform.position, away, t / 0.5f)); yield return null; }
             }
             locked = false;
         }

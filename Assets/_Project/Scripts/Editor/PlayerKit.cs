@@ -103,6 +103,20 @@ namespace Horror.EditorTools
             c.AddParameter("RunTurn", AnimatorControllerParameterType.Trigger);
             c.AddParameter("Roll", AnimatorControllerParameterType.Trigger);
             c.AddParameter("Stairs", AnimatorControllerParameterType.Bool);
+            c.AddParameter("Crouch", AnimatorControllerParameterType.Bool);
+            c.AddParameter("Grounded", AnimatorControllerParameterType.Bool);
+            c.AddParameter("Falling", AnimatorControllerParameterType.Bool);
+            c.AddParameter("Jump", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("HardLand", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Cover", AnimatorControllerParameterType.Int);
+            c.AddParameter("CoverIn", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("CoverOut", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("CoverMove", AnimatorControllerParameterType.Float);
+            c.AddParameter("Fidget", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("FidgetIndex", AnimatorControllerParameterType.Int);
+            c.AddParameter("DeathVariant", AnimatorControllerParameterType.Int);
+            c.AddParameter("Draw", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Holster", AnimatorControllerParameterType.Trigger);
 
             // ---- clips por ranura (con sustituto provisional)
             var runF = First("P_RunForward", "P_Running", "P_Run");
@@ -186,6 +200,7 @@ namespace Horror.EditorTools
                 Trans(st, aim, 0.18f, ("Aiming", AnimatorConditionMode.If, 0));
                 log.Add("escaleras: " + stairsClip.name);
             }
+            BuildMovementPack(c, sm, free, aim, death, log);
 
             // ---- capa de torso
             c.AddLayer("UpperBody");
@@ -238,9 +253,162 @@ namespace Horror.EditorTools
                 th.AddCondition(AnimatorConditionMode.If, 0, "Hit");
                 var back4 = hit.AddTransition(empty); back4.hasExitTime = true; back4.exitTime = 0.55f; back4.duration = 0.2f;
             }
+            // sacar / guardar la escopeta al cambiar de arma (solo brazos)
+            foreach (var (st, clipName, trig, sp) in new[] { ("DrawLong", "L_RiflePullOut", "Draw", 1.6f), ("HolsterLong", "L_PutBackRifle", "Holster", 1.8f) })
+            {
+                var clip = First(clipName); if (clip == null) continue;
+                var s = um.AddState(st); s.motion = clip; s.speed = sp;
+                var tr = um.AddAnyStateTransition(s); tr.hasExitTime = false; tr.duration = 0.1f; tr.canTransitionToSelf = false;
+                tr.AddCondition(AnimatorConditionMode.If, 0, trig);
+                var b = s.AddTransition(empty); b.hasExitTime = true; b.exitTime = 0.9f; b.duration = 0.2f;
+                var ba = s.AddTransition(empty); ba.hasExitTime = false; ba.duration = 0.15f; ba.AddCondition(AnimatorConditionMode.If, 0, "Aiming");
+            }
             EditorUtility.SetDirty(c);
             AssetDatabase.SaveAssets();
             return c;
+        }
+
+        /// <summary>
+        /// Pro Rifle Pack y Action Adventure Pack (2026-10-08): agacharse (C), saltar (espacio) y caer, coberturas (F), gestos en
+        /// reposo y muertes segun de donde venga el golpe. El override de arma larga (PlayerHumanoid_Long) cambia la locomocion por
+        /// la del pack de rifle.
+        /// </summary>
+        static void BuildMovementPack(AnimatorController c, AnimatorStateMachine sm, AnimatorState free, AnimatorState aim, AnimatorState death, List<string> log)
+        {
+            // ---- agachado: mapa de 8 direcciones (MoveX/MoveY van normalizados a la velocidad de apuntar, 1,7 m/s; agachado va a 1,2)
+            var crouchIdle = First("R_IdleCrouching");
+            if (crouchIdle != null)
+            {
+                var cr = sm.AddState("Crouch");
+                var ct = NewTree(c, cr, "Crouch");
+                ct.blendType = BlendTreeType.FreeformDirectional2D; ct.blendParameter = "MoveX"; ct.blendParameterY = "MoveY";
+                ct.AddChild(crouchIdle, Vector2.zero);
+                const float k = 0.7f;
+                var dirs = new (string clip, Vector2 at)[]
+                {
+                    ("R_WalkCrouchingForward", new Vector2(0, k)), ("R_WalkCrouchingBackward", new Vector2(0, -k)),
+                    ("R_WalkCrouchingLeft", new Vector2(-k, 0)), ("R_WalkCrouchingRight", new Vector2(k, 0)),
+                    ("R_WalkCrouchingForwardLeft", new Vector2(-k, k) * 0.7071f), ("R_WalkCrouchingForwardRight", new Vector2(k, k) * 0.7071f),
+                    ("R_WalkCrouchingBackwardLeft", new Vector2(-k, -k) * 0.7071f), ("R_WalkCrouchingBackwardRight", new Vector2(k, -k) * 0.7071f),
+                };
+                foreach (var (clip, at) in dirs) { var m = First(clip); if (m != null) ct.AddChild(m, at); }
+                var ch = ct.children; for (int i = 1; i < ch.Length; i++) ch[i].timeScale = 0.62f; ct.children = ch;   // clips a ~1,95 m/s; agachado va a 1,2
+                Trans(free, cr, 0.25f, ("Crouch", AnimatorConditionMode.If, 0));
+                Trans(aim, cr, 0.25f, ("Crouch", AnimatorConditionMode.If, 0));
+                Trans(cr, aim, 0.25f, ("Crouch", AnimatorConditionMode.IfNot, 0), ("Aiming", AnimatorConditionMode.If, 0));
+                Trans(cr, free, 0.25f, ("Crouch", AnimatorConditionMode.IfNot, 0));
+                log.Add("agachado: 8 direcciones");
+            }
+
+            // ---- salto y caida
+            var jumpUp = First("A_JumpingUp"); var airborne = First("A_FallingIdle"); var land = First("R_JumpDown"); var hard = First("A_HardLanding");
+            if (jumpUp != null && airborne != null && land != null)
+            {
+                var up = sm.AddState("JumpUp"); up.motion = jumpUp;
+                var air = sm.AddState("Airborne"); air.motion = airborne;
+                var ld = sm.AddState("Land"); ld.motion = land; ld.speed = 1.3f;
+                var tj = sm.AddAnyStateTransition(up); tj.hasExitTime = false; tj.duration = 0.1f; tj.canTransitionToSelf = false;
+                tj.AddCondition(AnimatorConditionMode.If, 0, "Jump"); tj.AddCondition(AnimatorConditionMode.IfNot, 0, "Dead");
+                var u2a = up.AddTransition(air); u2a.hasExitTime = true; u2a.exitTime = 0.9f; u2a.duration = 0.15f;
+                foreach (var from in new[] { free, aim })
+                {
+                    var tf = from.AddTransition(air); tf.hasExitTime = false; tf.duration = 0.25f; tf.AddCondition(AnimatorConditionMode.If, 0, "Falling");
+                }
+                var a2l = air.AddTransition(ld); a2l.hasExitTime = false; a2l.duration = 0.1f; a2l.AddCondition(AnimatorConditionMode.If, 0, "Grounded");
+                var l2f = ld.AddTransition(free); l2f.hasExitTime = true; l2f.exitTime = 0.7f; l2f.duration = 0.25f;
+                if (hard != null)
+                {
+                    var hl = sm.AddState("HardLand"); hl.motion = hard;
+                    var th = sm.AddAnyStateTransition(hl); th.hasExitTime = false; th.duration = 0.1f; th.canTransitionToSelf = false;
+                    th.AddCondition(AnimatorConditionMode.If, 0, "HardLand"); th.AddCondition(AnimatorConditionMode.IfNot, 0, "Dead");
+                    var hb = hl.AddTransition(free); hb.hasExitTime = true; hb.exitTime = 0.85f; hb.duration = 0.3f;
+                }
+                log.Add("salto y caida");
+            }
+
+            // ---- coberturas (la raiz de estos clips no gira: el codigo pone al personaje de espaldas a la pared)
+            AnimatorState CoverIdle(string name, string idleClip, string leftClip, string rightClip)
+            {
+                var s = sm.AddState(name);
+                var bt = NewTree(c, s, name);
+                bt.blendParameter = "CoverMove"; bt.useAutomaticThresholds = false;
+                var rc = First(rightClip); var ic = First(idleClip); var lc = First(leftClip);
+                if (rc != null) bt.AddChild(rc, -1f);
+                bt.AddChild(ic, 0f);
+                if (lc != null) bt.AddChild(lc, 1f);
+                return s;
+            }
+            if (First("L_CoverIdle") != null && First("A_StandToCover") != null)
+            {
+                var stand = CoverIdle("CoverStand", "L_CoverIdle", "A_LeftCoverSneak", "A_RightCoverSneak");
+                var low = CoverIdle("CoverCrouch", "L_CoverIdle1", "A_CrouchedSneakingLeft", "A_CrouchedSneakingRight");
+                foreach (var (enterClip, target, type) in new[] { ("A_StandToCover", stand, 1), ("A_StandToCover2", low, 2) })
+                {
+                    var e = sm.AddState("CoverEnter" + type); e.motion = First(enterClip); e.speed = 1.2f;
+                    var te = sm.AddAnyStateTransition(e); te.hasExitTime = false; te.duration = 0.15f; te.canTransitionToSelf = false;
+                    te.AddCondition(AnimatorConditionMode.If, 0, "CoverIn"); te.AddCondition(AnimatorConditionMode.Equals, type, "Cover");
+                    var tin = e.AddTransition(target); tin.hasExitTime = true; tin.exitTime = 0.9f; tin.duration = 0.2f;
+                }
+                foreach (var (from, exitClip) in new[] { (stand, "A_CoverToStand2"), (low, "A_CoverToStand") })
+                {
+                    var x = sm.AddState(from.name + "Exit"); x.motion = First(exitClip); x.speed = 1.4f;
+                    var tx = from.AddTransition(x); tx.hasExitTime = false; tx.duration = 0.15f; tx.AddCondition(AnimatorConditionMode.If, 0, "CoverOut");
+                    var xb = x.AddTransition(free); xb.hasExitTime = true; xb.exitTime = 0.8f; xb.duration = 0.25f;
+                    var mv = x.AddTransition(free); mv.hasExitTime = false; mv.duration = 0.25f; mv.AddCondition(AnimatorConditionMode.Greater, 0.6f, "Speed");
+                    var ta = from.AddTransition(aim); ta.hasExitTime = false; ta.duration = 0.2f; ta.AddCondition(AnimatorConditionMode.Equals, 0, "Cover"); ta.AddCondition(AnimatorConditionMode.If, 0, "Aiming");
+                    var tf = from.AddTransition(free); tf.hasExitTime = false; tf.duration = 0.3f; tf.AddCondition(AnimatorConditionMode.Equals, 0, "Cover");
+                }
+                log.Add("coberturas: de pie y agachado");
+            }
+
+            // ---- gestos en reposo (solo con pistola; los lanza PlayerAnimation tras un rato quieto)
+            for (int i = 0; i < 4; i++)
+            {
+                var clip = First("A_Idle" + (i + 2));
+                if (clip == null) continue;
+                var f = sm.AddState("Fidget" + i); f.motion = clip;
+                var tf = free.AddTransition(f); tf.hasExitTime = false; tf.duration = 0.4f;
+                tf.AddCondition(AnimatorConditionMode.If, 0, "Fidget"); tf.AddCondition(AnimatorConditionMode.Equals, i, "FidgetIndex");
+                var back = f.AddTransition(free); back.hasExitTime = true; back.exitTime = 0.95f; back.duration = 0.4f;
+                var mv = f.AddTransition(free); mv.hasExitTime = false; mv.duration = 0.2f; mv.AddCondition(AnimatorConditionMode.Greater, 0.2f, "Speed");
+                var am = f.AddTransition(aim); am.hasExitTime = false; am.duration = 0.2f; am.AddCondition(AnimatorConditionMode.If, 0, "Aiming");
+            }
+
+            // ---- muertes segun de donde viene el golpe (0 = la de siempre)
+            foreach (var t in sm.anyStateTransitions)
+                if (t.destinationState == death && !t.conditions.Any(q => q.parameter == "DeathVariant"))
+                    t.AddCondition(AnimatorConditionMode.Equals, 0, "DeathVariant");
+            string[] deaths = { "R_DeathFromTheFront", "R_DeathFromTheBack", "R_DeathFromRight", "R_DeathFromFrontHeadshot" };
+            for (int i = 0; i < deaths.Length; i++)
+            {
+                var clip = First(deaths[i]); if (clip == null) continue;
+                var d = sm.AddState("Death" + (i + 1)); d.motion = clip;
+                var td = sm.AddAnyStateTransition(d); td.hasExitTime = false; td.duration = 0.15f; td.canTransitionToSelf = false;
+                td.AddCondition(AnimatorConditionMode.If, 0, "Dead"); td.AddCondition(AnimatorConditionMode.Equals, i + 1, "DeathVariant");
+            }
+            log.Add("muertes: " + deaths.Length + " mas");
+        }
+
+        /// <summary>Override de arma larga: locomocion, salto y reposo del Pro Rifle Pack (con la escopeta en las manos).</summary>
+        public static AnimatorOverrideController LongGunOverride(AnimatorController baseCtrl)
+        {
+            string path = AnimDir + "PlayerHumanoid_Long.overrideController";
+            var oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(path);
+            bool isNew = oc == null;
+            if (isNew) oc = new AnimatorOverrideController(baseCtrl); else oc.runtimeAnimatorController = baseCtrl;
+            var map = new Dictionary<string, string>
+            {
+                ["P_Idle"] = "R_Idle", ["P_BreathingIdle"] = "R_Idle", ["P_PistolWalk"] = "R_WalkForward", ["P_Walking"] = "R_WalkForward",
+                ["P_RunForward"] = "R_RunForward", ["P_WalkLeft"] = "R_WalkLeft", ["P_WalkRight"] = "R_WalkRight",
+                ["P_PistolWalkBackward"] = "R_WalkBackward", ["P_WalkForwardLeft"] = "R_WalkForwardLeft",
+                ["A_JumpingUp"] = "R_JumpUp", ["A_FallingIdle"] = "R_JumpLoop",
+            };
+            var pairs = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+            foreach (var orig in baseCtrl.animationClips.Distinct())
+                pairs.Add(new KeyValuePair<AnimationClip, AnimationClip>(orig, map.TryGetValue(orig.name, out var rep) ? First(rep) : null));
+            oc.ApplyOverrides(pairs);
+            if (isNew) AssetDatabase.CreateAsset(oc, path); else EditorUtility.SetDirty(oc);
+            return oc;
         }
 
         // ------------------------------------------------------------------ prefab
@@ -303,7 +471,7 @@ namespace Horror.EditorTools
             var wc = root.GetComponent<WeaponController>();
             wc.handSocket = holder; wc.longSocket = Holder("LongWeaponHolder");
             var pa = root.GetComponent<PlayerAnimation>();
-            pa.animator = an2; pa.handgunController = ctrl; pa.longGunController = ctrl;
+            pa.animator = an2; pa.handgunController = ctrl; pa.longGunController = LongGunOverride(ctrl);
             var pc = root.GetComponent<PlayerController>();
             pc.aimSpeed = 1.7f;                       // la velocidad de los pasos laterales de Mixamo (1.73 m/s)
             PrefabUtility.SaveAsPrefabAsset(root, pp);
