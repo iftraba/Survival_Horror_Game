@@ -138,6 +138,8 @@ MonoBehaviour:
   chaseSpeed: 0.84
   staggerTime: 0.5
   hearingRange: 4.5
+  viewAngle: 140
+  closeSense: 1.8
   attackVariants:
   - hitDelay: 0.37777779
     damageMultiplier: 1
@@ -145,7 +147,7 @@ MonoBehaviour:
   dormant: 0
   dropOnDeath: {fileID: 0}
   bossName: 
-  alertTime: 0.35
+  alertTime: 1.6
 --- !u!114 &2851139157860159828
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -140,6 +140,8 @@ MonoBehaviour:
   chaseSpeed: 1.17
   staggerTime: 0
   hearingRange: 4.5
+  viewAngle: 140
+  closeSense: 1.8
   attackVariants:
   - hitDelay: 0.56666666
     damageMultiplier: 1
@@ -147,7 +149,7 @@ MonoBehaviour:
   dormant: 1
   dropOnDeath: {fileID: 11400000, guid: 11878370fe76fcf49ae21c0996261bd1, type: 2}
   bossName: ABOMINACION
-  alertTime: 0.6
+  alertTime: 2
 --- !u!114 &496292858899723512
 MonoBehaviour:
   m_ObjectHideFlags: 0

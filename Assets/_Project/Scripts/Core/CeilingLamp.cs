@@ -4,7 +4,7 @@ namespace Horror
 {
     /// <summary>
     /// Lampara de techo: se puede apagar desde un interruptor, puede parpadear y apagarse a ratos,
-    /// y su panel emisivo (objeto hijo "Bulb") y su zumbido siguen siempre a la luz.
+    /// y su panel emisivo (objeto hijo "Bulb") sigue siempre a la luz. Sin sonido (el zumbido y el chasquido molestaban).
     /// </summary>
     [RequireComponent(typeof(Light))]
     public class CeilingLamp : MonoBehaviour
@@ -22,11 +22,9 @@ namespace Horror
         float[] fillIntensity;
         Renderer bulb;
         MaterialPropertyBlock block;
-        AudioSource hum;
         Color baseEmission;
         float baseIntensity;
         float seed;
-        bool wasBlackout;
 
         public bool Powered { get; private set; } = true;
 
@@ -65,24 +63,6 @@ namespace Horror
             }
         }
 
-        void Start()
-        {
-            var audio = GameAudio.Instance;
-            if (audio != null && audio.lampHum != null)
-            {
-                hum = gameObject.AddComponent<AudioSource>();
-                hum.clip = audio.lampHum;
-                hum.loop = true;
-                hum.spatialBlend = 1f;
-                hum.rolloffMode = AudioRolloffMode.Logarithmic;
-                hum.minDistance = 1f;
-                hum.maxDistance = 7f;
-                hum.volume = 0.08f;   // hay una fuente por lampara: varias suenan a la vez y no deben fatigar
-                hum.time = Random.value * audio.lampHum.length;
-                hum.Play();
-            }
-        }
-
         public void SetPowered(bool on)
         {
             EnsureInit();
@@ -103,9 +83,7 @@ namespace Horror
                 // cerca, hasta un 10 % dejaria una mancha brillante)
                 blackout = n < 0.18f;
                 k = blackout ? 0f : Mathf.Lerp(1f, n * 1.6f, amount);
-                if (blackout && !wasBlackout) GameAudio.Play(Sfx.LampZap, transform.position, 0.6f);
             }
-            wasBlackout = blackout;
             Apply(!blackout, k);
         }
 
@@ -125,11 +103,6 @@ namespace Horror
                 bulb.GetPropertyBlock(block);
                 block.SetColor(EmissionId, baseEmission * (lit ? k : 0f));
                 bulb.SetPropertyBlock(block);
-            }
-            if (hum != null)
-            {
-                if (lit && !hum.isPlaying) hum.UnPause();
-                else if (!lit && hum.isPlaying) hum.Pause();
             }
         }
     }

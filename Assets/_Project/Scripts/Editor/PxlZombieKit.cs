@@ -11,7 +11,7 @@ namespace Horror.EditorTools
     /// Zombis del pack de la Asset Store "Zombie" (Pxltiger, importado en Assets/Zombie): tres modelos humanoides y 10
     /// animaciones. Construye tres AnimatorOverrideController sobre el controlador base de los zombis (ZombieHumanoid) y
     /// los prefabs Zombie_Pxl1..3 con el mismo montaje que ZombieKit. El pack solo trae un ataque y ninguna reaccion a
-    /// golpes ni grito de alerta: se reutilizan idle y la caida para la muerte. Se puede repetir.
+    /// golpes ni grito de alerta: el grito y la reaccion salen de Mixamo (humanoides) y la caida es la muerte. Se puede repetir.
     /// </summary>
     public static class PxlZombieKit
     {
@@ -21,19 +21,23 @@ namespace Horror.EditorTools
 
         static AnimationClip Clip(string name)
         {
+            // las que le faltan al pack (grito, reaccion al golpe) salen de Mixamo: son humanoides y se adaptan al esqueleto Pxl
+            foreach (var dir in new[] { "ZombieAnims/", "GenericAnims/", "BossAnims/" })
+                foreach (var o in AssetDatabase.LoadAllAssetsAtPath("Assets/_Project/Art/Mixamo/" + dir + name + ".fbx"))
+                    if (o is AnimationClip mc && mc.name == name) return mc;
             foreach (var o in AssetDatabase.LoadAllAssetsAtPath(Anims + "Zombie@" + name + ".FBX"))
                 if (o is AnimationClip c && !c.name.StartsWith("__")) return c;
             Debug.LogWarning("[Horror] No se encontro el clip " + name);
             return null;
         }
 
-        static AnimatorOverrideController Override(string name, AnimatorController baseCtrl, string walk, string run)
+        static AnimatorOverrideController Override(string name, AnimatorController baseCtrl, string walk, string run, string hit)
         {
             var map = new Dictionary<string, string>
             {
                 ["Z_ZombieIdle"] = "Z_Idle", ["Z_ZombieWalk"] = walk, ["Z_ZombieRun"] = run,
                 ["Z_ZombieAttack"] = "Z_Attack", ["Z_ZombieBiting"] = "Z_Attack", ["Z_ZombieNeckBite"] = "Z_Attack",
-                ["Z_ZombieScream"] = "Z_Idle", ["G_ZombieReactionHit"] = "Z_Idle", ["Z_ZombieDying"] = "Z_FallingBack",
+                ["Z_ZombieScream"] = "Z_ZombieScream", ["G_ZombieReactionHit"] = hit, ["Z_ZombieDying"] = "Z_FallingBack",
             };
             string path = AnimDir + name + ".overrideController";
             var oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(path);
@@ -47,7 +51,7 @@ namespace Horror.EditorTools
             return oc;
         }
 
-        class Kind { public string name, fbx, walkInPlace, walkMoving, runInPlace, runMoving; public float hp, chase, damage; }
+        class Kind { public string name, fbx, walkInPlace, walkMoving, runInPlace, runMoving, hit; public float hp, chase, damage; }
 
 
         // ------------------------------------------------------------------ segundo jefe
@@ -64,7 +68,7 @@ namespace Horror.EditorTools
             var map = new Dictionary<string, string>
             {
                 ["B_Idle"] = "Z_Idle", ["B_MutantWalking"] = "Z_Walk_InPlace", ["B_MutantRun"] = "Z_Run_InPlace", ["B_GangnamStyle"] = "Z_Idle",
-                ["Z_ZombieScream"] = "Z_Idle", ["B_Punching"] = "Z_Attack", ["B_PunchToElbowCombo"] = "Z_Attack", ["B_SurpriseUppercut"] = "Z_Attack",
+                ["Z_ZombieScream"] = "Z_ZombieScream", ["B_Punching"] = "Z_Attack", ["B_PunchToElbowCombo"] = "Z_Attack", ["B_SurpriseUppercut"] = "Z_Attack",
                 ["Z_ZombieDying"] = "Z_FallingBack",
             };
             string path = AnimDir + "Boss_Pxl.overrideController";
@@ -87,7 +91,7 @@ namespace Horror.EditorTools
             var spec = new ZombieKit.Spec
             {
                 name = "Zombie_BossPxl", fbxPath = fbxPath, scale = scale, controller = oc, height = 3.0f, radius = 0.85f,
-                hp = 1800f, chase = 1.17f, damage = 60f, attackRange = 2.6f, cooldown = 2.0f, stagger = 0f, alertTime = 0.6f,
+                hp = 1800f, chase = 1.17f, damage = 60f, attackRange = 2.6f, cooldown = 2.0f, stagger = 0f, alertTime = AlertBoss,
                 walkClip = Mathf.Max(0.3f, Clip("Z_Walk_InPlace").averageSpeed.magnitude, Clip("Z_Walk").averageSpeed.magnitude) * scale,
                 runClip = Clip("Z_Run").averageSpeed.magnitude * scale, runAbove = 1.8f, variants = new[] { variant }, dormant = true,
                 drop = "I_KeyFinal", bossName = "ABOMINACION",
@@ -130,6 +134,55 @@ namespace Horror.EditorTools
             return prefab;
         }
 
+        const float Alert = 1.6f, AlertBoss = 2.0f;   // parada al detectarte: lo que dura el grito (como los demas zombis)
+
+        static readonly Kind[] Kinds =
+        {
+            new Kind { name = "Pxl1", fbx = "Zombie1", walkInPlace = "Z_Walk_InPlace",  walkMoving = "Z_Walk",  runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hit = "G_ZombieReactionHit", hp = ZombieKit.GenericHp, chase = ZombieKit.BaseChase, damage = 15f },  // equilibrado (el clip anda a 0.27 m/s: a 0.42 se reproduce a ~1.5x; a 0.6 iba a 2x y se veia nervioso)
+            new Kind { name = "Pxl2", fbx = "Zombie2", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hit = "G_ZombieReactionHit2", hp = ZombieKit.GenericHp, chase = ZombieKit.BaseChase, damage = 12f },  // rapido y fragil (corre: la carrera del clip va a 3.7 m/s; a 2.2 iba a camara lenta, 0.6x)
+            new Kind { name = "Pxl3", fbx = "Zombie3", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hit = "G_ZombieReactionHit", hp = ZombieKit.GenericHp, chase = ZombieKit.BaseChase, damage = 22f },  // lento y resistente (~1.3x)
+        };
+
+        /// <summary>Solo animaciones: grito y reaccion al golpe de Mixamo en los Pxl y grito en el jefe 2, sin reconstruir los prefabs
+        /// (conserva sus ajustes). Menu: Horror/Animaciones de los zombis Pxltiger.</summary>
+        [MenuItem("Horror/Animaciones de los zombis Pxltiger")]
+        public static void AnimationsMenu() { Debug.Log("[Horror] " + UpdateAnimations()); }
+
+        public static string UpdateAnimations()
+        {
+            var baseCtrl = AssetDatabase.LoadAssetAtPath<AnimatorController>(AnimDir + "ZombieHumanoid.controller");
+            var log = new List<string>();
+            foreach (var k in Kinds)
+            {
+                Override("Zombie_" + k.name, baseCtrl, k.walkInPlace, k.runInPlace, k.hit);
+                log.Add(k.name + " " + SetAlert("Zombie_" + k.name, Alert));
+            }
+            var oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(AnimDir + "Boss_Pxl.overrideController");
+            if (oc != null)
+            {
+                var pairs = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+                oc.GetOverrides(pairs);
+                for (int i = 0; i < pairs.Count; i++)
+                    if (pairs[i].Key.name == "Z_ZombieScream") pairs[i] = new KeyValuePair<AnimationClip, AnimationClip>(pairs[i].Key, Clip("Z_ZombieScream"));
+                oc.ApplyOverrides(pairs);
+                EditorUtility.SetDirty(oc);
+                log.Add("jefe 2 " + SetAlert("Zombie_BossPxl", AlertBoss));
+            }
+            AssetDatabase.SaveAssets();
+            return "animaciones Pxl: " + string.Join(", ", log);
+        }
+
+        static string SetAlert(string prefab, float t)
+        {
+            var root = PrefabUtility.LoadPrefabContents(PrefabDir + prefab + ".prefab");
+            var ai = root.GetComponentInChildren<ZombieAI>(true);
+            bool found = ai != null;                      // despues de descargar el prefab, ai ya no es valido
+            if (found) ai.alertTime = t;
+            PrefabUtility.SaveAsPrefabAsset(root, PrefabDir + prefab + ".prefab");
+            PrefabUtility.UnloadPrefabContents(root);
+            return found ? "ok" : "sin ZombieAI";
+        }
+
         [MenuItem("Horror/Construir zombis Pxltiger")]
         public static void BuildMenu() { Debug.Log("[Horror] " + Build()); }
 
@@ -137,16 +190,10 @@ namespace Horror.EditorTools
         {
             var baseCtrl = AssetDatabase.LoadAssetAtPath<AnimatorController>(AnimDir + "ZombieHumanoid.controller");
             if (baseCtrl == null) return "falta ZombieHumanoid.controller (ejecuta Horror/Construir zombis y jefe)";
-            var kinds = new[]
-            {
-                new Kind { name = "Pxl1", fbx = "Zombie1", walkInPlace = "Z_Walk_InPlace",  walkMoving = "Z_Walk",  runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = ZombieKit.GenericHp, chase = ZombieKit.BaseChase, damage = 15f },  // equilibrado (el clip anda a 0.27 m/s: a 0.42 se reproduce a ~1.5x; a 0.6 iba a 2x y se veia nervioso)
-                new Kind { name = "Pxl2", fbx = "Zombie2", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = ZombieKit.GenericHp, chase = ZombieKit.BaseChase, damage = 12f },  // rapido y fragil (corre: la carrera del clip va a 3.7 m/s; a 2.2 iba a camara lenta, 0.6x)
-                new Kind { name = "Pxl3", fbx = "Zombie3", walkInPlace = "Z_Walk1_InPlace", walkMoving = "Z_Walk1", runInPlace = "Z_Run_InPlace", runMoving = "Z_Run", hp = ZombieKit.GenericHp, chase = ZombieKit.BaseChase, damage = 22f },  // lento y resistente (~1.3x)
-            };
             var log = new List<string>();
-            foreach (var k in kinds)
+            foreach (var k in Kinds)
             {
-                var oc = Override("Zombie_" + k.name, baseCtrl, k.walkInPlace, k.runInPlace);
+                var oc = Override("Zombie_" + k.name, baseCtrl, k.walkInPlace, k.runInPlace, k.hit);
                 string fbxPath = "Assets/Zombie/FBXs/" + k.fbx + ".FBX";
                 var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
                 var attack = Clip("Z_Attack");
@@ -157,7 +204,7 @@ namespace Horror.EditorTools
                 var spec = new ZombieKit.Spec
                 {
                     name = "Zombie_" + k.name, fbxPath = fbxPath, scale = 1.0f, controller = oc, height = 2f, radius = 0.4f,
-                    hp = k.hp, chase = k.chase, damage = k.damage, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = 0.35f,   // sin clip de grito: una parada larga solo se ve como zombi congelado
+                    hp = k.hp, chase = k.chase, damage = k.damage, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = Alert,   // grito de Mixamo al detectarte
                     walkClip = Mathf.Max(0.3f, walkSpeed), runClip = Mathf.Max(1f, runSpeed), runAbove = 1.3f, variants = new[] { variant },
                 };
                 ZombieKit.BuildPrefab(spec);

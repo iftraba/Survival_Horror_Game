@@ -46,6 +46,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Enemies · **Zombis Pxltiger y jefe 2 con grito y reacción al disparo**: les faltaban esas animaciones (se quedaban en reposo); ahora usan las de Mixamo, que se adaptan a su esqueleto.
+- 2026-10-08 · Core · **Luces sin sonido**: quitados el zumbido de las lámparas y el chasquido de los apagones.
 - 2026-10-08 · Art · **Texturas del escenario nuevas** (`build_env_textures.py` + `EnvTextureKit`): suelo, paredes, techo, madera de puertas y marcos, metal y columnas pasan a texturas a más resolución (suelo y paredes 2048) con normales, metal/suavidad y oclusión: baldosa vinílica gastada con juntas sucias, grietas y charcos brillantes; yeso pintado desconchado con humedades y moho; placas de techo con manchas de agua; madera con veta y barniz gastado; chapa pintada con óxido. Las columnas tienen material propio de hormigón visto.
 - 2026-10-08 · Art · **Muebles con textura** (horneada en Blender con `texture_items.py`): escritorios, sillas, taquillas, estanterías, archivadores, catres, cajas y bidones pasan de colores planos a madera con veta y barniz gastado, chapa pintada desconchada con óxido, hierro oxidado, cartón y tela, con normales y metal/suavidad (más de 300 copias en la escena).
 - 2026-10-08 · Interaction/Player · Las **puertas** ya no se incrustan en los muros gruesos (apertura máxima 90° y limitada por obstáculos; antes 100° y hasta 11 cm dentro del muro) y el jugador **siempre lleva un arma equipada**: no se puede desequipar ni tirar la equipada ni apuntar sin arma.
