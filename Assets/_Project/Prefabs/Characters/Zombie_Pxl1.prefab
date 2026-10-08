@@ -143,15 +143,15 @@ MonoBehaviour:
   viewAngle: 140
   closeSense: 1.8
   attackVariants:
-  - hitDelay: 0.67994237
-    damageMultiplier: 1
-    cooldown: 1.4
-  - hitDelay: 0.3229167
-    damageMultiplier: 1
-    cooldown: 1.4
   - hitDelay: 0.28659615
     damageMultiplier: 1
     cooldown: 2.0722222
+  - hitDelay: 0.5086656
+    damageMultiplier: 1
+    cooldown: 3.2157779
+  - hitDelay: 0.79310346
+    damageMultiplier: 1
+    cooldown: 1.9344445
   - hitDelay: 0.61635226
     damageMultiplier: 1
     cooldown: 1.7966667
@@ -165,6 +165,7 @@ MonoBehaviour:
   grabChance: 0.3
   grabRange: 1.1
   dormant: 0
+  wakeOnlyWhenShot: 0
   dropOnDeath: {fileID: 0}
   bossName: 
   alertTime: 1.6
@@ -196,7 +197,7 @@ MonoBehaviour:
   animator: {fileID: 2599251301658692128}
   strideSpeed: 1.4
   gaitMode: 1
-  walkClipSpeed: 0.79
+  walkClipSpeed: 0.33
   runClipSpeed: 2.84
   runAbove: 1.6
   maxWalkPlayback: 2.2

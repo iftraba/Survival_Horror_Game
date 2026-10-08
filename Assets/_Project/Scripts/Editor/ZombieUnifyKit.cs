@@ -22,13 +22,14 @@ namespace Horror.EditorTools
         /// <summary>Juego comun: clip base del controlador -> clip de Mixamo.</summary>
         public static readonly Dictionary<string, string> Common = new Dictionary<string, string>
         {
-            ["Z_ZombieIdle"] = "Z_ZombieIdle", ["Z_ZombieWalk"] = "G_ZombieStumbling", ["Z_ZombieRun"] = "Z_ZombieRun",
-            ["Z_ZombieAttack"] = "Z_ZombieAttack", ["Z_ZombieBiting"] = "G_ZombiePunching", ["Z_ZombieNeckBite"] = "Z_ZombieNeckBite",
+            // el juego de los policias (el que funcionaba bien): el del civil (andar tambaleante) se descarto
+            ["Z_ZombieIdle"] = "G_ZombieScratchIdle", ["Z_ZombieWalk"] = "Z_ZombieWalk", ["Z_ZombieRun"] = "Z_ZombieRun",
+            ["Z_ZombieAttack"] = "Z_ZombieNeckBite", ["Z_ZombieBiting"] = "Z_ZombieBiting", ["Z_ZombieNeckBite"] = "G_ZombiePunching2",
             ["G_ZombieReactionHit"] = "G_ZombieReactionHit", ["Z_ZombieScream"] = "Z_ZombieScream", ["Z_ZombieDying"] = "Z_ZombieDying",
         };
         /// <summary>Ataques comunes (variantes 0-4: estados Attack0-4 del controlador base).</summary>
-        static readonly string[] Attacks = { "Z_ZombieAttack", "G_ZombiePunching", "Z_ZombieNeckBite", "Z_ZombieKick", "Z_ZombieAttack2" };
-        const float WalkClip = 0.79f, RunClip = 2.84f, Damage = 15f;
+        static readonly string[] Attacks = { "Z_ZombieNeckBite", "Z_ZombieBiting", "G_ZombiePunching2", "Z_ZombieKick", "Z_ZombieAttack2" };
+        const float WalkClip = 0.33f, RunClip = 2.84f, Damage = 15f;
 
         /// <summary>Juego de reptante comun (cualquier modelo): arrastrarse, mordiscos desde el suelo.</summary>
         static readonly Dictionary<string, string> Crawl = new Dictionary<string, string>
