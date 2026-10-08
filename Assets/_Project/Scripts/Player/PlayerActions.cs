@@ -19,10 +19,10 @@ namespace Horror
         public static bool Grabbed => Instance != null && Instance.grabber != null;
 
         [Header("Abrir puertas (clip Opening, la primera mitad)")]
-        public float doorAnimSpeed = 1.8f;
-        [Tooltip("Segundos hasta que la mano llega al pomo y la hoja empieza a girar")] public float doorSwingAt = 0.75f;
-        [Tooltip("Segundos hasta devolver el control")] public float doorUnlockAt = 1.4f;
-        [Tooltip("Velocidad al acercarse a la puerta antes de abrirla")] public float doorWalkSpeed = 1.8f;
+        public float doorAnimSpeed = 2.7f;
+        [Tooltip("Segundos hasta que la mano llega al pomo y la hoja empieza a girar")] public float doorSwingAt = 0.5f;
+        [Tooltip("Segundos hasta devolver el control")] public float doorUnlockAt = 0.9f;
+        [Tooltip("Velocidad al acercarse a la puerta antes de abrirla")] public float doorWalkSpeed = 2.6f;
 
         [Header("Entrar en la sala del jefe (clip Opening Door Inwards)")]
         public float enterSpeed = 1.25f;

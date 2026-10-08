@@ -187,7 +187,7 @@ namespace Horror.EditorTools
                 if (name == "OpenDoor") { var mv = s.AddTransition(free); mv.hasExitTime = false; mv.duration = 0.25f; mv.AddCondition(AnimatorConditionMode.Greater, 0.4f, "Speed"); }
                 log.Add(name + ": " + clip.name);
             }
-            Action("OpenDoor", First("P_OpeningDoor"), 1.8f, 0.40f);                 // el clip trae dos aperturas: solo la primera (0-4,4 s)
+            Action("OpenDoor", First("P_OpeningDoor"), 2.7f, 0.40f);                 // mas rapido a peticion del usuario (antes 1,8)                 // el clip trae dos aperturas: solo la primera (0-4,4 s)
             Action("EnterDoor", First("P_OpeningDoorInwards"), 1.25f, 0.97f);
             Action("RunTurn", First("P_RunningToTurn"), 1f, 0.72f);
             Action("Roll", First("P_FallingToRoll"), 1f, 0.85f, 0.23f);            // empieza al tocar el suelo (antes cae desde 2 m)

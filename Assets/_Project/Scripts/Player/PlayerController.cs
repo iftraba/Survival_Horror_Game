@@ -21,6 +21,8 @@ namespace Horror
         [Tooltip("Caida (m) a partir de la cual el aterrizaje es duro (se queda un momento agachado)")] public float hardLandHeight = 3.5f;
         [Tooltip("Velocidad agachado (C)")] public float crouchSpeed = 1.2f;
         [Tooltip("Velocidad vertical del salto (espacio): ~0,6 m de altura")] public float jumpSpeed = 4.8f;
+        [Tooltip("Salto desactivado a peticion del usuario (2026-10-08); la animacion se conserva en el controlador por si se usa")]
+        public bool jumpEnabled = false;
         /// <summary>Agachado (C): mas lento y mas dificil de ver para los zombis.</summary>
         public bool IsCrouching { get; private set; }
         public static bool CrouchingNow { get; private set; }
@@ -91,7 +93,7 @@ namespace Horror
                 if (kb.spaceKey.wasPressedThisFrame && controller.isGrounded && !IsAiming && turnRemaining <= 0f)
                 {
                     if (IsCrouching) IsCrouching = false;                              // espacio agachado: se levanta
-                    else jumpRequest = true;
+                    else if (jumpEnabled) jumpRequest = true;
                 }
                 // cubrirse (V): contra la pared o el obstaculo que tenga delante
                 if (kb.vKey.wasPressedThisFrame && controller.isGrounded && !IsAiming && actions != null) actions.TryCover(IsCrouching);
