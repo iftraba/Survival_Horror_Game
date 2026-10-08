@@ -290,17 +290,17 @@ namespace Horror.EditorTools
         public static readonly Kind[] Kinds =
         {
             new Kind { name = "Civil", fbx = "Zombie_Civil_Mixamo", scale = 1.0f, hp = GenericHp, chase = BaseChase, damage = 15f,
-                       idle = new[] { "G_ZombieIdle" }, walk = new[] { "G_ZombieStumbling" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.79f,
-                       attacks = new[] { "Z_ZombieAttack", "G_ZombiePunching", "Z_ZombieBiting2" }, hit = new[] { "G_ZombieReactionHit" } },
-            new Kind { name = "Girl", fbx = "Zombie_Girl", scale = 0.84f, hp = GenericHp, chase = BaseChase, damage = 12f,
-                       idle = new[] { "G_ZombieIdle3" }, walk = new[] { "G_Walking" }, run = new[] { "G_ZombieRunning" }, walkClip = 0.50f,
-                       attacks = new[] { "G_ZombieAttack", "G_ZombieHeadbutt", "G_ZombieKicking" }, hit = new[] { "G_ZombieReactionHit2" }, death = "Z_ZombieDeath" },
-            new Kind { name = "Cop", fbx = "Zombie_Cop", scale = 0.9f, hp = GenericHp, torsoMult = PoliceTorsoMult, chase = BaseChase, damage = 18f,
-                       idle = new[] { "G_ZombieScratchIdle" }, walk = new[] { "Z_ZombieWalk" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.33f,
-                       attacks = new[] { "Z_ZombieNeckBite", "Z_ZombieBiting", "G_ZombiePunching2" }, hit = new[] { "G_ZombieReactionHit" } },
-            new Kind { name = "Yaku", fbx = "Zombie_Yaku", scale = 0.9f, hp = GenericHp, chase = BaseChase, damage = 20f,
-                       idle = new[] { "G_ZombieIdle2" }, walk = new[] { "Z_ZombieWalk" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.33f,
-                       attacks = new[] { "Z_ZombieAttack", "G_ZombieKicking2", "G_ZombiePunching" }, hit = new[] { "G_ZombieReactionHit2" } },
+                       idle = new[] { "Z_ZombieIdle" }, walk = new[] { "G_ZombieStumbling" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.79f,
+                       attacks = new[] { "Z_ZombieAttack", "G_ZombiePunching", "Z_ZombieNeckBite" }, hit = new[] { "G_ZombieReactionHit" } },
+            new Kind { name = "Girl", fbx = "Zombie_Girl", scale = 0.84f, hp = GenericHp, chase = BaseChase, damage = 15f,
+                       idle = new[] { "Z_ZombieIdle" }, walk = new[] { "G_ZombieStumbling" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.79f,
+                       attacks = new[] { "Z_ZombieAttack", "G_ZombiePunching", "Z_ZombieNeckBite" }, hit = new[] { "G_ZombieReactionHit" } },
+            new Kind { name = "Cop", fbx = "Zombie_Cop", scale = 0.9f, hp = GenericHp, torsoMult = PoliceTorsoMult, chase = BaseChase, damage = 15f,
+                       idle = new[] { "Z_ZombieIdle" }, walk = new[] { "G_ZombieStumbling" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.79f,
+                       attacks = new[] { "Z_ZombieAttack", "G_ZombiePunching", "Z_ZombieNeckBite" }, hit = new[] { "G_ZombieReactionHit" } },
+            new Kind { name = "Yaku", fbx = "Zombie_Yaku", scale = 0.9f, hp = GenericHp, chase = BaseChase, damage = 15f,
+                       idle = new[] { "Z_ZombieIdle" }, walk = new[] { "G_ZombieStumbling" }, run = new[] { "Z_ZombieRun" }, walkClip = 0.79f,
+                       attacks = new[] { "Z_ZombieAttack", "G_ZombiePunching", "Z_ZombieNeckBite" }, hit = new[] { "G_ZombieReactionHit" } },
         };
 
         /// <summary>Construye controladores y prefabs de todos los zombis y del jefe. Devuelve un resumen.</summary>

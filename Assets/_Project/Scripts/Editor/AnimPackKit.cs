@@ -188,6 +188,7 @@ namespace Horror.EditorTools
             log.Add("reptantes: Z_Crawling");
             log.Add(ZombieKicks());
             log.Add(Colossus());
+            log.Add(ZombieUnifyKit.Apply());                             // al final: deja a todos los zombis de pie con el mismo juego
             AssetDatabase.SaveAssets();
             return string.Join(" | ", log);
         }

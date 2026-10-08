@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 8385778812111018434}
   - component: {fileID: 4661097856024115987}
   - component: {fileID: 404157883499418572}
+  - component: {fileID: 8846982832946835016}
+  - component: {fileID: 474821024164556320}
   m_Layer: 0
   m_Name: Zombie_Cop
   m_TagString: Untagged
@@ -132,7 +134,7 @@ MonoBehaviour:
   detectRange: 14
   loseRange: 22
   attackRange: 1.6
-  attackDamage: 18
+  attackDamage: 15
   attackCooldown: 1.4
   walkSpeed: 1.1
   chaseSpeed: 0.84
@@ -141,15 +143,15 @@ MonoBehaviour:
   viewAngle: 140
   closeSense: 1.8
   attackVariants:
+  - hitDelay: 0.6580087
+    damageMultiplier: 1
+    cooldown: 1.4
+  - hitDelay: 0.3229167
+    damageMultiplier: 1
+    cooldown: 1.4
   - hitDelay: 0.28659615
     damageMultiplier: 1
     cooldown: 2.0722222
-  - hitDelay: 0.5086656
-    damageMultiplier: 1
-    cooldown: 3.2157779
-  - hitDelay: 0.6609196
-    damageMultiplier: 1
-    cooldown: 1.9344445
   - hitDelay: 0.59433967
     damageMultiplier: 1
     cooldown: 1.7966667
@@ -194,10 +196,59 @@ MonoBehaviour:
   animator: {fileID: 8340398157520412021}
   strideSpeed: 1.4
   gaitMode: 1
-  walkClipSpeed: 0.297
+  walkClipSpeed: 0.711
   runClipSpeed: 2.5559998
   runAbove: 1.6
   maxWalkPlayback: 2.2
+--- !u!114 &8846982832946835016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4036837680834323183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00c7c9bad4e9fdb4f81e80bd7d772724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieCripple
+  crawlController: {fileID: 22100000, guid: 9f0b425ed6e41f94e9e39569aa3072df, type: 2}
+  legHitsToCripple: 2
+  fallTime: 1
+  crawlHeight: 0.9
+  crawlRadius: 0.45
+  crawlChase: 0.84
+  crawlAttackRange: 1.4
+  crawlWalkClip: 0.5
+  crawlRunClip: 1.6
+  crawlVariants:
+  - hitDelay: 0.5086656
+    damageMultiplier: 1
+    cooldown: 3.2157779
+  - hitDelay: 0.2
+    damageMultiplier: 1
+    cooldown: 1.3144445
+  - hitDelay: 0.28659615
+    damageMultiplier: 1
+    cooldown: 2.0722222
+  startCrawling: 0
+--- !u!114 &474821024164556320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4036837680834323183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49a0e0fddb317964791261e482948667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieFeeding
+  feeding: 0
+  feedClip: {fileID: -203655887218126122, guid: bfc71dd907d1c304e9b1cdde57ab942d, type: 3}
+  corpsePrefab: {fileID: 7584050366631940265, guid: d9ae9ebcc7a395f498f9a514157c2d14, type: 3}
+  bloodMaterial: {fileID: 2100000, guid: f236bbab3d4d7ef4a9072f1375469bd4, type: 2}
+  spawnCorpse: 1
 --- !u!1001 &2510086393558147300
 PrefabInstance:
   m_ObjectHideFlags: 0

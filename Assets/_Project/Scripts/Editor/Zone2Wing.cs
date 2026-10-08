@@ -308,10 +308,10 @@ namespace Horror.EditorTools
             {
                 ("Zombie_Pxl2", "Z2_Pxl2_Bombas",  new Vector3(-2f, 1f, 42f), 150f),     // cuarto de bombas
                 ("Zombie_Cop",  "Z2_Cop_Maquinas", new Vector3(-6f, 1f, 48f), 200f),     // sala de maquinas
-                ("Zombie_Pxl3", "Z2_Pxl3_Maquinas", new Vector3(6f, 1f, 51f), 20f),
+                ("Zombie_Civil", "Z2_Civil_Maquinas", new Vector3(6f, 1f, 51f), 20f),
                 ("Zombie_Cop",  "Z2_Cop_Lab",      new Vector3(-9f, 1f, 61f), 160f),     // laboratorio
                 ("Zombie_Pxl1", "Z2_Pxl1_Lab",     new Vector3(-4f, 1f, 58f), 110f),
-                ("Zombie_Pxl3", "Z2_Pxl3_Almacen", new Vector3(10f, 1f, 60f), 250f),    // almacen (antes el Yaku, retirado)
+                ("Zombie_Girl", "Z2_Girl_Almacen", new Vector3(10f, 1f, 60f), 250f),    // almacen (antes el Yaku, retirado)
             };
             foreach (var sp in spots)
             {

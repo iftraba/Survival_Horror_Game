@@ -199,7 +199,7 @@ namespace Horror.EditorTools
             foreach (var n in new[] { "X_Cadaver", "X_Sangre" }) { var o = GameObject.Find(n); if (o != null) Object.DestroyImmediate(o); }
 
             // sin katana: los zombis del Yaku salen y entran otros modelos en su sitio
-            var swaps = new[] { ("Zombie_Yaku", "Zombie_Oficial", "Zombie_Oficial_Hall"), ("Z2_Yaku_Almacen", "Zombie_Pxl3", "Z2_Pxl3_Almacen") };
+            var swaps = new[] { ("Zombie_Yaku", "Zombie_Oficial", "Zombie_Oficial_Hall"), ("Z2_Yaku_Almacen", "Zombie_Girl", "Z2_Girl_Almacen") };
             foreach (var (oldName, prefab, newName) in swaps)
             {
                 var old = GameObject.Find(oldName);

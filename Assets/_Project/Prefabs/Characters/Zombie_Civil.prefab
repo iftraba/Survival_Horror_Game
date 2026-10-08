@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 4547109340905734716}
   - component: {fileID: 3352933540480430614}
   - component: {fileID: 3475651869078816556}
+  - component: {fileID: 3565918828094686130}
+  - component: {fileID: 7935229511940277092}
   m_Layer: 0
   m_Name: Zombie_Civil
   m_TagString: Untagged
@@ -147,9 +149,9 @@ MonoBehaviour:
   - hitDelay: 0.38750005
     damageMultiplier: 1
     cooldown: 1.4
-  - hitDelay: 0.35054776
+  - hitDelay: 0.308642
     damageMultiplier: 1
-    cooldown: 1.4
+    cooldown: 2.0722222
   - hitDelay: 0.59433967
     damageMultiplier: 1
     cooldown: 1.7966667
@@ -198,6 +200,55 @@ MonoBehaviour:
   runClipSpeed: 2.84
   runAbove: 1.6
   maxWalkPlayback: 2.2
+--- !u!114 &3565918828094686130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1024384207564506912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00c7c9bad4e9fdb4f81e80bd7d772724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieCripple
+  crawlController: {fileID: 22100000, guid: 9f0b425ed6e41f94e9e39569aa3072df, type: 2}
+  legHitsToCripple: 2
+  fallTime: 1
+  crawlHeight: 0.9
+  crawlRadius: 0.45
+  crawlChase: 0.84
+  crawlAttackRange: 1.4
+  crawlWalkClip: 0.5
+  crawlRunClip: 1.6
+  crawlVariants:
+  - hitDelay: 0.5086656
+    damageMultiplier: 1
+    cooldown: 3.2157779
+  - hitDelay: 0.35054776
+    damageMultiplier: 1
+    cooldown: 1.3144445
+  - hitDelay: 0.308642
+    damageMultiplier: 1
+    cooldown: 2.0722222
+  startCrawling: 0
+--- !u!114 &7935229511940277092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1024384207564506912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49a0e0fddb317964791261e482948667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ZombieFeeding
+  feeding: 0
+  feedClip: {fileID: -203655887218126122, guid: bfc71dd907d1c304e9b1cdde57ab942d, type: 3}
+  corpsePrefab: {fileID: 7584050366631940265, guid: d9ae9ebcc7a395f498f9a514157c2d14, type: 3}
+  bloodMaterial: {fileID: 2100000, guid: f236bbab3d4d7ef4a9072f1375469bd4, type: 2}
+  spawnCorpse: 1
 --- !u!1001 &2383566830602234951
 PrefabInstance:
   m_ObjectHideFlags: 0

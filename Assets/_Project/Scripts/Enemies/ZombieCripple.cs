@@ -20,6 +20,8 @@ namespace Horror
         public float crawlAttackRange = 1.4f;
         [Tooltip("Velocidad (m/s, a escala 1) de las zancadas de los clips de arrastrarse")] public float crawlWalkClip = 0.5f, crawlRunClip = 1.6f;
         public ZombieAI.AttackVariant[] crawlVariants;
+        [Tooltip("Empieza ya arrastrandose (zombi reptante). Vale para cualquier modelo: se marca en la instancia de la escena")]
+        public bool startCrawling;
 
         public bool Crippled { get; private set; }
 
@@ -44,6 +46,11 @@ namespace Horror
             anim = GetComponentInChildren<Animator>();
         }
 
+        void Start()
+        {
+            if (startCrawling && !Crippled) { Crippled = true; ToCrawl(); }
+        }
+
         void OnEnable() { if (zones != null) zones.LegHit += OnLegHit; }
         void OnDisable() { if (zones != null) zones.LegHit -= OnLegHit; }
 
@@ -61,7 +68,12 @@ namespace Horror
             if (anim != null) anim.SetBool("Dead", true);             // la animacion de muerte hace de caida
             yield return new WaitForSeconds(fallTime);
             if (health.IsDead) yield break;
+            ToCrawl();
+        }
 
+        /// <summary>Pasa a arrastrarse: controlador de reptante, cuerpo bajo, mas lento y con mordiscos.</summary>
+        void ToCrawl()
+        {
             if (anim != null)
             {
                 anim.SetBool("Dead", false);
