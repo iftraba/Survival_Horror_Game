@@ -178,3 +178,37 @@ Kit `ComisariaV2Archive` (menú *Horror/Comisaria v2/4 Archivo y jefe 1*). Se pu
 - Comprobado en Play: anima bien (no sale en T), despierta, atranca la puerta y va a por el jugador.
 
 **NavMesh:** toda la nave es alcanzable desde el vestíbulo del ascensor (comprobado con una rejilla de rutas). Al archivo se llega por el ascensor, que se pone en marcha en la fase 6.
+
+## Fase 5: sótano y jefe 2 (2026-10-08)
+Kit `ComisariaV2Basement` (menú *Horror/Comisaria v2/5 Sotano y jefe 2*).
+- Rehace `Props/Sotano_Props` y `Sotano_Jefe`.
+- El hundimiento de la sala de calderas (`Sotano_Calderas`) cambia la losa del sótano y solo se hace una vez. Si ya existe, el kit no hace nada; para repetirlo hay que reconstruir desde la fase 1.
+
+**Modelos nuevos** (Blender, `Tools/blender/build_basement.py`, en `Art/Props/Basement`; registrados en `ItemTextureKit.BasementProps`):
+- Caldera industrial horizontal con tapas abombadas, anillos, hogar, manómetros, nivel de agua, tubos al techo con bridas y volante, y escalerilla.
+- Bomba de agua con motor de aletas, grupo electrógeno y fila de armarios eléctricos con relojes, pilotos y canaletas.
+- Mesa de laboratorio con frascos, microscopio y gradilla, y vitrina con frascos.
+- Estantería industrial con cajas, bidones y garrafas.
+- Banco de trabajo con panel de herramientas y colector de tuberías con volantes.
+
+**Salas** (las instalaciones de la antigua zona 2):
+- **Cuarto de bombas** (suroeste): cuatro bombas, colectores de tuberías, banco, estantería, bidones.
+- **Sala de máquinas** (sureste): dos grupos electrógenos, armarios eléctricos y banco.
+- **Laboratorio** (norte): tres mesas de laboratorio, vitrinas, mesa con lámpara y archivadores.
+- **Almacén** (noreste): hileras de estanterías industriales, cajas y bidones.
+
+**Sala de calderas** (x -20..-6, z 12..32):
+- **Hundida 2 m**: foso de 5,5 m de alto, como la arena antigua.
+- Al cruzar la puerta se sale a un rellano con barandilla y se baja por una escalera de chapa. Lo que se pisa es una rampa invisible, para no tropezar y para que haya NavMesh.
+- En el foso:
+  - la caldera en el centro;
+  - armarios eléctricos, grupos electrógenos y una bomba como cobertura, con pasillos de unos 2,5 m;
+  - colectores en las paredes y bidones;
+  - luz roja de emergencia (dos parpadean) y el resplandor del hogar.
+
+**Jefe 2** (`Zombie_BossPxl`):
+- Espera al fondo del foso y suelta la llave maestra (`I_KeyFinal`).
+- Despierta al pisar el rellano (`BossRoomTrigger_2`) y la puerta de la sala se atranca hasta que muere.
+- Comprobado en Play: despierta, atranca la puerta y va hacia la escalera.
+
+**NavMesh:** todo el sótano es alcanzable desde el pasillo del ascensor, también el foso por la escalera (comprobado con una rejilla de rutas).
