@@ -24,11 +24,15 @@ namespace Horror
             public Transform a, b;      // extremos del segmento (b null = esfera en a)
             public float radius;
             public float multiplier;
-            public bool isHead, isLeg;
+            public bool isHead, isLeg, isTorso;
             public Vector3 offset;      // desplazamiento local del centro de la esfera respecto al hueso
         }
 
         Zone[] zones;
+
+        public enum Part { None, Head, Torso, Limb, Leg }
+        /// <summary>Zona del ultimo impacto (la lee la animacion: reaccion de cabeza, muerte segun donde entro el ultimo disparo).</summary>
+        public Part LastPart { get; private set; }
 
         /// <summary>Un disparo ha dado en una pierna (lo usa ZombieCripple). Se avisa una vez por impacto de bala o perdigon.</summary>
         public event System.Action LegHit;
@@ -63,7 +67,7 @@ namespace Horror
             var list = new System.Collections.Generic.List<Zone>();
             // la cabeza: esfera algo por encima del hueso (el hueso esta en la base del craneo)
             if (head != null) list.Add(new Zone { a = head, b = neck, radius = headRadius * sc, multiplier = headMultiplier, isHead = true, offset = new Vector3(0f, headLift * sc, 0f) });
-            if (hips != null && neck != null) list.Add(new Zone { a = hips, b = neck, radius = torsoRadius * sc, multiplier = torsoMultiplier });
+            if (hips != null && neck != null) list.Add(new Zone { a = hips, b = neck, radius = torsoRadius * sc, multiplier = torsoMultiplier, isTorso = true });
             foreach (var s in new[] { "L", "R" })
             {
                 float k = sc * limbRadiusScale;
@@ -86,7 +90,7 @@ namespace Horror
             multiplier = 1f; point = default; headshot = false;
             if (zones == null || zones.Length == 0) return false;
             float best = float.MaxValue;
-            bool leg = false;
+            bool leg = false, torso = false;
             foreach (var z in zones)
             {
                 Vector3 p0, p1;
@@ -106,9 +110,11 @@ namespace Horror
                 multiplier = z.multiplier;
                 headshot = z.isHead;
                 leg = z.isLeg;
+                torso = z.isTorso;
             }
             if (best == float.MaxValue) return false;
             point = ray.GetPoint(best);
+            LastPart = headshot ? Part.Head : leg ? Part.Leg : torso ? Part.Torso : Part.Limb;
             if (leg) LegHit?.Invoke();
             return true;
         }

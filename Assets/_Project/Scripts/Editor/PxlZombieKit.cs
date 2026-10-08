@@ -36,7 +36,7 @@ namespace Horror.EditorTools
             var map = new Dictionary<string, string>
             {
                 ["Z_ZombieIdle"] = "Z_Idle", ["Z_ZombieWalk"] = walk, ["Z_ZombieRun"] = run,
-                ["Z_ZombieAttack"] = "Z_Attack", ["Z_ZombieBiting"] = "Z_Attack", ["Z_ZombieNeckBite"] = "Z_Attack",
+                ["Z_ZombieAttack"] = "Z_Attack", ["Z_ZombieBiting"] = "Z_ZombiePunching", ["Z_ZombieNeckBite"] = "Z_Attack",
                 ["Z_ZombieScream"] = "Z_ZombieScream", ["G_ZombieReactionHit"] = hit, ["Z_ZombieDying"] = "Z_FallingBack",
             };
             string path = AnimDir + name + ".overrideController";
@@ -155,7 +155,7 @@ namespace Horror.EditorTools
             foreach (var k in Kinds)
             {
                 Override("Zombie_" + k.name, baseCtrl, k.walkInPlace, k.runInPlace, k.hit);
-                log.Add(k.name + " " + SetAlert("Zombie_" + k.name, Alert));
+                log.Add(k.name + " " + SetAlert("Zombie_" + k.name, Alert, Variants(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Zombie/FBXs/" + k.fbx + ".FBX"))));
             }
             var oc = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(AnimDir + "Boss_Pxl.overrideController");
             if (oc != null)
@@ -172,12 +172,26 @@ namespace Horror.EditorTools
             return "animaciones Pxl: " + string.Join(", ", log);
         }
 
-        static string SetAlert(string prefab, float t)
+        /// <summary>Ataques de los Pxl: el del pack (variante 0) y el puñetazo de Mixamo (variante 1, estado Attack1).</summary>
+        static ZombieAI.AttackVariant[] Variants(GameObject model)
+        {
+            var list = new List<ZombieAI.AttackVariant>();
+            foreach (var clip in new[] { Clip("Z_Attack"), Clip("Z_ZombiePunching") })
+            {
+                float eff = clip.length * 0.62f / 1.5f;                       // el estado de ataque reproduce a 1.5x y sale al 62 %
+                float impact = ZombieKit.ImpactTime(model, clip) / 1.5f;
+                list.Add(new ZombieAI.AttackVariant { hitDelay = Mathf.Clamp(impact, 0.2f, eff), damageMultiplier = 1f, cooldown = Mathf.Max(1.4f, eff + 0.35f) });
+            }
+            return list.ToArray();
+        }
+
+        static string SetAlert(string prefab, float t, ZombieAI.AttackVariant[] variants = null)
         {
             var root = PrefabUtility.LoadPrefabContents(PrefabDir + prefab + ".prefab");
             var ai = root.GetComponentInChildren<ZombieAI>(true);
             bool found = ai != null;                      // despues de descargar el prefab, ai ya no es valido
             if (found) ai.alertTime = t;
+            if (found && variants != null) ai.attackVariants = variants;
             PrefabUtility.SaveAsPrefabAsset(root, PrefabDir + prefab + ".prefab");
             PrefabUtility.UnloadPrefabContents(root);
             return found ? "ok" : "sin ZombieAI";
@@ -196,16 +210,14 @@ namespace Horror.EditorTools
                 var oc = Override("Zombie_" + k.name, baseCtrl, k.walkInPlace, k.runInPlace, k.hit);
                 string fbxPath = "Assets/Zombie/FBXs/" + k.fbx + ".FBX";
                 var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
-                var attack = Clip("Z_Attack");
-                float eff = attack.length * 0.62f / 1.5f;                       // el estado de ataque reproduce a 1.5x y sale al 62 %
-                float impact = ZombieKit.ImpactTime(model, attack) / 1.5f;
-                var variant = new ZombieAI.AttackVariant { hitDelay = Mathf.Clamp(impact, 0.2f, eff), damageMultiplier = 1f, cooldown = Mathf.Max(1.4f, eff + 0.35f) };
+                var variants = Variants(model);
+                var variant = variants[0];
                 float walkSpeed = Clip(k.walkMoving).averageSpeed.magnitude, runSpeed = Clip(k.runMoving).averageSpeed.magnitude;
                 var spec = new ZombieKit.Spec
                 {
                     name = "Zombie_" + k.name, fbxPath = fbxPath, scale = 1.0f, controller = oc, height = 2f, radius = 0.4f,
                     hp = k.hp, chase = k.chase, damage = k.damage, attackRange = 1.6f, cooldown = 1.4f, stagger = 0.5f, alertTime = Alert,   // grito de Mixamo al detectarte
-                    walkClip = Mathf.Max(0.3f, walkSpeed), runClip = Mathf.Max(1f, runSpeed), runAbove = 1.3f, variants = new[] { variant },
+                    walkClip = Mathf.Max(0.3f, walkSpeed), runClip = Mathf.Max(1f, runSpeed), runAbove = 1.3f, variants = variants,
                 };
                 ZombieKit.BuildPrefab(spec);
                 log.Add(k.name + " [paso " + walkSpeed.ToString("F2") + " m/s, carrera " + runSpeed.ToString("F2") + " m/s, golpe " + variant.hitDelay.ToString("F2") + "s]");

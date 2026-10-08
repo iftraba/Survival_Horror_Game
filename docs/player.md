@@ -12,6 +12,15 @@ Control, cámara y sonido del protagonista. Código en `Assets/_Project/Scripts/
 | `PlayerFootsteps` | Pasos por distancia recorrida: más rápidos y fuertes al correr, sigilosos al apuntar. |
 | `PlayerAudio` | Quejidos al recibir daño, muerte y latido con poca vida. |
 
+## Acciones con animación (`PlayerActions`, 2026-10-08)
+Componente que añade `PlayerController` si falta. Mientras dura una acción, `PlayerActions.Locked` quita el control (moverse, apuntar, disparar, interactuar).
+- **Abrir puerta** (`Door.Interact` al abrir): se gira hacia la puerta, guarda el arma, alarga la mano y la hoja gira cuando la mano llega (0,75 s); control a los 1,4 s.
+- **Entrar en la sala del jefe**: si al otro lado de la puerta hay un `BossRoomTrigger` con el jefe dormido, se coloca delante, abre y cruza hasta pasado el disparador (el recorrido sigue la cadera del clip). No se puede asomar y volver; la puerta se atranca al terminar.
+- **Giro corriendo**: Q mientras corres sin apuntar: derrapa, gira 180° a la izquierda y la cámara gira con él. Quieto o andando, Q sigue siendo el giro rápido.
+- **Voltereta**: al caer 1,6 m o más (`PlayerController.rollFallHeight`).
+- **Escaleras**: corriendo y subiendo, animación de subir escaleras.
+- **Agarre** de un zombi: ver `enemies.md`.
+
 ## Composición del prefab
 Raíz con `PlayerController`, `CharacterController`, `Health`, `Inventory`, `WeaponController`, `PlayerAnimation`,
 `PlayerInteractor`. Hijo `Model` = Soldier de Mixamo (Humanoid) con los *holders* de arma en la mano derecha.

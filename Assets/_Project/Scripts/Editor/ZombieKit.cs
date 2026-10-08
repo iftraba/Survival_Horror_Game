@@ -142,9 +142,65 @@ namespace Horror.EditorTools
             Any(sm, Oneshot(sm, loco, "Alert", Clip("Z_ZombieScream"), 1f, 0.85f), "Alert");
             Any(sm, Oneshot(sm, loco, "Hit", Clip("G_ZombieReactionHit"), 1.3f, 0.8f), "Hit");
             DeathState(sm, Clip("Z_ZombieDying"));
+            AddReactions(c);
             EditorUtility.SetDirty(c);
             AssetDatabase.SaveAssets();
             return c;
+        }
+
+        static readonly string[] ReactionStates = { "HeadHit", "Stun", "KnockFall", "Situp", "Downed", "Grab", "Death1", "Death2", "Death3" };
+        static readonly string[] ReactionParams = { "HeadHit", "Stun", "Knockdown", "Grab", "DeathVariant" };
+
+        /// <summary>
+        /// Reacciones nuevas (2026-10-08) sobre el controlador base de los zombis, repetible: golpe en la cabeza, aturdido (escopetazo),
+        /// derribo (cae de espaldas y se incorpora), tumbado (muere en el suelo), agarre con mordisco al cuello y tres muertes mas
+        /// (DeathVariant 1 vientre/torso, 2 desplomarse, 3 tambalearse; 0 = la de cada tipo). Son clips humanoides de Mixamo (y la
+        /// caida de espaldas del pack Pxltiger, que acaba boca arriba como empieza "Situp To Idle"): valen para todos los modelos.
+        /// </summary>
+        public static void AddReactions(AnimatorController c)
+        {
+            var sm = c.layers[0].stateMachine;
+            foreach (var cs in sm.states.ToArray()) if (System.Array.IndexOf(ReactionStates, cs.state.name) >= 0) sm.RemoveState(cs.state);
+            foreach (var t in sm.anyStateTransitions.ToArray()) if (t.destinationState == null) sm.RemoveAnyStateTransition(t);
+            var ps = c.parameters;
+            for (int i = ps.Length - 1; i >= 0; i--) if (System.Array.IndexOf(ReactionParams, ps[i].name) >= 0) c.RemoveParameter(i);
+            c.AddParameter("HeadHit", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Stun", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Knockdown", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Grab", AnimatorControllerParameterType.Bool);
+            c.AddParameter("DeathVariant", AnimatorControllerParameterType.Int);
+
+            var loco = sm.states.First(s => s.state.name == "Locomotion").state;
+            Any(sm, Oneshot(sm, loco, "HeadHit", Clip("Z_HeadHit"), 1.15f, 0.85f), "HeadHit");
+            Any(sm, Oneshot(sm, loco, "Stun", Clip("Z_GroinB"), 1.1f, 0.92f), "Stun");
+            AnimationClip fallBack = null;
+            foreach (var o in AssetDatabase.LoadAllAssetsAtPath("Assets/Zombie/Animations/Zombie@Z_FallingBack.FBX"))
+                if (o is AnimationClip fc && !fc.name.StartsWith("__")) fallBack = fc;
+            var situp = Oneshot(sm, loco, "Situp", Clip("Z_SitupToIdle"), 1.3f, 0.95f);
+            var fall = sm.AddState("KnockFall"); fall.motion = fallBack;
+            var toSit = fall.AddTransition(situp); toSit.hasExitTime = true; toSit.exitTime = 1f; toSit.duration = 0.25f;
+            Any(sm, fall, "Knockdown");
+            var downed = sm.AddState("Downed"); downed.motion = fallBack;      // sin salidas: muerto en el suelo
+            var grab = sm.AddState("Grab"); grab.motion = Clip("Z_NeckBiteGrab");
+            var tg = sm.AddAnyStateTransition(grab); tg.duration = 0.2f; tg.hasExitTime = false; tg.canTransitionToSelf = false;
+            tg.AddCondition(AnimatorConditionMode.If, 0, "Grab"); tg.AddCondition(AnimatorConditionMode.IfNot, 0, "Dead");
+            var back = grab.AddTransition(loco); back.hasExitTime = false; back.duration = 0.25f; back.AddCondition(AnimatorConditionMode.IfNot, 0, "Grab");
+
+            // muertes: la de siempre pasa a ser la variante 0
+            var death0 = sm.states.First(s => s.state.name == "Death").state;
+            foreach (var t in sm.anyStateTransitions)
+                if (t.destinationState == death0 && !t.conditions.Any(k => k.parameter == "DeathVariant"))
+                    t.AddCondition(AnimatorConditionMode.Equals, 0, "DeathVariant");
+            string[] clips = { "Z_GroinA", "Z_Dying2", "Z_StumbleDeath" };
+            for (int i = 0; i < clips.Length; i++)
+            {
+                var d = sm.AddState("Death" + (i + 1)); d.motion = Clip(clips[i]);
+                var t = sm.AddAnyStateTransition(d);
+                t.duration = 0.15f; t.hasExitTime = false; t.canTransitionToSelf = false;
+                t.AddCondition(AnimatorConditionMode.If, 0, "Dead");
+                t.AddCondition(AnimatorConditionMode.Equals, i + 1, "DeathVariant");
+            }
+            EditorUtility.SetDirty(c);
         }
 
         /// <summary>Controlador del jefe: baila (letargo) hasta que se le despierta; luego ruge, anda/corre y pega.</summary>

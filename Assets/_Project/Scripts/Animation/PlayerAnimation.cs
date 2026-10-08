@@ -23,6 +23,7 @@ namespace Horror
         static readonly int LongGunId = Animator.StringToHash("LongGun");
         static readonly int MoveXId = Animator.StringToHash("MoveX");
         static readonly int MoveYId = Animator.StringToHash("MoveY");
+        static readonly int StairsId = Animator.StringToHash("Stairs");
 
         // parametros que tiene el controlador actual (el de Mixamo no tiene recarga ni golpe hasta que haya esos clips)
         readonly HashSet<int> has = new HashSet<int>();
@@ -72,8 +73,9 @@ namespace Horror
             if (wanted != null && animator.runtimeAnimatorController != wanted)
                 animator.runtimeAnimatorController = wanted;
             // Al morir manda la animacion de cuerpo completo; la capa del torso se apaga
+            // al morir o en una accion de cuerpo entero (abrir puertas, girar corriendo...) manda la capa base; en el agarre si se ven los golpes
             if (animator.layerCount > UpperBodyLayer)
-                animator.SetLayerWeight(UpperBodyLayer, health != null && health.IsDead ? 0f : 1f);
+                animator.SetLayerWeight(UpperBodyLayer, (health != null && health.IsDead) || (PlayerActions.Locked && !PlayerActions.Grabbed) ? 0f : 1f);
             CacheParams();
             var v = body.velocity;
             v.y = 0f;
@@ -88,6 +90,7 @@ namespace Horror
                 animator.SetFloat(MoveYId, local.z, 0.1f, Time.deltaTime);
             }
             if (has.Contains(LongGunId)) animator.SetBool(LongGunId, longGun);
+            if (has.Contains(StairsId)) animator.SetBool(StairsId, player.OnStairs && !PlayerActions.Locked);
             animator.SetBool(AimingId, player.IsAiming);
             animator.SetBool(ArmedId, weapons != null && weapons.Equipped != null);
         }
@@ -137,6 +140,14 @@ namespace Horror
                 float kick = weapons.Equipped.twoHanded ? 7f : 4f;
                 spine.rotation = Quaternion.AngleAxis(-kick * recoil * recoil, transform.right) * spine.rotation;
             }
+        }
+
+        /// <summary>Lanza un disparador del controlador si existe (acciones de PlayerActions: OpenDoor, EnterDoor, RunTurn, Roll).</summary>
+        public void Trigger(string name)
+        {
+            CacheParams();
+            int id = Animator.StringToHash(name);
+            if (animator != null && has.Contains(id)) animator.SetTrigger(id);
         }
 
         void OnFired() { recoil = 1f; CacheParams(); if (animator != null && has.Contains(ShootId)) animator.SetTrigger(ShootId); }

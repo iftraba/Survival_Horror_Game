@@ -87,6 +87,35 @@ namespace Horror.EditorTools
             return speeds;
         }
 
+        /// <summary>
+        /// Configura UNA animacion (sin tocar las demas de su carpeta). 'bakeRotation' = false deja el giro de la raiz fuera de la
+        /// pose (se extrae como movimiento de raiz, que el juego ignora): para clips que giran o se desplazan y cuyo giro/avance
+        /// aplica el codigo (girar 180 corriendo, cruzar una puerta), si no el cuerpo giraria dos veces.
+        /// </summary>
+        public static void ConfigureAnimation(string path, bool loop, bool bakeRotation = true)
+        {
+            var imp = (ModelImporter)AssetImporter.GetAtPath(path);
+            if (imp == null) { Debug.LogWarning("[Horror] no existe " + path); return; }
+            imp.animationType = ModelImporterAnimationType.Human;
+            imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            imp.importAnimation = true;
+            imp.materialImportMode = ModelImporterMaterialImportMode.None;
+            imp.SaveAndReimport();
+            string clipName = Path.GetFileNameWithoutExtension(path);
+            var clips = imp.defaultClipAnimations;
+            if (clips.Length > 1) clips = clips.Where(x => x.takeName != "Take 001").ToArray();
+            foreach (var c in clips)
+            {
+                c.name = clipName;
+                c.loopTime = loop; c.loopPose = loop;
+                c.lockRootPositionXZ = false;
+                c.lockRootHeightY = true; c.keepOriginalPositionY = true;
+                c.lockRootRotation = bakeRotation; c.keepOriginalOrientation = true;
+            }
+            imp.clipAnimations = clips;
+            imp.SaveAndReimport();
+        }
+
         static float MeasureStride(GameObject modelPrefab, AnimationClip clip)
         {
             var inst = Object.Instantiate(modelPrefab);

@@ -15,7 +15,7 @@ namespace Horror
 
         void Update()
         {
-            if (GameState.InputBlocked)
+            if (GameState.InputBlocked || PlayerActions.Locked)
             {
                 Current = null;
                 return;

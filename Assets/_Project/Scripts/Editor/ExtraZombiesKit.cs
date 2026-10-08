@@ -136,7 +136,7 @@ namespace Horror.EditorTools
             var crawlAttacks = new[] { "Z_ZombieBiting", "Z_ZombieBiting2", "Z_ZombieNeckBite" };
             var ocCrawl = ZombieKit.Override("Zombie_Carronero_Reptante", baseCtrl, new Dictionary<string, string>
             {
-                ["Z_ZombieIdle"] = "Z_ZombieCrawl", ["Z_ZombieWalk"] = "Z_ZombieCrawl", ["Z_ZombieRun"] = "Z_RunningCrawl",
+                ["Z_ZombieIdle"] = "Z_ZombieCrawl", ["Z_ZombieWalk"] = "Z_Crawling", ["Z_ZombieRun"] = "Z_RunningCrawl",
                 ["Z_ZombieAttack"] = crawlAttacks[0], ["Z_ZombieBiting"] = crawlAttacks[1], ["Z_ZombieNeckBite"] = crawlAttacks[2],
                 ["G_ZombieReactionHit"] = "Z_ZombieCrawl", ["Z_ZombieScream"] = "Z_ZombieCrawl", ["Z_ZombieDying"] = girl.death,
             });

@@ -21,6 +21,9 @@ Objetos con los que se interactúa con **E**. Código en `Assets/_Project/Script
 | `ItemBox` | Baúl de sala segura: abre la pantalla de intercambio con `ItemStorage` (global). |
 | `SaveTerminal` | Punto de guardado de sala segura: abre el menú de guardado del HUD. Físicamente es un **teléfono antiguo de disco** sobre una mesita (prefab `Interactables/SavePhone`, modelo `Art/Props/Phone.fbx`, con una luz cálida tenue que guía al jugador). El script mantiene el nombre `SaveTerminal` por compatibilidad. Solo suena **al usarlo** (descolgar al abrir el menú, marcar al guardar): el timbre por el mapa está apagado (`ringsNearby` = false; si se activa, suena a `ringRange` m cada 30-55 s). |
 
+## Puertas con animación (2026-10-08)
+Al abrir una puerta, el jugador hace la animación de abrir (`PlayerActions.OpenDoor`) y la hoja gira cuando la mano llega al pomo. Las puertas de entrada a la sala de un jefe dormido (las de `BossRoomTrigger.sealDoors`, vistas desde fuera) lanzan la entrada animada (`PlayerActions.EnterBossRoom`). Una puerta atrancada espera a que acabe la animación para cerrarse.
+
 ## Zona del jefe
 `Door_SafeRoom` (sala segura, los zombis no la fuerzan) y `Door_Boss` (reforzada, la fuerzan tras 2.5 s).
 

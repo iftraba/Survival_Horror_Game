@@ -15,6 +15,12 @@ namespace Horror
 
         public bool IsAiming { get; private set; }
         public bool IsRunning { get; private set; }
+        /// <summary>Subiendo escaleras corriendo (animacion propia).</summary>
+        public bool OnStairs => stairsTimer > 0f;
+        [Tooltip("Caida (m) a partir de la cual aterriza con una voltereta")] public float rollFallHeight = 1.6f;
+        float stairsTimer, airTopY;
+        bool wasGrounded = true;
+        PlayerActions actions;
 
         CharacterController controller;
         Health health;
@@ -25,6 +31,7 @@ namespace Horror
         void Awake()
         {
             controller = GetComponent<CharacterController>();
+            actions = GetComponent<PlayerActions>() ?? gameObject.AddComponent<PlayerActions>();
         }
 
         // Start y no Awake: asi funciona aunque Health se anada despues de este componente
@@ -55,7 +62,7 @@ namespace Horror
             if (kb == null || ms == null) return;
 
             // Muerto = sin control, tanto por el estado global como por la propia salud
-            bool blocked = GameState.InputBlocked || (health != null && health.IsDead);
+            bool blocked = GameState.InputBlocked || (health != null && health.IsDead) || PlayerActions.Locked;
             Vector2 input = Vector2.zero;
             IsAiming = false;
             IsRunning = false;
@@ -70,7 +77,12 @@ namespace Horror
             }
 
             // Giro de 180 grados (Q): gira el personaje y la camara a la vez
-            if (!blocked && kb.qKey.wasPressedThisFrame && turnRemaining <= 0f) turnRemaining = 180f;
+            // corriendo sin apuntar: giro con derrape (animacion); si no, el giro rapido de siempre
+            if (!blocked && kb.qKey.wasPressedThisFrame && turnRemaining <= 0f)
+            {
+                if (IsRunning && actions != null) actions.RunTurn(runSpeed);
+                else turnRemaining = 180f;
+            }
             if (turnRemaining > 0f)
             {
                 float step = Mathf.Min(turnRemaining, 180f / Mathf.Max(0.05f, quickTurnTime) * Time.deltaTime);
@@ -95,6 +107,16 @@ namespace Horror
 
             verticalVelocity = controller.isGrounded ? -1f : verticalVelocity + gravity * Time.deltaTime;
             controller.Move((move * speed + Vector3.up * verticalVelocity) * Time.deltaTime);
+
+            // escaleras: corriendo y subiendo (el escalon eleva al controlador)
+            if (IsRunning && controller.isGrounded && controller.velocity.y > 0.5f) stairsTimer = 0.25f;
+            else stairsTimer -= Time.deltaTime;
+            // caida alta: voltereta al aterrizar
+            bool grounded = controller.isGrounded;
+            if (!grounded) airTopY = wasGrounded ? transform.position.y : Mathf.Max(airTopY, transform.position.y);
+            else if (!wasGrounded && airTopY - transform.position.y >= rollFallHeight && actions != null && !PlayerActions.Locked && (health == null || !health.IsDead))
+                actions.Roll();
+            wasGrounded = grounded;
         }
 
         [Tooltip("Fuerza con la que el jugador empuja cuerpos rigidos al caminar contra ellos")]

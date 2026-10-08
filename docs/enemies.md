@@ -10,6 +10,11 @@ Zombis y jefe. Código en `Assets/_Project/Scripts/Enemies/`. Prefabs en `Prefab
 ## Detección y golpes (2026-10-08)
 Los zombis **solo te detectan si te ven**: línea directa de los ojos a tu pecho (la tapan paredes, puertas cerradas y muebles; no otros zombis ni objetos sueltos) y dentro de su cono de visión (`viewAngle` 140°) a menos de `detectRange`; pegado a ellos (`closeSense` 1,8 m) te notan aunque estés a su espalda, pero nunca a través de una pared. Ya no hay "oído" por proximidad a través de muros (`hearingRange` queda obsoleto): los de una sala no reaccionan hasta que entras o abres la puerta. Un disparo alerta a los del radio (14 m) que tengan línea directa con él y, a través de paredes, solo a los que estén a menos del 35 % del radio. **Golpes**: solo atacan y solo conecta el golpe si hay línea directa contigo (`ZombieAI.HasLineTo`); antes bastaba la distancia y pegaban a través de las paredes. La embestida del jefe 2 también lo comprueba. Probado en Play: tras una pared a 1,8 m no te detecta y, forzado a perseguir 4 s, no hace daño; dentro de la sala, delante de él, te detecta, y a su espalda a 4 m no.
 
+## Escopetazos, agarre y reacciones (2026-10-08)
+- **Escopetazo a menos de 2,6 m** (`ZombieAI.knockdownRange`): el zombi cae de espaldas y se levanta (`knockdownTime` 4,5 s sin atacar). Más lejos, un 30 % de las veces (`stunChance`) se queda aturdido 2,4 s. Lo decide `ShotgunBlast`, que el arma llama una vez por disparo (no por perdigón) con los zombis alcanzados. Si muere en el suelo se queda tumbado. No afecta a jefes ni reptantes.
+- **Agarre** (`grabChance` 30 % de los ataques a menos de 1,1 m): el zombi se pega y muerde el cuello (`PlayerActions.TryGrab`). Hay que pulsar **E** 10 veces en 4 s (barra en el HUD); mientras, muerde 4 cada 0,8 s; si no te sueltas, 18 más. Si te sueltas, cae al suelo. Después hay 8 s sin otro agarre.
+- **Disparo en la cabeza estando de pie**: reacción propia (*Head Hit*). La zona del último impacto la guarda `ZombieHitZones.LastPart` (cabeza, torso, brazo, pierna); con ella se elige también la muerte (ver `animation.md`).
+
 ## Clases
 | Clase | Qué hace |
 |---|---|

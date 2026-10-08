@@ -144,6 +144,15 @@ MonoBehaviour:
   - hitDelay: 0.37777779
     damageMultiplier: 1
     cooldown: 1.4
+  - hitDelay: 0.3229167
+    damageMultiplier: 1
+    cooldown: 1.4
+  knockdownRange: 2.6
+  knockdownTime: 4.5
+  stunChance: 0.3
+  stunTime: 2.4
+  grabChance: 0.3
+  grabRange: 1.1
   dormant: 0
   dropOnDeath: {fileID: 0}
   bossName: 

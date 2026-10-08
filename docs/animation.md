@@ -18,5 +18,12 @@ Conexión de los personajes con sus `Animator`. Código en `Assets/_Project/Scri
 ## Jefe (`Boss.controller`)
 Baile (Gangnam Style) por defecto → Alert → Locomotion; tres ataques con tiempos de salida propios; muerte con la animación de muerte de zombi.
 
+## Animaciones nuevas (2026-10-08, menú *Horror/Animaciones nuevas (puertas, derribos, muertes)*, `AnimPackKit`)
+14 clips de Mixamo (humanoides, valen para todos los modelos). Los que giran o avanzan dejan la raíz fuera del clip (`MixamoImport.ConfigureAnimation`, `bakeRotation`) y el giro/avance lo aplica el código, así el cuerpo no gira dos veces.
+- **Jugador** (`PlayerKit.BuildController`, estados de la capa base que lanza `PlayerActions` con `PlayerAnimation.Trigger`): `OpenDoor` (*Opening*, solo la primera de sus dos aperturas, a 1,8×; se corta si echa a andar), `EnterDoor` (*Opening Door Inwards*, 1,25×), `RunTurn` (*Running To Turn*, el giro de 180° lo hace el código), `Roll` (*Falling To Roll*, empieza en el 23 %: al tocar el suelo) y `RunStairs` (*Running Up Stairs*, con el bool `Stairs`). Durante estas acciones la capa del torso se apaga.
+- **Zombis** (`ZombieKit.AddReactions` sobre `ZombieHumanoid.controller`): `HeadHit` (*Head Hit*), `Stun` (*Kick To The Groin (1)*, se dobla y se recupera), `KnockFall` → `Situp` (la caída de espaldas del pack Pxltiger acaba boca arriba como empieza *Situp To Idle*), `Downed` (muere en el suelo: se queda tumbado), `Grab` (*Zombie Neck Bite*, bool) y tres muertes más por `DeathVariant`: 1 *Kick To The Groin* (último disparo al torso/vientre), 2 *Dying*, 3 *Zombie Stumbling*; 0 = la de cada tipo. `ZombieAnimation.PickDeath` elige: torso → 1; si no, al azar entre 0, 2 y 3; los reptantes siempre 0.
+- **Pxltiger**: segundo ataque con *Zombie Punching* (variante 1). **Reptantes** (`Zombie_OficialReptante`, `Zombie_Carronero_Reptante`): andan con *Crawling*.
+- **Reptantes que se hundían**: los clips de arrastrarse dejan el cuerpo hasta 30 cm bajo la raíz (la cabeza se metía en el suelo y no se le podía dar). `ZombieAnimation.LateUpdate` mide los huesos tras animar y eleva el modelo lo justo (comprobado: cabeza a 45 cm del suelo). El `heightOffset` del importador no sirve con clips humanoides.
+
 ## Estructura de clips
 `Assets/_Project/Art/Mixamo/{PlayerAnims, ZombieAnims, GenericAnims, BossAnims}`. Prefijos `P_`, `Z_`, `G_`, `B_`. Importación en `MixamoImport` (ver `editor-tools.md`).

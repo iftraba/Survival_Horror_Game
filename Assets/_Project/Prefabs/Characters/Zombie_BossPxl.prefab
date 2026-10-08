@@ -146,6 +146,12 @@ MonoBehaviour:
   - hitDelay: 0.56666666
     damageMultiplier: 1
     cooldown: 2
+  knockdownRange: 2.6
+  knockdownTime: 4.5
+  stunChance: 0.3
+  stunTime: 2.4
+  grabChance: 0.3
+  grabRange: 1.1
   dormant: 1
   dropOnDeath: {fileID: 11400000, guid: 11878370fe76fcf49ae21c0996261bd1, type: 2}
   bossName: ABOMINACION

@@ -24,6 +24,7 @@ namespace Horror
         public int ReserveAmmo => Equipped != null ? inventory.CountAmmo(Equipped.ammoType) : 0;
 
         readonly Dictionary<WeaponData, int> mags = new Dictionary<WeaponData, int>();
+        readonly List<ZombieAI> blasted = new List<ZombieAI>();
         Inventory inventory;
         Health health;
         float nextShot;
@@ -68,10 +69,16 @@ namespace Horror
             foreach (var c in heldInstance.GetComponentsInChildren<Collider>()) c.enabled = false;
         }
 
+        /// <summary>Muestra u oculta el arma de la mano (al abrir una puerta con la mano la guarda un momento).</summary>
+        public void SetHeldVisible(bool visible)
+        {
+            if (heldInstance != null) heldInstance.SetActive(visible);
+        }
+
         void Update()
         {
             if (Equipped == null && (health == null || !health.IsDead)) EnsureWeapon();
-            if (GameState.InputBlocked || (health != null && health.IsDead)) return;
+            if (GameState.InputBlocked || (health != null && health.IsDead) || PlayerActions.Locked) return;
             var kb = Keyboard.current;
             var ms = Mouse.current;
             if (kb == null || ms == null) return;
@@ -176,6 +183,8 @@ namespace Horror
             if (Equipped.cycleSound != null || Equipped.ejectAtCycle) StartCoroutine(CycleRoutine(Equipped));
             if (!Equipped.ejectAtCycle) EjectCasing(Equipped);
 
+            // zombis alcanzados por este disparo (la escopeta los derriba o aturde una vez por disparo, no por perdigon)
+            blasted.Clear();
             for (int p = 0; p < Equipped.pellets; p++)
             {
                 var spread = Quaternion.Euler(Random.Range(-Equipped.spread, Equipped.spread),
@@ -202,10 +211,15 @@ namespace Horror
                     end = point;
                     var target = hit.collider.GetComponentInParent<IDamageable>();
                     target?.TakeDamage(damage, point);
+                    var zai = hit.collider.GetComponentInParent<ZombieAI>();
+                    if (zai != null && !blasted.Contains(zai)) blasted.Add(zai);
                     break;
                 }
                 Debug.DrawLine(ray.origin, end, Color.yellow, 0.1f);
             }
+            if (Equipped.pellets > 1)
+                foreach (var z in blasted)
+                    if (z != null && !z.Hp.IsDead) z.ShotgunBlast(Vector3.Distance(transform.position, z.transform.position));
         }
     }
 }

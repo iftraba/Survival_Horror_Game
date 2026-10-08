@@ -1,0 +1,256 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace Horror
+{
+    /// <summary>
+    /// Acciones con animacion propia que quitan el control un momento (2026-10-08):
+    /// - Abrir una puerta: el personaje alarga la mano y la empuja (la hoja gira cuando la mano llega al pomo).
+    /// - Entrar en la sala de un jefe: abre la puerta y cruza hasta dentro sin poder volverse (el combate empieza al pasar).
+    /// - Giro de 180 grados corriendo (Q mientras corres sin apuntar), voltereta al caer de altura.
+    /// - Agarre de un zombi (mordisco al cuello): hay que pulsar E muchas veces para soltarse; si no, muerde fuerte.
+    /// </summary>
+    public class PlayerActions : MonoBehaviour
+    {
+        public static PlayerActions Instance { get; private set; }
+        /// <summary>Hay una accion en curso: sin moverse, apuntar, disparar ni interactuar.</summary>
+        public static bool Locked => Instance != null && Instance.locked;
+        public static bool Grabbed => Instance != null && Instance.grabber != null;
+
+        [Header("Abrir puertas (clip Opening, la primera mitad)")]
+        public float doorAnimSpeed = 1.8f;
+        [Tooltip("Segundos hasta que la mano llega al pomo y la hoja empieza a girar")] public float doorSwingAt = 0.75f;
+        [Tooltip("Segundos hasta devolver el control")] public float doorUnlockAt = 1.4f;
+
+        [Header("Entrar en la sala del jefe (clip Opening Door Inwards)")]
+        public float enterSpeed = 1.25f;
+        [Tooltip("Segundos del clip (a velocidad 1) en que empuja la puerta")] public float enterPushAt = 2.85f;
+
+        [Header("Giro corriendo (clip Running To Turn) y voltereta (Falling To Roll)")]
+        public float runTurnTime = 1.6f;
+        public float rollTime = 1.3f;
+        public float rollDistance = 1.4f;
+
+        [Header("Agarre")]
+        public int mashNeeded = 10;
+        public float grabTime = 4f;
+        public float biteDamage = 4f;
+        public float biteEvery = 0.8f;
+        [Tooltip("Dano extra si no te sueltas a tiempo")] public float failDamage = 18f;
+        [Tooltip("Segundos sin otro agarre despues de uno")] public float grabCooldown = 8f;
+
+        bool locked;
+        ZombieAI grabber;
+        float nextGrab;
+        CharacterController body;
+        PlayerController player;
+        PlayerAnimation anim;
+        WeaponController weapons;
+        Health health;
+
+        // avance (fraccion del recorrido) del clip de entrar por la puerta, segun la cadera: coge el pomo, empuja (2,9 s) y cruza
+        static readonly AnimationCurve EnterProfile = new AnimationCurve(
+            new Keyframe(0f, 0f), new Keyframe(1f, 0.12f), new Keyframe(2f, 0.16f), new Keyframe(3.1f, 0.17f), new Keyframe(3.4f, 0.29f),
+            new Keyframe(3.8f, 0.48f), new Keyframe(4.2f, 0.78f), new Keyframe(4.5f, 0.88f), new Keyframe(4.9f, 0.98f), new Keyframe(5.2f, 1f));
+
+        void Awake()
+        {
+            Instance = this;
+            body = GetComponent<CharacterController>();
+            player = GetComponent<PlayerController>();
+            anim = GetComponent<PlayerAnimation>();
+            weapons = GetComponent<WeaponController>();
+            health = GetComponent<Health>();
+        }
+
+        void OnDestroy() { if (Instance == this) Instance = null; }
+
+        void Trigger(string name) { if (anim != null) anim.Trigger(name); }
+
+        void FaceTowards(Vector3 point, float t)
+        {
+            Vector3 d = Vector3.ProjectOnPlane(point - transform.position, Vector3.up);
+            if (d.sqrMagnitude < 0.0001f) return;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(d), t);
+        }
+
+        void MoveTo(Vector3 target)
+        {
+            Vector3 d = target - transform.position; d.y = 0f;
+            body.Move(d + Vector3.down * 0.05f);
+        }
+
+        // ------------------------------------------------------------------ puertas
+        /// <summary>Abre una puerta con la animacion; 'swing' gira la hoja cuando la mano llega al pomo.</summary>
+        public void OpenDoor(Door door, System.Action swing)
+        {
+            if (locked) { swing(); return; }
+            StartCoroutine(OpenDoorRoutine(door, swing));
+        }
+
+        IEnumerator OpenDoorRoutine(Door door, System.Action swing)
+        {
+            locked = true;
+            Trigger("OpenDoor");
+            weapons?.SetHeldVisible(false);                  // la mano derecha va al pomo
+            Vector3 c = door.Center;
+            bool swung = false;
+            for (float t = 0f; t < doorUnlockAt; t += Time.deltaTime)
+            {
+                FaceTowards(c, 10f * Time.deltaTime);
+                if (!swung && t >= doorSwingAt) { swung = true; swing(); }
+                if (health != null && health.IsDead) break;
+                yield return null;
+            }
+            if (!swung) swing();
+            weapons?.SetHeldVisible(true);
+            locked = false;
+        }
+
+        /// <summary>
+        /// Entra en la sala de un jefe: se coloca delante de la puerta, la abre y cruza hasta 'inside' (pasado el disparador del
+        /// combate). No se puede asomar y volver: el combate empieza al cruzar y la puerta se atranca detras.
+        /// </summary>
+        public void EnterBossRoom(Door door, Vector3 inside, System.Action swing)
+        {
+            if (locked) return;
+            StartCoroutine(EnterRoutine(door, inside, swing));
+        }
+
+        IEnumerator EnterRoutine(Door door, Vector3 inside, System.Action swing)
+        {
+            locked = true;
+            weapons?.SetHeldVisible(false);
+            Vector3 c = door.Center; c.y = transform.position.y;
+            inside.y = transform.position.y;
+            Vector3 inward = Vector3.ProjectOnPlane(inside - c, Vector3.up).normalized;
+            Vector3 start = c - inward * 0.75f;
+            Vector3 end = c + inward * (Vector3.Distance(c, inside) + 0.6f);
+            // colocarse delante de la puerta, de cara a ella
+            for (float t = 0f; t < 0.3f; t += Time.deltaTime)
+            {
+                MoveTo(Vector3.Lerp(transform.position, start, t / 0.3f));
+                FaceTowards(transform.position + inward, t / 0.3f);
+                yield return null;
+            }
+            transform.rotation = Quaternion.LookRotation(inward);
+            if (player != null && player.cam != null) player.cam.SetYaw(Quaternion.LookRotation(inward).eulerAngles.y);
+            Trigger("EnterDoor");
+            float total = Vector3.Distance(start, end);
+            float clipEnd = EnterProfile.keys[EnterProfile.length - 1].time;
+            bool swung = false;
+            for (float t = 0f; t * enterSpeed < clipEnd; t += Time.deltaTime)
+            {
+                float ct = t * enterSpeed;
+                if (!swung && ct >= enterPushAt) { swung = true; swing(); }
+                MoveTo(start + inward * (total * EnterProfile.Evaluate(ct)));
+                if (health != null && health.IsDead) break;
+                yield return null;
+            }
+            if (!swung) swing();
+            // la segunda parte del clip se gira a mirar atras y vuelve al frente: se deja terminar sin moverse
+            for (float t = 0f; t < 0.9f / enterSpeed; t += Time.deltaTime) yield return null;
+            weapons?.SetHeldVisible(true);
+            locked = false;
+        }
+
+        // ------------------------------------------------------------------ giro corriendo y voltereta
+        /// <summary>Giro de 180 grados corriendo: frena derrapando, se da la vuelta y sale hacia el otro lado.</summary>
+        public void RunTurn(float runSpeed)
+        {
+            if (locked) return;
+            StartCoroutine(RunTurnRoutine(runSpeed));
+        }
+
+        IEnumerator RunTurnRoutine(float runSpeed)
+        {
+            locked = true;
+            Trigger("RunTurn");
+            Vector3 fwd = transform.forward;
+            Quaternion from = transform.rotation;
+            float turned = 0f;
+            for (float t = 0f; t < runTurnTime; t += Time.deltaTime)
+            {
+                // el clip gira a la izquierda entre 0,3 y 1,5 s mientras sigue deslizandose hacia delante y frena
+                float k = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.3f, 1.5f, t));
+                float ang = -180f * k;
+                transform.rotation = from * Quaternion.Euler(0f, ang, 0f);
+                if (player != null && player.cam != null) player.cam.AddYaw(ang - turned);
+                turned = ang;
+                float sp = runSpeed * 0.75f * (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0f, 1.2f, t)));
+                body.Move((fwd * sp + Vector3.down * 2f) * Time.deltaTime);
+                if (health != null && health.IsDead) break;
+                yield return null;
+            }
+            locked = false;
+        }
+
+        /// <summary>Voltereta al aterrizar de una caida alta (amortigua el golpe).</summary>
+        public void Roll()
+        {
+            if (locked) return;
+            StartCoroutine(RollRoutine());
+        }
+
+        IEnumerator RollRoutine()
+        {
+            locked = true;
+            Trigger("Roll");
+            Vector3 fwd = transform.forward;
+            for (float t = 0f; t < rollTime; t += Time.deltaTime)
+            {
+                float sp = rollDistance / rollTime * 2f * (1f - t / rollTime);
+                body.Move((fwd * sp + Vector3.down * 2f) * Time.deltaTime);
+                yield return null;
+            }
+            locked = false;
+        }
+
+        // ------------------------------------------------------------------ agarre
+        /// <summary>Un zombi intenta agarrarte para morderte el cuello. Devuelve false si ahora no puede (otra accion, recien soltado...).</summary>
+        public static bool TryGrab(ZombieAI z)
+        {
+            var a = Instance;
+            if (a == null || a.locked || z == null || Time.time < a.nextGrab || GameState.InputBlocked) return false;
+            if (a.health != null && a.health.IsDead) return false;
+            a.StartCoroutine(a.GrabRoutine(z));
+            return true;
+        }
+
+        IEnumerator GrabRoutine(ZombieAI z)
+        {
+            locked = true;
+            grabber = z;
+            Vector3 dir = Vector3.ProjectOnPlane(z.transform.position - transform.position, Vector3.up);
+            dir = dir.sqrMagnitude > 0.001f ? dir.normalized : transform.forward;
+            transform.rotation = Quaternion.LookRotation(dir);
+            z.BeginGrab(transform.position + dir * 0.6f, transform.position);
+            int presses = 0;
+            float t = 0f, nextBite = 0.5f;
+            const string text = "¡Te muerde!  Pulsa E repetidamente para soltarte";
+            Hud.SetQte(text, 0f);
+            while (t < grabTime && presses < mashNeeded)
+            {
+                if (health != null && health.IsDead) break;
+                if (z == null || z.Hp.IsDead) break;
+                if (!GameState.InputBlocked)
+                {
+                    if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame) presses++;
+                    t += Time.deltaTime;
+                    if (t >= nextBite) { nextBite += biteEvery; health?.TakeDamage(biteDamage, z.transform.position); }
+                }
+                Hud.SetQte(text, presses / (float)mashNeeded);
+                yield return null;
+            }
+            bool freed = presses >= mashNeeded;
+            if (!freed && z != null && !z.Hp.IsDead && health != null && !health.IsDead) health.TakeDamage(failDamage, z.transform.position);
+            Hud.ClearQte();
+            if (z != null) z.EndGrab(freed);
+            if (freed) Hud.Message("Te has soltado de un empujon");
+            grabber = null;
+            nextGrab = Time.time + grabCooldown;
+            locked = false;
+        }
+    }
+}

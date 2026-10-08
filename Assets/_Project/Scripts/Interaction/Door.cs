@@ -157,8 +157,47 @@ namespace Horror
                 Hud.Message("Desbloqueaste la puerta");
                 GameAudio.Play(Sfx.DoorUnlock, transform.position);
             }
-            Toggle(who.transform.position);
-            if (partner != null && !partner.moving && partner.open != open) partner.Toggle(who.transform.position);
+            Vector3 from = who.transform.position;
+            System.Action swing = () =>
+            {
+                if (moving) return;
+                Toggle(from);
+                if (partner != null && !partner.moving && partner.open != open) partner.Toggle(from);
+            };
+            // el jugador abre con animacion (la hoja gira cuando la mano llega al pomo); en la sala de un jefe, cruza hasta dentro
+            var actions = who.GetComponent<PlayerActions>();
+            if (!open && actions != null)
+            {
+                var boss = BossBehind(from, out Vector3 inside);
+                if (boss != null) actions.EnterBossRoom(this, inside, swing);
+                else actions.OpenDoor(this, swing);
+                return;
+            }
+            swing();
+        }
+
+        /// <summary>Centro de la hoja (para mirar hacia la puerta).</summary>
+        public Vector3 Center => LeafCenter();
+
+        /// <summary>Disparador de la sala de un jefe todavia dormido que esta al otro lado de esta puerta (null si no hay).</summary>
+        BossRoomTrigger BossBehind(Vector3 from, out Vector3 inside)
+        {
+            inside = default;
+            Vector3 c = LeafCenter();
+            foreach (var trig in FindObjectsByType<BossRoomTrigger>(FindObjectsSortMode.None))
+            {
+                if (trig.boss == null || !trig.boss.IsDormant || trig.sealDoors == null) continue;
+                bool mine = false;
+                foreach (var d in trig.sealDoors) if (d == this || (d != null && d == partner)) mine = true;
+                if (!mine) continue;
+                var col = trig.GetComponent<Collider>();
+                Vector3 p = col != null ? col.bounds.center : trig.transform.position;
+                Vector3 toIn = Vector3.ProjectOnPlane(p - c, Vector3.up), toMe = Vector3.ProjectOnPlane(from - c, Vector3.up);
+                if (Vector3.Dot(toIn, toMe) >= 0f) continue;              // el jugador ya esta del lado de dentro
+                inside = p;
+                return trig;
+            }
+            return null;
         }
 
         void Toggle(Vector3 from)
@@ -181,8 +220,8 @@ namespace Horror
 
         void Update()
         {
-            // atrancada: si estaba abierta, se cierra de golpe
-            if (Sealed && open && !moving) { open = false; bashTime = 0f; StartCoroutine(Swing(closedRot)); return; }
+            // atrancada: si estaba abierta, se cierra de golpe (si el jugador la esta cruzando con la animacion, al terminar)
+            if (Sealed && open && !moving && !PlayerActions.Locked) { open = false; bashTime = 0f; StartCoroutine(Swing(closedRot)); return; }
             if (open || moving || requiredKey != null || !zombiesCanForce) { bashTime = 0f; return; }
             // Zombis que te persiguen y estan pegados a la puerta cerrada: la golpean hasta abrirla
             ZombieAI basher = null;

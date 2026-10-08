@@ -136,6 +136,7 @@ namespace Horror
                 DrawMessage();
                 DrawObjective();
                 DrawBossBar();
+                DrawQte();
             }
             if (GameState.InventoryOpen) DrawInventory();
             if (GameState.BoxOpen) DrawItemBox();

@@ -39,6 +39,17 @@ namespace Horror
         /// <summary>Variante elegida en el ultimo ataque: la lee la animacion antes de lanzar el ataque.</summary>
         public int LastAttackVariant { get; private set; }
 
+        [Header("Escopetazos y agarre")]
+        [Tooltip("Un escopetazo a menos de esta distancia lo tira al suelo (se levanta con la animacion de incorporarse)")]
+        public float knockdownRange = 2.6f;
+        [Tooltip("Segundos en el suelo hasta volver a perseguir: caida (1,4 s) + incorporarse (4,4 s a 1,3x)")]
+        public float knockdownTime = 4.5f;
+        [Tooltip("Probabilidad de quedarse aturdido con un escopetazo de mas lejos")] [Range(0f, 1f)] public float stunChance = 0.3f;
+        public float stunTime = 2.4f;
+        [Tooltip("Probabilidad de que un ataque a quemarropa sea un agarre con mordisco al cuello (hay que soltarse pulsando E)")]
+        [Range(0f, 1f)] public float grabChance = 0.3f;
+        public float grabRange = 1.1f;
+
         [Header("Jefe / estados especiales")]
         [Tooltip("Letargo: no detecta ni persigue hasta que se le despierte (Wake), le disparen o haya un ruido fuerte cerca. El jefe baila.")]
         public bool dormant;
@@ -51,6 +62,15 @@ namespace Horror
         public bool IsDormant => dormant;
         /// <summary>Un script externo (ataques especiales del jefe) controla al enemigo: la IA normal se detiene.</summary>
         public bool Suspended { get; set; }
+        /// <summary>En el suelo tras un escopetazo, aturdido o agarrando al jugador: no reacciona a los disparos con la animacion de golpe.</summary>
+        public bool Busy => knocked || stunned || Grabbing;
+        public bool KnockedDown => knocked;
+        public bool Grabbing { get; private set; }
+        /// <summary>Cuerpo bajo (reptante o con las piernas rotas): sin derribos, agarres ni muertes de pie.</summary>
+        public bool LowPose { get { var c = GetComponent<CapsuleCollider>(); return c != null && c.height < 1.2f; } }
+        bool knocked, stunned;
+        /// <summary>Reacciones especiales para la animacion: "Knockdown", "Stun".</summary>
+        public event System.Action<string> Reacted;
 
         public event System.Action Attacked;
         /// <summary>Empieza a perseguir al jugador (grito de alerta). Lo usa la animacion.</summary>
@@ -143,6 +163,11 @@ namespace Horror
             {
                 if (canNav) agent.isStopped = true;
                 FaceTarget();
+                if (Time.time >= nextAttack && dist <= grabRange && CanSpecial && Random.value < grabChance && PlayerActions.TryGrab(this))
+                {
+                    nextAttack = Time.time + 2.5f;
+                    return;
+                }
                 if (Time.time >= nextAttack)
                 {
                     int n = attackVariants != null ? attackVariants.Length : 0;
@@ -236,6 +261,60 @@ namespace Horror
                 staggerUntil = Mathf.Max(staggerUntil, Time.time + alertTime);
                 Alerted?.Invoke();
             }
+        }
+
+        /// <summary>Zombi normal de pie, vivo y libre (no jefes ni reptantes): admite derribos, aturdimientos y agarres.</summary>
+        bool CanSpecial => !health.IsDead && !dormant && string.IsNullOrEmpty(bossName) && !Suspended && !Busy && !LowPose;
+
+        /// <summary>Le ha dado un escopetazo (lo llama el arma una vez por disparo). De cerca cae al suelo; de lejos, a veces se queda aturdido.</summary>
+        public void ShotgunBlast(float distance)
+        {
+            if (!CanSpecial) return;
+            if (distance <= knockdownRange) StartCoroutine(Special(true));
+            else if (Random.value < stunChance) StartCoroutine(Special(false));
+        }
+
+        /// <summary>Lo tira al suelo (escopetazo a quemarropa o al soltarse el jugador de un agarre).</summary>
+        public void Knockdown() { if (!health.IsDead && !knocked) StartCoroutine(Special(true)); }
+
+        System.Collections.IEnumerator Special(bool knockdown)
+        {
+            if (knockdown) knocked = true; else stunned = true;
+            if (pendingHit != null) { StopCoroutine(pendingHit); pendingHit = null; }       // el golpe que iba a dar se pierde
+            Suspended = true;
+            if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
+            Reacted?.Invoke(knockdown ? "Knockdown" : "Stun");
+            yield return new WaitForSeconds(knockdown ? knockdownTime : stunTime);
+            knocked = false; stunned = false;
+            if (health.IsDead) yield break;
+            Suspended = false;
+            staggerUntil = 0f;
+            nextAttack = Time.time + 0.6f;
+            StartChase(false);
+        }
+
+        /// <summary>Agarre: lo empieza y lo termina PlayerActions (el zombi se queda pegado mordiendo).</summary>
+        public void BeginGrab(Vector3 at, Vector3 lookAt)
+        {
+            Grabbing = true;
+            Suspended = true;
+            if (pendingHit != null) { StopCoroutine(pendingHit); pendingHit = null; }
+            if (agent != null && agent.isOnNavMesh) { agent.isStopped = true; agent.Warp(at); } else transform.position = at;
+            Vector3 d = Vector3.ProjectOnPlane(lookAt - at, Vector3.up);
+            if (d.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(d);
+            Reacted?.Invoke("Grab");
+        }
+
+        /// <summary>Fin del agarre: si el jugador se solto de un empujon, cae al suelo; si no, sigue atacando tras una pausa.</summary>
+        public void EndGrab(bool shoved)
+        {
+            if (!Grabbing) return;
+            Grabbing = false;
+            Reacted?.Invoke("GrabEnd");
+            if (health.IsDead) return;
+            Suspended = false;
+            nextAttack = Time.time + 2f;
+            if (shoved) Knockdown();
         }
 
         /// <summary>Despierta del letargo: ruge (animacion de alerta) y pasa a combatir.</summary>

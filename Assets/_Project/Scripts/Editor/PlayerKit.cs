@@ -98,6 +98,11 @@ namespace Horror.EditorTools
             c.AddParameter("Dead", AnimatorControllerParameterType.Bool);
             c.AddParameter("Reload", AnimatorControllerParameterType.Trigger);
             c.AddParameter("Hit", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("OpenDoor", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("EnterDoor", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("RunTurn", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Roll", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("Stairs", AnimatorControllerParameterType.Bool);
 
             // ---- clips por ranura (con sustituto provisional)
             var runF = First("P_RunForward", "P_Running", "P_Run");
@@ -155,6 +160,32 @@ namespace Horror.EditorTools
             var death = sm.AddState("Death"); death.motion = dying;
             var td = sm.AddAnyStateTransition(death); td.hasExitTime = false; td.duration = 0.15f; td.canTransitionToSelf = false;
             td.AddCondition(AnimatorConditionMode.If, 0, "Dead");
+
+            // ---- acciones de cuerpo entero (PlayerActions). Las lanza el codigo; el avance y el giro tambien (raiz fuera del clip)
+            void Action(string name, AnimationClip clip, float speed, float exitTime, float offset = 0f)
+            {
+                if (clip == null) { log.Add(name + ": SIN clip"); return; }
+                var s = sm.AddState(name); s.motion = clip; s.speed = speed;
+                var t = sm.AddAnyStateTransition(s); t.hasExitTime = false; t.duration = 0.2f; t.offset = offset; t.canTransitionToSelf = false;
+                t.AddCondition(AnimatorConditionMode.If, 0, name); t.AddCondition(AnimatorConditionMode.IfNot, 0, "Dead");
+                var back = s.AddTransition(free); back.hasExitTime = true; back.exitTime = exitTime; back.duration = 0.3f;
+                // abrir una puerta normal: en cuanto vuelve el control y echa a andar, se corta (si no, patinaria con los brazos en el pomo)
+                if (name == "OpenDoor") { var mv = s.AddTransition(free); mv.hasExitTime = false; mv.duration = 0.25f; mv.AddCondition(AnimatorConditionMode.Greater, 0.4f, "Speed"); }
+                log.Add(name + ": " + clip.name);
+            }
+            Action("OpenDoor", First("P_OpeningDoor"), 1.8f, 0.40f);                 // el clip trae dos aperturas: solo la primera (0-4,4 s)
+            Action("EnterDoor", First("P_OpeningDoorInwards"), 1.25f, 0.97f);
+            Action("RunTurn", First("P_RunningToTurn"), 1f, 0.72f);
+            Action("Roll", First("P_FallingToRoll"), 1f, 0.85f, 0.23f);            // empieza al tocar el suelo (antes cae desde 2 m)
+            var stairsClip = First("P_RunningUpStairs");
+            if (stairsClip != null)
+            {
+                var st = sm.AddState("RunStairs"); st.motion = stairsClip;
+                Trans(free, st, 0.2f, ("Stairs", AnimatorConditionMode.If, 0));
+                Trans(st, free, 0.25f, ("Stairs", AnimatorConditionMode.IfNot, 0));
+                Trans(st, aim, 0.18f, ("Aiming", AnimatorConditionMode.If, 0));
+                log.Add("escaleras: " + stairsClip.name);
+            }
 
             // ---- capa de torso
             c.AddLayer("UpperBody");
