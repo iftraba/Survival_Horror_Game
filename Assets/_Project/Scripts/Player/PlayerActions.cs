@@ -15,7 +15,7 @@ namespace Horror
     {
         public static PlayerActions Instance { get; private set; }
         /// <summary>Hay una accion en curso: sin moverse, apuntar, disparar ni interactuar.</summary>
-        public static bool Locked => Instance != null && Instance.locked;
+        public static bool Locked => (Instance != null && Instance.locked) || IntroCutscene.Active;   // tambien durante la escena del principio
         public static bool Grabbed => Instance != null && Instance.grabber != null;
 
         [Header("Abrir puertas (clip Opening, la primera mitad)")]

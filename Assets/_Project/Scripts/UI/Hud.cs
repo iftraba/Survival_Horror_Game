@@ -124,6 +124,7 @@ namespace Horror
 
         void OnGUI()
         {
+            if (IntroCutscene.Active) return;                 // la escena del principio dibuja lo suyo
             Styles();
             // al examinar un objeto solo se ve el objeto (sin vida, municion, objetivo ni pestanas)
             bool examineView = GameState.InventoryOpen && examining && !archiveTab;

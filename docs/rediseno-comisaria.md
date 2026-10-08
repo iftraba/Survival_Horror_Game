@@ -62,3 +62,33 @@ Crea `Assets/Scenes/Comisaria_v2.unity` copiando la escena actual (se quedan jug
 - **Hueco del ascensor:** x 17-20, z 12-15, de -4,5 a 14 m, con una abertura al oeste en cada planta, tapada de momento por una puerta de chapa fija. El ascensor en sí es la fase 6.
 - **Puertas y luz:** 19 puertas de madera (las de modelo nuevo) y 79 lámparas.
 - **Fuera:** de momento solo una calle plana delante; el exterior de verdad es la fase 2.
+
+## Fase 2 hecha: vestíbulo, exterior e intro (`ComisariaV2Exterior`, menú *Horror/Comisaria v2/2 Vestibulo y exterior*)
+Repetible: rehace los grupos `Exterior`, `Vestibulo_Props` e `Intro` y vuelve a hornear el NavMesh.
+
+**Modelos nuevos** (`Tools/blender/build_exterior.py`, horneados con `texture_items.py`; copias sin hornear en `Tools/raw_generated/backup_exterior/`):
+- Mostrador de recepción en L con dos puestos (monitor, teclado, ratón, papeles).
+- Banco de espera.
+- Coche patrulla quemado.
+- Tramo de verja de barrotes de 3 m.
+- Farola.
+
+**Texturas de la ciudad** (`Tools/blender/build_city_textures.py`):
+- Dos fachadas de ladrillo u hormigón con ventanas, algunas encendidas (con emisión) y otras tapiadas.
+- Asfalto con grietas y charcos, y acera de losas.
+
+**Vestíbulo:** el mostrador al fondo a la izquierda (la escalera queda a la derecha), con sillas y archivadores detrás. Hay bancos de espera en las paredes de los lados, sin tapar las puertas, y unas cajas y un bidón.
+
+**Exterior:**
+- La comisaría tiene fachada con ventanas, marquesina con pilares, rótulo con luz y un patio de acera.
+- La rodea una **verja** (x -24..24, z -12..38) con colisión. Detrás de la verja de delante hay **8 zombis** de varios modelos que la sacuden y la golpean (`FenceRattler`: en letargo, solo despiertan si les disparan, y la verja no les deja pasar).
+- El **coche patrulla arde** delante de la entrada (llamas, humo, chispas y una luz que parpadea, `FireLight`). Hay otro coche quemado en la calle.
+- Hay farolas (una de cada tres fundida) y **edificios** alrededor: siete enfrente, dos a cada lado y uno detrás, de 12 a 30 m.
+- Más fuegos en la calle, tres columnas de humo a lo lejos, escombros, cajas y bidones.
+- Es de noche: luna fría y niebla.
+
+**Escena de cámara** (`IntroCutscene`, 14 s):
+- La cámara gira alrededor de la comisaría a 40 m y 25 m de altura. Aparece el título «SECTOR 7: GRIMHEIM» y baja hasta la puerta principal.
+- Funde a negro y el jugador queda en el vestíbulo con la **puerta principal atrancada** (ya no se puede salir).
+- Durante la escena, el jugador no se mueve y el HUD no se ve. Se salta con Espacio, E, Esc o clic.
+- Comprobado en Play con capturas.
