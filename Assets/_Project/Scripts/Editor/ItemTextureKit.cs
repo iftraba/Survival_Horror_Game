@@ -33,6 +33,9 @@ namespace Horror.EditorTools
         static readonly string[] Props = { "Desk", "Chair", "Locker", "Shelf", "FilingCabinet", "Cot", "Crate", "Barrel" };
 
         /// <summary>Atrezzo de pared (Tools/blender/build_wall_props.py), en Art/Props/Wall.</summary>
+        /// <summary>Piezas de puerta (Tools/blender/build_doors.py), en Art/Props/Door: las monta DoorModelKit.</summary>
+        public static readonly string[] DoorParts = { "DoorLeaf", "DoorJamb", "DoorHeader" };
+
         public static readonly string[] WallProps = { "WallRadiator", "WallExtinguisher", "WallElectricPanel", "WallNoticeBoard", "WallVent", "WallClock", "WallPipeRun" };
 
         static readonly (string mat, string name, bool baseColor)[] Meshy =
@@ -91,7 +94,8 @@ namespace Horror.EditorTools
             var log = new List<string>();
             var lit = Shader.Find("Universal Render Pipeline/Lit");
             var all = Baked.Select(b => (b.fbx, b.name, T)).Concat(Props.Select(n => ("Assets/_Project/Art/Props/" + n + ".fbx", n, TP)))
-                .Concat(WallProps.Select(n => ("Assets/_Project/Art/Props/Wall/" + n + ".fbx", n, TP)));
+                .Concat(WallProps.Select(n => ("Assets/_Project/Art/Props/Wall/" + n + ".fbx", n, TP)))
+                .Concat(DoorParts.Select(n => ("Assets/_Project/Art/Props/Door/" + n + ".fbx", n, TP)));
             foreach (var (fbx, name, folder) in all)
             {
                 dir = folder;

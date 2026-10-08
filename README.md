@@ -47,6 +47,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Art · **Puertas con modelo** (Blender): hoja con paneles en relieve, junquillo del cristal, placa de chapa, manivelas y bisagras; marco con moldura, plinto y cornisa. Cambian las 25 puertas de madera a la vez (mismo prefab, misma lógica).
 - 2026-10-08 · Level/Art · **Paredes con detalle**: molduras junto al techo, tuberías y atrezzo de pared modelado y texturizado en Blender (radiadores, extintores, cuadros eléctricos, tablones de anuncios, rejillas, relojes) repartido por todas las salas.
 - 2026-10-08 · Enemies · **Zombi comiéndose un cadáver**: el cadáver se coloca solo bajo su boca (ya tumbado; antes salía cayendo de rodillas) y el zombi solo se levanta cuando le disparas. Corregido `HoldLastFrame` (estaba en un archivo con otro nombre y Unity no lo guardaba en el prefab del cadáver).
 - 2026-10-08 · Enemies · **Todos los zombis con las mismas animaciones** (andar tambaleante común: la chica ya no se mueve raro), mismos ataques y daño; solo cambian el chaleco de los policías y las reacciones por probabilidad. **Fuera los zombis con la piel del segundo jefe** (sustituidos por civiles y una chica). **Comiendo un cadáver y arrastrándose** son ahora opciones que se pueden poner a cualquier zombi de cualquier modelo; cualquiera se arrastra si le das dos tiros en las piernas.
