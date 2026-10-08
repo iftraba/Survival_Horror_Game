@@ -44,3 +44,21 @@ Lo que pide el usuario. Se guarda todo lo que hay (modelos, enemigos, jefes, sis
 5. **Sótano y jefe 2:** pasar ahí la zona 2 y la sala de calderas.
 6. **Recorrido:** llaves, ascensor, salas seguras, munición, zombis y salida.
 7. **Variedad de objetos** en todas las salas.
+
+## Fase 1 hecha: estructura (`ComisariaV2Builder`, menú *Horror/Comisaria v2/1 Estructura*)
+Crea `Assets/Scenes/Comisaria_v2.unity` copiando la escena actual (se quedan jugador, HUD, audio, `GameFlow`, cámara e iluminación global) y levanta el nivel bajo `--- COMISARIA V2 ---`. Repetible. Edificio de 40 × 32 m (x -20..20, z 0..32; la fachada con la puerta principal doble mira al sur, z = 0).
+
+| Planta | Suelo / techo | Distribución |
+|---|---|---|
+| Sótano | -4,5 / -1 | Pasillo central (z 12-16) desde el ascensor hacia el oeste, dos salas al sur y dos al norte, y la sala de calderas al noroeste (x -20..-6, z 16-32). |
+| Baja | 0 / 3,5 | Vestíbulo (x -8..8, z 0-16) con puertas oeste, este y al fondo. Ala oeste: sala de espera y sala segura. Ala este: oficina y vestíbulo del ascensor. Al fondo: dos salas grandes (vestuarios y calabozos o interrogatorios). |
+| Primera | 4 / 7 | Oficinas (x -8..8, z 0-16) con el hueco de la escalera. Despacho del comisario al oeste, sala de conferencias al este (z 0-12), vestíbulo del ascensor (z 12-16). Al fondo, una sala grande (por definir). |
+| Archivo | 7,5 / 14 | Nave de 34 × 32 m con 6,5 m de techo (jefe 1) y un vestíbulo del ascensor cerrado (x 14-20, z 10-18). |
+
+- **Escalera de caracol** (centro x 5, z 12; radio 2,2 m; 400° de giro; 24 peldaños) del vestíbulo a las oficinas.
+  - Los peldaños, la columna y la barandilla son decorado. La colisión es una rampa helicoidal invisible (`Art/Props/RampaCaracol.asset`), así el jugador no tropieza y los zombis tienen NavMesh para subir.
+  - Arriba llega a un rellano hacia el oeste, con barandilla alrededor del hueco.
+  - Comprobado: hay camino de NavMesh completo de la planta baja a la primera, y el jugador la sube entera andando.
+- **Hueco del ascensor:** x 17-20, z 12-15, de -4,5 a 14 m, con una abertura al oeste en cada planta, tapada de momento por una puerta de chapa fija. El ascensor en sí es la fase 6.
+- **Puertas y luz:** 19 puertas de madera (las de modelo nuevo) y 79 lámparas.
+- **Fuera:** de momento solo una calle plana delante; el exterior de verdad es la fase 2.

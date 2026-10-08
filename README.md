@@ -47,6 +47,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-08 · Level · **Comisaría nueva, fase 1 (estructura)**: escena `Comisaria_v2` con sótano, planta baja (vestíbulo con puertas a los lados y escalera de caracol), primera planta (oficinas, despacho del comisario, sala de conferencias) y archivo de techo alto, más el hueco del ascensor. Ver `docs/rediseno-comisaria.md`.
 - 2026-10-08 · Player · **Rama `rediseno-comisaria`**: salto desactivado (se conserva la animación), abrir puertas más rápido (2,7× en vez de 1,8×; control a los 0,9 s). Plan del rediseño de la comisaría en `docs/rediseno-comisaria.md`.
 - 2026-10-08 · Art · **Puertas con modelo** (Blender): hoja con paneles en relieve, junquillo del cristal, placa de chapa, manivelas y bisagras; marco con moldura, plinto y cornisa. Cambian las 25 puertas de madera a la vez (mismo prefab, misma lógica).
 - 2026-10-08 · Level/Art · **Paredes con detalle**: molduras junto al techo, tuberías y atrezzo de pared modelado y texturizado en Blender (radiadores, extintores, cuadros eléctricos, tablones de anuncios, rejillas, relojes) repartido por todas las salas.
