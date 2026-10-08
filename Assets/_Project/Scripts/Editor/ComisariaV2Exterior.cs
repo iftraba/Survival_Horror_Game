@@ -25,12 +25,12 @@ namespace Horror.EditorTools
         const string Mats = "Assets/_Project/Materials/";
         const string Tex = "Assets/_Project/Art/Textures/";
 
-        static Transform ext, lobby, level;
+        internal static Transform ext, lobby, level;
 
         static T Call<T>(string method, params object[] args) =>
             (T)typeof(TestSceneBuilder).GetMethod(method, BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, args);
 
-        static GameObject Box(string name, Transform parent, Vector3 c, Vector3 s, Material m, float tile, bool collider = true)
+        internal static GameObject Box(string name, Transform parent, Vector3 c, Vector3 s, Material m, float tile, bool collider = true)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = name; go.transform.SetParent(parent);
@@ -43,7 +43,7 @@ namespace Horror.EditorTools
         }
 
         /// <summary>Modelo (FBX horneado) colocado con su giro de Blender; con colision de caja opcional.</summary>
-        static GameObject Model(string path, Transform parent, Vector3 pos, float yaw, bool collider, string name = null)
+        internal static GameObject Model(string path, Transform parent, Vector3 pos, float yaw, bool collider, string name = null)
         {
             var pf = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             if (pf == null) { Debug.LogWarning("[Horror] falta " + path); return null; }
@@ -63,7 +63,7 @@ namespace Horror.EditorTools
         }
 
         // ------------------------------------------------------------------ materiales de la ciudad
-        static Material CityMat(string name, string tex, bool emission)
+        internal static Material CityMat(string name, string tex, bool emission)
         {
             foreach (var (suffix, normal, linear) in new[] { ("", false, false), ("_n", true, true), ("_ms", false, true), ("_ao", false, true), ("_emis", false, false) })
             {
@@ -94,7 +94,7 @@ namespace Horror.EditorTools
         }
 
         // ------------------------------------------------------------------ fuego y humo
-        static Material ParticleMat(string name, Color color, bool additive)
+        internal static Material ParticleMat(string name, Color color, bool additive)
         {
             string path = Mats + name + ".mat";
             var m = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -109,7 +109,7 @@ namespace Horror.EditorTools
             return m;
         }
 
-        static ParticleSystem Particles(string name, Transform parent, Vector3 pos, Material mat, float rate, Vector2 life, Vector2 speed, Vector2 size,
+        internal static ParticleSystem Particles(string name, Transform parent, Vector3 pos, Material mat, float rate, Vector2 life, Vector2 speed, Vector2 size,
                                         Color c0, Color c1, float radius, float gravity, int max)
         {
             var go = new GameObject(name);
@@ -137,7 +137,7 @@ namespace Horror.EditorTools
         }
 
         /// <summary>Fuego con humo, chispas y luz que parpadea. 'scale' 1 = fuego de un coche.</summary>
-        static void Fire(Transform parent, Vector3 pos, float scale, Material fire, Material smoke)
+        internal static void Fire(Transform parent, Vector3 pos, float scale, Material fire, Material smoke)
         {
             var root = new GameObject("Fuego").transform; root.SetParent(parent); root.position = pos;
             Particles("Llamas", root, pos, fire, 40 * scale, new Vector2(0.5f, 1.1f), new Vector2(1.2f, 2.4f) * Mathf.Sqrt(scale), new Vector2(0.6f, 1.3f) * scale,

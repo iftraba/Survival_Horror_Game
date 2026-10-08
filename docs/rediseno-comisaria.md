@@ -305,3 +305,12 @@ El constructor saca solo lo demás:
 **Comprobado:**
 - Con las puertas abiertas, NavMesh completo a todas las salas de las cuatro plantas, al callejón, al balcón, a la azotea y a la caseta.
 - En el sótano, desde el vestíbulo del ascensor, también al foso de calderas.
+
+## Fase B hecha: exterior e intro (`ComisariaGrandeExterior`, menú *Horror/Comisaria grande/2 Exterior e intro*)
+- Reutiliza las piezas de `ComisariaV2Exterior` (ahora `internal`): modelos, fuego, humo y materiales de ciudad.
+- **Patio, calle y verja:** patio delantero de 8 m y franjas alrededor dentro de la verja (x -42..36,5, z -8..48,5). Delante, la acera, la calzada y la acera de enfrente.
+- **Fachada:** de hormigón con ventanas hasta 8,6 m, con huecos para la puerta principal, la del callejón y la del balcón de la primera planta. Marquesina y rótulo.
+- **Coches y luces:** dos coches patrulla (uno ardiendo en la entrada), un coche quemado en la calle y 13 farolas. En el callejón hay dos luces que parpadean.
+- **Alrededor:** edificios en las cuatro manzanas, fuegos, columnas de humo, escombros y 10 zombis agolpados tras la verja.
+- **Escena de cámara:** radio de 52 m y altura de 34, centrada en el edificio (comprobada en Play con capturas). La puerta principal se atranca al entrar. Objetivo: «Explora la comisaría y busca una salida».
+- **Pendiente:** algunas lámparas del archivo iluminan sus muros por fuera (luces sin sombra). Se corrige en el pase de luces.
