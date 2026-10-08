@@ -43,6 +43,9 @@ namespace Horror.EditorTools
         public static readonly string[] OfficeProps = { "DeskComputer", "Laptop", "PaperStack", "DeskLamp", "TrashBin", "WaterCooler", "Whiteboard", "SwivelChair",
             "CoatRack", "ExecutiveDesk", "ExecutiveChair", "Bookcase", "TrophyCabinet", "Rug", "AuditoriumChair", "Lectern", "FlagPole" };
 
+        /// <summary>Memorial del recibidor de la primera planta (Tools/blender/build_memorial.py), en Art/Props/Memorial.</summary>
+        public static readonly string[] MemorialProps = { "MemorialMonument", "MemorialMedallion", "MemorialPlaque", "Stanchion", "StanchionRope", "PottedPlant", "FlowerWreath", "Candles" };
+
         public static readonly string[] WallProps = { "WallRadiator", "WallExtinguisher", "WallElectricPanel", "WallNoticeBoard", "WallVent", "WallClock", "WallPipeRun" };
 
         static readonly (string mat, string name, bool baseColor)[] Meshy =
@@ -104,7 +107,8 @@ namespace Horror.EditorTools
                 .Concat(WallProps.Select(n => ("Assets/_Project/Art/Props/Wall/" + n + ".fbx", n, TP)))
                 .Concat(DoorParts.Select(n => ("Assets/_Project/Art/Props/Door/" + n + ".fbx", n, TP)))
                 .Concat(ExteriorProps.Select(n => ("Assets/_Project/Art/Props/Exterior/" + n + ".fbx", n, TP)))
-                .Concat(OfficeProps.Select(n => ("Assets/_Project/Art/Props/Office/" + n + ".fbx", n, TP)));
+                .Concat(OfficeProps.Select(n => ("Assets/_Project/Art/Props/Office/" + n + ".fbx", n, TP)))
+                .Concat(MemorialProps.Select(n => ("Assets/_Project/Art/Props/Memorial/" + n + ".fbx", n, TP)));
             foreach (var (fbx, name, folder) in all)
             {
                 dir = folder;

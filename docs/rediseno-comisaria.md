@@ -138,3 +138,21 @@ Kit `ComisariaV2Office` (menú *Horror/Comisaria v2/3 Primera planta*). Se puede
 **NavMesh:**
 - Toda la planta es alcanzable desde la planta baja por la escalera: oficinas, despacho, conferencias, estrado y vestíbulo del ascensor (comprobado con una rejilla de rutas).
 - El estrado va fuera de `Props` porque ese grupo es «no transitable» para el NavMesh.
+
+## Fase 3, cambio: memorial en el recibidor y oficinas al fondo (2026-10-08)
+A petición del usuario, la sala de ordenadores pasa del recibidor (donde sale la escalera) a la **sala del fondo** (x -20..20, z 16..32, tras la puerta norte):
+- Mismo estilo de distribución: grupos de dos islas, en 6 columnas y 2 filas, con dos huecos para archivadores y para la zona de pizarras. Son 40 puestos.
+- Hay un pasillo central libre desde la puerta y otro entre las dos filas.
+
+En el **recibidor** va el **memorial de los agentes caídos** (modelos nuevos en `Tools/blender/build_memorial.py`, en `Art/Props/Memorial`; la piedra se hornea con el nuevo tipo «stone» de `texture_items.py`):
+- **Monumento** de piedra escalonado en el lado oeste, mirando hacia donde sale la escalera.
+  - Lleva la estrella de la policía en bronce, una placa y **tres huecos para medallones** (también existe el modelo del medallón).
+  - El puzle de colocar los medallones para abrir el camino al archivo se monta en la fase 6.
+- Cordón de terciopelo con postes de latón alrededor, abierto por delante. Delante, dos coronas de flores y velas derretidas; detrás, las banderas de la policía y de la ciudad.
+- 15 placas con nombres en las paredes sur y oeste, sin tapar la puerta del despacho.
+- Dos bancos mirando al monumento, una alfombra, plantas en maceta y la vitrina de trofeos.
+
+**NavMesh:**
+- El voxel pasa a 0,1 m (antes 0,167). Con el de antes, las puertas de 1,6 m quedaban cerradas en el horneado.
+- Comprobado con una rejilla de rutas: toda la planta es alcanzable, incluido el paso al ascensor por el este del hueco de la escalera.
+- Las puertas cerradas siguen cortando el NavMesh (`NavMeshObstacle`), como antes.

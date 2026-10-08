@@ -10,8 +10,9 @@ namespace Horror.EditorTools
 {
     /// <summary>
     /// Comisaria v2, fase 3: la primera planta (menu Horror/Comisaria v2/3 Primera planta). Repetible (rehace "Primera_Props").
-    ///  - Oficinas: islas de mesas enfrentadas con silla giratoria o normal, ordenador (monitor, teclado y raton) o portatil, papeles,
-    ///    lampara, telefono y papelera al azar; archivadores, pizarra, fuente de agua, perchero.
+    ///  - Sala de ordenadores (la sala del fondo): islas de mesas enfrentadas con silla giratoria o normal, ordenador (monitor,
+    ///    teclado y raton) o portatil, papeles, lampara, telefono y papelera al azar; archivadores, pizarras, fuente de agua, perchero.
+    ///  - Recibidor (donde sale la escalera): memorial de los agentes caidos.
     ///  - Despacho del comisario: mesa grande con sillon de piel, sillas de visita, alfombra, librerias, vitrina de trofeos y banderas.
     ///  - Sala de conferencias: filas de sillas con pasillo central, estrado con atril y microfono, mapa de la ciudad y 4 banderas.
     /// Variedad: cada mueble con un pequeno giro y desplazamiento al azar y un tono distinto (PropVariant); los objetos de encima
@@ -77,18 +78,75 @@ namespace Horror.EditorTools
             Desk(new Vector3(x, Y, z + 0.375f), 0f);
         }
 
+        /// <summary>Sala de ordenadores en la sala del fondo (x -20..20, z 16..32), detras de la puerta norte del recibidor: grupos de
+        /// dos islas con pasillos entre ellos y uno central libre desde la puerta; en los huecos, archivadores, pizarras y estanterias.</summary>
         static void Offices()
         {
-            foreach (float x in new[] { -6.4f, -4.85f }) { Pod(x, 3.0f); Pod(x, 11.6f); }   // al oeste, dejando libre el paso de la puerta (z = 8)
-            foreach (float x in new[] { -1.9f, -0.35f }) { Pod(x, 2.6f); Pod(x, 7.4f); }   // pasillo ancho entre las dos filas
-            foreach (float x in new[] { 3.2f, 4.75f }) Pod(x, 3.0f);                          // al sur del hueco de la escalera
-            for (int i = 0; i < 4; i++) Place(P + "FilingCabinet.fbx", new Vector3(-7.6f, Y, 13.4f + i * 0.62f), 90f);
-            Place(O + "Whiteboard.fbx", new Vector3(2.6f, Y, 0.45f), 0f);
-            Place(O + "WaterCooler.fbx", new Vector3(7.5f, Y, 0.45f), 0f);
-            Place(O + "CoatRack.fbx", new Vector3(-7.4f, Y, 0.6f), R(0, 90));
-            Place(P + "Crate.fbx", new Vector3(5.6f, Y, 15.4f), 20f);                          // en la esquina: el paso al este del hueco queda libre
-            Place(P + "Shelf.fbx", new Vector3(-3.0f, Y, 15.6f), 180f);
-            Place(P + "Shelf.fbx", new Vector3(-4.3f, Y, 15.6f), 180f);
+            float[][] cols = { new[] { -16.4f, -14.85f }, new[] { -10.4f, -8.85f }, new[] { -4.4f, -2.85f }, new[] { 2.85f, 4.4f }, new[] { 8.85f, 10.4f }, new[] { 14.85f, 16.4f } };
+            float[] rows = { 20.0f, 27.0f };
+            for (int c = 0; c < cols.Length; c++)
+                for (int r = 0; r < rows.Length; r++)
+                {
+                    if ((c == 0 && r == 1) || (c == 5 && r == 0)) continue;                    // huecos: archivo y zona de pizarras
+                    foreach (float x in cols[c]) Pod(x, rows[r]);
+                }
+            for (int i = 0; i < 5; i++) Place(P + "FilingCabinet.fbx", new Vector3(-19.4f, Y, 24.6f + i * 0.62f), 90f);
+            for (int i = 0; i < 4; i++) Place(P + "FilingCabinet.fbx", new Vector3(-17.4f + i * 0.62f, Y, 31.4f), 180f);
+            Place(O + "Whiteboard.fbx", new Vector3(15.0f, Y, 19.2f), -90f + R(-10, 10));
+            Place(O + "Whiteboard.fbx", new Vector3(16.6f, Y, 21.0f), -110f);
+            foreach (float x in new[] { 18.1f, 19.4f }) Place(P + "Shelf.fbx", new Vector3(x, Y, 16.5f), 0f);
+            foreach (float x in new[] { -6.0f, 6.0f }) Place(P + "Shelf.fbx", new Vector3(x, Y, 31.5f), 180f);
+            Place(O + "WaterCooler.fbx", new Vector3(-1.6f, Y, 31.4f), 180f);
+            Place(O + "WaterCooler.fbx", new Vector3(-19.4f, Y, 16.6f), 0f);
+            Place(O + "CoatRack.fbx", new Vector3(2.6f, Y, 16.7f), R(0, 90));
+            Place(O + "CoatRack.fbx", new Vector3(19.3f, Y, 31.3f), R(0, 90));
+            Place(P + "Crate.fbx", new Vector3(19.1f, Y, 26.0f), 20f);
+            Place(P + "Crate.fbx", new Vector3(18.9f, Y, 27.1f), -10f);
+            Place(O + "TrashBin.fbx", new Vector3(-2.4f, Y, 16.5f), 0f);
+        }
+
+        // ------------------------------------------------------------------ recibidor: memorial de los agentes caidos
+        const string M = "Assets/_Project/Art/Props/Memorial/";
+
+        /// <summary>Recibidor de la primera planta (x -8..8, z 0..16, con el hueco de la escalera en x 1-6, z 9-14): monumento de
+        /// piedra en el lado oeste mirando a la escalera (tres huecos para medallones: el puzle se monta en la fase de progresion),
+        /// cordon alrededor salvo por delante, coronas, velas, banderas, placas con nombres en las paredes, bancos, plantas y vitrina.</summary>
+        static void Memorial(Material policeFlag, Material cityFlag)
+        {
+            Vector3 c = new Vector3(-3.6f, Y, 7.0f);
+            var mon = Place(M + "MemorialMonument.fbx", c, 90f, true, 0f, false);           // el frente mira al este (+X)
+            mon.name = "Memorial_Monumento";
+            // cordon: postes en un rectangulo, abierto por delante
+            float x0 = -5.6f, x1 = -1.5f, z0 = 4.6f, z1 = 9.4f;
+            var posts = new[] { new Vector3(x1, Y, z0), new Vector3((x0 + x1) / 2f, Y, z0), new Vector3(x0, Y, z0), new Vector3(x0, Y, (z0 + z1) / 2f), new Vector3(x0, Y, z1), new Vector3((x0 + x1) / 2f, Y, z1), new Vector3(x1, Y, z1) };
+            foreach (var p in posts) Place(M + "Stanchion.fbx", p, 0f, true, 0f, false);
+            for (int i = 0; i < posts.Length - 1; i++)
+            {
+                Vector3 a = posts[i], b = posts[i + 1], d = b - a;
+                int n = Mathf.Max(1, Mathf.RoundToInt(d.magnitude / 1.5f));
+                for (int k = 0; k < n; k++)
+                {
+                    var rope = Place(M + "StanchionRope.fbx", a + d * ((k + 0.5f) / n), Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg, false, 0f, false);
+                    rope.transform.localScale = new Vector3(1f, 1f, d.magnitude / n / 1.5f);
+                }
+            }
+            // coronas a los lados del frente, velas en el suelo delante, banderas detras
+            Place(M + "FlowerWreath.fbx", new Vector3(-2.0f, Y, 5.4f), 90f - 20f, true, 0.5f, false);
+            Place(M + "FlowerWreath.fbx", new Vector3(-2.0f, Y, 8.6f), 90f + 20f, true, 0.5f, false);
+            Place(M + "Candles.fbx", new Vector3(-2.2f, Y, 6.5f), R(0, 360), false, 0.5f, false);
+            Place(M + "Candles.fbx", new Vector3(-2.15f, Y, 7.6f), R(0, 360), false, 0.5f, false);
+            Flag(new Vector3(-5.1f, Y, 4.95f), -90f, policeFlag);
+            Flag(new Vector3(-5.1f, Y, 8.15f), -90f, cityFlag);
+            // placas con nombres: pared sur (de cara al norte) y pared oeste (sin tapar la puerta del despacho, z = 8)
+            for (int i = 0; i < 9; i++) Place(M + "MemorialPlaque.fbx", new Vector3(-6.4f + i * 1.6f, Y + 1.15f, 0.2f), 0f, false, 0.3f, false);
+            foreach (float z in new[] { 1.8f, 3.4f, 5.0f, 11.0f, 12.6f, 14.2f }) Place(M + "MemorialPlaque.fbx", new Vector3(-7.83f, Y + 1.15f, z), 90f, false, 0.3f, false);
+            // bancos mirando al monumento, plantas en las esquinas y vitrina de trofeos
+            Place(P + "Exterior/WaitingBench.fbx", new Vector3(0.6f, Y, 4.6f), -90f + R(-4, 4));
+            Place(P + "Exterior/WaitingBench.fbx", new Vector3(0.0f, Y, 7.4f), -90f + R(-4, 4));
+            foreach (var p in new[] { new Vector3(-7.4f, Y, 0.6f), new Vector3(-7.4f, Y, 15.4f), new Vector3(7.4f, Y, 0.6f), new Vector3(5.6f, Y, 0.6f), new Vector3(-2.1f, Y, 15.4f) })   // sin tapar puertas, la salida de la escalera ni el paso al ascensor (x 6-8)
+                Place(M + "PottedPlant.fbx", p, R(0, 360));
+            Place(O + "TrophyCabinet.fbx", new Vector3(-4.6f, Y, 15.6f), 180f);
+            Place(O + "Rug.fbx", new Vector3(-0.6f, Y, 7.0f), 90f, false, 0.3f);
         }
 
         // ------------------------------------------------------------------ despacho del comisario
@@ -241,11 +299,13 @@ namespace Horror.EditorTools
             var cityFlag = TexMat("Bandera_Ciudad", "tex_flag_city", true, 0.15f);
             var map = TexMat("Mapa_Ciudad", "tex_city_map", false, 0.25f);
             Offices();
+            Memorial(policeFlag, cityFlag);
             Commissioner(policeFlag, cityFlag);
             Conference(policeFlag, cityFlag, map);
             int n = root.GetComponentsInChildren<PropVariant>().Length;
             // NavMesh de nuevo (las mesas y sillas lo recortan)
             var surface = rootGo.GetComponent<NavMeshSurface>(); var rt = rootGo.GetComponent<RuntimeNavMesh>();
+            surface.overrideVoxelSize = true; surface.voxelSize = 0.1f;  // con el voxel por defecto (0,167) las puertas de 1,6 m se cerraban
             Physics.SyncTransforms();                                   // las cajas recien creadas (estrado) aun no estan en su sitio para la fisica
             foreach (var l in rt.disableDuringBake) if (l != null) l.SetActive(false);
             surface.BuildNavMesh();

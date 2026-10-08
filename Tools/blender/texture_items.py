@@ -138,6 +138,8 @@ class G:
 
 def kind_of(name):
     n = name.lower()
+    if any(k in n for k in ("stone", "marble")):        # memorial (2026-10-08): piedra con vetas
+        return "stone"
     if any(k in n for k in ("wood", "board")):
         return "wood"
     if "cardboard" in n:
@@ -246,6 +248,20 @@ def build_material(mat, base_rgb, base_rough, name):
         metal = g.val(1.0)
         height = g.math("ADD", g.math("MULTIPLY", n1, 0.4), g.math("MULTIPLY", scratch, -0.25))
         bump_strength = 0.18
+    elif kind == "stone":
+        # piedra pulida y gastada: vetas finas retorcidas, poros, mugre en las juntas y bordes algo mas claros
+        vein = g.math("GREATER_THAN", g.wave(6.0, "X", 14.0, g.coords((1, 1, 1))), 0.93)
+        pores = g.noise(320.0, 2.0, 0.5)
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.86, g.math("MULTIPLY", n2, 0.24)))
+        col = g.vmath("SCALE", col, scale=g.math("ADD", 0.94, g.math("MULTIPLY", pores, 0.1)))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.62), g.math("MULTIPLY", vein, 0.55))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.4), g.math("MULTIPLY", grime, 0.7))
+        col = g.lerp(col, g.vmath("ADD", base, (0.08, 0.08, 0.08)), g.math("MULTIPLY", edge, 0.5))
+        rough = g.math("ADD", base_rough, g.math("MULTIPLY", n1, 0.18))
+        rough = g.math("ADD", rough, g.math("MULTIPLY", grime, 0.2))
+        metal = g.val(0.0)
+        height = g.math("ADD", g.math("MULTIPLY", pores, 0.25), g.math("MULTIPLY", vein, -0.2))
+        bump_strength = 0.12
     elif kind == "fabric":
         vec = g.coords((1, 1, 1))
         ws = 140.0 if any(k in name.lower() for k in ("blanket", "mattress", "pillow")) else 380.0
