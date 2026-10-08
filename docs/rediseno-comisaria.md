@@ -383,3 +383,18 @@ El constructor saca solo lo demás:
 - La puerta de calderas empieza «Sin corriente» y se libera con los tres fusibles.
 - El candado no abre sin cizalla y sí con ella: desaparece la cadena y la cizalla se conserva.
 - La tarjeta del jefe abre los calabozos y el piloto pasa de rojo a verde.
+
+## Fase E hecha: zombis y botín (`ComisariaGrandeEnemies`, menú *Horror/Comisaria grande/5 Zombis y botin*)
+**74 zombis** repartidos por zonas: unos 30 en la planta baja, 22 en la primera y la azotea, 3 en el archivo además del jefe, y 21 en el sótano.
+- Van de 1 a 3 por sala o pasillo. No hay zombis en las salas seguras, el vestíbulo, los aseos ni el vestíbulo del ascensor.
+- **Mezcla:** 9 modelos normales (ninguno con la piel del jefe 2), 5 reptantes (garaje, calabozos, callejón, galería de tuberías y otro) y 3 carroñeros comiéndose un cadáver (descanso, sindicato y laboratorio), que solo despiertan si les disparan.
+- **Letargo:** 12 están dormidos; no reaccionan hasta oír un ruido o recibir un tiro. Están sobre todo en la sala de pruebas (a oscuras), almacenes, biblioteca y archivo.
+- Fuera siguen los 10 de la verja y los dos jefes.
+
+**Botín justo:**
+- 23 objetos sueltos encima de los muebles: unas 140 balas de pistola, 40 cartuchos y 7 sprays.
+- Además, lo que hay en las taquillas de la fase D: escopeta y 6 cartuchos en la armería, 2 riñoneras y algo de munición.
+
+**Comprobado:** 400 fotogramas en Play sin errores. Falta probar el rendimiento con todos los zombis en una build. Si va justo: occlusion culling (las paredes no ocultan nada ahora) o menos zombis en `Spawns`.
+
+**Pendiente (fase F):** jugarlo entero, equilibrar munición y zombis, y el pase de luces (fugas de luz por fuera del archivo; salas algo oscuras). Los menús viejos *Horror/Comisaria v2/…* son del diseño anterior: no hay que usarlos sobre esta escena.

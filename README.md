@@ -47,6 +47,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-09 · Enemies/Level · **Comisaría grande, fase E (zombis y botín)**: 74 zombis por zonas (2-3 por sala o pasillo), con reptantes, carroñeros y zombis en letargo para emboscadas, y botín justo (unas 140 balas, 40 cartuchos y 7 sprays además de lo de las taquillas).
 - 2026-10-09 · Level/Interaction · **Comisaría grande, fase D (puzles)**: candados que se cortan con la cizalla, puertas con lector (tarjeta de seguridad y tarjeta del jefe de seguridad para los calabozos), 3 taquillas con código y 7 normales, sala a oscuras con interruptor, escalera de incendios hasta el despacho del jefe y la azotea, medallones del memorial, cuadro eléctrico con 3 fusibles para la puerta de las calderas, los dos jefes y el portón final. 8 notas con las pistas.
 - 2026-10-09 · Level/Art · **Comisaría grande, fase C (mobiliario)**: las 70 salas amuebladas según su tipo (unos 1.200 muebles con variación). 8 modelos nuevos en Blender: aseos, lavabos, monitores de vigilancia, sofá, máquina expendedora, office, armero y neumáticos.
 - 2026-10-09 · Level · **Comisaría grande, fase B (exterior e intro)**: patio, verja con zombis, calle, coches ardiendo, edificios y humo alrededor del edificio nuevo, fachada con los huecos del callejón y del balcón, y la escena de cámara del principio recentrada.
