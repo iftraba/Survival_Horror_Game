@@ -156,3 +156,25 @@ En el **recibidor** va el **memorial de los agentes caídos** (modelos nuevos en
 - El voxel pasa a 0,1 m (antes 0,167). Con el de antes, las puertas de 1,6 m quedaban cerradas en el horneado.
 - Comprobado con una rejilla de rutas: toda la planta es alcanzable, incluido el paso al ascensor por el este del hueco de la escalera.
 - Las puertas cerradas siguen cortando el NavMesh (`NavMeshObstacle`), como antes.
+
+## Fase 4: archivo y jefe 1 (2026-10-08)
+Kit `ComisariaV2Archive` (menú *Horror/Comisaria v2/4 Archivo y jefe 1*). Se puede repetir: rehace `Props/Archivo_Props`, `Archivo_Estanterias` y `Archivo_Jefe`.
+
+**Modelos nuevos** (Blender, `Tools/blender/build_archive.py`, en `Art/Props/Archive`; registrados en `ItemTextureKit.ArchiveProps`):
+- Estantería metálica exenta (1,8 × 0,5 × 2,3 m) en tres variantes con distinto desorden: cajas de archivo con etiqueta y asa, filas de carpetas AZ de colores, huecos, cajas sin tapa con papeles, carpetas inclinadas.
+- Estantería de obra de pared (4 × 3,4 m).
+- Pilas de cajas, papeles por el suelo, escalerilla con ruedas, fichero de madera con cajoncitos (alguno abierto) y carrito con carpetas.
+
+**Nave del archivo** (34 × 32 m, 6,5 m de techo):
+- Estanterías de obra en todas las paredes, fijas.
+- Al oeste, tres pasillos largos de estanterías espalda con espalda, con dos cruces. Junto a la entrada, cuatro bloques más, que dejan libre el paso desde la puerta. Son 120 estanterías exentas:
+  - sirven de cobertura;
+  - el jefe las revienta al embestir o caer encima (`PropBreaker`: cuelgan de un grupo `_Props` y miden menos de 2,6 m).
+- En el centro queda la arena del combate: pilas de cajas, papeles, carritos, ficheros, escalerillas, la mesa del archivero y una estantería volcada.
+
+**Jefe 1** (`Boss.prefab`: salto, embestida, rompe muebles y suelta la llave):
+- Está dormido en el centro, haciendo músculo, mirando a la entrada.
+- Al pasar la puerta del vestíbulo del ascensor (`BossRoomTrigger`) despierta y la puerta se atranca hasta que muere.
+- Comprobado en Play: anima bien (no sale en T), despierta, atranca la puerta y va a por el jugador.
+
+**NavMesh:** toda la nave es alcanzable desde el vestíbulo del ascensor (comprobado con una rejilla de rutas). Al archivo se llega por el ascensor, que se pone en marcha en la fase 6.
