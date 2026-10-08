@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_v2_sotano
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_v2_sotano
+  title: Parte de mantenimiento
+  category: 0
+  body: 'El tunel de servicio sale desde la sala de calderas a la calle de atras. El porton se abre con la llave maestra del jefe de turno.
+
+
+    El jefe de turno bajo a revisar la caldera hace dos dias y no ha vuelto a subir. Desde entonces la luz de emergencia esta encendida y algo golpea los armarios electricos.'
+  highlight: llave maestra
+  image: {fileID: 0}
+  objective: 

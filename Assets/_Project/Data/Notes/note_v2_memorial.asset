@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_v2_memorial
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_v2_memorial
+  title: Aviso del sargento
+  category: 1
+  body: 'A todo el personal:
+
+
+    He cerrado la escalera de servicio del archivo con la reja del memorial. Solo se abre con los tres medallones de la placa en el monumento.
+
+
+    Los repartimos para que nadie suba solo: uno lo tiene el comisario en su despacho, otro quedo en el estrado de la sala de conferencias y el tercero lo guardo Henderson en los calabozos.
+
+
+    Ahi arriba hay algo. No subais.'
+  highlight: tres medallones
+  image: {fileID: 0}
+  objective: 'Busca los tres medallones: despacho del comisario, sala de conferencias y calabozos.'

@@ -212,3 +212,48 @@ Kit `ComisariaV2Basement` (menú *Horror/Comisaria v2/5 Sotano y jefe 2*).
 - Comprobado en Play: despierta, atranca la puerta y va hacia la escalera.
 
 **NavMesh:** todo el sótano es alcanzable desde el pasillo del ascensor, también el foso por la escalera (comprobado con una rejilla de rutas).
+
+## Fase 6: recorrido (2026-10-08)
+Kit `ComisariaV2Progress` (menú *Horror/Comisaria v2/6 Recorrido*).
+- Rehace `Recorrido` y `Props/Recorrido_Props`.
+- La escalera de servicio, que agujerea las losas, se hace una sola vez (`Escalera_Servicio`).
+
+**Recorrido completo:**
+1. **Exterior → vestíbulo:** la puerta se atranca y el objetivo pasa a ser «Explora la comisaría y busca una salida».
+2. **Puzle del memorial** (primera planta): hay que reunir tres medallones de bronce.
+   - **Dónde están:** en la mesa del comisario, en el estrado de la sala de conferencias y en el catre de la celda del medio de los calabozos (planta baja).
+   - **La pista:** una nota del sargento, en un banco del memorial, dice dónde están.
+   - **Al colocarlos** en el monumento (`MedallionMonument`) se ven puestos y sube la reja (`ServiceGate`) de la escalera de servicio de la sala de ordenadores.
+3. **Escalera de servicio** (x 10→17 junto a la pared norte, de la primera planta al archivo):
+   - Lleva peldaños de chapa, una rampa invisible y barandillas.
+   - Arriba hay un cuarto con puerta. Al salir de él despierta el **jefe 1** y la puerta se atranca.
+   - El jefe 1 suelta la **llave del ascensor** (`I_KeyElevator`). La nota del archivero lo explica.
+4. **Ascensor de carga** (`ElevatorPanel`):
+   - Hay botoneras en la planta baja (ala este) y en el sótano. Con la llave se pone en marcha.
+   - Después, al usarlo, funde a negro y el jugador aparece en la otra planta.
+5. **Jefe 2** en la sala de calderas: suelta la **llave maestra**.
+6. **Fin:** el **portón del túnel de servicio** (pared oeste del foso, con luz verde) se abre con la llave maestra y gana la partida (`ExitDoor`).
+
+**Planta baja amueblada:**
+- Sala de espera: bancos, plantas, fuente de agua.
+- Sala segura: terminal, baúl, catre, mesa.
+- Oficina este: mesas, ordenador, archivadores.
+- Vestíbulo del ascensor: banco y planta.
+- Vestuarios: 26 taquillas y bancos.
+- Calabozos: tres celdas con rejas y catres, y mesa de interrogatorio.
+
+**Salas seguras:** planta baja (oeste), sala de ordenadores (junto a la reja) y sótano (junto al ascensor, con teléfono).
+
+**Botín:**
+- La escopeta y cartuchos en el despacho del comisario.
+- 28 objetos en total: munición, sprays, la riñonera en los vestuarios y los medallones.
+
+**Zombis:** 16 repartidos (5 en la planta baja, 6 en la primera, 5 en el sótano), sin los modelos del jefe 2.
+
+**Guardado:** las marcas de progreso (`Progress`: medallones, reja, ascensor) van en la partida (`SaveData.flags`). Al cargar, la reja y los medallones aparecen como estaban.
+
+**Comprobado en Play (avanzando fotogramas a mano):**
+- El monumento con 2 medallones no abre; con 3 sí, y la reja sube.
+- El ascensor sin llave no va; con llave, se pone en marcha y lleva al sótano. El jugador queda en el suelo y recupera el control.
+- El portón sin llave maestra no abre; con ella, victoria.
+- NavMesh: rutas completas de la planta baja al archivo por la escalera de servicio y a todas las salas.

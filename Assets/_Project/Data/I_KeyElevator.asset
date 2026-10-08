@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fec1bc90f18f4e54caa80a75be7d65ee, type: 3}
-  m_Name: I_KeyFinal
+  m_Name: I_KeyElevator
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ItemData
-  displayName: Llave maestra
-  description: La llave maestra. Abre el porton del tunel de servicio de la sala de calderas.
+  displayName: Llave del ascensor
+  description: Llave de la botonera del ascensor de carga. Lo pone en marcha.
   type: 3
-  icon: {fileID: 4730656342366570531, guid: 1a7f95e3e8112c244bd1921a423e4fd2, type: 3}
-  tint: {r: 1, g: 0.25, b: 0.2, a: 1}
+  icon: {fileID: -6198420344433101329, guid: eba9d20d8c21f744f89edf8e68e474d8, type: 3}
+  tint: {r: 0.35, g: 0.8, b: 1, a: 1}
   maxStack: 1
-  worldPrefab: {fileID: 919132149155446097, guid: 1a57b5e4bc7feff429f944925d2009b5, type: 3}
-  worldScale: 1.5
-  mass: 0.1
-  pickupObjective: Abre el porton del tunel de servicio, en la pared oeste de la sala de calderas.
+  worldPrefab: {fileID: 919132149155446097, guid: a9e53a0b43df3114e99a9ccd149d1dc5, type: 3}
+  worldScale: 1
+  mass: 0.5
+  pickupObjective: Usa la llave en el ascensor de carga (planta baja, ala este) para bajar al sotano.
   extraSlots: 2
   healAmount: 50
   weapon: {fileID: 0}

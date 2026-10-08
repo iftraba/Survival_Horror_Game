@@ -36,6 +36,7 @@ namespace Horror
         public List<SlotSave> box = new List<SlotSave>();   // baul de objetos (comun a todas las salas seguras)
         public List<bool> switches = new List<bool>();
         public string objective;
+        public List<string> flags = new List<string>();   // marcas de progreso (Progress): medallones, reja, ascensor...
     }
 
     /// <summary>
@@ -177,6 +178,7 @@ namespace Horror
             foreach (var l in OrderedLockers()) d.lockers.Add(l.IsOpen);
             foreach (var b in ItemStorage.Slots) d.box.Add(new SlotSave { item = b.item.displayName, count = b.count });
             foreach (var s in OrderedSwitches()) d.switches.Add(s.IsOn);
+            d.flags = Progress.All;
 
             try
             {
@@ -214,6 +216,7 @@ namespace Horror
             if (d == null) return false;
             Pending = null;
             NoteArchive.Restore(d.notes);
+            Progress.Restore(d.flags);
 
             var pc = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
             if (pc != null)

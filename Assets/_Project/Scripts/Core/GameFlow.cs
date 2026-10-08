@@ -27,6 +27,7 @@ namespace Horror
             ZombieAI.SpeedMultiplier = enemySpeedMultiplier;
             ZombieAI.MinSpeed = minEnemySpeed;
             NoteArchive.Clear();
+            Progress.Clear();
             if (SaveSystem.ApplyPending()) return;
             ItemStorage.Clear();   // partida nueva: baul vacio
             Objectives.Set(startObjective, false);
