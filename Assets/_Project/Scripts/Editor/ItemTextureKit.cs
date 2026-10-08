@@ -56,6 +56,9 @@ namespace Horror.EditorTools
         /// <summary>Mobiliario de la comisaria grande (Tools/blender/build_station.py), en Art/Props/Station.</summary>
         public static readonly string[] StationProps = { "RestroomStall", "SinkCounter", "CCTVDesk", "Couch", "VendingMachine", "KitchenCounter", "GunRack", "TireStack" };
 
+        /// <summary>Objetos y piezas de los puzles de la comisaria grande (Tools/blender/build_puzzle_items.py), en Art/Props/Puzzle.</summary>
+        public static readonly string[] PuzzleProps = { "BoltCutter", "KeyCard", "Fuse", "PadlockChain", "CardReader", "FuseBox" };
+
         public static readonly string[] WallProps = { "WallRadiator", "WallExtinguisher", "WallElectricPanel", "WallNoticeBoard", "WallVent", "WallClock", "WallPipeRun" };
 
         static readonly (string mat, string name, bool baseColor)[] Meshy =
@@ -121,7 +124,8 @@ namespace Horror.EditorTools
                 .Concat(MemorialProps.Select(n => ("Assets/_Project/Art/Props/Memorial/" + n + ".fbx", n, TP)))
                 .Concat(ArchiveProps.Select(n => ("Assets/_Project/Art/Props/Archive/" + n + ".fbx", n, TP)))
                 .Concat(BasementProps.Select(n => ("Assets/_Project/Art/Props/Basement/" + n + ".fbx", n, TP)))
-                .Concat(StationProps.Select(n => ("Assets/_Project/Art/Props/Station/" + n + ".fbx", n, TP)));
+                .Concat(StationProps.Select(n => ("Assets/_Project/Art/Props/Station/" + n + ".fbx", n, TP)))
+                .Concat(PuzzleProps.Select(n => ("Assets/_Project/Art/Props/Puzzle/" + n + ".fbx", n, TP)));
             foreach (var (fbx, name, folder) in all)
             {
                 dir = folder;

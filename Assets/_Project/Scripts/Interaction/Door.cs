@@ -36,7 +36,10 @@ namespace Horror
         [Tooltip("Objetivo que se muestra cuando se abre la puerta por primera vez")]
         public string openedObjective;
 
-        public string Prompt => moving ? "" : Sealed ? "Atrancada" : open ? "E  Cerrar puerta" : requiredKey != null ? "E  Abrir puerta (cerrada con llave)" : "E  Abrir puerta";
+        [Tooltip("Lo que se lee al acercarse si esta atrancada (p. ej. 'Sin corriente') y el mensaje al intentarlo")]
+        public string sealedPrompt = "Atrancada";
+        public string sealedMessage = "La puerta se ha atrancado";
+        public string Prompt => moving ? "" : Sealed ? sealedPrompt : open ? "E  Cerrar puerta" : requiredKey != null ? "E  Abrir puerta (cerrada con llave)" : "E  Abrir puerta";
         public bool IsOpen => open;
         /// <summary>Atrancada: se cierra de golpe y no se puede abrir (el combate con el jefe encierra al jugador). Unseal() la libera.</summary>
         public bool Sealed { get; private set; }
@@ -137,7 +140,7 @@ namespace Horror
             if (moving) return;
             if (Sealed)
             {
-                Hud.Message("La puerta se ha atrancado");
+                Hud.Message(sealedMessage);
                 GameAudio.Play(Sfx.DoorLocked, transform.position);
                 return;
             }

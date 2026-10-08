@@ -339,3 +339,47 @@ El constructor saca solo lo demás:
 
 - 1.227 muebles y 47 piezas fijas.
 - **Comprobado:** con las puertas abiertas se llega a las 70 salas (ruta de NavMesh a cada una) y las capturas de 9 salas se ven bien.
+
+## Fase D hecha: puzles (`ComisariaGrandePuzzles`, menú *Horror/Comisaria grande/4 Puzles*)
+**Modelos nuevos** (`Tools/blender/build_puzzle_items.py`, en `Art/Props/Puzzle`): cizalla, tarjeta magnética, fusible, cadena con candado, lector de tarjetas y cuadro de fusibles.
+
+**Componentes nuevos:**
+- `LockVisual`: muestra el candado o el piloto rojo mientras la puerta está cerrada con llave, y el piloto verde al abrirla.
+- `ProgressSeal`: deja una puerta atrancada hasta una marca de progreso.
+- `Door.sealedPrompt` y `Door.sealedMessage`: textos propios de una puerta atrancada («Sin corriente»).
+- `MedallionMonument`: sus textos son configurables, así que también sirve de cuadro de fusibles.
+
+**Cadena del recorrido:**
+1. **Cizalla** (garaje, en el pasillo sur al oeste; lo dice la nota de la recepción). Corta los tres candados y no se gasta: puerta este del vestíbulo, puerta del pasillo sur en x 8 y puerta trasera de los vestuarios.
+2. **Ala este:**
+   - **Tarjeta de seguridad** en la oficina de seguridad. Abre el pasillo de seguridad y la escalera norte de la planta baja (así no se cuela nadie bajando desde la primera).
+   - **Escopeta** en la taquilla con teclado de la armería: código **4519**, en la nota de la sala de pruebas.
+3. **Sala de pruebas a oscuras:** el interruptor está junto a la puerta.
+4. **Pasillo norte:**
+   - Vestuarios: riñonera en una taquilla y la nota con el código de la biblioteca (**0832**).
+   - Puerta trasera con candado → callejón → **escalera de incendios** → despacho del jefe de seguridad (**tarjeta del jefe**) y azotea (caseta: **medallón III**).
+5. **Calabozos** (tarjeta del jefe): **medallón I** en el catre de la segunda celda.
+6. **Biblioteca** (primera planta): **medallón II** en la taquilla con teclado.
+7. **Memorial:**
+   - Con los tres medallones sube la reja de la escalera del archivo (pasillo norte de la primera planta).
+   - Arriba, en la arena central del archivo, espera el **jefe 1**. La puerta del archivo se atranca hasta que muere, y suelta la **llave del ascensor**.
+8. **Ascensor** (planta baja, junto a los aseos) → sótano.
+9. **Fusibles** para el **cuadro eléctrico** del ala este del sótano:
+   - almacén;
+   - taquilla del laboratorio, con el código **7258** de la nota de la sala de máquinas;
+   - galería de tuberías.
+
+   Con los tres, la puerta del pasillo de las calderas recupera la corriente.
+10. **Sala de calderas:**
+    - Al pisar el rellano despierta el **jefe 2** y la puerta se atranca.
+    - Suelta la **llave maestra**, que abre el **portón del túnel** (pared oeste del foso) y da la victoria.
+
+**Taquillas y notas:**
+- 10 taquillas: 3 con código y 7 normales con munición, curas o riñonera.
+- 8 notas con las pistas.
+- Las marcas de progreso (medallones, fusibles, corriente, reja, ascensor) se guardan con la partida.
+
+**Comprobado en Play:**
+- La puerta de calderas empieza «Sin corriente» y se libera con los tres fusibles.
+- El candado no abre sin cizalla y sí con ella: desaparece la cadena y la cizalla se conserva.
+- La tarjeta del jefe abre los calabozos y el piloto pasa de rojo a verde.

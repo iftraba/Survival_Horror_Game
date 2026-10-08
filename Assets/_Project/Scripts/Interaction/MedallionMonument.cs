@@ -15,6 +15,12 @@ namespace Horror
         public string doneFlag = "memorial";
         [TextArea] public string doneMessage = "Al encajar el ultimo medallon se oye una reja subiendo en la sala de ordenadores.";
         [TextArea] public string doneObjective = "Sube al archivo por la escalera de servicio de la sala de ordenadores (primera planta, al fondo).";
+        [Header("Textos (sirve tambien para otros puzles de piezas, como el cuadro de fusibles)")]
+        public string placePrompt = "E  Colocar medallon";
+        public string examinePrompt = "E  Examinar monumento";
+        [TextArea] public string emptyText = "\"En memoria de los agentes caidos en acto de servicio.\" Debajo de la estrella hay tres huecos redondos vacios.";
+        [Tooltip("{0} = huecos que quedan")] public string missingText = "Quedan {0} huecos vacios. Faltan {0} medallones.";
+        [Tooltip("{0} = puestos, {1} = total")] public string placedText = "Colocas el medallon ({0}/{1}).";
 
         Inventory inv;
 
@@ -28,7 +34,7 @@ namespace Horror
             return false;
         }
 
-        public string Prompt => Progress.Has(doneFlag) ? "" : CanPlace() ? "E  Colocar medallon" : "E  Examinar monumento";
+        public string Prompt => Progress.Has(doneFlag) ? "" : CanPlace() ? placePrompt : examinePrompt;
 
         void OnEnable() { Progress.Changed += Refresh; Refresh(); }
         void OnDisable() => Progress.Changed -= Refresh;
@@ -52,13 +58,11 @@ namespace Horror
             int placed = Placed, missing = medallions.Length - placed;
             if (put == 0)
             {
-                Hud.Message(missing == medallions.Length
-                    ? "\"En memoria de los agentes caidos en acto de servicio.\" Debajo de la estrella hay tres huecos redondos vacios."
-                    : $"Quedan {missing} huecos vacios. Faltan {missing} medallones.");
+                Hud.Message(missing == medallions.Length ? emptyText : string.Format(missingText, missing));
                 return;
             }
             GameAudio.Play(Sfx.DoorUnlock, transform.position);
-            if (missing > 0) { Hud.Message($"Colocas el medallon ({placed}/{medallions.Length})."); return; }
+            if (missing > 0) { Hud.Message(string.Format(placedText, placed, medallions.Length)); return; }
             Progress.Set(doneFlag);
             GameAudio.Play(Sfx.Switch, transform.position);
             Hud.Message(doneMessage);

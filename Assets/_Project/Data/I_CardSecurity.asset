@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fec1bc90f18f4e54caa80a75be7d65ee, type: 3}
+  m_Name: I_CardSecurity
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ItemData
+  displayName: Tarjeta de seguridad
+  description: Tarjeta de acceso del personal de seguridad. Abre las puertas con lector.
+  type: 3
+  icon: {fileID: 1579947497477030661, guid: 1e75b8699865c944cb468c3520a96588, type: 3}
+  tint: {r: 0.3, g: 0.6, b: 1, a: 1}
+  maxStack: 1
+  worldPrefab: {fileID: 919132149155446097, guid: 73d4f39b880a6744da9edb9eb5f7129d, type: 3}
+  worldScale: 2.5
+  mass: 0.5
+  pickupObjective: La tarjeta abre la puerta del pasillo de seguridad (al este del pasillo sur) y la de la escalera norte.
+  extraSlots: 2
+  healAmount: 50
+  weapon: {fileID: 0}
+  ammoType: 0

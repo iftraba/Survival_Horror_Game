@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fec1bc90f18f4e54caa80a75be7d65ee, type: 3}
+  m_Name: I_BoltCutter
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.ItemData
+  displayName: Cizalla
+  description: Cizalla de mangos largos. Corta los candados de las puertas.
+  type: 3
+  icon: {fileID: 3114110747631151484, guid: 13d570b6a8caf5148b32ed43e5c3b58c, type: 3}
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  maxStack: 1
+  worldPrefab: {fileID: 919132149155446097, guid: f01997cf8bc416e4fbfe19bcb4c841ac, type: 3}
+  worldScale: 1
+  mass: 0.5
+  pickupObjective: Con la cizalla puedes cortar los candados (vestibulo este, pasillo sur y la puerta trasera de los vestuarios).
+  extraSlots: 2
+  healAmount: 50
+  weapon: {fileID: 0}
+  ammoType: 0

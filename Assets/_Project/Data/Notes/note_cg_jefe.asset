@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_cg_jefe
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_cg_jefe
+  title: Mensaje del jefe de seguridad
+  category: 0
+  body: 'Me encierro en mi despacho de la primera planta con la tarjeta de los calabozos. He atrancado la puerta interior con todo lo que tenia.
+
+
+    Si alguien queda: la unica forma de llegar es la escalera de incendios del callejon. Se sale por la puerta trasera de los vestuarios, la del candado.'
+  highlight: escalera de incendios
+  image: {fileID: 0}
+  objective: Al despacho del jefe de seguridad se llega por la escalera de incendios del callejon (puerta trasera de los vestuarios).

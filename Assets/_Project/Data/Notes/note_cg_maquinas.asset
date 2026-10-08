@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_cg_maquinas
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_cg_maquinas
+  title: Parte de mantenimiento
+  category: 1
+  body: 'La puerta de seguridad del pasillo de las calderas va con el cuadro electrico del ala este, y le faltan los tres fusibles.
+
+
+    Uno quedo en el almacen, otro lo guarde en la taquilla del laboratorio (7 2 5 8) y el ultimo se cayo en la galeria de tuberias.'
+  highlight: 7258
+  image: {fileID: 0}
+  objective: 'Busca los tres fusibles: almacen, taquilla del laboratorio (7258) y galeria de tuberias.'

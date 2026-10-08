@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0dd9931911b5db4eb95eb9172f67223, type: 3}
+  m_Name: note_cg_tunel
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.NoteData
+  id: note_cg_tunel
+  title: Plano de evacuacion
+  category: 0
+  body: 'Salida de emergencia: tunel de servicio desde la sala de calderas hasta la calle de atras.
+
+
+    El porton se abre con la llave maestra del jefe de turno. El jefe de turno bajo a revisar la caldera hace dos dias y no ha vuelto.'
+  highlight: llave maestra
+  image: {fileID: 0}
+  objective: 
