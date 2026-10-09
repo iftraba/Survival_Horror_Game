@@ -27,8 +27,11 @@ La auditoría de rendimiento (editor, 640×480) dio la GPU como límite en la co
 - Entre N = 4, 6 y 8 la diferencia entra en el ruido de la medición, por eso se eligió 8 (más sombras, mismo coste medido).
 - Son cifras del editor a baja resolución. **La medición real en build a 1920×1080 está pendiente** (con F3).
 
+## Prueba en la build
+- 2026-10-09: el usuario jugó la Version 2 a 1920×1080 en su equipo (Core Ultra 7 255HX, RTX 5070 Ti Laptop) y confirmó que los fps van bien. **No se anotaron cifras**, así que no consta el valor exacto ni por escenario.
+
 ## Qué no se ha comprobado
-- Fotogramas por segundo en la build.
+- Cifras exactas de fps en la build (solo la valoración del usuario).
 - Si las salas lejanas se ven peor o si hay saltos visibles de sombra al caminar (lo valora quien juegue).
 - Cuánto sube el coste a 1920×1080.
 

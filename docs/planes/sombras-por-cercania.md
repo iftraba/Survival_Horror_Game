@@ -1,7 +1,7 @@
 # Plan: sombras de focos solo por cercanía
 
 - **Fecha:** 2026-10-09
-- **Estado:** Aprobado por el usuario (2026-10-09). Implementado; falta medir fps en la build
+- **Estado:** Hecho (2026-10-09). El usuario probó la build a 1920×1080 y dice que los fps van bien (sin cifras exactas)
 - **Autor:** Claude (Sonnet), a partir de la auditoría de rendimiento
 - **Rama:** rediseno-comisaria
 
