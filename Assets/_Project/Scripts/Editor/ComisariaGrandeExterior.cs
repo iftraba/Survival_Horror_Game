@@ -154,7 +154,7 @@ namespace Horror.EditorTools
 
             // zombis agolpados tras la verja de delante
             var zr = new GameObject("Zombis_Verja").transform; zr.SetParent(ext);
-            string[] types = { "Zombie_Civil", "Zombie_Girl", "Zombie_Cop", "Zombie_Oficial", "Zombie_Ejecutivo", "Zombie_Infectado", "Zombie_Civil", "Zombie_Girl", "Zombie_Paciente", "Zombie_Mecanico" };
+            string[] types = { "Zombie_Civil", "Zombie_Girl", "Zombie_Cop", "Zombie_Oficial", "Zombie_Pxl1", "Zombie_Cop", "Zombie_Civil", "Zombie_Girl", "Zombie_Pxl2", "Zombie_Oficial" };   // solo los aprobados
             for (int i = 0; i < types.Length; i++)
             {
                 var pf = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Characters/" + types[i] + ".prefab");

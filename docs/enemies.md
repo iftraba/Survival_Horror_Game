@@ -70,3 +70,9 @@ Reparto de los Pxl: oficina (Pxl1) y barricada (Pxl3) abajo; pasillo (Pxl1) y re
 - La velocidad de animación se ajusta a la velocidad real del agente ("gait mode", ver `animation.md`) para evitar patinar.
 - Los zombis rodean muebles: `RuntimeNavMesh` + `NavMeshAgent.climb` 0.3 impiden subirse.
 - Si el jugador carga partida, los zombis muertos se retiran y los vivos recuperan posición y vida.
+
+## Solo los zombis aprobados en la comisaría grande (2026-10-10)
+- La escena tenía 74 zombis de zona más 10 de la verja, y **37 + 4 eran de los 5 modelos generados descartados** (`Zombie_Ejecutivo`, `_Infectado`, `_Mecanico`, `_Paciente`, `_Policia`; rig Generic, controlador antiguo sin grito, derribo, aturdimiento ni agarre; `Zombie_Policia` además con clips humanoides sobre rig Generic, es decir, sin animar). Causa: el array `Normal` de `ComisariaGrandeEnemies` y la lista de la verja de `ComisariaGrandeExterior` los incluían.
+- Ahora `Normal` = `Zombie_Civil`, `Zombie_Cop`, `Zombie_Girl`, `Zombie_Oficial`, `Zombie_Pxl1`, `Zombie_Pxl2` (los de Mixamo con el juego unificado de `docs/enemies.md` 2026-10-08 y los de Pxltiger; Pxl3 lleva la piel del jefe 2). Los reptantes (`OficialReptante`) y carroñeros siguen igual.
+- Aplicado a la escena **en el sitio** (sin rehacer el exterior ni el botín): los 41 zombis descartados se sustituyen por aprobados con la misma posición, giro y estado de letargo (`dormant`), y los de la verja conservan `FenceRattler`. Censo final: 0 de los 5 descartados, 86 agentes con Animator y controlador. Los 5 prefabs descartados se quedan en el proyecto sin usar.
+- **Sin comprobar en Play:** que los aprobados animen bien (se leyó la configuración y se vieron en capturas del garaje).

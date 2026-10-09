@@ -19,7 +19,9 @@ namespace Horror.EditorTools
     /// </summary>
     public static class ComisariaGrandeEnemies
     {
-        static readonly string[] Normal = { "Zombie_Civil", "Zombie_Cop", "Zombie_Girl", "Zombie_Ejecutivo", "Zombie_Infectado", "Zombie_Mecanico", "Zombie_Oficial", "Zombie_Paciente", "Zombie_Policia" };
+        // Solo los aprobados por el usuario (docs/enemies.md, 2026-10-08): los de Mixamo con el juego de animaciones unificado y los de Pxltiger
+        // (Pxl3 lleva la piel del jefe 2). Los ZombieGen* (Ejecutivo, Infectado, Mecanico, Paciente, Policia) estan descartados: no usarlos.
+        public static readonly string[] Normal = { "Zombie_Civil", "Zombie_Cop", "Zombie_Girl", "Zombie_Oficial", "Zombie_Pxl1", "Zombie_Pxl2" };
 
         // sala -> (zombis, probabilidad de letargo, extras: 'R' reptante, 'C' carronero)
         static readonly (string room, int n, float dormant, string extra)[] Spawns =

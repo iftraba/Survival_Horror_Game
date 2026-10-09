@@ -21,6 +21,7 @@ MonoBehaviour:
   worldPrefab: {fileID: 919132149155446097, guid: f01997cf8bc416e4fbfe19bcb4c841ac, type: 3}
   worldScale: 1
   mass: 0.5
+  highlight: 1
   pickupObjective: Con la cizalla puedes cortar los candados (vestibulo este, pasillo sur y la puerta trasera de los vestuarios).
   extraSlots: 2
   healAmount: 50

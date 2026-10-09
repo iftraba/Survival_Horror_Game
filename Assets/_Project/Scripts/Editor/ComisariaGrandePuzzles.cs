@@ -125,11 +125,13 @@ namespace Horror.EditorTools
         {
             var d = DoorNamed(doorName); if (d == null) { log.Add("falta puerta " + doorName); return; }
             d.requiredKey = cutter; d.consumeKey = false; EditorUtility.SetDirty(d);
-            var leaf = d.transform.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name == "Leaf") ?? d.transform;
             var center = d.GetComponentInChildren<Renderer>().bounds.center;
-            var chain = Model(Pz + "PadlockChain.fbx", leaf, new Vector3(center.x, d.transform.position.y, center.z) + offset, sideYaw, false);
+            // Cuelga de la bisagra (escala 1), NO de la hoja: la hoja tiene escala no uniforme (1,46 x 2,36 x 0,05) y SetParent conserva la
+            // escala del mundo, asi que el candado salia estirado 29 veces y aplastado a 3 cm (un sliver de ~16 m: el "candado en el aire").
+            // La puerta no se mueve mientras esta cerrada con llave, y al cortarlo el candado cae por su cuenta (LockVisual.dropOnUnlock).
+            var chain = Model(Pz + "PadlockChain.fbx", d.transform, new Vector3(center.x, d.transform.position.y, center.z) + offset, sideYaw, false);
             chain.name = "Candado";
-            var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = chain;
+            var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = chain; lv.dropOnUnlock = true;
         }
 
         static void CardLock(string doorName, ItemData card, Vector3 readerPos, float yaw)
@@ -140,7 +142,7 @@ namespace Horror.EditorTools
             var fwd = Quaternion.Euler(0, yaw, 0) * Vector3.forward;
             var red = Led("Piloto_Rojo", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(1f, 0.1f, 0.05f));
             var green = Led("Piloto_Verde", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(0.2f, 1f, 0.3f));
-            var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = red; lv.unlockedVisual = green;
+            var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = red; lv.unlockedVisual = green; lv.beepOnUnlock = true;
         }
 
         // ------------------------------------------------------------------ entrada

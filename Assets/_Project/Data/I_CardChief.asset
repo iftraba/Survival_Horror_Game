@@ -21,6 +21,7 @@ MonoBehaviour:
   worldPrefab: {fileID: 919132149155446097, guid: 73d4f39b880a6744da9edb9eb5f7129d, type: 3}
   worldScale: 2.5
   mass: 0.5
+  highlight: 1
   pickupObjective: Con la tarjeta del jefe de seguridad se abren los calabozos (pasillo norte de la planta baja).
   extraSlots: 2
   healAmount: 50

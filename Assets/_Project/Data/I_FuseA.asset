@@ -21,6 +21,7 @@ MonoBehaviour:
   worldPrefab: {fileID: 919132149155446097, guid: ab46690ec5acb9a40990bf545dcfb775, type: 3}
   worldScale: 2
   mass: 0.5
+  highlight: 1
   pickupObjective: Pon los fusibles en el cuadro electrico del sotano (ala este) para dar corriente a la puerta de las calderas.
   extraSlots: 2
   healAmount: 50

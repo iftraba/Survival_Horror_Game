@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-10 · Enemies/Interaction/Level · **Fase F, parte 2, etapa A**: fuera los 5 modelos de zombi descartados (41 sustituidos en el sitio por los aprobados: Civil, Cop, Girl, Oficial, Pxl1, Pxl2); el candado ya no sale estirado como un sliver (colgaba de una hoja con escala no uniforme) y ahora se corta, cae con físicas y se desvanece; los objetos clave llevan un brillo suave (`PickupGlint`, `ItemData.highlight`). Plan para rehacer la planta en `docs/planes/fase-f-parte-2-rediseno-planta.md`; el esquema se enseñará antes de construir. Sin recompilar la build.
+
 - 2026-10-10 · Level/Core · **Fase F, parte 1 (arenas y luces)**: (1) kit `ComisariaGrandeArenaLoot` (menú 6): reserva de 6 cartuchos y 12 balas dentro de cada arena de jefe, para no quedar atrapado sin munición; (2) kit `ComisariaGrandeLightFix` (menú 7): recorta el rango de 59 luces de relleno, que eran la causa de las manchas de luz en los muros exteriores (fuga medida −90 %); (3) `ShadowBudget` reparte las 8 sombras en 4 focos con visión al jugador y 4 con una pared en medio (las fugas de focos a través de paredes bajan de 25/42/62 a 0/0/23). Sin recompilar la build; fps en build sin medir. Detalle en `docs/rediseno-comisaria.md` y `docs/sombras.md`.
 
 - 2026-10-09 · Core/Rendimiento · **Sombras por cercanía y contador de fps**: `ShadowBudget` deja con sombra solo los 8 focos más cercanos al jugador (antes 129 a la vez, que era el límite de la GPU en el editor), y `FpsCounter` (F3) muestra fps y el peor fotograma. En el editor la GPU pasó de 14,9-19,1 ms a 7,2-9,7 ms; falta medir en la build a 1920×1080. Detalle en `docs/sombras.md`.

@@ -19,6 +19,7 @@ namespace Horror
         [Tooltip("Modelo que se ve en el suelo")] public GameObject worldPrefab;
         public float worldScale = 1f;
         [Tooltip("Masa del cuerpo rigido (kg)")] public float mass = 0.5f;
+        [Tooltip("Objeto clave de un puzle: en el mundo lleva un brillo suave pulsante (PickupGlint) para distinguirlo del desorden")] public bool highlight;
 
         [Header("Objetivo")]
         [Tooltip("Si no esta vacio, al recoger este objeto el objetivo de la partida pasa a este texto")]

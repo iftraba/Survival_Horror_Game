@@ -41,7 +41,9 @@ namespace Horror.EditorTools
 
         public static string Apply()
         {
-            var level = GameObject.Find("--- LEVEL ---").transform;
+            var levelGo = GameObject.Find("--- COMISARIA V2 ---") ?? GameObject.Find("--- LEVEL ---");   // la comisaria grande vive bajo --- COMISARIA V2 ---
+            if (levelGo == null) return "no hay raiz del nivel";
+            var level = levelGo.transform;
             var old = level.Find("WallDressing");
             if (old != null) Object.DestroyImmediate(old.gameObject);
             var root = new GameObject("WallDressing").transform;

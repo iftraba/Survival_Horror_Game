@@ -21,6 +21,7 @@ MonoBehaviour:
   worldPrefab: {fileID: 919132149155446097, guid: 1a57b5e4bc7feff429f944925d2009b5, type: 3}
   worldScale: 1.5
   mass: 0.1
+  highlight: 1
   pickupObjective: Abre el porton del tunel de servicio, en la pared oeste de la sala de calderas.
   extraSlots: 2
   healAmount: 50

@@ -420,3 +420,9 @@ Sale de la revisión de nivel (`/level-review`) y de `docs/planes/fase-f-arenas-
 **Cambio 3: reparto de sombras de `ShadowBudget`** (4 plazas para focos con visión, 4 para focos con pared en medio). Detalle, tablas y mediciones en `docs/sombras.md`: las fugas de focos a través de paredes bajan de 25/42/62 a 0/0/23 (suelo/cabeza/sobre la cabeza).
 
 **Sin comprobar:** fps reales en una build (la build del escritorio no lleva estos cambios hasta `/recompile`), qué tal se siente el ambiente jugando y si las reservas bastan.
+
+## Fase F, parte 2: rehacer el diseño (2026-10-10), etapa A hecha
+Tras probar la build, el usuario rechazó el diseño: pasillos estrechos y sin carácter, salas iguales conectadas solo por puertas, objetos «al tuntún», munición insuficiente, zombis descartados, candado sin animación y salas oscuras. Plan aprobado en `docs/planes/fase-f-parte-2-rediseno-planta.md`; decisiones del usuario: **rehacer la planta**, **solo zombis aprobados**, **menos zombis y munición para casi todos**, **luz mixta**.
+- **Etapa A (hecha, ver `docs/interaction.md` y `docs/enemies.md`):** zombis descartados fuera, candado corregido y con animación de corte, brillo en los objetos clave, `WallDressingKit` apuntando a la raíz de la comisaría grande (sin ejecutarlo todavía).
+- **Etapa B (siguiente):** esquema de la nueva planta para que el usuario lo apruebe **antes de construir**. Etapas C a G: estructura, salas con carácter, puzles/zombis/botín por anclas, luz y verificación.
+- Observado de paso: el pasillo sur de la planta baja y el garaje se ven muy oscuros en Play (una sola lámpara de 28 por sala de 12×12), lo que confirma la queja de la luz.
