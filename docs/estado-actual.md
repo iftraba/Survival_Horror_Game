@@ -10,7 +10,7 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
   - `Desktop/Sector7 - Version 2 (comisaria nueva)/Sector7_Grimheim.exe`: menú + `Comisaria_v2` (empieza con la escena de cámara alrededor de la comisaría; sus guardados van aparte, `savegame_v2_N.json`).
   - La build antigua de `Desktop/Juego` (commit `ad06e54`) sigue ahí. Volver a compilar al añadir cosas (ver `docs/art-pipeline.md`).
 - Documentación por módulos en `docs/` y registro de cambios en el README (regla: actualizar en cada cambio).
-- Skills del proyecto en `.claude/skills/`: `pedir-modelo-ia`, `modelo-blender`, `recompile`, `plan`.
+- Skills del proyecto en `.claude/skills/`: `pedir-modelo-ia`, `modelo-blender`, `recompile`, `plan`, `level-review`, `performance-audit`.
 - Agentes por modelo en `.claude/agents/` (`disenador` Opus, `aplicador` Sonnet, `rutinas` Haiku) y reglas de trabajo en el `CLAUDE.md` de la raíz. El relevo entre agentes es un plan en `docs/planes/`.
 
 ## Sonidos

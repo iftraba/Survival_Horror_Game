@@ -22,6 +22,7 @@ Juego de terror en tercera persona en Unity 6000.6.4f1 (URP), con modelos hechos
 - **Opus (agente `disenador`):** define diseño, flujo de nivel, puzles, equilibrio y arquitectura. Solo lee y escribe planes en `docs/planes/`.
 - **Sonnet (agente `aplicador`):** aplica un plan ya aprobado (kits de editor, scripts, Blender, escena) y lo prueba.
 - **Haiku (agente `rutinas`):** tareas cíclicas: docs y registro del README, commits y push, comprobaciones de rutas, capturas, listados.
+- Revisiones de solo lectura: skills `level-review` (nivel, recorrido, equilibrio, luz) y `performance-audit` (mediciones del profiler).
 - Un agente nuevo empieza sin contexto: el relevo siempre es un documento de `docs/planes/`.
 - **Un solo escritor sobre la escena a la vez.** Solo hay un Unity abierto. Haiku puede ir en paralelo porque solo toca documentos.
 
