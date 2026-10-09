@@ -5,7 +5,7 @@ Fecha de cierre: 2026-10-09. Último commit: `e98f123`. Todo subido a GitHub.
 ## Estado actual
 - **Escena de trabajo:** `Assets/Scenes/Comisaria_v2.unity`. Su nivel se genera con `ComisariaGrande` (fase A) y los kits de las fases B a E. Hasta ahora se usaba la `Comisaria_v2` de las fases 1 a 6 (edificio pequeño); el de la comisaría grande la sustituye.
 - **Escena original:** `Assets/Scenes/Comisaria.unity`, sin tocar, de referencia.
-- **Builds en el escritorio:** dos carpetas, `Sector7 - Version 1 (comisaria original)` y `Sector7 - Version 2 (comisaria nueva)`. Son anteriores a la comisaría grande (la v2 usa la escena de las fases 1 a 6). Hay que recompilar para llevar la última versión.
+- **Builds en el escritorio:** dos carpetas, `Sector7 - Version 1 (comisaria original)` y `Sector7 - Version 2 (comisaria nueva)`. La **Version 2 se recompiló el 2026-10-09** con la comisaría grande y las sombras por cercanía (`docs/sombras.md`); la Version 1 sigue siendo anterior. Para recompilar la v2 hay que pasar las escenas `MainMenu` + `Comisaria_v2` a mano (Build Settings lleva `Comisaria`); el skill `/recompile` apunta a `Desktop/Juego`, que ya no existe.
 - **Build antigua:** `Desktop/Juego` (commit `ad06e54`), sin tocar.
 
 ## Qué se ha hecho (en orden)

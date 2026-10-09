@@ -7,7 +7,7 @@ Resumen para retomar el trabajo en una conversación nueva sin perder contexto. 
 - Versión estable en la etiqueta `estable` (anterior a menú, planta superior y teléfonos; moverla cuando el usuario lo pida).
 - Exportaciones Windows (2026-10-08, rama `rediseno-comisaria`, commit siguiente a `8642d6e`), en dos carpetas del escritorio:
   - `Desktop/Sector7 - Version 1 (comisaria original)/Sector7_Grimheim.exe`: menú + `Comisaria`.
-  - `Desktop/Sector7 - Version 2 (comisaria nueva)/Sector7_Grimheim.exe`: menú + `Comisaria_v2` (empieza con la escena de cámara alrededor de la comisaría; sus guardados van aparte, `savegame_v2_N.json`).
+  - `Desktop/Sector7 - Version 2 (comisaria nueva)/Sector7_Grimheim.exe`: menú + `Comisaria_v2` (empieza con la escena de cámara alrededor de la comisaría; sus guardados van aparte, `savegame_v2_N.json`). **Recompilada el 2026-10-09 con la comisaría grande (fases A a E), `ShadowBudget` (8 focos con sombra) y contador de fps con F3**; commit siguiente a `ff4f8d2`. Se construyó pasando las escenas `MainMenu` + `Comisaria_v2` a mano, porque Build Settings solo lleva `Comisaria`. La versión 1 sigue siendo de 2026-10-08.
   - La build antigua de `Desktop/Juego` (commit `ad06e54`) sigue ahí. Volver a compilar al añadir cosas (ver `docs/art-pipeline.md`).
 - Documentación por módulos en `docs/` y registro de cambios en el README (regla: actualizar en cada cambio).
 - Skills del proyecto en `.claude/skills/`: `pedir-modelo-ia`, `modelo-blender`, `recompile`, `plan`, `level-review`, `performance-audit`.

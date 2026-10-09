@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-09 · Core/Rendimiento · **Sombras por cercanía y contador de fps**: `ShadowBudget` deja con sombra solo los 8 focos más cercanos al jugador (antes 129 a la vez, que era el límite de la GPU en el editor), y `FpsCounter` (F3) muestra fps y el peor fotograma. En el editor la GPU pasó de 14,9-19,1 ms a 7,2-9,7 ms; falta medir en la build a 1920×1080. Detalle en `docs/sombras.md`.
+
 - 2026-10-09 · Tooling · **Skills de revisión**: `level-review` (recorrido sin bloqueos, ritmo, recursos, arenas, salas seguras, luz) y `performance-audit` (recuento y mediciones reales con el profiler), adaptadas a la comisaría grande. Solo informan.
 - 2026-10-09 · Tooling · **Agentes por modelo y `CLAUDE.md`**: `CLAUDE.md` en la raíz con el estado, las reglas de trabajo (plan antes de trabajar, no compilar en Play…) y las trampas de la escena. Tres agentes en `.claude/agents/`: `disenador` (Opus: decide y escribe planes en `docs/planes/`), `aplicador` (Sonnet: ejecuta el plan aprobado) y `rutinas` (Haiku: docs, commits y comprobaciones). Skill `/plan` y plantilla `docs/planes/PLANTILLA.md`.
 - 2026-10-09 · Enemies/Level · **Comisaría grande, fase E (zombis y botín)**: 74 zombis por zonas (2-3 por sala o pasillo), con reptantes, carroñeros y zombis en letargo para emboscadas, y botín justo (unas 140 balas, 40 cartuchos y 7 sprays además de lo de las taquillas).
