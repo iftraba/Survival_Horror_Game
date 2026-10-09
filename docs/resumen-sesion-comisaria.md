@@ -19,7 +19,9 @@ Fecha de cierre: 2026-10-09. Último commit: `e98f123`. Todo subido a GitHub.
    - **E. Zombis y botín:** 74 zombis (12 en letargo), 23 objetos sueltos.
 
 ## Planes y pendiente
-- **Fase F: pase de juego y equilibrio.** Jugarlo entero de principio a fin. Equilibrar munición y zombis (`ComisariaGrandeEnemies.Spawns`). Pase de luces: fugas de luz por fuera del archivo y salas algo oscuras.
+- **Fase F: pase de juego y equilibrio.** Jugarlo entero de principio a fin. Equilibrar munición y zombis (`ComisariaGrandeEnemies.Spawns`).
+  - **Hecho el 2026-10-10 (parte 1, `docs/planes/fase-f-arenas-y-luces.md`):** reservas de munición en las dos arenas (menú 6), recorte de luces de relleno que fugaban por fuera (menú 7) y nuevo reparto de sombras en `ShadowBudget`. Sin recompilar la build; fps sin medir fuera del editor.
+  - **Pendiente:** jugarlo entero, decidir si la puerta de una arena se libera sin munición, valorar el equilibrio (la revisión salió con ~60 % de cobertura de munición para los zombis y jefes de cada tramo con acierto perfecto) y si hace falta un punto de guardado cerca del archivo (el más cercano al jefe 1 queda a ~140-160 m por pasillos, estimado).
 - **Rendimiento:** medir con todos los zombis en una build. Si va justo: occlusion culling o menos zombis.
 - **Recompilar las dos builds** del escritorio con la comisaría grande cuando se quiera probarla fuera del editor.
 - **Documentación:** `docs/rediseno-comisaria.md` tiene las fases A a E. Falta el pase F. El README tiene las entradas del registro.

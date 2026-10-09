@@ -398,3 +398,25 @@ El constructor saca solo lo demás:
 **Comprobado:** 400 fotogramas en Play sin errores. Falta probar el rendimiento con todos los zombis en una build. Si va justo: occlusion culling (las paredes no ocultan nada ahora) o menos zombis en `Spawns`.
 
 **Pendiente (fase F):** jugarlo entero, equilibrar munición y zombis, y el pase de luces (fugas de luz por fuera del archivo; salas algo oscuras). Los menús viejos *Horror/Comisaria v2/…* son del diseño anterior: no hay que usarlos sobre esta escena.
+
+## Fase F, parte 1: reservas en las arenas y fugas de luz (2026-10-10)
+Sale de la revisión de nivel (`/level-review`) y de `docs/planes/fase-f-arenas-y-luces.md`. **No cambia el equilibrio general** (vida de zombis frente a munición): eso va después de jugar el nivel entero.
+
+**Cambio 1: reservas de munición en las arenas** (`ComisariaGrandeArenaLoot`, menú *Horror/Comisaria grande/6 Reservas de arenas*)
+- Por qué: con la puerta sellada no se puede salir ni recoger munición, y dentro de las arenas no había ninguna. Quien entra sin balas solo puede morir y cargar.
+- Cada arena lleva 6 cartuchos y 12 balas (provisional, a ajustar jugando), en el suelo y a 4,5-8,5 m del jefe. En el archivo, además, **dentro** del volumen del disparador del jefe 1, para no poder cogerlas antes de que empiece el combate (el disparador del jefe 2 es solo el rellano, no la arena).
+- Colocadas: archivo `(20,9; 7,5; 27,2)` y `(11,0; 7,5; 31,7)`; foso de calderas `(-23,4; -6,5; 38,1)` y `(-26,6; -6,5; 36,5)`. Todas con ruta de NavMesh desde el jefe o el rellano, en suelo desnudo y fuera de `_Props` (rompible).
+- Repetible: rehace solo el grupo `Botin_Arenas`. Va aparte del menú 5, que rehace zombis y botín al azar. Total de recogidas: 45 (antes 41).
+- Es una ayuda, no una garantía: con un 50 % de acierto, el jefe 1 pide ~26 cartuchos. **Decisión abierta:** liberar la puerta si el jugador se queda sin munición (opción B del plan); se decide tras jugar.
+
+**Cambio 2: fugas de luz exteriores** (`ComisariaGrandeLightFix`, menú *Horror/Comisaria grande/7 Pase de luces*)
+- Diagnóstico (Play, capturas de la azotea): las manchas en la cara exterior del muro sur del archivo desaparecen al anular las luces de relleno `Fill` (puntuales, sin sombra, rango 5). **No las causan ni los focos ni `ShadowBudget`**: con las 131 sombras originales seguían igual.
+- Dos causas: relleno a menos de su alcance de un muro exterior, y relleno de la primera planta bajo una azotea cuya luz sube por el forjado y alumbra la base de los muros del archivo (pasillo `F_C1`).
+- El kit recorta el rango del relleno (mínimo 2,5 m, base 5) hasta la distancia al muro exterior más cercano y, bajo una azotea, hasta la distancia 3D a la base del muro que se levanta sobre ella. 59 de 129 rellenos recortados. Idempotente: parte siempre del rango 5.
+- Resultado medido en 20 puntos a 1 m fuera de los muros (solo rellenos): 5 puntos con fuga e irradiancia relativa 1,43 → **2 puntos y 0,14** (−90 %). En la captura de la azotea, las manchas grandes quedan en dos destellos pequeños y tenues en la base del muro (mínimo de rango 2,5 m).
+- El interior no se oscurece de forma visible: capturas A/B del pasillo `F_C1` con rango 5 y con el recorte, prácticamente iguales.
+- Si se rehace el nivel con el menú 1, hay que volver a ejecutar los menús 6 y 7 (y el 5 si se rehace el botín).
+
+**Cambio 3: reparto de sombras de `ShadowBudget`** (4 plazas para focos con visión, 4 para focos con pared en medio). Detalle, tablas y mediciones en `docs/sombras.md`: las fugas de focos a través de paredes bajan de 25/42/62 a 0/0/23 (suelo/cabeza/sobre la cabeza).
+
+**Sin comprobar:** fps reales en una build (la build del escritorio no lleva estos cambios hasta `/recompile`), qué tal se siente el ambiente jugando y si las reservas bastan.

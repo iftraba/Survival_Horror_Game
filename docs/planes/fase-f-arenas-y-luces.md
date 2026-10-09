@@ -1,7 +1,7 @@
 # Plan: fase F, parte 1 (reservas en las arenas y fugas de luz)
 
 - **Fecha:** 2026-10-09
-- **Estado:** Borrador (pendiente del OK del usuario)
+- **Estado:** Hecho (2026-10-10), aprobado por el usuario con la opción A. Falta jugarlo y medir fps en una build
 - **Autor:** Claude (Sonnet), a partir de la revisión de nivel `/level-review` del mismo día
 - **Rama:** rediseno-comisaria
 
@@ -94,4 +94,19 @@ No se toca el equilibrio general (vida de zombis frente a munición): eso va des
 - `ShadowBudget` está en la build de la versión 2 de hoy; los cambios solo llegan a la build tras `/recompile`.
 
 ## Resultado (lo rellena quien ejecuta)
-Pendiente.
+Hecho el 2026-10-10. Las decisiones abiertas quedaron así: 1 = **A** (reservas, sin liberar la puerta; B se decide tras jugar); 2 = 6 cartuchos y 12 balas por arena; 3 = 4 + 4 como se recomendó; 4 = recorte de rangos, **solo de las luces de relleno** (el diagnóstico mostró que los focos no fugan).
+
+**Hecho y comprobado (editor, Play avanzando con `Step`, NavMesh y capturas):**
+- Diagnóstico de la fuga (paso 2): las manchas desaparecen al anular los rellenos; no dependen de `ShadowBudget` ni de los focos.
+- Cambio 3: `ShadowBudget` reescrito (`visibleSlots` 4, dos puntos de prueba: suelo y cabeza). En 61 salas y pasillos, fugas de focos a través de paredes: 25/42/62 → 0/0/23 (suelo/cabeza/sobre la cabeza); nunca más de 8 luces con sombra. Coste en CPU principal en una prueba A/B: unos 0,5 ms.
+- Cambio 2: `ComisariaGrandeLightFix` (menú 7), idempotente (repetido da lo mismo). Fuga de rellenos en 20 puntos exteriores: 5 puntos y 1,43 → 2 y 0,14. Capturas: las manchas grandes quedan en dos destellos pequeños. Pasillo `F_C1` A/B sin diferencia visible.
+- Cambio 1: `ComisariaGrandeArenaLoot` (menú 6): 4 objetos en el suelo dentro de las arenas, con ruta de NavMesh desde el jefe o el rellano; 45 recogidas (antes 41).
+- Docs: `docs/sombras.md`, `docs/rediseno-comisaria.md` (fase F, parte 1) y registro del README.
+
+**Corregido por el camino (errores míos):** el primer punto de prueba de `ShadowBudget` (los ojos) hacía que la regla nueva midiera 0 fugas por estar optimizada para ese mismo punto; el recorrido de salas teletransportó al jugador dentro del suelo (el pivote está ~1 m sobre los pies) y la primera medida no valió; la primera reserva del archivo cayó fuera del volumen que sella la puerta. Las tres se arreglaron y se repitió la medida.
+
+**No comprobado / pendiente:**
+- **Fps en una build.** La build del escritorio no lleva nada de esto hasta `/recompile`. Las medidas de GPU/CPU del editor de ese día salieron más altas que las del 2026-10-09 incluso con el presupuesto desactivado, sin causa conocida: no son comparables con la tabla de `docs/sombras.md`.
+- Si 6 cartuchos y 12 balas bastan en las arenas, y si la puerta debe liberarse (opción B).
+- El ambiente jugando, y los destellos que quedan en la base del muro sur del archivo (se quitarían bajando el rango mínimo de 2,5 m a 2 m en `ComisariaGrandeLightFix`).
+- Las reservas solo aparecen al empezar partida o con el nivel actualizado; un guardado antiguo no las tiene.
