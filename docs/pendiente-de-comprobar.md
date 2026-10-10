@@ -1,6 +1,6 @@
 # Pendiente de probar y comprobar (comisaría grande, rediseño de la planta)
 
-Lista viva de lo que **no se ha comprobado** o solo se vio a medias. Se consulta con la skill `pendiente-comprobar`. Al comprobar algo, se tacha aquí con fecha y cómo se hizo; si falla, se anota la salida real. Última actualización: 2026-10-10 (tras la etapa E).
+Lista viva de lo que **no se ha comprobado** o solo se vio a medias. Se consulta con la skill `pendiente-comprobar`. Al comprobar algo, se tacha aquí con fecha y cómo se hizo; si falla, se anota la salida real. Última actualización: 2026-10-10 (tras la etapa F).
 
 Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]** necesita al usuario jugando · **[ETAPA]** depende de una etapa por hacer.
 
@@ -39,16 +39,18 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [JUGAR] El jefe 1 en la arena nueva (36×29 m, antes 13,6 m): ¿se puede huir dando vueltas?, ¿rompe los muebles y no las estanterías de obra?, ¿alcanza la reserva?
 - [ ] [JUGAR] El jefe 2 y la reserva de la caldera; el portón final.
 
-## 4. Luz (etapa F, sin hacer)
-- [ ] [ETAPA] Menú 7 (`ComisariaGrandeLightFix`) sin adaptar: no ejecutar hasta la etapa F.
-- [ ] [ETAPA] Lámparas por m² (una por ~40 m²), color por zona, 6 salas a oscuras con interruptor (pruebas ya lo tiene; faltan calabozos, biblioteca, interrogatorios, almacén y laboratorio del sótano), 25-30 % del atrio, comedor y galerías apagadas.
-- [ ] [PC] Salas muy oscuras ahora (la radio, el atrio): brillo medio de capturas por sala para detectar negros.
-- [ ] [PC] Fugas de luz por fuera del edificio (el archivo las tenía) y luz de la rampa, la explanada y el callejón.
-- [ ] [PC] Interruptor de cada sala oscura a menos de 2 m de su puerta y visible; el de pruebas con sus dos pilotos.
-- [ ] [PC] `ShadowBudget` con las lámparas nuevas (límite de sombras) y las luces de mesa de los objetos clave.
+## 4. Luz (etapa F, hecha el 2026-10-10)
+- [x] Menú 7 adaptado, lámparas por m², color por zona, lámparas rotas, 6 salas a oscuras con interruptores (2026-10-10: luminancia medida en Play, mediana 5,5 % → 8,0 %; interruptores accionados por script en calabozos, laboratorio, biblioteca y pruebas, anillo sincronizado).
+- [ ] [JUGAR] ¿8 % de mediana es la penumbra buscada? (valor provisional; ajustar con 7a → 4 → 7). Hoy las salas con interruptor apagado quedan a 1-2 %.
+- [ ] [PC] Los interruptores se accionan con la tecla E desde el sitio donde está el jugador y se ven (piloto naranja): solo se vieron en captura y accionados por script.
+- [ ] [PC] Guardado de los interruptores en anillo (SaveSystem los guarda por orden): cargar partida con la biblioteca encendida y ver que los tres siguen iguales.
+- [ ] [PC] Fugas de luz por fuera del edificio (el archivo las tenía) y luz de la rampa, la explanada y el callejón (9 luces añadidas, sin ver).
+- [ ] [PC] Salas pequeñas con una lámpara muy cerca (G_Atrio4 31 %, G_Atrio3 14 %, caseta 17 %) y el atrio, aún oscuro en la zona de entrada.
+- [ ] [PC] `ShadowBudget` con 252 lámparas y las luces de mesa de los objetos clave (límite de 8 sombras).
+- [ ] [PC] Lámparas rotas (5) y parpadeantes (5): que se ven bien y no molestan.
 
 ## 5. Rendimiento
-- [ ] [PC] Skill `performance-audit` en 1080p tras el pase de luces: GPU en el atrio con el hueco (objetivo provisional ≤ 12 ms), F3 (`FpsCounter`), recuento de luces.
+- [ ] [PC] Skill `performance-audit` en 1080p con las 252 lámparas (el contador de frame timing del editor devolvió GPU 0 ms: no sirve; usar F3 y el profiler): GPU en el atrio con el hueco (objetivo provisional ≤ 12 ms), F3 (`FpsCounter`), recuento de luces.
 - [ ] [JUGAR] fps en una **build** (no se ha medido; la build del escritorio no lleva nada de la planta nueva hasta `/recompile`, que solo se hace si lo pide el usuario).
 
 ## 6. Exterior y resto

@@ -428,22 +428,74 @@ namespace Horror.EditorTools
             }
         }
 
+        /// <summary>El punto si no cae en ningun hueco de losa; si cae, el punto mas cercano pegado al borde del hueco (a 0,7 m) que siga dentro de la sala y fuera de otros huecos; null si no hay.</summary>
+        static Vector2? OutsideHoles(Room r, Vector2 p)
+        {
+            Rect? hit = null;
+            foreach (var h in SlabHoles) if (h.r.Contains(p)) { hit = h.r; break; }
+            if (hit == null) return p;
+            var hr = hit.Value; float m = 0.7f;
+            var cands = new[] { new Vector2(hr.xMin - m, Mathf.Clamp(p.y, hr.yMin, hr.yMax)), new Vector2(hr.xMax + m, Mathf.Clamp(p.y, hr.yMin, hr.yMax)),
+                                new Vector2(Mathf.Clamp(p.x, hr.xMin, hr.xMax), hr.yMin - m), new Vector2(Mathf.Clamp(p.x, hr.xMin, hr.xMax), hr.yMax + m) };
+            Vector2? best = null; float bd = float.MaxValue;
+            foreach (var c in cands)
+            {
+                if (!r.r.Contains(c) || SlabHoles.Any(h => h.r.Contains(c))) continue;
+                float d = Vector2.Distance(c, p); if (d < bd) { bd = d; best = c; }
+            }
+            return best;
+        }
+
+        /// <summary>Color de las lamparas de una sala por zona (etapa F): ambar en vestibulo/atrio/galeria, sodio en el garaje, frio verdoso en calabozos, rojo de emergencia en el sotano industrial, azulado en los pasillos de servicio. Las salas con color propio lo conservan.</summary>
+        static Color ZoneColor(Room r)
+        {
+            var d = new Vector3(r.light.r - 1f, r.light.g - 0.93f, r.light.b - 0.82f);
+            if (r.kind == Kind.Corridor || d.magnitude > 0.02f) return r.light;
+            switch (r.type)
+            {
+                case "garage": return new Color(1f, 0.72f, 0.38f);
+                case "cells": case "custody": return new Color(0.72f, 1f, 0.86f);
+                case "lobby": case "atrium": case "gallery": case "hall": case "waiting": return new Color(1f, 0.84f, 0.6f);
+            }
+            return r.floor < -1f ? new Color(1f, 0.64f, 0.56f) : r.light;
+        }
+
+        /// <summary>
+        /// Lamparas (etapa F): una por ~40 m2 (2 a 8 por sala), foco de 36 (halls, atrio y galerias 29, pasillos de servicio 22) con rango 7,5, y relleno
+        /// puntual (rango 6, intensidad 7) en una de cada dos lamparas de las salas de mas de 100 m2. Nombres "Lamp_&lt;sala&gt;#n". Entre el 25 y el 30 %
+        /// de las del atrio, galerias y comedor estan rotas (nunca se encienden) y 1 de cada 3 de los pasillos del sotano parpadea.
+        /// </summary>
         static void EmitLamps()
         {
+            var rnd = new System.Random(31);
             foreach (var r in Rooms.Where(r => r.Indoor))
             {
-                float spacing = r.kind == Kind.Corridor ? 10f : 9.5f;
-                int nx = Mathf.Max(1, Mathf.RoundToInt(r.r.width / spacing)), nz = Mathf.Max(1, Mathf.RoundToInt(r.r.height / spacing));
-                if (r.r.width < 3.1f) nx = 1; if (r.r.height < 3.1f) nz = 1;
+                float area = r.r.width * r.r.height;
+                int want = Mathf.Clamp(Mathf.RoundToInt(area / (r.kind == Kind.Corridor ? 45f : 40f)), 2, 8);
+                // rejilla de nx x nz que reparte 'want' lamparas con celdas lo mas cuadradas posible
+                int nx = Mathf.Max(1, Mathf.RoundToInt(Mathf.Sqrt(want * r.r.width / r.r.height))), nz = Mathf.Max(1, Mathf.CeilToInt(want / (float)nx));
+                nx = Mathf.Min(nx, 8); nz = Mathf.Min(nz, 8);
+                if (r.r.width < 3.1f) { nx = 1; nz = Mathf.Max(nz, want); }
+                if (r.r.height < 3.1f) { nz = 1; nx = Mathf.Max(nx, want); }
+                bool tall = r.type == "atrium" || r.type == "gallery" || r.type == "hall";
+                float inten = r.kind == Kind.Corridor ? 22f : tall ? 29f : 36f;       // medido en Play (luminancia media de cada sala): con 20/16/12 la mediana era del 5,5 %, con estos ~8 %
+                float range = Mathf.Min(7.5f, r.ceil - r.floor + 4f);
+                var color = ZoneColor(r);
+                bool mayBreak = r.type == "atrium" || r.type == "gallery" || r.id == "F_Canteen";
+                int k = 0;
                 for (int i = 0; i < nx; i++)
                     for (int j = 0; j < nz; j++)
                     {
                         var xz = new Vector3(r.r.xMin + r.r.width * (i + 0.5f) / nx, 0f, r.r.yMin + r.r.height * (j + 0.5f) / nz);
-                        if (SlabHoles.Any(h => h.r.Contains(new Vector2(xz.x, xz.z)))) continue;
-                        float inten = r.kind == Kind.Corridor ? 22f : 28f;
-                        var lamp = Call<CeilingLamp>("Lamp", level, xz, r.light, inten, Mathf.Min(14f, r.ceil - r.floor + 6f), false, 5f, 8f);
+                        var spot = OutsideHoles(r, new Vector2(xz.x, xz.z));          // una lampara no cuelga de un hueco de escalera o de la galeria: se arrima a su borde
+                        if (spot == null) continue;
+                        xz = new Vector3(spot.Value.x, 0f, spot.Value.y);
+                        bool fill = area > 100f && k % 2 == 0;
+                        var lamp = Call<CeilingLamp>("Lamp", level, xz, color, inten, range, r.floor < -1f && r.kind == Kind.Corridor && k % 3 == 1, fill ? 6f : 0f, fill ? 7f : 0f);
                         lamp.transform.position += Vector3.up * (r.ceil - 3.0f);
-                        lamp.name = "Lamp_" + r.id;
+                        lamp.name = "Lamp_" + r.id + "#" + k;
+                        if (mayBreak && rnd.NextDouble() < 0.28) lamp.dead = true;
+                        k++;
                         lamps++;
                     }
             }
@@ -658,6 +710,25 @@ namespace Horror.EditorTools
         // ------------------------------------------------------------------ entrada
         [MenuItem("Horror/Comisaria grande/1 Estructura")]
         public static void Menu() { Debug.Log("[Horror] " + Build()); }
+
+        /// <summary>Rehace solo las lamparas (sin tocar la estructura, el mobiliario ni lo demas) para ajustar la luz rapido. Despues hay que repetir el menu 4 (los interruptores apuntan a las lamparas) y el 7.</summary>
+        [MenuItem("Horror/Comisaria grande/7a Rehacer lamparas")]
+        public static void RebuildLampsMenu() { Debug.Log("[Horror] " + RebuildLamps()); }
+
+        public static string RebuildLamps()
+        {
+            if (EditorApplication.isPlaying) return "no con el editor en Play";
+            Define();
+            var scene = EditorSceneManager.GetActiveScene();
+            if (scene.path != ScenePath) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            var root = GameObject.Find("--- COMISARIA V2 ---"); if (root == null) return "falta la fase A";
+            level = root.transform; lamps = 0;
+            foreach (var t in level.Cast<Transform>().Where(t => t.name.StartsWith("Lamp_")).ToList()) Object.DestroyImmediate(t.gameObject);
+            EmitLamps();
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            return "lamparas rehechas: " + lamps + " (repite el menu 4 y el 7)";
+        }
 
         public static string Build()
         {

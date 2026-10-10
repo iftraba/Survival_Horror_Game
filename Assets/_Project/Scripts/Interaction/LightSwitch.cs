@@ -45,11 +45,15 @@ namespace Horror
             on = !on;
             foreach (var l in lamps) if (l != null) l.SetPowered(on);
             ApplyLever();
-            if (partner != null) partner.Mirror(on);
+            if (partner != null) partner.Mirror(on, this);
             GameAudio.Play(Sfx.Switch, transform.position, 0.9f, 1f, false);
         }
 
-        void Mirror(bool value) { on = value; restored = true; ApplyLever(); }
+        void Mirror(bool value, LightSwitch origin)
+        {
+            on = value; restored = true; ApplyLever();
+            if (partner != null && partner != origin) partner.Mirror(value, origin);      // anillo A->B->C->A: se para al volver al que lo pulso
+        }
 
         void ApplyLever()
         {

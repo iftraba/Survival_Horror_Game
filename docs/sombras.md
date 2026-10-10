@@ -56,3 +56,6 @@ Con la regla de «las N más cercanas» había focos sin sombra cuya luz cruzaba
 
 ## Si hay que ajustarlo
 Bajar `maxShadowed`, subir `interval`, o recurrir a occlusion culling por sala (no hay datos horneados).
+
+## Nota (2026-10-10, etapa F)
+La comisaría tiene ahora 252 lámparas (antes 110), con nombres `Lamp_<sala>#n`. `ShadowBudget` sigue limitando a 8 las luces con sombra; su coste con el número nuevo de luces sin sombra (rellenos) no se ha medido todavía.

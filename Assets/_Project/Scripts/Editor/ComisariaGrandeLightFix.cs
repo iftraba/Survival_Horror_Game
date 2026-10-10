@@ -16,7 +16,7 @@ namespace Horror.EditorTools
     /// </summary>
     public static class ComisariaGrandeLightFix
     {
-        const float FillBase = 5f, MinRange = 2.5f, Margin = 0.1f;
+        const float FillBase = 6f, MinRange = 2.5f, Margin = 0.1f;
 
         [MenuItem("Horror/Comisaria grande/7 Pase de luces")]
         public static void Menu() { Debug.Log("[Horror] " + Build()); }
@@ -33,7 +33,8 @@ namespace Horror.EditorTools
             foreach (var fill in level.GetComponentsInChildren<Light>(true))
             {
                 if (fill.name != "Fill" || fill.transform.parent == null || !fill.transform.parent.name.StartsWith("Lamp_")) continue;
-                var room = ComisariaGrande.Rooms.FirstOrDefault(r => r.id == fill.transform.parent.name.Substring(5));
+                string roomId = fill.transform.parent.name.Substring(5); int hash = roomId.IndexOf('#'); if (hash >= 0) roomId = roomId.Substring(0, hash);
+                var room = ComisariaGrande.Rooms.FirstOrDefault(r => r.id == roomId);
                 if (room == null) continue;
                 total++;
                 var p = fill.transform.position;
@@ -45,9 +46,36 @@ namespace Horror.EditorTools
                 if (!Mathf.Approximately(fill.range, range)) { fill.range = range; EditorUtility.SetDirty(fill); }
                 if (range < FillBase) { trimmed++; shortest = Mathf.Min(shortest, range); }
             }
+            int outdoor = OutdoorLights(level);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            return "pase de luces: " + total + " rellenos, " + trimmed + " recortados (el mas corto, " + shortest.ToString("F1") + " m)";
+            return "pase de luces: " + total + " rellenos, " + trimmed + " recortados (el mas corto, " + shortest.ToString("F1") + " m), " + outdoor + " luces exteriores";
+        }
+
+        /// <summary>Luces de emergencia (puntuales, sin sombra, con un piloto emisivo) en la rampa del garaje, su explanada y el callejon oeste. Rehace el grupo "Luces_Exterior".</summary>
+        static int OutdoorLights(Transform level)
+        {
+            var old = level.Find("Luces_Exterior"); if (old != null) Object.DestroyImmediate(old.gameObject);
+            var root = new GameObject("Luces_Exterior").transform; root.SetParent(level);
+            var bulbMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/_Project/Materials/Bulb_FFF2D9.mat");
+            int n = 0;
+            void Post(string name, Vector3 p, Color c, float range, float intensity)
+            {
+                var g = new GameObject(name); g.transform.SetParent(root); g.transform.position = p;
+                var l = g.AddComponent<Light>(); l.type = LightType.Point; l.color = c; l.range = range; l.intensity = intensity; l.shadows = LightShadows.None;
+                var head = GameObject.CreatePrimitive(PrimitiveType.Cube); head.name = "Foco"; Object.DestroyImmediate(head.GetComponent<Collider>());
+                head.transform.SetParent(g.transform, false); head.transform.localPosition = Vector3.up * 0.12f; head.transform.localScale = new Vector3(0.32f, 0.1f, 0.32f);
+                if (bulbMat != null) head.GetComponent<Renderer>().sharedMaterial = bulbMat;
+                head.isStatic = true; n++;
+            }
+            var sodium = new Color(1f, 0.7f, 0.35f);
+            foreach (float z in new[] { 12f, 22f, 32f, 41f })                                   // rampa: sube de z 5,5 (y -4,5) a z 44 (y 0)
+                Post("Rampa_" + z, new Vector3(-39.35f, Mathf.Lerp(ComisariaGrande.B, 0f, (z - 5.5f) / 38.5f) + 2.9f, z), sodium, 8f, 5f);
+            foreach (float x in new[] { -38f, -34f })                                            // explanada al pie de la rampa
+                Post("Explanada_" + x, new Vector3(x, ComisariaGrande.B + 3.1f, 2.7f), sodium, 8f, 5f);
+            foreach (float z in new[] { 14f, 27f, 40f })                                         // callejon oeste, mas tenue
+                Post("Callejon_" + z, new Vector3(-34.5f, 3.0f, z), new Color(0.85f, 0.9f, 1f), 7f, 3f);
+            return n;
         }
 
         /// <summary>

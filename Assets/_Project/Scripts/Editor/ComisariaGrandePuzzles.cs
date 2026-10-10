@@ -122,6 +122,46 @@ namespace Horror.EditorTools
             return l;
         }
 
+        /// <summary>Salas que arrancan a oscuras; cada una tiene su interruptor junto a la puerta (luz solo en los puntos que da la linterna y los interruptores).</summary>
+        static readonly string[] DarkRooms = { "G_Dark", "B_Cells", "F_Lib", "G_Interr", "B_Store", "B_Lab" };
+
+        static void DarkRoomSwitches(string roomId)
+        {
+            var room = ComisariaGrande.Rooms.FirstOrDefault(r => r.id == roomId);
+            var lamps = level.GetComponentsInChildren<CeilingLamp>(true).Where(l => l.name.StartsWith("Lamp_" + roomId + "#")).ToArray();
+            if (room == null || lamps.Length == 0) { log.Add("sala a oscuras sin lamparas: " + roomId); return; }
+            var rr = room.r; var made = new List<LightSwitch>();
+            var doors = ComisariaGrande.Doors.Where(d => Mathf.Abs(d.floor - room.floor) < 0.6f && d.kind != ComisariaGrande.DoorKind.Fixed && d.kind != ComisariaGrande.DoorKind.Roll
+                && ((Mathf.Abs(d.p.x - rr.xMin) < 0.05f || Mathf.Abs(d.p.x - rr.xMax) < 0.05f) && d.p.y > rr.yMin && d.p.y < rr.yMax
+                 || (Mathf.Abs(d.p.y - rr.yMin) < 0.05f || Mathf.Abs(d.p.y - rr.yMax) < 0.05f) && d.p.x > rr.xMin && d.p.x < rr.xMax)).ToList();
+            foreach (var d in doors)
+            {
+                bool vertical = Mathf.Abs(d.p.x - rr.xMin) < 0.05f || Mathf.Abs(d.p.x - rr.xMax) < 0.05f;       // pared a lo largo de Z
+                Vector2 n = vertical ? new Vector2(Mathf.Abs(d.p.x - rr.xMin) < 0.05f ? 1f : -1f, 0f) : new Vector2(0f, Mathf.Abs(d.p.y - rr.yMin) < 0.05f ? 1f : -1f);   // hacia dentro de la sala
+                Vector2 along = vertical ? Vector2.up : Vector2.right;
+                Vector3? best = null; float bestD = float.MaxValue;
+                foreach (float off in new[] { d.width / 2f + 0.5f, d.width / 2f + 0.9f, d.width / 2f + 1.5f })
+                    foreach (float sg in new[] { -1f, 1f })
+                    {
+                        var q = d.p + along * (sg * off); var inside = q + n * 0.12f;
+                        if (vertical ? (inside.y < rr.yMin + 0.4f || inside.y > rr.yMax - 0.4f) : (inside.x < rr.xMin + 0.4f || inside.x > rr.xMax - 0.4f)) continue;      // lejos de las esquinas (a lo largo de la pared)
+                        if (doors.Any(o => o != d && Vector2.Distance(o.p, q) < o.width / 2f + 0.4f)) continue;
+                        var c = new Vector3(inside.x + n.x * 0.25f, room.floor + 1.3f, inside.y + n.y * 0.25f);
+                        if (Physics.CheckBox(c, new Vector3(0.14f, 0.2f, 0.14f), Quaternion.identity, ~0, QueryTriggerInteraction.Ignore)) continue;      // mueble contra la pared
+                        float dist = off;                                  // lo mas cerca posible de la puerta (el primer sitio libre)
+                        if (dist < bestD) { bestD = dist; best = new Vector3(inside.x, room.floor + 1.3f, inside.y); }
+                    }
+                if (best == null) { log.Add("sin sitio libre para el interruptor de " + roomId + " junto a " + d.name); continue; }
+                var pos = best.Value;
+                var sw = ComisariaGrande.Box("Interruptor_" + roomId, root, pos, vertical ? new Vector3(0.04f, 0.15f, 0.1f) : new Vector3(0.1f, 0.15f, 0.04f), metal, 0f);
+                var ls = sw.AddComponent<LightSwitch>(); ls.lamps = lamps; ls.startOn = false;
+                Led("Piloto_Interruptor_" + roomId, root, pos + new Vector3(n.x * 0.03f, 0.17f, n.y * 0.03f), new Color(1f, 0.5f, 0.1f));
+                made.Add(ls);
+            }
+            for (int i = 0; i < made.Count && made.Count > 1; i++) made[i].partner = made[(i + 1) % made.Count];
+            if (made.Count == 0) log.Add("la sala " + roomId + " arranca a oscuras SIN interruptor");
+        }
+
         /// <summary>Lampara de mesa encendida junto a un objeto clave que esta sobre un mueble: lo hace ver sin una luz de pasillo.</summary>
         static void KeyLamp(Vector3 itemPos)
         {
@@ -275,17 +315,9 @@ namespace Horror.EditorTools
             OneWay("Puerta_Garaje_Bombas", new Vector3(-6.5f, B + 1f, 5f), "Esta atrancada con una estanteria por el lado del garaje. Solo se abre desde las bombas.");
             OneWay("Puerta_Galeria_HallNorte", new Vector3(0f, F1 + 1f, 31f), "Hay una barricada por el lado de la galeria. Solo se abre desde el hall norte.");
 
-            // ---- sala de pruebas a oscuras: un interruptor junto a cada puerta (se mantienen sincronizados) con su piloto naranja
-            var darkLamps = level.GetComponentsInChildren<CeilingLamp>(true).Where(l => l.name == "Lamp_G_Dark").ToArray();
-            LightSwitch DarkSwitch(Vector3 pos)
-            {
-                var sw = ComisariaGrande.Box("Interruptor", root, pos, new Vector3(0.04f, 0.15f, 0.1f), metal, 0f);
-                var ls = sw.AddComponent<LightSwitch>(); ls.lamps = darkLamps; ls.startOn = false;
-                Led("Piloto_Interruptor", root, pos + new Vector3(pos.x > -13f ? 0.03f : -0.03f, 0.17f, 0f), new Color(1f, 0.5f, 0.1f));
-                return ls;
-            }
-            var swA = DarkSwitch(new Vector3(-8.12f, G + 1.3f, 23.6f)); var swB = DarkSwitch(new Vector3(-17.88f, G + 1.3f, 23.6f));
-            swA.partner = swB; swB.partner = swA;
+            // ---- salas a oscuras (etapa F): pruebas, calabozos, biblioteca, interrogatorios, almacen y laboratorio del sotano.
+            // Un interruptor con piloto naranja junto a cada una de sus puertas, por dentro; los de una misma sala van en anillo (se mantienen sincronizados).
+            foreach (var darkId in DarkRooms) DarkRoomSwitches(darkId);
 
             // ---- taquillas con codigo y normales (contra la pared de su sala)
             var sg = Item("I_Shotgun"); var sgAmmo = Item("I_ShotgunAmmo"); var hgAmmo = Item("I_HandgunAmmo"); var spray = Item("I_Spray"); var bag = Item("I_Bag");

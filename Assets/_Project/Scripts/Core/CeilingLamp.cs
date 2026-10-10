@@ -10,6 +10,8 @@ namespace Horror
     public class CeilingLamp : MonoBehaviour
     {
         public bool flicker;
+        [Tooltip("Lampara rota: nunca se enciende (ni con un interruptor)")]
+        public bool dead;
         [Range(0f, 1f)] public float amount = 0.5f;
         public float speed = 6f;
         [Tooltip("Intensidad encendida. Se guarda aparte porque la de la Light queda a 0 si la escena se guardo con la lampara apagada")]
@@ -40,6 +42,7 @@ namespace Horror
             lamp = GetComponent<Light>();
             if (ratedIntensity <= 0f) ratedIntensity = lamp.intensity;
             baseIntensity = ratedIntensity;
+            if (dead) Powered = false;
             // Luces de relleno hijas (sin sombras, iluminan la sala entera): siguen a la lampara principal
             var all = GetComponentsInChildren<Light>(true);
             fills = new Light[all.Length - 1];
@@ -61,11 +64,14 @@ namespace Horror
                 block = new MaterialPropertyBlock();
                 baseEmission = bulb.sharedMaterial.GetColor(EmissionId);
             }
+            if (dead) Apply(false, 0f);
         }
+
 
         public void SetPowered(bool on)
         {
             EnsureInit();
+            if (dead) on = false;
             Powered = on;
             if (!on) Apply(false, 0f);
         }
