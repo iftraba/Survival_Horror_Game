@@ -1,0 +1,68 @@
+# Pendiente de probar y comprobar (comisaría grande, rediseño de la planta)
+
+Lista viva de lo que **no se ha comprobado** o solo se vio a medias. Se consulta con la skill `pendiente-comprobar`. Al comprobar algo, se tacha aquí con fecha y cómo se hizo; si falla, se anota la salida real. Última actualización: 2026-10-10 (tras la etapa E).
+
+Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]** necesita al usuario jugando · **[ETAPA]** depende de una etapa por hacer.
+
+## 1. Recorrido y progresión
+- [ ] [PC] Coger cada objeto clave andando en Play: cizalla, 2 tarjetas, 3 medallones, 3 fusibles y 8 notas (alcance real, que la interacción lo apunte sin que lo tape un mueble, altura de la cara superior). Solo se vio la cizalla en su banco.
+- [ ] [PC] Las 8 notas legibles desde donde quedan, y que cada código (4519, 0832, 7258) tenga su nota alcanzable antes de la taquilla.
+- [ ] [PC] Grafo de progresión incluyendo la sala de calderas y el portón final (el script de la etapa E no cubre `B_Boiler`, cota −6,5). Repetir en Play con puertas reales, no solo el grafo de `Define()`.
+- [ ] [PC] Las puertas con llave abren de verdad con su objeto: 3 candados (cizalla), 3 lectores de tarjeta recolocados (atrio→ingreso, ingreso→escalera norte, custodia→calabozos: ver que el lector está visible y de cara a quien llega), puerta sin corriente, reja del archivo, ascensor.
+- [ ] [PC] `OneWayDoor` desde los dos lados con el jugador de verdad (solo se probó teletransportando): garaje↔bombas y galería↔hall norte; que los zombis no la abran por el lado malo; que tras abrirla queda abierta; y **tras guardar y cargar partida**.
+- [ ] [PC] Escaleras recorridas andando con el jugador (caracol, norte con sus dos tramos, archivo, garaje, custodia): hasta ahora solo NavMesh y capturas.
+- [ ] [PC] Rampa del garaje y persiana enrollable (cerrada): que el jugador no puede atravesarla; salida por el callejón.
+- [ ] [PC] Ascensor: llave del ascensor, viaje G↔sótano, llegada en el sitio correcto (nudo B_HubB).
+- [ ] [PC] Guardado: medallones, fusibles, reja, ascensor, interruptores de la sala de pruebas (los dos sincronizados tras cargar) y `OneWayDoor`.
+- [ ] [PC] Sala segura de la antesala del archivo: terminal y baúl accesibles, no tapados por el banco ni por la escalera, a unos 12 m del jefe 1.
+- [ ] [PC] Softlock: ¿puede quedarse el jugador sin salida o sin munición dentro de las arenas? (puertas atrancadas con el jefe; reservas dentro del disparador).
+- [ ] [PC] Camino de retorno: tras el jefe 1, ¿se vuelve sin pasar por el paso de un solo sentido atrancado?
+
+## 2. Salas y mobiliario (etapa D)
+- [ ] [PC] Orientación de las patrullas del garaje (larga en X a yaw 0, se vio bien a ojo, sin medir) y que dejan carril libre.
+- [ ] [PC] Colisiones de la balaustrada de la galería (el jugador no cae al hueco, no la atraviesa).
+- [ ] [PC] Camastros y rejas de las celdas de cerca; la primera celda de la fila sur queda libre (entrada). Son 19 celdas, no 20.
+- [ ] [PC] Orientación del mapa enmarcado de la conferencia (quad a yaw 180) y de las banderas.
+- [ ] [PC] Captura de cada sala que no se ha visto: vestíbulo (con el mostrador reubicado), espera, seguridad, armería, descanso, vestuarios, taller, ingreso, interrogatorios, comisario, memorial, biblioteca, detectives, comedor, registro, sindicato, archivo, antesala, caseta, sótano industrial (bombas, máquinas, almacén, laboratorio, cuadro, control, calderas).
+- [ ] [PC] Mobiliario que tapa el paso o una puerta (repetir la prueba de puertas y de rutas tras cualquier cambio en los menús 3-6).
+- [ ] [PC] Cajas de collider recortadas por las anclas: que ningún mueble ha quedado atravesable o con huecos (zombis, balas).
+- [ ] [ETAPA] Modelos nuevos pendientes: placas de puerta, señal de salida, botiquín, lámpara colgante, marco de ventana, cuadros/retratos (IA solo con prompt aprobado), furgoneta de detenidos, tablero de herramientas, bolsas de pruebas, mesa de comedor, llavero. Y `WallDressingKit` (apuntado a la raíz nueva, no ejecutado).
+
+## 3. Zombis, botín y equilibrio
+- [ ] [PC] Zombis: que cada uno despierta, persigue y puede cruzar sus puertas; reptantes y carroñeros se comportan (el carroñero solo despierta si le disparan); los 18 en letargo despiertan con ruido o tiro. Están de pie (no hay animación de dormido): decidir si se acepta.
+- [ ] [PC] Los dos encuentros a mano: Cop junto a la mesa de la tarjeta y reptante junto al coche del garaje (hoy no hay disparador «sale al coger la cizalla»).
+- [ ] [PC] Los dos primeros encuentros (espera y garaje) son suaves y están cerca; ningún zombi despierto pegado a una sala segura o a un guardado.
+- [ ] [PC] Munición: recuento real en la escena por tramo (balas, cartuchos, sprays) frente al presupuesto (≈182/62/8 hasta el jefe 1; ≈96/30/4 después; reservas 18+12 y 24+12) y cuántas casillas hay que llevar con pilas 45/18/3. Comprobar que el `maxStack` nuevo no rompe el guardado ni el HUD.
+- [ ] [PC] Objeto del cuadro eléctrico que cae al suelo (no hay banco en esa sala) y los que el log marque «al suelo».
+- [ ] [JUGAR] ¿Alcanza la munición? ¿El ritmo de zombis es justo? ¿Los sprays están bien repartidos? (cifras provisionales, calculadas con 60 % de acierto).
+- [ ] [JUGAR] ¿Se encuentran los objetos clave sin pistas externas? ¿El brillo y la lámpara de mesa bastan?
+- [ ] [JUGAR] El jefe 1 en la arena nueva (36×29 m, antes 13,6 m): ¿se puede huir dando vueltas?, ¿rompe los muebles y no las estanterías de obra?, ¿alcanza la reserva?
+- [ ] [JUGAR] El jefe 2 y la reserva de la caldera; el portón final.
+
+## 4. Luz (etapa F, sin hacer)
+- [ ] [ETAPA] Menú 7 (`ComisariaGrandeLightFix`) sin adaptar: no ejecutar hasta la etapa F.
+- [ ] [ETAPA] Lámparas por m² (una por ~40 m²), color por zona, 6 salas a oscuras con interruptor (pruebas ya lo tiene; faltan calabozos, biblioteca, interrogatorios, almacén y laboratorio del sótano), 25-30 % del atrio, comedor y galerías apagadas.
+- [ ] [PC] Salas muy oscuras ahora (la radio, el atrio): brillo medio de capturas por sala para detectar negros.
+- [ ] [PC] Fugas de luz por fuera del edificio (el archivo las tenía) y luz de la rampa, la explanada y el callejón.
+- [ ] [PC] Interruptor de cada sala oscura a menos de 2 m de su puerta y visible; el de pruebas con sus dos pilotos.
+- [ ] [PC] `ShadowBudget` con las lámparas nuevas (límite de sombras) y las luces de mesa de los objetos clave.
+
+## 5. Rendimiento
+- [ ] [PC] Skill `performance-audit` en 1080p tras el pase de luces: GPU en el atrio con el hueco (objetivo provisional ≤ 12 ms), F3 (`FpsCounter`), recuento de luces.
+- [ ] [JUGAR] fps en una **build** (no se ha medido; la build del escritorio no lleva nada de la planta nueva hasta `/recompile`, que solo se hace si lo pide el usuario).
+
+## 6. Exterior y resto
+- [ ] [ETAPA] Puerta de coches de la verja norte (por donde entrarían los vehículos).
+- [ ] [PC] Intro y puerta que se atranca con la planta nueva; la cinemática se salta bien.
+- [ ] [PC] Los zombis de la verja (10) usan solo modelos aprobados.
+- [ ] [PC] Escena guardada limpia (sin objetos temporales) y sin avisos de consola nuevos.
+- [ ] [PC] Candado: caída y desvanecimiento en Play de los tres candados nuevos y brillo de los objetos clave a 6 m.
+
+## 7. Documentación y repositorio
+- [ ] Revisar que `docs/estado-actual.md` y `docs/resumen-sesion-comisaria.md` reflejan la planta v3 (hoy el detalle está en `docs/rediseno-comisaria.md`).
+- [ ] Decidir qué hacer con los 5 prefabs de zombi descartados (siguen en el proyecto sin usar) y con `Assets/_Recovery` y `Tools/raw_generated` (sin commit, no son del rediseño).
+
+## Cómo se prueba aquí (recordatorio)
+- Nunca compilar ni editar scripts con Unity en Play; no ofrecer recompilar la build.
+- Play desde `execute_code`: `EditorApplication.isPlaying = true`; avanzar con `EditorApplication.Step()` desde un callback; saltar la intro con el campo `skip` de `IntroCutscene`; para el NavMesh apagar los `NavMeshObstacle` tras ~15 fotogramas y medir a ~40; jugador a `suelo + 1,05`; cámara con `yaw`/`pitch` de `ThirdPersonCamera`.
+- Orden de menús tras cambiar la planta: 1 → 2 → 3 → 4 → 5 → 6 (el 7 no hasta la etapa F).
