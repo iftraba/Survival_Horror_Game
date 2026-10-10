@@ -21,6 +21,8 @@ namespace Horror.EditorTools
     ///  - Cuadro electrico: tres fusibles (almacen, laboratorio, galeria de tuberias) -> puerta del pasillo de calderas.
     ///  - Jefe 2 en la sala de calderas -> llave maestra -> porton del tunel (fin).
     ///  - Sala de pruebas a oscuras con su interruptor. Notas con las pistas.
+    /// Etapa E (planta v3): los objetos, notas y piezas ya no llevan coordenadas absolutas sino anclas por sala (ComisariaGrandeAnchors: encima de un
+    /// mueble de este tipo de esta sala); hay dos pasos de un solo sentido (OneWayDoor) y dos interruptores sincronizados en la sala de pruebas.
     /// Repetible: rehace "Puzles" y lo que cuelga de las puertas.
     /// </summary>
     public static class ComisariaGrandePuzzles
@@ -120,6 +122,39 @@ namespace Horror.EditorTools
             return l;
         }
 
+        /// <summary>Lampara de mesa encendida junto a un objeto clave que esta sobre un mueble: lo hace ver sin una luz de pasillo.</summary>
+        static void KeyLamp(Vector3 itemPos)
+        {
+            foreach (var o in new[] { new Vector3(0.32f, 0, 0), new Vector3(-0.32f, 0, 0), new Vector3(0, 0, 0.32f), new Vector3(0, 0, -0.32f) })
+            {
+                var p = itemPos + o;
+                if (!Physics.Raycast(p + Vector3.up * 0.6f, Vector3.down, out var hit, 1.2f, ~0, QueryTriggerInteraction.Ignore) || Mathf.Abs(hit.point.y - itemPos.y) > 0.03f) continue;
+                var lamp = Model("Assets/_Project/Art/Props/Office/DeskLamp.fbx", root, hit.point, Random.Range(0f, 360f), false); lamp.name = "Lampara_Clave";
+                var l = new GameObject("Luz").AddComponent<Light>(); l.transform.SetParent(lamp.transform, false); l.transform.localPosition = new Vector3(0f, 0.32f, 0f);
+                l.type = LightType.Point; l.color = new Color(1f, 0.82f, 0.55f); l.range = 3.2f; l.intensity = 3.5f; l.shadows = LightShadows.None;
+                return;
+            }
+        }
+
+        /// <summary>Papel con nota sobre un punto (cara superior de un mueble).</summary>
+        static void PaperAt(string name, NoteData n, Vector3 p, float yaw)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Cube); go.name = name; go.transform.SetParent(root);
+            go.transform.SetPositionAndRotation(p + Vector3.up * 0.003f, Quaternion.Euler(0f, yaw, 0f));
+            go.transform.localScale = new Vector3(0.21f, 0.004f, 0.297f);
+            go.GetComponent<Renderer>().sharedMaterial = paperMat;
+            go.GetComponent<BoxCollider>().size = new Vector3(1.4f, 12f, 1.2f);
+            go.AddComponent<ReadableNote>().note = n;
+        }
+
+        /// <summary>Paso de un solo sentido: atrancada por un lado, se abre desde el que contiene 'freePoint' (y queda abierta).</summary>
+        static void OneWay(string doorName, Vector3 freePoint, string message)
+        {
+            var d = DoorNamed(doorName); if (d == null) { log.Add("falta puerta " + doorName); return; }
+            var ow = d.GetComponent<OneWayDoor>() ?? d.gameObject.AddComponent<OneWayDoor>();
+            ow.freePoint = freePoint; ow.blockedMessage = message; EditorUtility.SetDirty(ow);
+        }
+
         // ------------------------------------------------------------------ cerraduras de las puertas
         static void Padlock(string doorName, ItemData cutter, float sideYaw, Vector3 offset)
         {
@@ -165,6 +200,7 @@ namespace Horror.EditorTools
             var old = level.Find("Puzles"); if (old != null) Object.DestroyImmediate(old.gameObject);
             foreach (var lv in level.GetComponentsInChildren<LockVisual>(true)) Object.DestroyImmediate(lv);
             foreach (var ps in level.GetComponentsInChildren<ProgressSeal>(true)) Object.DestroyImmediate(ps);
+            foreach (var ow in level.GetComponentsInChildren<OneWayDoor>(true)) Object.DestroyImmediate(ow);
             foreach (var t in level.GetComponentsInChildren<Transform>(true).Where(t => t != null && t.name == "Candado").ToList()) if (t != null) Object.DestroyImmediate(t.gameObject);
             foreach (var d in level.GetComponentsInChildren<Door>(true)) { d.requiredKey = null; d.sealedPrompt = "Atrancada"; d.sealedMessage = "La puerta se ha atrancado"; }
             root = new GameObject("Puzles").transform; root.SetParent(level);
@@ -183,6 +219,7 @@ namespace Horror.EditorTools
             elevKey.pickupObjective = "Usa la llave en el ascensor de carga (planta baja, junto a los aseos) para bajar al sotano."; EditorUtility.SetDirty(elevKey);
             var keyFinal = Item("I_KeyFinal");
             if (keyFinal != null) { keyFinal.pickupObjective = "Abre el porton del tunel de servicio, en la pared oeste de la sala de calderas."; EditorUtility.SetDirty(keyFinal); }
+            foreach (var (n, st) in new[] { ("I_HandgunAmmo", 45), ("I_ShotgunAmmo", 18), ("I_Spray", 3) }) { var a = Item(n); if (a != null) { a.maxStack = st; EditorUtility.SetDirty(a); } }   // pilas mas grandes: hay mas municion repartida
             AssetDatabase.SaveAssets();
             var newItems = new[] { cutter, cardSec, cardChief }.Concat(fuses).ToArray();
             ItemIcons.Generate(newItems.Concat(medals).ToArray());
@@ -221,9 +258,9 @@ namespace Horror.EditorTools
             Padlock("Puerta_Vestibulo_E", cutter, -90f, new Vector3(-0.08f, 0, 0));
             Padlock("Puerta_Pasillo_Candado", cutter, -90f, new Vector3(-0.08f, 0, 0));
             Padlock("Puerta_Callejon", cutter, 90f, new Vector3(0.08f, 0, 0));
-            CardLock("Puerta_Tarjeta", cardSec, new Vector3(31.8f, G + 1.3f, 14.36f), 180f);
-            CardLock("Puerta_Escalera_Norte", cardSec, new Vector3(8.0f, G + 1.3f, 28.86f), 180f);
-            CardLock("Puerta_Calabozos", cardChief, new Vector3(-5.9f, G + 1.3f, 28.86f), 180f);
+            CardLock("Puerta_Tarjeta", cardSec, new Vector3(-0.9f, G + 1.3f, 28.86f), 180f);          // atrio -> ingreso, en el lado del atrio
+            CardLock("Puerta_Escalera_Norte", cardSec, new Vector3(1.86f, G + 1.3f, 33.7f), -90f);    // ingreso -> escalera norte, en el lado del ingreso
+            CardLock("Puerta_Calabozos", cardChief, new Vector3(9.86f, B + 1.3f, 40.4f), -90f);       // custodia -> calabozos, en el lado de la custodia
             var power = DoorNamed("Puerta_Sin_Corriente");
             if (power != null)
             {
@@ -234,41 +271,64 @@ namespace Horror.EditorTools
                 ps.poweredVisual = Led("Piloto_Corriente", root, new Vector3(-11.85f, B + 2.75f, 27.75f), new Color(0.2f, 1f, 0.3f));
             }
 
-            // ---- sala de pruebas a oscuras, con su interruptor junto a la puerta
-            var darkLamps = level.GetComponentsInChildren<CeilingLamp>(true).Where(l => l.name == "Lamp_G_Dark").ToArray();
-            var sw = ComisariaGrande.Box("Interruptor", root, new Vector3(-12.8f, G + 1.3f, 14.65f), new Vector3(0.1f, 0.15f, 0.04f), metal, 0f);
-            var ls = sw.AddComponent<LightSwitch>(); ls.lamps = darkLamps; ls.startOn = false;
+            // ---- pasos de un solo sentido (se abren desde un lado y despues quedan abiertos)
+            OneWay("Puerta_Garaje_Bombas", new Vector3(-6.5f, B + 1f, 5f), "Esta atrancada con una estanteria por el lado del garaje. Solo se abre desde las bombas.");
+            OneWay("Puerta_Galeria_HallNorte", new Vector3(0f, F1 + 1f, 31f), "Hay una barricada por el lado de la galeria. Solo se abre desde el hall norte.");
 
-            // ---- taquillas con codigo y normales
+            // ---- sala de pruebas a oscuras: un interruptor junto a cada puerta (se mantienen sincronizados) con su piloto naranja
+            var darkLamps = level.GetComponentsInChildren<CeilingLamp>(true).Where(l => l.name == "Lamp_G_Dark").ToArray();
+            LightSwitch DarkSwitch(Vector3 pos)
+            {
+                var sw = ComisariaGrande.Box("Interruptor", root, pos, new Vector3(0.04f, 0.15f, 0.1f), metal, 0f);
+                var ls = sw.AddComponent<LightSwitch>(); ls.lamps = darkLamps; ls.startOn = false;
+                Led("Piloto_Interruptor", root, pos + new Vector3(pos.x > -13f ? 0.03f : -0.03f, 0.17f, 0f), new Color(1f, 0.5f, 0.1f));
+                return ls;
+            }
+            var swA = DarkSwitch(new Vector3(-8.12f, G + 1.3f, 23.6f)); var swB = DarkSwitch(new Vector3(-17.88f, G + 1.3f, 23.6f));
+            swA.partner = swB; swB.partner = swA;
+
+            // ---- taquillas con codigo y normales (contra la pared de su sala)
             var sg = Item("I_Shotgun"); var sgAmmo = Item("I_ShotgunAmmo"); var hgAmmo = Item("I_HandgunAmmo"); var spray = Item("I_Spray"); var bag = Item("I_Bag");
             Locker(new Vector3(31.55f, G, 9.8f), -90f, CodeArmory, (sg, 1), (sgAmmo, 6));                 // armeria
             Locker(new Vector3(-8.45f, F1, 25.6f), -90f, CodeLibrary, (medals[1], 1));                      // biblioteca
-            Locker(new Vector3(21.55f, B, 16.0f), -90f, CodeLab, (fuses[1], 1));                            // laboratorio
+            Locker(new Vector3(19.55f, B, 16.0f), -90f, CodeLab, (fuses[1], 1));                            // laboratorio del sotano
             Locker(new Vector3(-31.55f, G, 31.0f), 90f, "", (bag, 1));                                      // vestuarios: rinonera
-            Locker(new Vector3(-31.55f, G, 32.3f), 90f, "", (hgAmmo, 10));
+            Locker(new Vector3(-31.55f, G, 32.3f), 90f, "", (hgAmmo, 12));
             Locker(new Vector3(19.55f, G, 15.6f), -90f, "", (spray, 1));                                    // seguridad
-            Locker(new Vector3(29.1f, G, 15.2f), -90f, "", (hgAmmo, 8));                                    // descanso
-            Locker(new Vector3(-20.45f, F1, 25.6f), -90f, "", (sgAmmo, 4));                                  // despacho del jefe
-            Locker(new Vector3(-31.55f, B, 25.6f), 90f, "", (bag, 1));                                      // almacen del sotano: 2a rinonera
-            Locker(new Vector3(31.55f, B, 2.2f), -90f, "", (sgAmmo, 6));                                    // taller del sotano
+            Locker(new Vector3(20.55f, G, 2.5f), -90f, "", (hgAmmo, 15));                                   // sala de agentes
+            Locker(new Vector3(31.55f, G, 15.2f), -90f, "", (hgAmmo, 8));                                   // descanso
+            Locker(new Vector3(-20.45f, F1, 25.6f), -90f, "", (sgAmmo, 4));                                 // despacho del jefe
+            Locker(new Vector3(31.55f, B, 2.2f), -90f, "", (sgAmmo, 6));                                    // almacen del sotano
+            Locker(new Vector3(31.55f, B, 7.2f), -90f, "", (bag, 1));                                       // almacen del sotano: 2a rinonera
 
-            // ---- piezas sueltas
+            // ---- piezas y notas por anclas (encima de un mueble de la sala que corresponde)
             Physics.SyncTransforms();
-            PutOn(cutter, 1, -31.0f, G + 1.6f, 20.5f);                       // garaje: banco de trabajo (pared oeste)
-            PutOn(cardSec, 1, 14.0f, G + 1.6f, 25.6f);                       // seguridad: mesa de monitores
-            PutOn(cardChief, 1, -25.0f, F1 + 1.6f, 20.5f);                   // despacho del jefe: su mesa
-            PutOn(medals[0], 1, -9.75f, G + 1.6f, 43.0f);                    // calabozos: catre de la segunda celda
-            PutOn(medals[2], 1, -21.0f, F2 + 1.6f, 31.5f);                   // caseta de la azotea
-            PutOn(fuses[0], 1, -23.0f, B + 2.8f, 20.5f);                     // almacen del sotano
-            PutOn(fuses[2], 1, 30.2f, B + 1.6f, 42.6f);                      // galeria de tuberias, al fondo
-            Paper("Nota_Turno", nTurno, -3.6f, G + 1.6f, 9.9f, 15f);
-            Paper("Nota_Armeria", nArmero, -18.7f, G + 1.6f, 25.6f, -10f);
-            Paper("Nota_Jefe", nJefe, 12.5f, G + 1.6f, 25.8f, 20f);
-            Paper("Nota_Vestuarios", nVest, -25.0f, G + 1.6f, 34.3f, 5f);
-            Paper("Nota_Memorial", nMem, -0.6f, F1 + 1.6f, 2.0f, -80f);
-            Paper("Nota_Archivero", nArch, 17.0f, F2 + 1.6f, 34.6f, 15f);
-            Paper("Nota_Maquinas", nMaq, 7.4f, B + 3.0f, 5.5f, 0f);
-            Paper("Nota_Tunel", nTun, -7.0f, B + 1.6f, 25.0f, 30f);
+            ComisariaGrandeAnchors.Init(level);
+            Vector3 Anchor(string room, string[] kinds, Vector3? pref = null, string what = null) => ComisariaGrandeAnchors.Spot(room, kinds, 0, pref, what);
+            var cutterAt = Anchor("B_Garage", new[] { "Workbench" }, null, "cizalla");                       // garaje: banco de trabajo
+            Put(cutter, 1, cutterAt); KeyLamp(cutterAt);
+            var cardAt = Anchor("G_Sec", new[] { "Desk", "CCTVDesk" }, null, "tarjeta de seguridad");        // seguridad: mesa del jefe de turno
+            Put(cardSec, 1, cardAt); KeyLamp(cardAt);
+            var chiefAt = Anchor("F_Chief", new[] { "ExecutiveDesk", "Desk" }, null, "tarjeta del jefe");     // despacho del jefe de seguridad
+            Put(cardChief, 1, chiefAt); KeyLamp(chiefAt);
+            var cots = ComisariaGrandeAnchors.Furniture("B_Cells", "Cot").Where(t => t.position.z < 36.5f).OrderBy(t => t.position.x).ToList();   // calabozos: catre de la 2.a celda
+            var cot = cots.Count > 1 ? cots[1] : cots.FirstOrDefault();
+            var cotAt = cot != null ? ComisariaGrandeAnchors.TopSpot(cot) : null;
+            if (cotAt == null) log.Add("sin catre para el medallon I");
+            Put(medals[0], 1, cotAt ?? Anchor("B_Cells", new[] { "Desk" }, null, "medallon I"));
+            var shedAt = Anchor("S_Shed", new[] { "Desk", "Crate" }, null, "medallon III");                    // caseta de la azotea: mesa de Miller
+            Put(medals[2], 1, shedAt); KeyLamp(shedAt);
+            Put(fuses[0], 1, Anchor("B_Store", new[] { "Crate", "MetalRack", "Shelf" }, null, "fusible A")); // almacen del sotano: caja de repuestos
+            Put(fuses[2], 1, Surface(30.4f, B + 1.5f, 12.2f));                                              // galeria de servicio, caido junto a la rejilla del fondo
+            PaperAt("Nota_Turno", nTurno, Anchor("G_Lobby", new[] { "ReceptionDesk" }, null, "nota del turno"), 15f);
+            PaperAt("Nota_Armeria", nArmero, Anchor("G_Dark", new[] { "Desk", "MetalRack" }, null, "nota del armero"), -10f);
+            PaperAt("Nota_Jefe", nJefe, Anchor("G_Brief", new[] { "Desk" }, null, "nota del jefe"), 20f);
+            PaperAt("Nota_Vestuarios", nVest, Anchor("G_Lock", new[] { "WaitingBench", "Desk" }, null, "nota de vestuarios"), 5f);
+            PaperAt("Nota_Memorial", nMem, Anchor("F_Mem", new[] { "WaitingBench" }, new Vector3(-0.6f, F1, 2.0f), "nota del memorial"), -80f);
+            PaperAt("Nota_Archivero", nArch, Anchor("S_Ante", new[] { "Desk" }, null, "nota del archivero"), 15f);
+            PaperAt("Nota_Maquinas", nMaq, Anchor("B_Safe", new[] { "Desk" }, null, "nota de mantenimiento"), 0f);
+            PaperAt("Nota_Tunel", nTun, Anchor("B_Control", new[] { "Desk", "ControlPanel" }, null, "plano de evacuacion"), 30f);
+            foreach (var m in ComisariaGrandeAnchors.Log) log.Add(m);
 
             // ---- memorial: monumento con los huecos y la reja de la escalera del archivo
             var monument = level.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name == "Memorial_Monumento");
@@ -298,7 +358,8 @@ namespace Horror.EditorTools
             gsv.lockedMessage = "Una reja de seguridad cierra la escalera del archivo. Tiene una placa: \"Se abre desde el memorial.\"";
 
             // ---- cuadro electrico del sotano (tres fusibles)
-            var fb = Model(Pz + "FuseBox.fbx", root, new Vector3(22.25f, B + 1.3f, 20.5f), 90f, true); fb.name = "Cuadro_Fusibles";
+            ClearAround(new Rect(19.6f, 19.4f, 1.8f, 2.2f), B);
+            var fb = Model(Pz + "FuseBox.fbx", root, new Vector3(20.25f, B + 1.3f, 20.5f), 90f, true); fb.name = "Cuadro_Fusibles";
             var fm = fb.AddComponent<MedallionMonument>();
             fm.medallions = fuses; fm.flagPrefix = "fusible_"; fm.doneFlag = "corriente"; fm.placedVisuals = new GameObject[3];
             fm.placePrompt = "E  Poner fusible"; fm.examinePrompt = "E  Examinar cuadro electrico";

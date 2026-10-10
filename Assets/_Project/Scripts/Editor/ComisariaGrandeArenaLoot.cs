@@ -21,8 +21,8 @@ namespace Horror.EditorTools
         // Valores provisionales: se ajustan jugando.
         static readonly (string room, string boss, string trigger, (string item, int n)[] items)[] Arenas =
         {
-            ("S_Arch", "Boss", "BossRoomTrigger", new[] { ("I_ShotgunAmmo", 6), ("I_HandgunAmmo", 12) }),
-            ("B_Boiler", "Boss_2", null, new[] { ("I_ShotgunAmmo", 6), ("I_HandgunAmmo", 12) }),
+            ("S_Arch", "Boss", "BossRoomTrigger", new[] { ("I_ShotgunAmmo", 12), ("I_HandgunAmmo", 18) }),
+            ("B_Boiler", "Boss_2", null, new[] { ("I_ShotgunAmmo", 12), ("I_HandgunAmmo", 24) }),
         };
 
         [MenuItem("Horror/Comisaria grande/6 Reservas de arenas")]

@@ -280,9 +280,9 @@ namespace Horror.EditorTools
                     Clutter(r, keep, used, 5);
                     break;
                 case "lobby":
-                    At(r, E + "ReceptionDesk.fbx", -3.6f, 9.9f, 180f, new Vector2(1.8f, 0.9f), keep, used);
-                    At(r, P + "Chair.fbx", -4.4f, 10.9f, 200f, new Vector2(0.3f, 0.3f), keep, used);
-                    At(r, P + "Chair.fbx", -2.6f, 10.9f, 160f, new Vector2(0.3f, 0.3f), keep, used);
+                    At(r, E + "ReceptionDesk.fbx", -5.2f, 9.9f, 180f, new Vector2(1.8f, 0.9f), keep, used);
+                    At(r, P + "Chair.fbx", -6.0f, 10.9f, 200f, new Vector2(0.3f, 0.3f), keep, used);
+                    At(r, P + "Chair.fbx", -4.4f, 10.9f, 160f, new Vector2(0.3f, 0.3f), keep, used);
                     AlongWall(r, 'N', cabinets, 0.6f, 0.65f, 0.1f, keep, used, 0.7);
                     AlongWall(r, 'W', new[] { E + "WaitingBench.fbx" }, 2.2f, 0.6f, 1.0f, keep, used);
                     foreach (var (px, pz) in new[] { (-7.4f, 0.6f), (7.4f, 0.6f), (7.4f, 11.4f) }) At(r, M + "PottedPlant.fbx", px, pz, 0, new Vector2(0.4f, 0.4f), keep, used);
@@ -457,6 +457,10 @@ namespace Horror.EditorTools
                     Clutter(r, keep, used, 3);
                     break;
                 case "ante":
+                    // sala segura de la antesala del archivo: terminal de guardado y baul contra la pared este (a ~12 m del jefe 1, a un lado de su puerta)
+                    Inst("Interactables/SaveTerminal.prefab", new Vector3(x1 - 0.5f, y, z0 + 2.2f), -90f, "Guardar_" + r.id, fixedRoot);
+                    Inst("Interactables/ItemBox.prefab", new Vector3(x1 - 0.5f, y, z0 + 4.2f), -90f, "Baul_" + r.id, fixedRoot);
+                    used.Add(Rect.MinMaxRect(x1 - 1.3f, z0 + 1.0f, x1, z0 + 5.4f));
                     AlongWall(r, 'E', new[] { E + "WaitingBench.fbx" }, 2.2f, 0.6f, 1.2f, keep, used, 0.8);
                     At(r, P + "Desk.fbx", x1 - 2.0f, z1 - 1.2f, 180f, new Vector2(0.8f, 0.45f), keep, used);
                     At(r, M + "PottedPlant.fbx", x1 - 0.6f, z0 + 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
@@ -466,6 +470,7 @@ namespace Horror.EditorTools
                     Archive(r, keep, used);
                     break;
                 case "shed":
+                    At(r, P + "Desk.fbx", x0 + 0.7f, cz + 1.0f, 90f, new Vector2(0.8f, 0.4f), keep, used);   // la mesa donde Miller dejo el medallon
                     At(r, Bm + "ControlPanel.fbx", cx, z1 - 0.5f, 180f, new Vector2(1.5f, 0.35f), keep, used);
                     At(r, P + "Crate.fbx", x0 + 0.6f, z0 + 1.4f, 20f, new Vector2(0.5f, 0.5f), keep, used);
                     break;
@@ -491,6 +496,7 @@ namespace Horror.EditorTools
                     for (float x = x0 + 2.8f; x < x1 - 2.5f; x += 4.6f) At(r, Bm + "Generator.fbx", x, cz - 0.5f, 0f, new Vector2(1.35f, 0.6f), keep, used);
                     AlongWall(r, 'S', new[] { Bm + "ControlPanel.fbx" }, 3.0f, 0.65f, 0.6f, keep, used);
                     AlongWall(r, 'E', new[] { Bm + "PipeValves.fbx" }, 1.9f, 0.4f, 1.0f, keep, used);
+                    AlongWall(r, 'N', new[] { Bm + "Workbench.fbx" }, 2.2f, 0.6f, 1.0f, keep, used, 0.8);      // banco de trabajo del taller
                     break;
                 case "lab":
                     for (float x = x0 + 2.5f; x < x1 - 2f; x += 3.6f) At(r, Bm + "LabBench.fbx", x, cz, 90f, new Vector2(1.2f, 0.42f), keep, used);
@@ -501,6 +507,7 @@ namespace Horror.EditorTools
                 case "fuse":
                     AlongWall(r, 'N', new[] { Bm + "ControlPanel.fbx" }, 3.0f, 0.65f, 0.4f, keep, used);
                     AlongWall(r, 'W', new[] { Bm + "PipeValves.fbx" }, 1.9f, 0.4f, 1.2f, keep, used);
+                    AlongWall(r, 'S', new[] { Bm + "Workbench.fbx" }, 2.2f, 0.6f, 1.0f, keep, used, 0.8);      // banco con repuestos del cuadro
                     break;
                 case "control":
                     At(r, S + "CCTVDesk.fbx", cx, z1 - 0.65f, 180f, new Vector2(1.2f, 0.5f), keep, used);

@@ -12,6 +12,9 @@ namespace Horror
         [Tooltip("Estado al empezar la partida (las salas apagadas obligan a buscar el interruptor)")]
         public bool startOn = true;
 
+        [Tooltip("Otro interruptor de la misma sala (junto a otra puerta): se mantienen sincronizados")]
+        public LightSwitch partner;
+
         bool on = true;
 
         public string Prompt => on ? "E  Apagar luces" : "E  Encender luces";
@@ -42,8 +45,11 @@ namespace Horror
             on = !on;
             foreach (var l in lamps) if (l != null) l.SetPowered(on);
             ApplyLever();
+            if (partner != null) partner.Mirror(on);
             GameAudio.Play(Sfx.Switch, transform.position, 0.9f, 1f, false);
         }
+
+        void Mirror(bool value) { on = value; restored = true; ApplyLever(); }
 
         void ApplyLever()
         {

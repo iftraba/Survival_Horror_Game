@@ -10,11 +10,14 @@ using UnityEngine.AI;
 namespace Horror.EditorTools
 {
     /// <summary>
-    /// Comisaria grande, fase E (menu Horror/Comisaria grande/5 Zombis y botin): la dificultad.
-    ///  - Unos 74 zombis repartidos por zonas (2-4 en las salas grandes y pasillos), ninguno en las salas seguras ni en el
-    ///    vestibulo. Mezcla de modelos (sin los del jefe 2), reptantes, carroneros comiendose un cadaver (solo despiertan si les
-    ///    disparan) y una parte en letargo: no reaccionan hasta oir un ruido o recibir un tiro (emboscadas al cruzar una sala).
-    ///  - Botin justo: cajas de balas, cartuchos y sprays encima de los muebles (lo que hay en las taquillas lo pone la fase D).
+    /// Comisaria grande, fase E (menu Horror/Comisaria grande/5 Zombis y botin): la dificultad. Planta v3 (docs/planes/rediseno-planta.md).
+    ///  - 43 zombis: planta baja 13, primera 13, segunda 3, sotano 14 (garaje 3, calabozos 2, zona industrial 9). Entre ellos 5 reptantes y
+    ///    3 carroneros comiendose un cadaver (solo despiertan si les disparan); una parte en letargo (no reaccionan hasta oir un ruido o
+    ///    recibir un tiro). Ninguno en el vestibulo, las salas seguras, los aseos, la escalera norte, el ingreso, la custodia ni la antesala.
+    ///    Dos encuentros a mano: un Cop dormido en la silla de la tarjeta de seguridad y un reptante dormido junto a un coche del garaje.
+    ///  - Botin por anclas (encima de un mueble de la sala que corresponde: guantera del coche, mesa del agente, armero...) con los totales
+    ///    del plan: hasta el jefe 1 ~180 balas y ~66 cartuchos; hasta el jefe 2 ~96 y ~34; sprays 8 + 4. Lo que hay dentro de las taquillas
+    ///    (y las reservas de las arenas) lo ponen los menus 4 y 6. Provisional: se ajusta jugando.
     /// Repetible: rehace "Enemigos" y "Botin".
     /// </summary>
     public static class ComisariaGrandeEnemies
@@ -26,27 +29,48 @@ namespace Horror.EditorTools
         // sala -> (zombis, probabilidad de letargo, extras: 'R' reptante, 'C' carronero)
         static readonly (string room, int n, float dormant, string extra)[] Spawns =
         {
-            ("G_Wait", 2, 0.2f, ""), ("G_C1W", 2, 0f, ""), ("G_Garage", 2, 0.3f, "R"), ("G_Dark", 2, 0.8f, ""), ("G_WC", 0, 0f, ""),
-            ("G_Elev", 0, 0f, ""), ("G_OffE", 2, 0.2f, ""), ("G_Armory", 1, 0f, ""), ("G_C1E", 2, 0f, ""), ("G_Sec", 1, 0.3f, ""),
-            ("G_Break", 1, 0f, "C"), ("G_C2", 2, 0.1f, ""), ("G_Lock", 2, 0.4f, ""), ("G_Cells", 2, 0.3f, "R"), ("G_Store", 2, 0.5f, ""),
-            ("G_Work", 2, 0.2f, ""), ("G_Alley", 1, 0f, "R"),
-            ("F_Conf", 2, 0.3f, ""), ("F_Comm", 1, 0.5f, ""), ("F_OffA", 2, 0.2f, ""), ("F_OffB", 2, 0.2f, ""), ("F_C1", 2, 0f, ""),
-            ("F_Lib", 2, 0.5f, ""), ("F_Det", 2, 0.2f, ""), ("F_C2", 2, 0f, ""), ("F_WC", 0, 0f, ""), ("F_Inter", 1, 0.3f, ""),
-            ("F_Records", 2, 0.4f, ""), ("F_Lounge", 0, 0f, "C"), ("S_RoofA", 1, 0f, ""), ("S_Ante", 1, 0.3f, ""), ("S_Arch", 2, 0.6f, ""),
-            ("B_Pump", 2, 0.3f, ""), ("B_Tanks", 0, 0f, ""), ("B_Mach", 2, 0.2f, ""), ("B_Work", 2, 0.3f, ""), ("B_C1", 2, 0f, ""),
-            ("B_Store", 2, 0.4f, ""), ("B_Lab", 2, 0.3f, "C"), ("B_Fuse", 1, 0.3f, ""), ("B_C2E", 2, 0f, ""), ("B_Control", 2, 0.2f, ""),
-            ("B_Pipes", 2, 0.3f, "R"),
+            // planta baja (13; con el Cop de seguridad a mano)
+            ("G_Wait", 1, 0.5f, ""), ("G_Radio", 2, 0.3f, ""), ("G_Dark", 2, 0.8f, ""), ("G_Brief", 1, 0.2f, ""), ("G_Armory", 1, 0f, ""),
+            ("G_Break", 0, 0f, "C"), ("G_Lock", 2, 0.4f, ""), ("G_Work", 1, 0.2f, ""), ("G_Alley", 0, 0f, "R"),
+            // primera planta (13)
+            ("F_Comm", 1, 0.5f, ""), ("F_Conf", 1, 0.3f, ""), ("F_Det", 2, 0.2f, ""), ("F_Lib", 1, 0.5f, ""), ("F_GalA", 1, 0.3f, ""),
+            ("F_Canteen", 2, 0.3f, ""), ("F_Admin", 1, 0.2f, ""), ("F_NHall", 1, 0f, ""), ("F_Rec", 1, 0.4f, "R"), ("F_Lounge", 0, 0f, "C"),
+            // segunda planta (3)
+            ("S_RoofA", 1, 0f, ""), ("S_Arch", 2, 0.6f, ""),
+            // sotano (14; el reptante del garaje va a mano)
+            ("B_Garage", 2, 0.3f, ""), ("B_Cells", 1, 0.3f, "R"),
+            ("B_Pump", 2, 0.3f, ""), ("B_Mach", 2, 0.2f, ""), ("B_Store", 1, 0.4f, ""), ("B_Lab", 1, 0.3f, "C"), ("B_Control", 1, 0.2f, ""), ("B_Gal", 0, 0f, "R"),
         };
 
-        // sala -> objetos sueltos (encima de los muebles si hay)
-        static readonly (string room, string item, int n)[] Loot =
+        // botin: sala, clases de mueble donde puede ir (la primera que exista), objeto, cantidad, que mueble de esa clase (0 = el mas cercano al centro...)
+        static readonly (string room, string[] on, string item, int n, int index)[] Loot =
         {
-            ("G_Wait", "I_HandgunAmmo", 10), ("G_Garage", "I_Spray", 1), ("G_OffE", "I_HandgunAmmo", 12), ("G_Sec", "I_HandgunAmmo", 10),
-            ("G_Break", "I_Spray", 1), ("G_Store", "I_ShotgunAmmo", 6), ("G_Work", "I_HandgunAmmo", 10),
-            ("F_Conf", "I_HandgunAmmo", 10), ("F_OffA", "I_Spray", 1), ("F_OffB", "I_HandgunAmmo", 12), ("F_Det", "I_ShotgunAmmo", 6),
-            ("F_Records", "I_HandgunAmmo", 10), ("F_Lounge", "I_Spray", 1), ("F_Evid", "I_ShotgunAmmo", 6), ("S_Ante", "I_ShotgunAmmo", 8),
-            ("S_Ante", "I_Spray", 1), ("B_Safe", "I_HandgunAmmo", 12), ("B_Safe", "I_Spray", 1), ("B_Mach", "I_ShotgunAmmo", 6),
-            ("B_Work", "I_HandgunAmmo", 10), ("B_Control", "I_Spray", 1), ("B_C2W", "I_ShotgunAmmo", 8), ("B_C2W", "I_HandgunAmmo", 12),
+            // hasta el jefe 1: balas (las taquillas aportan 35 mas) -> ~182
+            ("G_Wait", new[] { "WaitingBench" }, "I_HandgunAmmo", 12, 0), ("B_Garage", new[] { "PoliceCar" }, "I_HandgunAmmo", 10, 1),
+            ("G_Lobby", new[] { "ReceptionDesk" }, "I_HandgunAmmo", 10, 0), ("G_Radio", new[] { "Desk" }, "I_HandgunAmmo", 10, 0),
+            ("G_Brief", new[] { "Desk" }, "I_HandgunAmmo", 10, 1), ("G_Sec", new[] { "Desk" }, "I_HandgunAmmo", 8, 1),
+            ("G_Work", new[] { "Workbench" }, "I_HandgunAmmo", 12, 0), ("G_Armory", new[] { "GunRack" }, "I_HandgunAmmo", 15, 0),
+            ("G_Intake", new[] { "ReceptionDesk" }, "I_HandgunAmmo", 10, 0), ("F_Conf", new[] { "Lectern" }, "I_HandgunAmmo", 10, 0),
+            ("F_Comm", new[] { "ExecutiveDesk" }, "I_HandgunAmmo", 10, 0), ("F_Det", new[] { "Desk" }, "I_HandgunAmmo", 12, 0),
+            ("F_Canteen", new[] { "KitchenCounter" }, "I_HandgunAmmo", 8, 0), ("S_Ante", new[] { "Desk" }, "I_HandgunAmmo", 10, 0),
+            // hasta el jefe 1: cartuchos (las taquillas aportan 10 mas) -> ~68
+            ("G_Armory", new[] { "GunRack" }, "I_ShotgunAmmo", 6, 1), ("G_Dark", new[] { "MetalRack" }, "I_ShotgunAmmo", 8, 0),
+            ("F_Det", new[] { "Desk" }, "I_ShotgunAmmo", 6, 1), ("F_Lib", new[] { "Bookcase" }, "I_ShotgunAmmo", 6, 0),
+            ("F_Lounge", new[] { "Couch", "Desk" }, "I_ShotgunAmmo", 6, 0), ("F_Rec", new[] { "ArchiveCart", "ArchiveShelfA", "ArchiveShelfB" }, "I_ShotgunAmmo", 6, 0),
+            ("S_Ante", new[] { "Desk" }, "I_ShotgunAmmo", 8, 1), ("B_Cells", new[] { "Desk" }, "I_ShotgunAmmo", 6, 0),
+            // hasta el jefe 1: sprays (+1 en la taquilla de seguridad) -> 8
+            ("G_Radio", new[] { "Desk" }, "I_Spray", 1, 1), ("G_Safe", new[] { "Desk" }, "I_Spray", 1, 0), ("F_Canteen", new[] { "KitchenCounter" }, "I_Spray", 1, 1),
+            ("F_Det", new[] { "Desk" }, "I_Spray", 1, 2), ("F_Lib", new[] { "Bookcase" }, "I_Spray", 1, 1), ("S_Ante", new[] { "Desk" }, "I_Spray", 1, 2),
+            ("B_Cells", new[] { "Desk" }, "I_Spray", 1, 1),
+            // despues del jefe 1 (sotano industrial): ~96 balas, ~34 cartuchos (6 en la taquilla del almacen), 4 sprays
+            ("B_Pump", new[] { "Barrel", "WaterPump", "Crate" }, "I_HandgunAmmo", 12, 0), ("B_Mach", new[] { "Workbench" }, "I_HandgunAmmo", 12, 0),
+            ("B_Store", new[] { "MetalRack", "Shelf" }, "I_HandgunAmmo", 12, 0), ("B_Lab", new[] { "LabBench" }, "I_HandgunAmmo", 10, 0),
+            ("B_Fuse", new[] { "Workbench" }, "I_HandgunAmmo", 12, 0), ("B_Control", new[] { "Desk" }, "I_HandgunAmmo", 12, 0),
+            ("B_Safe", new[] { "Desk" }, "I_HandgunAmmo", 14, 1), ("B_Gal", new[] { "WaitingBench" }, "I_HandgunAmmo", 12, 0),
+            ("B_Mach", new[] { "Generator", "Workbench" }, "I_ShotgunAmmo", 6, 1), ("B_Lab", new[] { "LabCabinet" }, "I_ShotgunAmmo", 6, 0),
+            ("B_Control", new[] { "Desk" }, "I_ShotgunAmmo", 6, 1), ("B_Safe", new[] { "Shelf" }, "I_ShotgunAmmo", 8, 0),
+            ("B_Lab", new[] { "LabBench" }, "I_Spray", 1, 1), ("B_Control", new[] { "Desk" }, "I_Spray", 1, 2), ("B_Safe", new[] { "Desk" }, "I_Spray", 1, 2),
+            ("B_Mach", new[] { "Workbench" }, "I_Spray", 1, 1),
         };
 
         static System.Random rng;
@@ -79,58 +103,67 @@ namespace Horror.EditorTools
             var lr = new GameObject("Botin").transform; lr.SetParent(level);
             rng = new System.Random(66);
             var taken = new List<Vector3>();
-            int total = 0, dorm = 0;
-            GameObject Spawn(string prefab, Vector3 p, string name)
+            var log = new List<string>();
+            int total = 0, dorm = 0, reptantes = 0, carroneros = 0;
+            GameObject Spawn(string prefab, Vector3 p, string name, bool dormant)
             {
                 var pf = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Characters/" + prefab + ".prefab");
-                if (pf == null) return null;
+                if (pf == null) { log.Add("falta " + prefab); return null; }
                 var z = (GameObject)PrefabUtility.InstantiatePrefab(pf, zr);
                 z.name = name; z.transform.SetPositionAndRotation(p + Vector3.up * 0.05f, Quaternion.Euler(0, (float)rng.NextDouble() * 360f, 0));
                 total++;
+                if (dormant) { var ai = z.GetComponent<ZombieAI>(); ai.dormant = true; EditorUtility.SetDirty(ai); PrefabUtility.RecordPrefabInstancePropertyModifications(ai); dorm++; }
                 return z;
             }
             foreach (var (roomId, n, dp, extra) in Spawns)
             {
-                var r = ComisariaGrande.Rooms.FirstOrDefault(x => x.id == roomId); if (r == null) continue;
+                var r = ComisariaGrande.Rooms.FirstOrDefault(x => x.id == roomId); if (r == null) { log.Add("falta la sala " + roomId); continue; }
                 for (int i = 0; i < n; i++)
                 {
-                    var p = NavPoint(r, taken, 2.5f); if (p == null) continue; taken.Add(p.Value);
-                    var z = Spawn(Normal[rng.Next(Normal.Length)], p.Value, "Z_" + roomId + "_" + i);
-                    if (z != null && rng.NextDouble() < dp) { var ai = z.GetComponent<ZombieAI>(); ai.dormant = true; EditorUtility.SetDirty(ai); PrefabUtility.RecordPrefabInstancePropertyModifications(ai); dorm++; }
+                    var p = NavPoint(r, taken, 2.5f); if (p == null) { log.Add("sin sitio en " + roomId); continue; }
+                    taken.Add(p.Value);
+                    Spawn(Normal[rng.Next(Normal.Length)], p.Value, "Z_" + roomId + "_" + i, rng.NextDouble() < System.Math.Min(1.0, dp * 1.7));
                 }
                 foreach (var c in extra)
                 {
-                    var p = NavPoint(r, taken, 2.5f); if (p == null) continue; taken.Add(p.Value);
-                    if (c == 'R') Spawn("Zombie_OficialReptante", p.Value, "Z_Reptante_" + roomId);
-                    else if (c == 'C') Spawn("Zombie_Carronero", p.Value, "Z_Carronero_" + roomId);
+                    var p = NavPoint(r, taken, 2.5f); if (p == null) { log.Add("sin sitio para el extra en " + roomId); continue; }
+                    taken.Add(p.Value);
+                    if (c == 'R') { Spawn("Zombie_OficialReptante", p.Value, "Z_Reptante_" + roomId, false); reptantes++; }
+                    else if (c == 'C') { Spawn("Zombie_Carronero", p.Value, "Z_Carronero_" + roomId, false); carroneros++; }
                 }
             }
-            // botin: encima del primer mueble que haya en un punto al azar de la sala (o en el suelo)
             Physics.SyncTransforms();
-            int items = 0;
-            foreach (var (roomId, item, n) in Loot)
+            ComisariaGrandeAnchors.Init(level);
+
+            // encuentros a mano: el Cop dormido junto a la mesa donde esta la tarjeta de seguridad y el reptante dormido junto a un coche del garaje
+            var card = level.GetComponentsInChildren<Pickup>(true).FirstOrDefault(pk => pk.item != null && pk.item.name == "I_CardSecurity");
+            if (card != null && NavMesh.SamplePosition(card.transform.position, out var ch, 2.5f, NavMesh.AllAreas))
+            { Spawn("Zombie_Cop", ch.position, "Z_G_Sec_Cop", true); taken.Add(ch.position); }
+            else log.Add("sin tarjeta de seguridad o sin NavMesh junto a ella: falta el Cop dormido");
+            var cars = ComisariaGrandeAnchors.Furniture("B_Garage", "PoliceCar").OrderBy(t => t.position.x).ToList();
+            if (cars.Count > 1 && NavMesh.SamplePosition(cars[1].GetComponent<BoxCollider>().bounds.center, out var rh, 3.5f, NavMesh.AllAreas))
+            { Spawn("Zombie_OficialReptante", rh.position, "Z_Reptante_B_Garage", true); reptantes++; }
+            else log.Add("sin coche o sin NavMesh junto a el: falta el reptante del garaje");
+
+            // botin por anclas
+            int items = 0, bullets1 = 0, shells1 = 0, sprays1 = 0;
+            foreach (var (roomId, on, itemName, n, index) in Loot)
             {
-                var r = ComisariaGrande.Rooms.FirstOrDefault(x => x.id == roomId); var it = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/Data/" + item + ".asset");
-                if (r == null || it == null) continue;
-                Vector3 best = Vector3.zero; bool ok = false;
-                for (int i = 0; i < 40 && !ok; i++)
-                {
-                    float x = (float)(r.r.xMin + 0.8f + rng.NextDouble() * (r.r.width - 1.6f)), z = (float)(r.r.yMin + 0.8f + rng.NextDouble() * (r.r.height - 1.6f));
-                    var hits = Physics.RaycastAll(new Vector3(x, r.floor + 1.5f, z), Vector3.down, 2f, ~0, QueryTriggerInteraction.Ignore).OrderBy(h => h.distance).ToArray();
-                    if (hits.Length == 0) continue;
-                    var top = hits[0];
-                    if (top.point.y > r.floor + 0.5f && top.point.y < r.floor + 1.3f && Vector3.Angle(top.normal, Vector3.up) < 10f) { best = top.point; ok = true; }
-                    else if (i > 30 && top.point.y < r.floor + 0.1f) { best = top.point; ok = true; }
-                }
-                if (!ok) continue;
-                var pk = Pickup.Spawn(it, n, best + Vector3.up * 0.12f); pk.transform.SetParent(lr); items++;
+                var it = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Project/Data/" + itemName + ".asset");
+                if (it == null) { log.Add("falta " + itemName); continue; }
+                var p = ComisariaGrandeAnchors.Spot(roomId, on, index, null, itemName + " x" + n);
+                var pk = Pickup.Spawn(it, n, p + Vector3.up * 0.12f); pk.transform.SetParent(lr); items++;
+                bool early = !roomId.StartsWith("B_") || roomId == "B_Garage" || roomId == "B_Cells";
+                if (early) { if (itemName == "I_HandgunAmmo") bullets1 += n; else if (itemName == "I_ShotgunAmmo") shells1 += n; else sprays1 += n; }
             }
+            foreach (var m in ComisariaGrandeAnchors.Log) log.Add(m);
             var oldMode = Physics.simulationMode; Physics.simulationMode = SimulationMode.Script; Physics.SyncTransforms();
             for (int i = 0; i < 150; i++) Physics.Simulate(0.02f);
             Physics.simulationMode = oldMode;
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            return "fase E: " + total + " zombis (" + dorm + " en letargo), " + items + " objetos sueltos";
+            return "fase E: " + total + " zombis (" + dorm + " en letargo, " + reptantes + " reptantes, " + carroneros + " carroneros), " + items + " objetos sueltos (tabla hasta el jefe 1: "
+                + bullets1 + " balas, " + shells1 + " cartuchos, " + sprays1 + " sprays; las taquillas suman mas) | " + string.Join(" | ", log);
         }
     }
 }

@@ -17,11 +17,13 @@ MonoBehaviour:
   type: 2
   icon: {fileID: 872719979490790903, guid: b129f2c1ea36ec241b89e22da435c51e, type: 3}
   tint: {r: 0, g: 1, b: 0, a: 1}
-  maxStack: 1
+  maxStack: 3
   worldPrefab: {fileID: 919132149155446097, guid: 6c7f5758529809e43a60e1a31d3ed4bf, type: 3}
   worldScale: 1.4
   mass: 0.4
+  highlight: 0
   pickupObjective: 
+  extraSlots: 2
   healAmount: 60
   weapon: {fileID: 0}
   ammoType: 0
