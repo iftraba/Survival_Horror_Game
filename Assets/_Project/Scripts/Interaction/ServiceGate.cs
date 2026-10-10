@@ -14,7 +14,7 @@ namespace Horror
         [Tooltip("Barrotes que suben al abrir")] public Transform bars;
         public float liftHeight = 2.5f;
         [Tooltip("Si no es cero, la reja se desliza este desplazamiento local (hacia la pared) en vez de subir; al llegar queda oculta dentro de ella")] public Vector3 slideOffset;
-        public float liftTime = 2.2f;
+        public float liftTime = 3.6f;
         [TextArea] public string lockedMessage = "Una reja de seguridad cierra la escalera. Tiene una placa: \"Acceso al archivo. Se abre desde el memorial.\"";
 
         Vector3 closedPos;
@@ -51,7 +51,9 @@ namespace Horror
         System.Collections.IEnumerator OpenAfter(float delay)
         {
             waiting = true;
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSeconds(0.2f);
+            for (float w = 0f; ProgressCutscene.Travelling(flag) && w < 40f; w += Time.deltaTime) yield return null;      // espera a que la camara llegue
+            yield return new WaitForSeconds(0.6f);
             waiting = false;
             if (Progress.Has(flag) && t < 0f) Begin();
         }

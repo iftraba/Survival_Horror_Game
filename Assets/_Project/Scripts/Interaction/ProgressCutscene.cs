@@ -21,11 +21,11 @@ namespace Horror
         public Vector3 focusOffset = new Vector3(0f, 1.2f, 0f);
         public float travelSpeed = 14f;
         [Tooltip("Segundos viendo la pieza recien colocada antes de partir")] public float startHold = 0.9f;
-        [Tooltip("Segundos que se queda mirando como se abre")] public float openHold = 3.0f;
+        [Tooltip("Segundos que se queda mirando como se abre")] public float openHold = 5.5f;
         public float returnSpeedFactor = 1.8f;
 
         static readonly Dictionary<string, ProgressCutscene> registry = new Dictionary<string, ProgressCutscene>();
-        bool played, running, skip;
+        bool played, running, skip, arrived;
         float loadedAt;
 
         void OnEnable() { registry[flag] = this; Progress.Changed += Check; loadedAt = Time.time; }
@@ -41,6 +41,9 @@ namespace Horror
 
         void Check() => Begin();
 
+        /// <summary>True mientras la camara todavia viaja hacia lo que se abre (el efecto debe esperar a que llegue para que se vea).</summary>
+        public static bool Travelling(string flag) => registry.TryGetValue(flag, out var c) && c != null && c.running && !c.arrived;
+
         /// <summary>Empieza la secuencia si toca (una sola vez). Devuelve true si se esta reproduciendo.</summary>
         bool Begin()
         {
@@ -50,7 +53,7 @@ namespace Horror
             if (Progress.Restoring || Time.time - loadedAt < 2f) { played = true; return false; }   // la marca llega al cargar una partida o empezar una
             var pc = FindFirstObjectByType<PlayerController>(); var cam = FindFirstObjectByType<ThirdPersonCamera>();
             if (pc == null || cam == null) { played = true; return false; }
-            played = true; running = true; skip = false;
+            played = true; running = true; skip = false; arrived = false;
             StartCoroutine(Run(pc, cam));
             return true;
         }
@@ -81,11 +84,13 @@ namespace Horror
             Vector3 look = focus != null ? focus.position + focusOffset : pts[pts.Count - 1] + Vector3.forward;
             yield return Fly(cam, pts, travelSpeed, fov, look, true);
             // 3) mirar como se abre
+            arrived = true;
             if (!skip) { float t = 0f; var endPos = pts[pts.Count - 1]; while (t < openHold && !skip) { t += Time.deltaTime; cam.SetCinematic(endPos, Quaternion.Slerp(cam.transform.rotation, Quaternion.LookRotation(look - endPos), 5f * Time.deltaTime), fov); PollSkip(); yield return null; } }
             // 4) volver
             pts.Reverse();
             if (!skip) yield return Fly(cam, pts, travelSpeed * returnSpeedFactor, fov, Vector3.zero, false);
 
+            arrived = true;
             cam.EndCinematic();
             pc.enabled = true;
             if (hp != null) hp.damageTakenMultiplier = oldMult;

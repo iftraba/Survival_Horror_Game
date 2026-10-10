@@ -35,7 +35,9 @@ namespace Horror
         System.Collections.IEnumerator ApplyAfter(float delay)
         {
             waiting = true;
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSeconds(0.2f);
+            for (float w = 0f; ProgressCutscene.Travelling(flag) && w < 40f; w += Time.deltaTime) yield return null;      // espera a que la camara llegue
+            yield return new WaitForSeconds(0.6f);
             waiting = false;
             Apply(Progress.Has(flag));
         }
