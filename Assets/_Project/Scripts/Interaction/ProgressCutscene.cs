@@ -26,6 +26,7 @@ namespace Horror
 
         static readonly Dictionary<string, ProgressCutscene> registry = new Dictionary<string, ProgressCutscene>();
         bool played, running, skip, arrived;
+        float startedAt;
         float loadedAt;
 
         void OnEnable() { registry[flag] = this; Progress.Changed += Check; loadedAt = Time.time; }
@@ -53,7 +54,7 @@ namespace Horror
             if (Progress.Restoring || Time.time - loadedAt < 2f) { played = true; return false; }   // la marca llega al cargar una partida o empezar una
             var pc = FindFirstObjectByType<PlayerController>(); var cam = FindFirstObjectByType<ThirdPersonCamera>();
             if (pc == null || cam == null) { played = true; return false; }
-            played = true; running = true; skip = false; arrived = false;
+            played = true; running = true; skip = false; arrived = false; startedAt = Time.unscaledTime;
             StartCoroutine(Run(pc, cam));
             return true;
         }
@@ -104,6 +105,7 @@ namespace Horror
 
         void PollSkip()
         {
+            if (Time.unscaledTime - startedAt < 0.7f) return;          // la E que coloca el ultimo medallon es la misma que saltaria la secuencia en el mismo fotograma
             var kb = Keyboard.current;
             if (kb != null && (kb.eKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame || kb.escapeKey.wasPressedThisFrame)) skip = true;
         }

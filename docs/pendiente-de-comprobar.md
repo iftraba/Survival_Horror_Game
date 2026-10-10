@@ -92,3 +92,4 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [JUGAR] Parpadeo del suelo: ¿ha desaparecido en el sitio de la captura y en el resto? (121 paredes bajadas 6 cm; comprobado solo en datos, no a ojo).
 - [ ] [JUGAR] Notas con el ratón encima: la tinta ya no cambia a blanco (corregido en el estilo, sin ver en pantalla).
 - [JUGAR] Secuencia de la reja (arreglada el 2026-10-11, vista en Play con el monumento) y de las calderas (mismo arreglo, sin ver).
+- [JUGAR] Poner el 3.º medallón con la E real en la build recompilada: la cámara debe recorrer el camino (si no, la causa era otra). Guardar con la reja abierta y cargar: debe estar abierta sin cinemática.

@@ -45,6 +45,7 @@ namespace Horror
         {
             if (!Progress.Has(flag)) { if (t >= 0f) SetOpen(false); waiting = false; return; }
             if (t >= 0f || waiting) return;
+            if (Progress.Restoring) { SetOpen(true); return; }             // partida cargada: ya estaba abierta, sin animacion ni sonido
             float delay = ProgressCutscene.DelayFor(flag);                 // si hay secuencia de camara, la reja se abre cuando la camara llega
             if (delay > 0f) StartCoroutine(OpenAfter(delay)); else Begin();
         }

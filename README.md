@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-11 · Interaction · **Secuencias de progreso**: la E que coloca el medallón ya no las salta en el mismo fotograma; al cargar partida la reja y la puerta de las calderas quedan abiertas al instante y al empezar partida nueva se reinician.
+
 - 2026-10-11 · UI/Build · **Menú principal**: los controles ya no se pisan (una línea por grupo). Build de Windows en `Desktop/Juego` recompilada con menú + `Comisaria_v2` (Build Settings: `MainMenu` + `Comisaria_v2`).
 
 - 2026-10-11 · Interaction · **Reja del archivo**: barrotes no estáticos para que se vea la animación, se deslizan 3 s hacia el lado de la barandilla y quedan a la vista.

@@ -23,7 +23,7 @@ namespace Horror
         {
             if (door == null) return;
             bool on = Progress.Has(flag);
-            if (on && !applied && !waiting)
+            if (on && !applied && !waiting && !Progress.Restoring)       // al cargar una partida se libera de golpe, sin esperar a una camara que no va a salir
             {
                 float delay = ProgressCutscene.DelayFor(flag);             // con secuencia de camara, la corriente llega cuando la camara llega a la puerta
                 if (delay > 0f) { StartCoroutine(ApplyAfter(delay)); return; }
