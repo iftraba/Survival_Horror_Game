@@ -138,17 +138,37 @@ namespace Horror
 
         // ------------------------------------------------------------------ hoja de papel (2D)
 
-        /// <summary>Dibuja una nota como una hoja de papel: titulo, texto a mano, linea destacada y dibujo opcional. s escala las letras.</summary>
+        /// <summary>
+        /// Dibuja una nota como una hoja de papel: banda superior con la categoria, titulo, texto a mano con la frase clave subrayada en rojo
+        /// DENTRO del propio texto, renglones, margen, cinta y un dibujo opcional. s escala las letras.
+        /// </summary>
         void DrawNotePage(Rect r, NoteData n, float s)
         {
-            Fill(r, new Color(0.88f, 0.82f, 0.67f));
-            Fill(new Rect(r.x + r.width * 0.60f, r.y + r.height * 0.06f, r.width * 0.28f, r.height * 0.13f), new Color(0.62f, 0.45f, 0.22f, 0.10f));   // mancha
-            Fill(new Rect(r.x + r.width * 0.05f, r.y + r.height * 0.72f, r.width * 0.18f, r.height * 0.1f), new Color(0.5f, 0.38f, 0.2f, 0.08f));
-            Fill(new Rect(r.x, r.yMax - r.height * 0.16f, r.width, r.height * 0.16f), new Color(0.45f, 0.34f, 0.18f, 0.08f));                       // borde sucio
-            Fill(new Rect(r.x, r.y + r.height * 0.5f, r.width, 1f), new Color(0.4f, 0.32f, 0.2f, 0.25f));                                              // doblez
+            bool story = n.category == NoteCategory.Story;
+            // papel: base con tiras mas oscuras hacia los bordes (viñeta), manchas y doblez
+            var paper = story ? new Color(0.89f, 0.83f, 0.68f) : new Color(0.91f, 0.89f, 0.80f);
+            Fill(r, paper);
+            for (int k = 0; k < 6; k++)
+            {
+                float f = k / 6f, a = 0.045f * (1f - f);
+                Fill(new Rect(r.x, r.y + f * r.height * 0.5f, r.width, 2f + r.height * 0.5f / 6f), new Color(0.35f, 0.25f, 0.1f, a));
+                Fill(new Rect(r.x, r.yMax - (f + 1f / 6f) * r.height * 0.5f, r.width, 2f + r.height * 0.5f / 6f), new Color(0.35f, 0.25f, 0.1f, a));
+            }
+            Fill(new Rect(r.x, r.y, 10f * s, r.height), new Color(0.35f, 0.25f, 0.1f, 0.07f));
+            Fill(new Rect(r.xMax - 10f * s, r.y, 10f * s, r.height), new Color(0.35f, 0.25f, 0.1f, 0.07f));
+            Fill(new Rect(r.x + r.width * 0.62f, r.y + r.height * 0.07f, r.width * 0.2f, r.height * 0.08f), new Color(0.55f, 0.38f, 0.16f, 0.10f));      // mancha de cafe
+            Fill(new Rect(r.x + r.width * 0.07f, r.y + r.height * 0.74f, r.width * 0.16f, r.height * 0.09f), new Color(0.5f, 0.38f, 0.2f, 0.09f));
+            Fill(new Rect(r.x, r.y + r.height * 0.5f, r.width, 1f), new Color(0.4f, 0.32f, 0.2f, 0.22f));                                             // doblez
             Frame(r, new Color(0.33f, 0.26f, 0.16f, 0.9f), 2f);
+            // cinta adhesiva arriba
+            Fill(new Rect(r.x + r.width * 0.5f - 34f * s, r.y - 9f * s, 68f * s, 22f * s), new Color(0.86f, 0.8f, 0.6f, 0.62f));
 
-            float pad = 30f * s, x = r.x + pad, w = r.width - pad * 2f, y = r.y + pad;
+            float pad = 34f * s, x = r.x + pad, w = r.width - pad * 2f, y = r.y + pad * 0.8f;
+            // etiqueta de categoria
+            var tag = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(13f * s), fontStyle = FontStyle.Bold };
+            tag.normal.textColor = new Color(PaperInk.r, PaperInk.g, PaperInk.b, 0.55f);
+            GUI.Label(new Rect(x, y - 4f * s, w, 18f * s), story ? "NOTA PERSONAL" : "NOTA DE SERVICIO", tag);
+            y += 16f * s;
             var title = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(28f * s), fontStyle = FontStyle.Bold, wordWrap = true };
             title.normal.textColor = PaperInk;
             float th = title.CalcHeight(new GUIContent(n.title), w);
@@ -157,20 +177,31 @@ namespace Horror
             Fill(new Rect(x, y, w, 2f), new Color(PaperInk.r, PaperInk.g, PaperInk.b, 0.45f));
             y += 14f * s;
 
-            var body = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(21f * s), wordWrap = true, fontStyle = FontStyle.Italic };
+            // texto con la frase clave en rojo y subrayada dentro de la propia frase
+            var body = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(21f * s), wordWrap = true, fontStyle = FontStyle.Italic, richText = true };
             body.normal.textColor = PaperInk;
-            float bh = body.CalcHeight(new GUIContent(n.body), w);
-            GUI.Label(new Rect(x, y, w, bh), n.body, body);
-            y += bh + 16f * s;
-
+            string text = n.body, callout = null;
             if (!string.IsNullOrEmpty(n.highlight))
             {
-                var hs = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(56f * s), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
-                hs.normal.textColor = PenRed;
-                float hh = 76f * s;
-                GUI.Label(new Rect(x, y, w, hh), n.highlight, hs);
-                Fill(new Rect(x + w * 0.22f, y + hh - 4f, w * 0.56f, 3f), new Color(PenRed.r, PenRed.g, PenRed.b, 0.7f));
-                y += hh + 14f * s;
+                int hi, hl;
+                if (FindPhrase(text, n.highlight, out hi, out hl))
+                    text = text.Substring(0, hi) + "<b><color=#" + ColorUtility.ToHtmlStringRGB(PenRed) + ">" + text.Substring(hi, hl) + "</color></b>" + text.Substring(hi + hl);
+                else callout = n.highlight;       // la frase no aparece tal cual en el texto: va aparte, en una linea
+            }
+            float bh = body.CalcHeight(new GUIContent(text), w);
+            // renglones suaves detras del texto
+            for (float ly = y + 26f * s; ly < y + bh; ly += 29f * s) Fill(new Rect(x, ly, w, 1f), new Color(0.3f, 0.35f, 0.5f, 0.10f));
+            GUI.Label(new Rect(x, y, w, bh), text, body);
+            y += bh + 14f * s;
+
+            if (callout != null)
+            {
+                var cs = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(30f * s), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, richText = true };
+                cs.normal.textColor = PenRed;
+                float ch = 44f * s;
+                GUI.Label(new Rect(x, y, w, ch), callout, cs);
+                Fill(new Rect(x + w * 0.25f, y + ch - 3f, w * 0.5f, 2f), new Color(PenRed.r, PenRed.g, PenRed.b, 0.7f));
+                y += ch + 10f * s;
             }
 
             if (n.image != null && n.image.texture != null)
@@ -180,12 +211,41 @@ namespace Horror
             }
         }
 
+        /// <summary>Alto que necesita la nota (mismo reparto que DrawNotePage) para que la hoja no sea mas grande que su contenido.</summary>
+        float NoteContentHeight(NoteData n, float s, float pageWidth)
+        {
+            float pad = 34f * s, w = pageWidth - pad * 2f, y = pad * 0.8f + 16f * s;
+            var title = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(28f * s), fontStyle = FontStyle.Bold, wordWrap = true };
+            y += title.CalcHeight(new GUIContent(n.title), w) + 6f * s + 14f * s;
+            var body = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(21f * s), wordWrap = true, fontStyle = FontStyle.Italic, richText = true };
+            string text = n.body; int hi, hl;
+            bool inline = !string.IsNullOrEmpty(n.highlight) && FindPhrase(text, n.highlight, out hi, out hl);
+            if (inline) { FindPhrase(text, n.highlight, out hi, out hl); text = text.Substring(0, hi) + "<b>" + text.Substring(hi, hl) + "</b>" + text.Substring(hi + hl); }
+            y += body.CalcHeight(new GUIContent(text), w) + 14f * s;
+            if (!string.IsNullOrEmpty(n.highlight) && !inline) y += 54f * s;
+            if (n.image != null && n.image.texture != null) y += 260f * s;
+            return y + pad;
+        }
+
+        /// <summary>Busca la frase clave en el texto (sin mayusculas y, si son cifras o letras sueltas, tambien con espacios entre ellas: "4 5 1 9").</summary>
+        static bool FindPhrase(string text, string phrase, out int index, out int length)
+        {
+            index = text.IndexOf(phrase, System.StringComparison.OrdinalIgnoreCase); length = phrase.Length;
+            if (index >= 0) return true;
+            var pat = new System.Text.StringBuilder();
+            foreach (char c in phrase) { if (char.IsWhiteSpace(c)) continue; if (pat.Length > 0) pat.Append(@"\s*"); pat.Append(System.Text.RegularExpressions.Regex.Escape(c.ToString())); }
+            var m = System.Text.RegularExpressions.Regex.Match(text, pat.ToString(), System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (!m.Success) return false;
+            index = m.Index; length = m.Length; return true;
+        }
+
         void DrawNoteReader()
         {
             Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0f, 0f, 0f, 0.82f));
             var n = NoteArchive.Reading;
             if (n == null) return;
-            float w = Mathf.Min(660f, Screen.width - 60f), h = Mathf.Min(Screen.height - 120f, 760f);
+            float w = Mathf.Min(660f, Screen.width - 60f), maxH = Mathf.Min(Screen.height - 120f, 760f);
+            float h = Mathf.Clamp(NoteContentHeight(n, 1f, w) + 24f, 300f, maxH);                   // la hoja se ajusta a su contenido
             var r = new Rect(Screen.width / 2f - w / 2f, Screen.height / 2f - h / 2f - 10f, w, h);
             // sombra y ligero giro: el papel esta puesto a mano sobre la mesa
             Fill(new Rect(r.x + 10f, r.y + 12f, r.width, r.height), new Color(0f, 0f, 0f, 0.45f));

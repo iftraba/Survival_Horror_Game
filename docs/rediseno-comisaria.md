@@ -513,3 +513,16 @@ Qué se comprobó y cómo (el detalle de lo que sigue abierto está en `docs/pen
 - **Rendimiento** (1920×1080, cámara temporal en el editor, con lectura de píxeles para sincronizar): 8-20 ms por fotograma según el sitio, con ±5 ms de ruido; las sombras de los focos son la mitad del coste en el atrio (14 → 8 ms sin ellas). No hay línea base anterior a la etapa F ni medida en build.
 
 Lo que **no** se pudo comprobar aquí y queda para jugar: coger de verdad cada objeto con la tecla E, abrir cada puerta con su llave, las taquillas, guardar y cargar (revisado por lectura de `SaveSystem`, `Door.ApplySaved` y `LightSwitch.SetOn`, pero no ejecutado), el comportamiento de los zombis (despertar, perseguir, puertas), el jefe 1 en la arena nueva y el equilibrio de munición, zombis y luz.
+
+## Cambios tras la primera partida completa: fase 1 (2026-10-10)
+
+Plan completo y decisiones del usuario en `docs/planes/feedback-primera-partida-completa.md`. Lo hecho en esta fase:
+- **Jefe 1 despertado desde otra planta:** `ZombieAI.Noise` ya no despierta a los jefes (solo su `BossRoomTrigger`) y los zombis que están a más de 2,5 m de altura sin línea directa no oyen el disparo. Medido en Play: un ruido justo debajo del jefe lo deja dormido y sin barra de vida.
+- **El jefe no rompía estanterías:** `PropBreaker.PropRoot` solo aceptaba grupos `Props` o `*_Props`; el mobiliario nuevo cuelga de `Props/Mobiliario`. Ahora también acepta `Mobiliario` y el tope de altura sube a 2,9 m (las estanterías metálicas miden 2,64 m). Medido en Play: una esfera de 1 m sobre una `ArchiveShelfA` rompe 2 muebles. **Sin ver aún al jefe real romperlas.**
+- **Zombis dormidos:** `ZombieAI.proximityWakeRange` (3,5 m, la mitad agachado; con línea directa y misma planta) los despierta; el carroñero (`wakeOnlyWhenShot`) y los jefes no. En el menú 5 el factor de letargo baja de 1,7 a 1,1: 9 dormidos al azar más el Cop y el reptante del garaje (antes 18). Medido en Play: el Cop de seguridad sigue dormido a 6 m y despierta a 2,8 m.
+- **Animación de comer al disparar:** el prefab `Zombie_Carronero` usaba el bucle de morder (`Z_ZombieBiting2`) como movimiento y golpe, así que al dispararle seguía «comiendo». Los 3 carroñeros ahora son un zombi normal (Civil, Cop, Girl u Oficial) con `ZombieFeeding.feeding` activo: comen junto a su cadáver y, al dispararles, se levantan con sus animaciones de siempre. Medido en Play: reacción al golpe, reposo y puñetazo normales tras el tiro.
+- **Guardado:** siempre `SavePhone` (también en la antesala del archivo, antes terminal), más dos rincones de guardado (teléfono y baúl) en el ingreso (`G_Intake`) y el memorial (`F_Mem`): 5 puntos en el edificio principal más el del sótano.
+- **Tirar es desechar:** `Inventory.Drop` ya no crea un `Pickup` en el suelo.
+- **Notas:** la frase clave sale en rojo y subrayada dentro del texto (acepta «4 5 1 9» para 4519; si no aparece, va en una línea aparte), con etiqueta de categoría, viñeta, renglones y cinta; la hoja se ajusta a su contenido.
+
+**Comprobado:** compila; rutas (62 salas) y puertas (54) tras rehacer; 100 de 100 interactuables alcanzables y a la vista; oclusión horneada de nuevo. **Sin comprobar:** el estilo de las notas más allá de una captura, el comportamiento del jefe rompiendo estanterías en combate, y los dos rincones nuevos a ojo.

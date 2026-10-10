@@ -184,11 +184,41 @@ namespace Horror.EditorTools
         }
 
         // ------------------------------------------------------------------ tipos de sala
+        /// <summary>
+        /// Rincon de guardado en una sala normal: telefono y baul pegados a una pared libre (sin tapar puertas ni escaleras), uno junto al otro,
+        /// mirando hacia dentro. Se reserva antes que el resto del mobiliario.
+        /// </summary>
+        static void SaveCorner(ComisariaGrande.Room r, List<Rect> keep, List<Rect> used)
+        {
+            float y = r.floor;
+            foreach (char side in new[] { 'S', 'N', 'W', 'E' })
+            {
+                bool alongX = side == 'S' || side == 'N';
+                float a0 = (alongX ? r.r.xMin : r.r.yMin) + 1.6f, a1 = (alongX ? r.r.xMax : r.r.yMax) - 1.6f;
+                float yaw = side == 'S' ? 0f : side == 'N' ? 180f : side == 'W' ? 90f : -90f;
+                float off = side == 'S' ? r.r.yMin + 0.55f : side == 'N' ? r.r.yMax - 0.55f : side == 'W' ? r.r.xMin + 0.55f : r.r.xMax - 0.55f;
+                for (float a = a0; a <= a1; a += 0.5f)
+                {
+                    Vector2 box = alongX ? new Vector2(a, off) : new Vector2(off, a);
+                    Vector2 phone = alongX ? new Vector2(a + 1.3f, off) : new Vector2(off, a + 1.3f);
+                    var half = new Vector2(0.4f, 0.4f);
+                    if (!Free(r, box, half, keep, used) || !Free(r, phone, half, keep, used)) continue;
+                    Inst("Interactables/ItemBox.prefab", new Vector3(box.x, y, box.y), yaw, "Baul_" + r.id, fixedRoot);
+                    Inst("Interactables/SavePhone.prefab", new Vector3(phone.x, y, phone.y), yaw, "Guardar_" + r.id, fixedRoot);
+                    used.Add(Rect.MinMaxRect(box.x - 0.7f, box.y - 0.7f, box.x + 0.7f, box.y + 0.7f));
+                    used.Add(Rect.MinMaxRect(phone.x - 0.7f, phone.y - 0.7f, phone.x + 0.7f, phone.y + 0.7f));
+                    return;
+                }
+            }
+            Debug.LogWarning("[Horror] sin sitio para el rincon de guardado de " + r.id);
+        }
+
         static void Furnish(ComisariaGrande.Room r)
         {
             var keep = KeepOut(r); var used = new List<Rect>();
             float x0 = r.r.xMin, x1 = r.r.xMax, z0 = r.r.yMin, z1 = r.r.yMax, y = r.floor, cx = r.r.center.x, cz = r.r.center.y;
             string[] shelves = { P + "Shelf.fbx" }, cabinets = { P + "FilingCabinet.fbx" }, lockers = { P + "Locker.fbx" };
+            if (r.id == "G_Intake" || r.id == "F_Mem") SaveCorner(r, keep, used);           // salas de guardado extra del mapa principal (docs/planes/feedback-primera-partida-completa.md)
             switch (r.type)
             {
                 case "radio":
@@ -267,7 +297,7 @@ namespace Horror.EditorTools
                     Clutter(r, keep, used, 2);
                     break;
                 case "safe":
-                    Inst(r.floor < -1f ? "Interactables/SavePhone.prefab" : "Interactables/SaveTerminal.prefab", new Vector3(x0 + 0.5f, y, cz - 2f), 90f, "Guardar_" + r.id, fixedRoot);
+                    Inst("Interactables/SavePhone.prefab", new Vector3(x0 + 0.5f, y, cz - 2f), 90f, "Guardar_" + r.id, fixedRoot);       // siempre el telefono (el terminal ya no se usa)
                     Inst("Interactables/ItemBox.prefab", new Vector3(x1 - 0.5f, y, cz - 2f), -90f, "Baul_" + r.id, fixedRoot);
                     used.Add(Rect.MinMaxRect(x0, cz - 3f, x0 + 1.2f, cz - 1f)); used.Add(Rect.MinMaxRect(x1 - 1.2f, cz - 3f, x1, cz - 1f));
                     At(r, P + "Cot.fbx", x0 + 1.2f, z0 + 1.2f, 0f, new Vector2(1.0f, 0.5f), keep, used);
@@ -462,7 +492,7 @@ namespace Horror.EditorTools
                     break;
                 case "ante":
                     // sala segura de la antesala del archivo: terminal de guardado y baul contra la pared este (a ~12 m del jefe 1, a un lado de su puerta)
-                    Inst("Interactables/SaveTerminal.prefab", new Vector3(x1 - 0.5f, y, z0 + 2.2f), -90f, "Guardar_" + r.id, fixedRoot);
+                    Inst("Interactables/SavePhone.prefab", new Vector3(x1 - 0.5f, y, z0 + 2.2f), -90f, "Guardar_" + r.id, fixedRoot);
                     Inst("Interactables/ItemBox.prefab", new Vector3(x1 - 0.5f, y, z0 + 4.2f), -90f, "Baul_" + r.id, fixedRoot);
                     used.Add(Rect.MinMaxRect(x1 - 1.3f, z0 + 1.0f, x1, z0 + 5.4f));
                     AlongWall(r, 'E', new[] { E + "WaitingBench.fbx" }, 2.2f, 0.6f, 1.2f, keep, used, 0.8);

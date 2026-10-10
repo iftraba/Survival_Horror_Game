@@ -122,14 +122,22 @@ namespace Horror.EditorTools
                 {
                     var p = NavPoint(r, taken, 2.5f); if (p == null) { log.Add("sin sitio en " + roomId); continue; }
                     taken.Add(p.Value);
-                    Spawn(Normal[rng.Next(Normal.Length)], p.Value, "Z_" + roomId + "_" + i, rng.NextDouble() < System.Math.Min(1.0, dp * 1.7));
+                    Spawn(Normal[rng.Next(Normal.Length)], p.Value, "Z_" + roomId + "_" + i, rng.NextDouble() < System.Math.Min(1.0, dp * 1.1));
                 }
                 foreach (var c in extra)
                 {
                     var p = NavPoint(r, taken, 2.5f); if (p == null) { log.Add("sin sitio para el extra en " + roomId); continue; }
                     taken.Add(p.Value);
                     if (c == 'R') { Spawn("Zombie_OficialReptante", p.Value, "Z_Reptante_" + roomId, false); reptantes++; }
-                    else if (c == 'C') { Spawn("Zombie_Carronero", p.Value, "Z_Carronero_" + roomId, false); carroneros++; }
+                    else if (c == 'C')
+                    {
+                        // carronero = un zombi normal de pie con ZombieFeeding.feeding marcado: come junto a su cadaver y, al dispararle, se levanta con su juego
+                        // de animaciones de siempre (el prefab Zombie_Carronero usaba el bucle de morder como animacion de movimiento y de golpe)
+                        var feeder = Spawn(new[] { "Zombie_Civil", "Zombie_Cop", "Zombie_Girl", "Zombie_Oficial" }[rng.Next(4)], p.Value, "Z_Carronero_" + roomId, false);
+                        var fd = feeder != null ? feeder.GetComponent<ZombieFeeding>() : null;
+                        if (fd != null) { fd.feeding = true; fd.spawnCorpse = true; EditorUtility.SetDirty(fd); PrefabUtility.RecordPrefabInstancePropertyModifications(fd); carroneros++; }
+                        else log.Add("el carronero de " + roomId + " no tiene ZombieFeeding");
+                    }
                 }
             }
             Physics.SyncTransforms();

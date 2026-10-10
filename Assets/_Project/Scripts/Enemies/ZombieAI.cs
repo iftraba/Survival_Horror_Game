@@ -55,6 +55,8 @@ namespace Horror
         public bool dormant;
         [Tooltip("En letargo solo despierta si le disparan (no por ruidos ni por verte): el que se come un cadaver")]
         public bool wakeOnlyWhenShot;
+        [Tooltip("Un zombi en letargo (no jefe, no el que se come un cadaver) despierta si el jugador esta a menos de esta distancia con linea directa (agachado, a la mitad). 0 = no")]
+        public float proximityWakeRange = 3.5f;
         [Tooltip("Objeto que suelta al morir (la llave de salida)")] public ItemData dropOnDeath;
         [Tooltip("Nombre para la barra de vida (solo jefes)")] public string bossName;
 
@@ -142,6 +144,14 @@ namespace Horror
             if (dormant || Suspended)
             {
                 if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
+                // el letargo normal se rompe al acercarte (el jefe solo lo despierta su sala; el carronero, solo un disparo)
+                if (dormant && !Suspended && !wakeOnlyWhenShot && proximityWakeRange > 0f && string.IsNullOrEmpty(bossName) && Time.time >= nextSightCheck)
+                {
+                    nextSightCheck = Time.time + 0.2f;
+                    float range = PlayerController.CrouchingNow ? proximityWakeRange * 0.5f : proximityWakeRange;
+                    var feet = player.position;
+                    if (Mathf.Abs(feet.y - transform.position.y) < 2.2f && Vector3.Distance(transform.position, feet) <= range && HasLineTo(player.position + Vector3.up * 0.4f)) Wake();
+                }
                 return;
             }
 
@@ -356,7 +366,9 @@ namespace Horror
             foreach (var z in All)
             {
                 if (z == null || z.chasing) continue;
+                if (!string.IsNullOrEmpty(z.bossName)) continue;                                   // al jefe solo lo despierta su sala (BossRoomTrigger)
                 float d = Vector3.Distance(z.transform.position, position);
+                if (Mathf.Abs(z.transform.position.y - position.y) > 2.5f && !z.HasLineTo(position)) continue;   // otra planta y sin linea directa: no se oye
                 if (d > radius || (d > radius * 0.35f && !z.HasLineTo(position))) continue;
                 if (z.dormant) { if (!z.wakeOnlyWhenShot) z.Wake(); }
                 else z.StartChase(true);

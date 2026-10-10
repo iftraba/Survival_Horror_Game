@@ -76,3 +76,8 @@ Reparto de los Pxl: oficina (Pxl1) y barricada (Pxl3) abajo; pasillo (Pxl1) y re
 - Ahora `Normal` = `Zombie_Civil`, `Zombie_Cop`, `Zombie_Girl`, `Zombie_Oficial`, `Zombie_Pxl1`, `Zombie_Pxl2` (los de Mixamo con el juego unificado de `docs/enemies.md` 2026-10-08 y los de Pxltiger; Pxl3 lleva la piel del jefe 2). Los reptantes (`OficialReptante`) y carroñeros siguen igual.
 - Aplicado a la escena **en el sitio** (sin rehacer el exterior ni el botín): los 41 zombis descartados se sustituyen por aprobados con la misma posición, giro y estado de letargo (`dormant`), y los de la verja conservan `FenceRattler`. Censo final: 0 de los 5 descartados, 86 agentes con Animator y controlador. Los 5 prefabs descartados se quedan en el proyecto sin usar.
 - **Sin comprobar en Play:** que los aprobados animen bien (se leyó la configuración y se vieron en capturas del garaje).
+
+## Letargo, ruido y carroñeros (2026-10-10, tras la primera partida completa)
+- Un zombi en letargo normal despierta si el jugador está a menos de `proximityWakeRange` (3,5 m; 1,75 m agachado) con línea directa y en la misma planta (±2,2 m). Los que tienen `wakeOnlyWhenShot` (carroñeros) y los jefes no.
+- `ZombieAI.Noise` ignora a los jefes y a los que están a más de 2,5 m de altura sin línea directa.
+- Carroñero = zombi normal con `ZombieFeeding.feeding` activo (el prefab `Zombie_Carronero` queda sin usar: su controlador usaba el bucle de morder como movimiento).

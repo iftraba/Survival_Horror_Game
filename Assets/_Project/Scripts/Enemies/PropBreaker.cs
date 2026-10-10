@@ -26,11 +26,11 @@ namespace Horror
             while (t.parent != null)
             {
                 string pn = t.parent.name;
-                if (pn == "Props" || pn.EndsWith("_Props"))
+                if (pn == "Props" || pn == "Mobiliario" || pn.EndsWith("_Props"))      // "Mobiliario": el mobiliario de la comisaria grande (Props/Mobiliario)
                 {
                     if (t.GetComponentInChildren<IInteractable>() != null) return null;                // taquillas con codigo, baul, terminal...
                     var b = Bounds(t);
-                    if (b.size.x > 3.2f || b.size.z > 3.2f || b.size.y > 2.6f) return null;           // nada grande
+                    if (b.size.x > 3.2f || b.size.z > 3.2f || b.size.y > 2.9f) return null;           // nada grande (las estanterias metalicas miden 2,64 m)
                     return t;
                 }
                 t = t.parent;

@@ -191,8 +191,8 @@ namespace Horror
             if (s.item.type == ItemType.Weapon && wc != null && wc.Equipped == s.item.weapon) { Hud.Message("Equipa otra arma antes de tirar la que llevas"); return; }
             slots[index] = default;
             Changed?.Invoke();
-            Pickup.Spawn(s.item, s.count, transform.position + transform.forward * 0.9f + Vector3.up * 0.4f,
-                transform.forward * 2.2f + Vector3.up * 1.2f);   // sale lanzado hacia delante
+            // Tirar es desechar: el objeto desaparece del todo (antes salia lanzado al suelo y se acumulaba por el nivel)
+            Hud.Message(s.count > 1 ? $"{s.item.displayName} x{s.count} desechado" : $"{s.item.displayName} desechado");
         }
     }
 }
