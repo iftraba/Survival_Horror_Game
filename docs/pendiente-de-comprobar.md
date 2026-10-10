@@ -91,3 +91,4 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [PC] Puertas reforzadas y lectores con marco luminoso: ver de cerca las tres (la azul dos veces y la dorada) y que los refuerzos se mueven con la hoja al abrir.
 - [ ] [JUGAR] Parpadeo del suelo: ¿ha desaparecido en el sitio de la captura y en el resto? (121 paredes bajadas 6 cm; comprobado solo en datos, no a ojo).
 - [ ] [JUGAR] Notas con el ratón encima: la tinta ya no cambia a blanco (corregido en el estilo, sin ver en pantalla).
+- [JUGAR] Secuencia de la reja (arreglada el 2026-10-11, vista en Play con el monumento) y de las calderas (mismo arreglo, sin ver).

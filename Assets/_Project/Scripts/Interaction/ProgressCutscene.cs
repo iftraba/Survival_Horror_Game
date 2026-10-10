@@ -30,7 +30,7 @@ namespace Horror
 
         void OnEnable() { registry[flag] = this; Progress.Changed += Check; loadedAt = Time.time; }
         void OnDisable() { if (registry.TryGetValue(flag, out var c) && c == this) registry.Remove(flag); Progress.Changed -= Check; }
-        void Start() { if (Progress.Has(flag)) played = true; }                          // partida cargada con la marca puesta: sin secuencia
+        // No se decide nada en Start: en el editor (sin recarga de dominio) Progress conserva las marcas de la partida anterior hasta que GameFlow las limpia.
 
         /// <summary>Segundos que tarda la camara en llegar (lo que debe esperar el efecto para abrirse a la vista). 0 si no hay secuencia.</summary>
         public static float DelayFor(string flag)
@@ -45,8 +45,9 @@ namespace Horror
         bool Begin()
         {
             if (running) return true;
-            if (played || !Progress.Has(flag) || path == null || path.Length == 0) return false;
-            if (Time.time - loadedAt < 2f) { played = true; return false; }               // la marca llega al cargar una partida
+            if (!Progress.Has(flag)) { played = false; return false; }                   // partida nueva: la secuencia vuelve a estar disponible
+            if (played || path == null || path.Length == 0) return false;
+            if (Progress.Restoring || Time.time - loadedAt < 2f) { played = true; return false; }   // la marca llega al cargar una partida o empezar una
             var pc = FindFirstObjectByType<PlayerController>(); var cam = FindFirstObjectByType<ThirdPersonCamera>();
             if (pc == null || cam == null) { played = true; return false; }
             played = true; running = true; skip = false;

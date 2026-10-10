@@ -21,13 +21,16 @@ namespace Horror
 
         public static List<string> All => new List<string>(flags);
 
-        public static void Clear() { flags.Clear(); Changed?.Invoke(); }
+        /// <summary>True mientras se limpian o restauran las marcas (partida nueva o cargada): las secuencias no deben reproducirse por ellas.</summary>
+        public static bool Restoring { get; private set; }
+
+        public static void Clear() { flags.Clear(); Restoring = true; try { Changed?.Invoke(); } finally { Restoring = false; } }
 
         public static void Restore(IEnumerable<string> ids)
         {
             flags.Clear();
             if (ids != null) foreach (var i in ids) if (!string.IsNullOrEmpty(i)) flags.Add(i);
-            Changed?.Invoke();
+            Restoring = true; try { Changed?.Invoke(); } finally { Restoring = false; }
         }
     }
 }
