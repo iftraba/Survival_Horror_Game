@@ -475,6 +475,7 @@ namespace Horror.EditorTools
             var gc = gate.AddComponent<BoxCollider>(); gc.center = new Vector3(0, 1.3f, 0); gc.size = new Vector3(2.3f, 2.6f, 0.12f);
             var obs = gate.AddComponent<NavMeshObstacle>(); obs.carving = true; obs.shape = NavMeshObstacleShape.Box; obs.center = new Vector3(0, 1.3f, 0); obs.size = new Vector3(2.3f, 2.6f, 0.3f);
             var gsv = gate.AddComponent<ServiceGate>(); gsv.bars = bars; gsv.flag = "memorial";
+            gsv.slideOffset = new Vector3(-2.3f, 0f, 0f);      // se desliza hacia la pared de la izquierda y desaparece dentro de ella
             gsv.lockedMessage = "Una reja de seguridad cierra la escalera del archivo. Tiene una placa: \"Se abre desde el memorial.\"";
 
             // ---- cuadro electrico del sotano (tres fusibles)

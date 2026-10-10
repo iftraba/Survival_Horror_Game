@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-11 · Interaction · **La reja del archivo se desliza hacia la pared** en vez de subir (`ServiceGate.slideOffset`).
+
 - 2026-10-11 · Interaction · **Secuencia de la reja arreglada**: no se reproducía en el editor porque `Progress` conservaba marcas de la partida anterior (sin recarga de dominio); ahora se reinicia con la partida nueva (afecta también a las calderas).
 
 - 2026-10-10 · Level/Enemies/UI · **Segunda tanda de arreglos tras jugar**: z-fighting del suelo corregido (121 paredes a ras de un suelo), puertas de tarjeta reforzadas con franja del color de su tarjeta en lugar de rótulos 3D, tinta de las notas fija con el ratón encima, zombis sin dormidos que deambulan por su sala y atacan todos a la vez al entrar en ella (menos el carroñero que come).

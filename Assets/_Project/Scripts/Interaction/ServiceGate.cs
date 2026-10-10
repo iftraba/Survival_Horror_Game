@@ -13,6 +13,7 @@ namespace Horror
         public string flag = "memorial";
         [Tooltip("Barrotes que suben al abrir")] public Transform bars;
         public float liftHeight = 2.5f;
+        [Tooltip("Si no es cero, la reja se desliza este desplazamiento local (hacia la pared) en vez de subir; al llegar queda oculta dentro de ella")] public Vector3 slideOffset;
         public float liftTime = 2.2f;
         [TextArea] public string lockedMessage = "Una reja de seguridad cierra la escalera. Tiene una placa: \"Acceso al archivo. Se abre desde el memorial.\"";
 
@@ -22,6 +23,7 @@ namespace Horror
         NavMeshObstacle obstacle;
 
         public bool IsOpen => t >= 1f;
+        Vector3 OpenOffset => slideOffset != Vector3.zero ? slideOffset : Vector3.up * liftHeight;
         public string Prompt => t < 0f ? "E  Examinar reja" : "";
 
         void Awake()
@@ -59,7 +61,8 @@ namespace Horror
         void SetOpen(bool open)
         {
             t = open ? 1f : -1f;
-            bars.localPosition = closedPos + (open ? Vector3.up * liftHeight : Vector3.zero);
+            bars.localPosition = closedPos + (open ? OpenOffset : Vector3.zero);
+            if (slideOffset != Vector3.zero) foreach (var r in bars.GetComponentsInChildren<Renderer>(true)) r.enabled = !open;      // metida en la pared: no debe asomar por el otro lado
             foreach (var c in cols) if (c != null && !(c.isTrigger)) c.enabled = !open;
             if (obstacle != null) obstacle.enabled = !open;
         }
@@ -68,7 +71,7 @@ namespace Horror
         {
             if (t < 0f || t >= 1f) return;
             t = Mathf.Min(1f, t + Time.deltaTime / liftTime);
-            bars.localPosition = closedPos + Vector3.up * liftHeight * Mathf.SmoothStep(0f, 1f, t);
+            bars.localPosition = closedPos + OpenOffset * Mathf.SmoothStep(0f, 1f, t);
             if (t >= 1f) SetOpen(true);
         }
 
