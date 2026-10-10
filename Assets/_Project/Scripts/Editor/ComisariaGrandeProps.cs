@@ -45,6 +45,10 @@ namespace Horror.EditorTools
             if (collider) Pickup.FitBoxCollider(holder);
             if (tint) { float v = Rn(0.8f, 1.05f); holder.AddComponent<PropVariant>().tint = new Color(v * Rn(0.96f, 1.03f), v, v * Rn(0.96f, 1.03f)); }
             foreach (var t in holder.GetComponentsInChildren<Transform>()) t.gameObject.isStatic = true;
+            // las estanterias son porosas (se ve lo que hay entre las baldas): no tapan nada en el occlusion culling, si no se pierden las cajas de dentro
+            string nm = holder.name;
+            if (nm.Contains("Shelf") || nm.Contains("Rack") || nm.Contains("Bookcase") || nm.Contains("Cabinet"))
+                foreach (var t in holder.GetComponentsInChildren<Transform>()) GameObjectUtility.SetStaticEditorFlags(t.gameObject, GameObjectUtility.GetStaticEditorFlags(t.gameObject) & ~StaticEditorFlags.OccluderStatic);
             count++;
             return holder;
         }
