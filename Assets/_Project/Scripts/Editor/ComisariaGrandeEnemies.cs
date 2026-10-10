@@ -122,7 +122,7 @@ namespace Horror.EditorTools
                 {
                     var p = NavPoint(r, taken, 2.5f); if (p == null) { log.Add("sin sitio en " + roomId); continue; }
                     taken.Add(p.Value);
-                    Spawn(Normal[rng.Next(Normal.Length)], p.Value, "Z_" + roomId + "_" + i, rng.NextDouble() < System.Math.Min(1.0, dp * 1.1));
+                    Spawn(Normal[rng.Next(Normal.Length)], p.Value, "Z_" + roomId + "_" + i, false);
                 }
                 foreach (var c in extra)
                 {
@@ -146,11 +146,11 @@ namespace Horror.EditorTools
             // encuentros a mano: el Cop dormido junto a la mesa donde esta la tarjeta de seguridad y el reptante dormido junto a un coche del garaje
             var card = level.GetComponentsInChildren<Pickup>(true).FirstOrDefault(pk => pk.item != null && pk.item.name == "I_CardSecurity");
             if (card != null && NavMesh.SamplePosition(card.transform.position, out var ch, 2.5f, NavMesh.AllAreas))
-            { Spawn("Zombie_Cop", ch.position, "Z_G_Sec_Cop", true); taken.Add(ch.position); }
+            { Spawn("Zombie_Cop", ch.position, "Z_G_Sec_Cop", false); taken.Add(ch.position); }
             else log.Add("sin tarjeta de seguridad o sin NavMesh junto a ella: falta el Cop dormido");
             var cars = ComisariaGrandeAnchors.Furniture("B_Garage", "PoliceCar", "PoliceCarClean").OrderBy(t => t.position.x).ToList();
             if (cars.Count > 1 && NavMesh.SamplePosition(cars[1].GetComponent<BoxCollider>().bounds.center, out var rh, 3.5f, NavMesh.AllAreas))
-            { Spawn("Zombie_OficialReptante", rh.position, "Z_Reptante_B_Garage", true); reptantes++; }
+            { Spawn("Zombie_OficialReptante", rh.position, "Z_Reptante_B_Garage", false); reptantes++; }
             else log.Add("sin coche o sin NavMesh junto a el: falta el reptante del garaje");
 
             // botin por anclas

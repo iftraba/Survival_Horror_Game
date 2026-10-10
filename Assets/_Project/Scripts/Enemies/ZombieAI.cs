@@ -55,6 +55,12 @@ namespace Horror
         public bool dormant;
         [Tooltip("En letargo solo despierta si le disparan (no por ruidos ni por verte): el que se come un cadaver")]
         public bool wakeOnlyWhenShot;
+        [Header("Sala (comisaria grande)")]
+        [Tooltip("Si el jugador entra en la sala (o grupo de salas) donde esta el zombi, este se lanza a por el: todos los de la sala a la vez. Hace falta el plano (MapData)")]
+        public bool roomAggro = true;
+        [Tooltip("Antes de detectarte deambula despacio por su sala en vez de quedarse parado (no los que comen ni los jefes)")]
+        public bool wanderInRoom = true;
+        [Tooltip("Segundos de espera entre un destino y el siguiente al deambular")] public Vector2 wanderPause = new Vector2(1.5f, 5f);
         [Tooltip("Un zombi en letargo (no jefe, no el que se come un cadaver) despierta si el jugador esta a menos de esta distancia con linea directa (agachado, a la mitad). 0 = no")]
         public float proximityWakeRange = 3.5f;
         [Tooltip("Objeto que suelta al morir (la llave de salida)")] public ItemData dropOnDeath;
@@ -125,6 +131,7 @@ namespace Horror
             }
 
             CompensateNavMeshLift();
+            if (MapData.Instance != null && MapData.Instance.TryRoomAt(transform.position.x, transform.position.z, transform.position.y - (cap != null ? cap.height * 0.5f : 1f), out homeRoom)) hasHome = true;
             var pc = FindFirstObjectByType<PlayerController>();
             if (pc != null)
             {
@@ -156,6 +163,8 @@ namespace Horror
             }
 
             float dist = Vector3.Distance(transform.position, player.position);
+            // Si entras en su sala, ataca (todos los de la sala a la vez), aunque no te vea
+            if (roomAggro && !chasing && hasHome && MapTracker.CurrentGroup == homeRoom.group && Mathf.Abs(player.position.y - transform.position.y) < 2.6f) StartChase(true);
             // Te detecta si te ve (sin paredes en medio) o si estas tan cerca que te oye
             if (!chasing && dist <= detectRange && Time.time >= nextSightCheck && CanSeePlayer(dist))
                 StartChase(true);
@@ -164,6 +173,7 @@ namespace Horror
             bool staggered = Time.time < staggerUntil;
             bool canNav = agent != null && agent.isOnNavMesh;
 
+            if (!chasing && !staggered && wanderInRoom && hasHome && canNav && dist < 45f && string.IsNullOrEmpty(bossName)) { Wander(); return; }
             if (!chasing || staggered)
             {
                 if (canNav) agent.isStopped = true;
@@ -227,6 +237,28 @@ namespace Horror
         }
 
         float nextSightCheck;
+
+        // ---- deambular por la sala
+        MapRoom homeRoom; bool hasHome, hasWanderTarget; float wanderWaitUntil;
+
+        void Wander()
+        {
+            if (Time.time < wanderWaitUntil) { agent.isStopped = true; return; }
+            if (hasWanderTarget)
+            {
+                if (agent.pathPending) return;
+                if (agent.remainingDistance > agent.stoppingDistance + 0.35f && agent.hasPath) { agent.isStopped = false; agent.speed = Mathf.Max(0.4f, walkSpeed * SpeedMultiplier * 0.8f); return; }
+                hasWanderTarget = false; wanderWaitUntil = Time.time + Random.Range(wanderPause.x, wanderPause.y); agent.isStopped = true; return;
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                var p = new Vector3(Random.Range(homeRoom.x0 + 1.2f, homeRoom.x1 - 1.2f), homeRoom.floorY + 0.2f, Random.Range(homeRoom.z0 + 1.2f, homeRoom.z1 - 1.2f));
+                if (!NavMesh.SamplePosition(p, out var hit, 1.2f, NavMesh.AllAreas) || Mathf.Abs(hit.position.y - transform.position.y) > 1.6f || !homeRoom.Contains(hit.position.x, hit.position.z)) continue;
+                agent.isStopped = false; agent.speed = Mathf.Max(0.4f, walkSpeed * SpeedMultiplier * 0.8f);
+                if (agent.SetDestination(hit.position)) { hasWanderTarget = true; return; }
+            }
+            wanderWaitUntil = Time.time + 2f;
+        }
 
         /// <summary>Ojos: algo por encima del centro de la capsula (los jefes, mas altos, a su altura).</summary>
         Vector3 Eye()

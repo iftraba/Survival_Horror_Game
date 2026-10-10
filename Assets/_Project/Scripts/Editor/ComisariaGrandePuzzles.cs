@@ -64,13 +64,13 @@ namespace Horror.EditorTools
             return holder;
         }
 
-        static GameObject Led(string name, Transform parent, Vector3 pos, Color c)
+        static GameObject Led(string name, Transform parent, Vector3 pos, Color c, float intensity = 0.8f, float range = 1.5f)
         {
             var g = GameObject.CreatePrimitive(PrimitiveType.Cube); g.name = name; Object.DestroyImmediate(g.GetComponent<Collider>());
             g.transform.SetParent(parent); g.transform.position = pos; g.transform.localScale = Vector3.one * 0.035f;
             g.GetComponent<Renderer>().sharedMaterial = Call<Material>("Mat", "Led_" + ColorUtility.ToHtmlStringRGB(c), c);
             var l = new GameObject("Luz").AddComponent<Light>(); l.transform.SetParent(g.transform, false); l.transform.localPosition = Vector3.zero;
-            l.type = LightType.Point; l.color = c; l.range = 1.5f; l.intensity = 0.8f; l.shadows = LightShadows.None;
+            l.type = LightType.Point; l.color = c; l.range = range; l.intensity = intensity; l.shadows = LightShadows.None;
             return g;
         }
 
@@ -228,28 +228,82 @@ namespace Horror.EditorTools
             var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = chain; lv.dropOnUnlock = true;
         }
 
-        /// <summary>Texto 3D pequeno en la pared (rotulo del lector: "Requiere: ..."), de cara a quien se acerca.</summary>
-        static void WallLabel(string name, string text, Vector3 pos, float yaw, Color color)
+        /// <summary>Material con emision (franja luminosa del lector y de la puerta reforzada).</summary>
+        static Material Glow(Color c)
         {
-            var go = new GameObject(name); go.transform.SetParent(root); go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, yaw + 180f, 0f));
-            var tm = go.AddComponent<TextMesh>(); tm.text = text; tm.anchor = TextAnchor.MiddleCenter; tm.alignment = TextAlignment.Center;
-            tm.characterSize = 0.02f; tm.fontSize = 48; tm.color = color; tm.fontStyle = FontStyle.Bold;
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); if (font != null) { tm.font = font; go.GetComponent<MeshRenderer>().sharedMaterial = font.material; }
+            string path = Mats + "Glow_" + ColorUtility.ToHtmlStringRGB(c) + ".mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null) { m = new Material(Shader.Find("Universal Render Pipeline/Unlit")); AssetDatabase.CreateAsset(m, path); }
+            // Unlit y no Lit+emision: el material Lit guardado perdia la palabra clave _EMISSION y la franja salia apagada
+            var bright = c * 1.6f; bright.a = 1f;
+            m.SetColor("_BaseColor", bright);
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
+        static Material Steel(string name, Color c, float metallic, float smooth)
+        {
+            string path = Mats + name + ".mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null) { m = new Material(Shader.Find("Universal Render Pipeline/Lit")); AssetDatabase.CreateAsset(m, path); }
+            m.SetColor("_BaseColor", c); m.SetFloat("_Metallic", metallic); m.SetFloat("_Smoothness", smooth);
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
+        /// <summary>
+        /// Puerta reforzada (acero, sin ventanilla, con tres refuerzos horizontales y una franja luminosa del color de su tarjeta): el jugador ve de lejos que
+        /// no es una puerta cualquiera y cual hace falta (azul = seguridad, dorado = jefe). Los refuerzos cuelgan de la bisagra y se mueven con la hoja.
+        /// </summary>
+        static void Reinforce(Door d, Color accent)
+        {
+            var steel = Steel("Puerta_Acero", new Color(0.3f, 0.33f, 0.38f), 0.85f, 0.45f);
+            var dark = Steel("Puerta_Acero_Oscuro", new Color(0.1f, 0.11f, 0.13f), 0.7f, 0.35f);
+            Renderer leaf = null;
+            foreach (var r in d.GetComponentsInChildren<Renderer>(true))
+            {
+                if (r.name == "Leaf") leaf = r;
+                if (r.name == "Leaf" || r.name == "PanelLow" || r.name == "KickPlate") r.sharedMaterial = steel;
+                else if (r.name == "Window") r.enabled = false;
+            }
+            if (leaf == null) { log.Add("sin hoja para reforzar " + d.name); return; }
+            var b = leaf.bounds; bool thinX = b.size.x < b.size.z;
+            float thick = thinX ? b.size.x : b.size.z, span = thinX ? b.size.z : b.size.x;
+            Vector3 n = thinX ? Vector3.right : Vector3.forward;
+            foreach (float h in new[] { 0.35f, 1.1f, 1.85f })
+                foreach (float side in new[] { -1f, 1f })
+                {
+                    var pos = new Vector3(b.center.x, b.min.y + h, b.center.z) + n * (side * (thick / 2f + 0.012f));
+                    var size = thinX ? new Vector3(0.024f, 0.09f, span * 0.94f) : new Vector3(span * 0.94f, 0.09f, 0.024f);
+                    var band = ComisariaGrande.Box("Refuerzo", d.transform, pos, size, dark, 0f, false); band.isStatic = false;
+                }
+            foreach (float side in new[] { -1f, 1f })
+            {
+                var pos = new Vector3(b.center.x, b.min.y + 1.5f, b.center.z) + n * (side * (thick / 2f + 0.02f));
+                var size = thinX ? new Vector3(0.03f, 0.07f, span * 0.82f) : new Vector3(span * 0.82f, 0.07f, 0.03f);
+                var glow = ComisariaGrande.Box("Refuerzo", d.transform, pos, size, Glow(accent), 0f, false); glow.isStatic = false;
+            }
         }
 
         static void CardLock(string doorName, ItemData card, Vector3 readerPos, float yaw, Color accent, string requires)
         {
             var d = DoorNamed(doorName); if (d == null) { log.Add("falta puerta " + doorName); return; }
             d.requiredKey = card; d.originalKey = card; d.consumeKey = false; EditorUtility.SetDirty(d);
+            Reinforce(d, accent);
             var reader = Model(Pz + "CardReader.fbx", root, readerPos, yaw, false); reader.name = "Lector_" + doorName;
             var fwd = Quaternion.Euler(0, yaw, 0) * Vector3.forward;
-            // franja de color del lector (azul = seguridad, dorada = jefe) y rotulo de lo que pide, bajo el lector
-            var band = GameObject.CreatePrimitive(PrimitiveType.Cube); band.name = "Franja"; Object.DestroyImmediate(band.GetComponent<Collider>());
-            band.transform.SetParent(reader.transform); band.transform.SetPositionAndRotation(readerPos + fwd * 0.027f + Vector3.up * 0.115f, Quaternion.Euler(0, yaw, 0)); band.transform.localScale = new Vector3(0.12f, 0.03f, 0.008f);
-            band.GetComponent<Renderer>().sharedMaterial = Call<Material>("Mat", "Franja_" + ColorUtility.ToHtmlStringRGB(accent), accent);
-            WallLabel("Rotulo_" + doorName, requires, readerPos + fwd * 0.03f + Vector3.down * 0.19f, yaw, Color.Lerp(accent, Color.white, 0.25f));
-            var red = Led("Piloto_Rojo", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(1f, 0.1f, 0.05f));
-            var green = Led("Piloto_Verde", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(0.2f, 1f, 0.3f));
+            // marco luminoso del lector del color de su tarjeta (azul = seguridad, dorado = jefe): cuatro barras alrededor, para distinguirlo del piloto rojo
+            var rot = Quaternion.Euler(0, yaw, 0); var right = rot * Vector3.right;
+            void Bar(string nm, Vector3 offset, Vector3 size)
+            {
+                var bar = GameObject.CreatePrimitive(PrimitiveType.Cube); bar.name = nm; Object.DestroyImmediate(bar.GetComponent<Collider>());
+                bar.transform.SetParent(reader.transform); bar.transform.SetPositionAndRotation(readerPos + rot * offset + fwd * 0.018f, rot); bar.transform.localScale = size;
+                bar.GetComponent<Renderer>().sharedMaterial = Glow(accent);
+            }
+            Bar("Marco_Arriba", new Vector3(0f, 0.125f, 0f), new Vector3(0.2f, 0.022f, 0.012f)); Bar("Marco_Abajo", new Vector3(0f, -0.125f, 0f), new Vector3(0.2f, 0.022f, 0.012f));
+            Bar("Marco_Izq", new Vector3(-0.089f, 0f, 0f), new Vector3(0.022f, 0.27f, 0.012f)); Bar("Marco_Der", new Vector3(0.089f, 0f, 0f), new Vector3(0.022f, 0.27f, 0.012f));
+            var red = Led("Piloto_Rojo", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(1f, 0.1f, 0.05f), 0.25f, 0.9f);
+            var green = Led("Piloto_Verde", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(0.2f, 1f, 0.3f), 0.25f, 0.9f);
             var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = red; lv.unlockedVisual = green; lv.beepOnUnlock = true;
         }
 
@@ -275,6 +329,7 @@ namespace Horror.EditorTools
             foreach (var ps in level.GetComponentsInChildren<ProgressSeal>(true)) Object.DestroyImmediate(ps);
             foreach (var ow in level.GetComponentsInChildren<OneWayDoor>(true)) Object.DestroyImmediate(ow);
             foreach (var t in level.GetComponentsInChildren<Transform>(true).Where(t => t != null && t.name == "Candado").ToList()) if (t != null) Object.DestroyImmediate(t.gameObject);
+            foreach (var t in level.GetComponentsInChildren<Transform>(true).Where(t => t != null && t.name == "Refuerzo").ToList()) if (t != null) Object.DestroyImmediate(t.gameObject);
             foreach (var d in level.GetComponentsInChildren<Door>(true)) { d.requiredKey = null; d.originalKey = null; d.sealedPrompt = "Atrancada"; d.sealedMessage = "La puerta se ha atrancado"; }
             root = new GameObject("Puzles").transform; root.SetParent(level);
             ItemTextureKit.Apply();

@@ -167,11 +167,11 @@ namespace Horror
             float pad = 34f * s, x = r.x + pad, w = r.width - pad * 2f, y = r.y + pad * 0.8f;
             // etiqueta de categoria
             var tag = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(13f * s), fontStyle = FontStyle.Bold };
-            tag.normal.textColor = new Color(PaperInk.r, PaperInk.g, PaperInk.b, 0.55f);
+            Ink(tag, new Color(PaperInk.r, PaperInk.g, PaperInk.b, 0.55f));
             GUI.Label(new Rect(x, y - 4f * s, w, 18f * s), story ? "NOTA PERSONAL" : "NOTA DE SERVICIO", tag);
             y += 16f * s;
             var title = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(28f * s), fontStyle = FontStyle.Bold, wordWrap = true };
-            title.normal.textColor = PaperInk;
+            Ink(title, PaperInk);
             float th = title.CalcHeight(new GUIContent(n.title), w);
             GUI.Label(new Rect(x, y, w, th), n.title, title);
             y += th + 6f * s;
@@ -180,7 +180,7 @@ namespace Horror
 
             // texto con la frase clave en rojo y subrayada dentro de la propia frase
             var body = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(21f * s), wordWrap = true, fontStyle = FontStyle.Italic, richText = true };
-            body.normal.textColor = PaperInk;
+            Ink(body, PaperInk);
             string text = n.body, callout = null;
             if (!string.IsNullOrEmpty(n.highlight))
             {
@@ -198,7 +198,7 @@ namespace Horror
             if (callout != null)
             {
                 var cs = new GUIStyle(GUI.skin.label) { fontSize = Mathf.RoundToInt(30f * s), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, richText = true };
-                cs.normal.textColor = PenRed;
+                Ink(cs, PenRed);
                 float ch = 44f * s;
                 GUI.Label(new Rect(x, y, w, ch), callout, cs);
                 Fill(new Rect(x + w * 0.25f, y + ch - 3f, w * 0.5f, 2f), new Color(PenRed.r, PenRed.g, PenRed.b, 0.7f));
@@ -210,6 +210,13 @@ namespace Horror
                 float ih = Mathf.Max(0f, r.yMax - pad - y);
                 if (ih > 40f) GUI.DrawTexture(new Rect(x, y, w, ih), n.image.texture, ScaleMode.ScaleToFit, true);
             }
+        }
+
+        /// <summary>Fija el color del texto en todos los estados del estilo (con el raton encima, el de la skin por defecto lo pone blanco y sobre el papel no se lee).</summary>
+        static void Ink(GUIStyle st, Color c)
+        {
+            st.normal.textColor = c; st.hover.textColor = c; st.active.textColor = c; st.focused.textColor = c;
+            st.onNormal.textColor = c; st.onHover.textColor = c; st.onActive.textColor = c; st.onFocused.textColor = c;
         }
 
         /// <summary>Alto que necesita la nota (mismo reparto que DrawNotePage) para que la hoja no sea mas grande que su contenido.</summary>

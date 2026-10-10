@@ -85,3 +85,9 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [JUGAR] Nuevos puntos de guardado (ingreso y memorial) y la antesala del archivo: ¿se encuentran, sin muebles que los tapen?
 - [ ] [PC] Patrullas nuevas de cerca, tarjetas 3D en el suelo y lectores con franja y rótulo desde varios ángulos.
 - [ ] [PC] Estilo de las notas en las 8 notas (solo vista la del jefe de seguridad) y que ninguna se corta en la hoja.
+
+## 9. Segunda tanda tras jugar (2026-10-10)
+- [ ] [JUGAR] Zombis que deambulan: ¿velocidad y pausas bien?, ¿se salen de su sala o se atascan?, ¿atacan todos al entrar y no antes?
+- [ ] [PC] Puertas reforzadas y lectores con marco luminoso: ver de cerca las tres (la azul dos veces y la dorada) y que los refuerzos se mueven con la hoja al abrir.
+- [ ] [JUGAR] Parpadeo del suelo: ¿ha desaparecido en el sitio de la captura y en el resto? (121 paredes bajadas 6 cm; comprobado solo en datos, no a ojo).
+- [ ] [JUGAR] Notas con el ratón encima: la tinta ya no cambia a blanco (corregido en el estilo, sin ver en pantalla).

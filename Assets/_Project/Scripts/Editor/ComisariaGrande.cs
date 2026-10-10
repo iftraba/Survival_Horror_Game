@@ -250,7 +250,7 @@ namespace Horror.EditorTools
 
         // ------------------------------------------------------------------ paredes a partir de las salas
         /// <summary>Altura a la que llega la pared de una sala (tapa la losa de encima).</summary>
-        static float Top(Room a) => a.kind == Kind.Outdoor ? a.floor + (a.type == "alley" ? 3.2f : a.type == "fireescape" ? 0f : 1.1f) : a.ceil + (a.floor < -0.6f ? 0.75f : 0.5f);
+        static float Top(Room a) => a.kind == Kind.Outdoor ? a.floor + (a.type == "alley" ? 3.2f : a.type == "fireescape" ? 0f : 1.1f) : a.ceil + (a.floor < -0.6f ? 0.75f : 0.44f);   // 0,44 y no 0,5: a 0,5 el borde de la pared coincidia con la cara de arriba del suelo de la planta siguiente y parpadeaba (z-fighting)
 
         struct Seg { public bool alongX; public float c, s0, s1, y0, y1, t, floorA, floorB; public bool skirtA, skirtB; }
 

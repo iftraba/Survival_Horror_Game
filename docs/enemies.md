@@ -81,3 +81,8 @@ Reparto de los Pxl: oficina (Pxl1) y barricada (Pxl3) abajo; pasillo (Pxl1) y re
 - Un zombi en letargo normal despierta si el jugador está a menos de `proximityWakeRange` (3,5 m; 1,75 m agachado) con línea directa y en la misma planta (±2,2 m). Los que tienen `wakeOnlyWhenShot` (carroñeros) y los jefes no.
 - `ZombieAI.Noise` ignora a los jefes y a los que están a más de 2,5 m de altura sin línea directa.
 - Carroñero = zombi normal con `ZombieFeeding.feeding` activo (el prefab `Zombie_Carronero` queda sin usar: su controlador usaba el bucle de morder como movimiento).
+
+## Sin dormidos: deambular y atacar al entrar en la sala (2026-10-10)
+- Ningún zombi empieza en letargo (el menú 5 ya no marca dormidos; el Cop de seguridad y el reptante del garaje tampoco). Solo siguen en `wakeOnlyWhenShot` los carroñeros (`ZombieFeeding`) y los jefes.
+- `ZombieAI.wanderInRoom`: mientras no te ha detectado camina a puntos al azar de su sala, con pausas de 1,5 a 5 s (solo si el jugador está a menos de 45 m).
+- `ZombieAI.roomAggro`: si el jugador está en el mismo grupo de salas que el zombi (`MapTracker.CurrentGroup` == su sala de origen) y en su planta, empieza a perseguirlo (grito de alerta incluido). Necesita el plano (`MapData`).
