@@ -188,7 +188,7 @@ namespace Horror.EditorTools
 
         // ------------------------------------------------------------------ sala de conferencias
         /// <summary>Bandera: mastil (modelo) y tela colgando del remate con pliegues (malla generada con UV).</summary>
-        static void Flag(Vector3 basePos, float yaw, Material cloth)
+        internal static void Flag(Vector3 basePos, float yaw, Material cloth)
         {
             var pole = Place(O + "FlagPole.fbx", basePos, yaw, true, 0.3f, false);
             var go = new GameObject("Tela"); go.transform.SetParent(pole.transform, false);
@@ -213,7 +213,7 @@ namespace Horror.EditorTools
             go.AddComponent<MeshRenderer>().sharedMaterial = cloth;
         }
 
-        static Material TexMat(string name, string tex, bool doubleSided, float smooth)
+        internal static Material TexMat(string name, string tex, bool doubleSided, float smooth)
         {
             var ti = (TextureImporter)AssetImporter.GetAtPath(Tex + tex + ".png");
             if (ti != null) { ti.wrapMode = TextureWrapMode.Clamp; ti.maxTextureSize = 2048; ti.anisoLevel = 4; ti.SaveAndReimport(); }
@@ -265,6 +265,17 @@ namespace Horror.EditorTools
             Place(O + "WaterCooler.fbx", new Vector3(8.5f, Y, 0.5f), 0f);
             Place(O + "TrashBin.fbx", new Vector3(8.5f, Y, 11.4f), 0f);
         }
+
+        /// <summary>Para la comisaria grande: pone una bandera (mastil y tela con pliegues) bajo 'parent'.</summary>
+        internal static void FlagAt(Transform parent, Vector3 basePos, float yaw, Material cloth)
+        {
+            var old = root; root = parent; if (rng == null) rng = new System.Random(5);
+            Flag(basePos, yaw, cloth);
+            root = old;
+        }
+        internal static Material PoliceFlagMat() => TexMat("Bandera_Policia", "tex_flag_police", true, 0.15f);
+        internal static Material CityFlagMat() => TexMat("Bandera_Ciudad", "tex_flag_city", true, 0.15f);
+        internal static Material CityMapMat() => TexMat("Mapa_Ciudad", "tex_city_map", false, 0.25f);
 
         static GameObject Box(string name, Transform parent, Vector3 c, Vector3 s, Material m, float tile, bool collider = true)
         {

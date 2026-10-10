@@ -30,7 +30,7 @@ namespace Horror.EditorTools
         static float Rn(float a, float b) => a + (float)rng.NextDouble() * (b - a);
         static bool Chance(double p) => rng.NextDouble() < p;
         static int count;
-        static Material metal, wood;
+        static Material metal, wood, policeFlag, cityFlag, cityMap;
 
         // ------------------------------------------------------------------ colocacion
         static GameObject Place(string path, Vector3 pos, float yaw, bool collider = true, bool tint = true, Transform parent = null, float jitter = 1f)
@@ -73,7 +73,13 @@ namespace Horror.EditorTools
             }
             var sh = ComisariaGrande.SpiralHole;
             if (r.id == "G_Lobby" || r.id == "F_Mem") { k.Add(new Rect(sh.x - 0.8f, sh.y - 0.8f, sh.width + 1.6f, sh.height + 1.6f)); if (r.id == "G_Lobby") k.Add(Rect.MinMaxRect(-1.8f, 0f, 2.6f, 6.0f)); }
-            if (r.type == "stairwell") k.Add(Rect.MinMaxRect(3.6f, 29f, 7.2f, 44f));
+            if (r.type == "stairwell") k.Add(Rect.MinMaxRect(2f, 29f, 10f, 44f));                                   // las dos escaleras ocupan toda la caja
+            if (r.id == "F_NHall") k.Add(Rect.MinMaxRect(3.2f, 30.8f, 7.2f, 40.8f));                              // llegada de la escalera norte
+            if (r.id == "B_Custody") k.Add(Rect.MinMaxRect(6.4f, 31.6f, 9.6f, 40.8f));                            // bajo el tramo que baja a la custodia
+            var gs = ComisariaGrande.GarageStairHole;
+            if (r.id == "G_Wait") k.Add(Rect.MinMaxRect(gs.xMin - 1f, 0f, gs.xMax + 2.6f, gs.yMax + 1.6f));      // hueco de la escalera al garaje y su entrada
+            if (r.id == "B_Garage") k.Add(Rect.MinMaxRect(gs.xMin - 4f, 0f, gs.xMax + 0.6f, gs.yMax + 1.8f));   // bajo la escalera y el rellano de salida
+            if (r.type == "gallery") { var gh = ComisariaGrande.GalleryHole; k.Add(new Rect(gh.x - 1.0f, gh.y - 1.0f, gh.width + 2.0f, gh.height + 2.0f)); }   // barandilla alrededor del hueco
             if (r.type == "servicestair") k.Add(Rect.MinMaxRect(-14f, 29f, -10.6f, 44f));
             if (r.id == "S_Ante") k.Add(Rect.MinMaxRect(-14f, 29f, -10.8f, 44f));
             if (r.id == "B_Boiler") k.Add(Rect.MinMaxRect(-25f, 29f, -19f, 37f));
@@ -181,6 +187,81 @@ namespace Horror.EditorTools
             string[] shelves = { P + "Shelf.fbx" }, cabinets = { P + "FilingCabinet.fbx" }, lockers = { P + "Locker.fbx" };
             switch (r.type)
             {
+                case "radio":
+                    // sala de radio y despachos: consola de vigilancia al norte con dos operadores, dos puestos, plano en la pared y archivadores
+                    At(r, S + "CCTVDesk.fbx", cx, z1 - 0.65f, 180f, new Vector2(1.2f, 0.5f), keep, used);
+                    At(r, O + "SwivelChair.fbx", cx - 0.5f, z1 - 1.6f, 170f, new Vector2(0.3f, 0.3f), keep, used);
+                    At(r, O + "SwivelChair.fbx", cx + 0.6f, z1 - 1.5f, 200f, new Vector2(0.3f, 0.3f), keep, used);
+                    Desk(new Vector3(cx - 3.5f, y, cz - 2.5f), 0f); used.Add(Rect.MinMaxRect(cx - 4.3f, cz - 3.6f, cx - 2.7f, cz - 1.4f));
+                    Desk(new Vector3(cx + 3.5f, y, cz - 2.5f), 0f); used.Add(Rect.MinMaxRect(cx + 2.7f, cz - 3.6f, cx + 4.3f, cz - 1.4f));
+                    AlongWall(r, 'W', cabinets, 0.6f, 0.65f, 0.05f, keep, used, 0.7);
+                    AlongWall(r, 'S', new[] { O + "Whiteboard.fbx", O + "CoatRack.fbx", O + "WaterCooler.fbx" }, 1.3f, 0.5f, 1.8f, keep, used, 0.7);
+                    Clutter(r, keep, used, 3);
+                    break;
+                case "atrium":
+                    // el atrio son cuatro piezas del mismo grupo: cada una pone lo suyo contra sus paredes reales (sin tapar puertas ni el ascensor)
+                    if (r.id == "G_Atrio1")
+                    {
+                        At(r, E + "WaitingBench.fbx", x1 - 0.6f, 14.2f, -90f, new Vector2(1.1f, 0.3f), keep, used);
+                        At(r, M + "PottedPlant.fbx", x1 - 0.6f, z0 + 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                        At(r, M + "PottedPlant.fbx", x0 + 0.6f, 18.3f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    }
+                    else if (r.id == "G_Atrio2")
+                    {
+                        At(r, E + "WaitingBench.fbx", x0 + 0.6f, 26.4f, 90f, new Vector2(1.1f, 0.3f), keep, used);
+                        At(r, M + "PottedPlant.fbx", x0 + 0.6f, z1 - 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                        At(r, O + "TrophyCabinet.fbx", -5.5f, z1 - 0.5f, 180f, new Vector2(0.7f, 0.3f), keep, used);
+                        At(r, E + "WaitingBench.fbx", 1.8f, z1 - 0.6f, 180f, new Vector2(1.1f, 0.3f), keep, used);
+                        At(r, M + "PottedPlant.fbx", x1 - 0.8f, z1 - 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    }
+                    else if (r.id == "G_Atrio3") At(r, M + "PottedPlant.fbx", x1 - 0.5f, 20.0f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    else if (r.id == "G_Atrio4") At(r, M + "PottedPlant.fbx", x1 - 0.5f, z1 - 0.5f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    break;
+                case "gallery":
+                    // galeria de la primera planta alrededor del hueco del atrio: bancos de cara a la barandilla, plantas y vitrinas en las paredes
+                    if (r.id == "F_GalA")
+                    {
+                        At(r, E + "WaitingBench.fbx", x0 + 0.6f, 15.6f, 90f, new Vector2(1.1f, 0.3f), keep, used);
+                        At(r, M + "PottedPlant.fbx", x0 + 0.6f, z0 + 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                        At(r, O + "TrophyCabinet.fbx", 3.0f, z0 + 0.5f, 0f, new Vector2(0.7f, 0.3f), keep, used);
+                        At(r, M + "PottedPlant.fbx", x1 - 0.6f, z0 + 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    }
+                    else if (r.id == "F_GalB")
+                    {
+                        At(r, E + "WaitingBench.fbx", -4.5f, z1 - 0.6f, 180f, new Vector2(1.1f, 0.3f), keep, used);
+                        At(r, M + "PottedPlant.fbx", x0 + 0.6f, z1 - 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                        At(r, O + "TrophyCabinet.fbx", 3.0f, z1 - 0.5f, 180f, new Vector2(0.7f, 0.3f), keep, used);
+                    }
+                    else if (r.id == "F_GalC") At(r, M + "PottedPlant.fbx", x1 - 0.5f, z1 - 0.5f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    break;
+                case "hall":
+                    AlongWall(r, 'N', new[] { E + "WaitingBench.fbx" }, 2.2f, 0.6f, 1.2f, keep, used, 0.8);
+                    foreach (var (px, pz) in new[] { (-3.3f, 43.3f), (9.3f, 43.3f), (9.3f, 30.2f) }) At(r, M + "PottedPlant.fbx", px, pz, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    At(r, O + "WaterCooler.fbx", -3.4f, 31.0f, 90f, new Vector2(0.2f, 0.2f), keep, used);
+                    Clutter(r, keep, used, 2);
+                    break;
+                case "intake":
+                    // ingreso de detenidos: mostrador con dos agentes, taquillas para las pertenencias y un banco de espera
+                    At(r, E + "ReceptionDesk.fbx", cx, 40.0f, 180f, new Vector2(1.8f, 0.9f), keep, used);
+                    At(r, O + "SwivelChair.fbx", cx - 0.8f, 41.1f, 200f, new Vector2(0.3f, 0.3f), keep, used);
+                    At(r, O + "SwivelChair.fbx", cx + 0.8f, 41.1f, 160f, new Vector2(0.3f, 0.3f), keep, used);
+                    AlongWall(r, 'N', lockers, 0.62f, 0.55f, 0.0f, keep, used, 0.9);
+                    At(r, E + "WaitingBench.fbx", x0 + 0.6f, 32.0f, 90f, new Vector2(1.1f, 0.3f), keep, used);
+                    At(r, M + "PottedPlant.fbx", x1 - 0.6f, 30.2f, 0, new Vector2(0.4f, 0.4f), keep, used);
+                    Clutter(r, keep, used, 2);
+                    break;
+                case "custody":
+                    // custodia: mesa del carcelero con su silla, taquillas y un banco para los detenidos
+                    if (At(r, P + "Desk.fbx", 4.4f, 41.5f, 0f, new Vector2(0.8f, 0.4f), keep, used) != null)
+                    {
+                        Place(O + "SwivelChair.fbx", new Vector3(4.4f, y, 42.4f), 180f + Rn(-20, 20));
+                        OnTop(O + "DeskLamp.fbx", new Vector3(4.8f, y + 0.76f, 41.5f), Rn(0, 360));
+                        OnTop(O + "PaperStack.fbx", new Vector3(3.9f, y + 0.76f, 41.5f), Rn(0, 360));
+                    }
+                    AlongWall(r, 'W', lockers, 0.62f, 0.55f, 0.0f, keep, used, 0.9);
+                    At(r, E + "WaitingBench.fbx", 5.4f, 30.2f, 0f, new Vector2(1.1f, 0.3f), keep, used);
+                    Clutter(r, keep, used, 2);
+                    break;
                 case "safe":
                     Inst(r.floor < -1f ? "Interactables/SavePhone.prefab" : "Interactables/SaveTerminal.prefab", new Vector3(x0 + 0.5f, y, cz - 2f), 90f, "Guardar_" + r.id, fixedRoot);
                     Inst("Interactables/ItemBox.prefab", new Vector3(x1 - 0.5f, y, cz - 2f), -90f, "Baul_" + r.id, fixedRoot);
@@ -243,9 +324,12 @@ namespace Horror.EditorTools
                     }
                     break;
                 case "garage":
-                    At(r, E + "PoliceCar.fbx", cx + 1.2f, cz + 1.0f, 90f + Rn(-8, 8), new Vector2(2.4f, 1.1f), keep, used);
-                    AlongWall(r, 'W', new[] { Bm + "Workbench.fbx", Bm + "MetalRack.fbx" }, 2.4f, 0.9f, 0.6f, keep, used);
-                    AlongWall(r, 'N', new[] { S + "TireStack.fbx", P + "Barrel.fbx", Bm + "MetalRack.fbx" }, 1.5f, 0.8f, 0.5f, keep, used, 0.8);
+                    // aparcamiento: 5 patrullas (las quemadas, que no llegaron a salir) en dos filas, con un carril libre entre ellas y desde la persiana; taller al norte
+                    foreach (var (px, pz, pyaw) in new[] { (-12.5f, 8.5f, 4f), (-19.5f, 8.5f, -3f), (-26.5f, 8.5f, 5f), (-12.5f, 18.0f, 176f), (-19.5f, 18.0f, 183f) })
+                        At(r, E + "PoliceCar.fbx", px, pz, pyaw, new Vector2(2.4f, 1.1f), keep, used);
+                    AlongWall(r, 'N', new[] { Bm + "Workbench.fbx", S + "TireStack.fbx", Bm + "MetalRack.fbx" }, 2.4f, 0.9f, 0.6f, keep, used, 0.9);
+                    AlongWall(r, 'W', new[] { Bm + "MetalRack.fbx", P + "Barrel.fbx" }, 1.5f, 0.8f, 1.2f, keep, used, 0.7);
+                    AlongWall(r, 'S', new[] { S + "TireStack.fbx", P + "Barrel.fbx" }, 1.2f, 0.8f, 1.5f, keep, used, 0.6);
                     Clutter(r, keep, used, 3);
                     break;
                 case "darkroom": case "evidence":
@@ -261,6 +345,7 @@ namespace Horror.EditorTools
                     Clutter(r, keep, used, 2);
                     break;
                 case "elevator":
+                    if (r.id == "B_HubB") break;
                     At(r, E + "WaitingBench.fbx", x0 + 0.5f, cz, 90f, new Vector2(1.1f, 0.3f), keep, used);
                     At(r, M + "PottedPlant.fbx", x0 + 0.6f, z1 - 0.6f, 0, new Vector2(0.4f, 0.4f), keep, used);
                     break;
@@ -317,6 +402,14 @@ namespace Horror.EditorTools
                     AlongWall(r, 'W', new[] { O + "Bookcase.fbx" }, 1.25f, 0.45f, 0.0f, keep, used, 0.9);
                     AlongWall(r, 'S', new[] { O + "TrophyCabinet.fbx", O + "Bookcase.fbx" }, 1.25f, 0.5f, 0.3f, keep, used, 0.7);
                     At(r, S + "Couch.fbx", x1 - 1.0f, cz + 2.5f, -90f, new Vector2(1.15f, 0.5f), keep, used);
+                    // las banderas del despacho (policia y ciudad) detras de la mesa, y la mesa de reuniones con sus sillas (diseno del usuario)
+                    ComisariaV2Office.FlagAt(props, new Vector3(x0 + 0.9f, y, cz - 2.0f), -90f, policeFlag);
+                    ComisariaV2Office.FlagAt(props, new Vector3(x0 + 0.9f, y, cz + 2.2f), -90f, cityFlag);
+                    if (At(r, P + "Desk.fbx", cx + 2.6f, z0 + 2.4f, 0f, new Vector2(0.8f, 0.4f), keep, used) != null && At(r, P + "Desk.fbx", cx + 2.6f, z0 + 3.15f, 180f, new Vector2(0.8f, 0.4f), keep, used) != null)
+                    {
+                        foreach (float dx in new[] { -0.45f, 0.45f }) { Place(P + "Chair.fbx", new Vector3(cx + 2.6f + dx, y, z0 + 1.55f), Rn(-20, 20)); Place(P + "Chair.fbx", new Vector3(cx + 2.6f + dx, y, z0 + 4.0f), 180f + Rn(-20, 20)); }
+                        OnTop(O + "PaperStack.fbx", new Vector3(cx + 2.4f, y + 0.76f, z0 + 2.7f), Rn(0, 360));
+                    }
                     break;
                 case "chief":
                     At(r, O + "ExecutiveDesk.fbx", cx + 1.0f, cz, 90f, new Vector2(1.0f, 0.5f), keep, used);
@@ -328,16 +421,7 @@ namespace Horror.EditorTools
                     Clutter(r, keep, used, 3);
                     break;
                 case "conference":
-                    At(r, O + "Lectern.fbx", x0 + 1.6f, cz, 90f, new Vector2(0.35f, 0.35f), keep, used);
-                    At(r, O + "Whiteboard.fbx", x0 + 0.5f, cz + 2.2f, 90f, new Vector2(0.7f, 0.3f), keep, used);
-                    for (float x = x0 + 3.6f; x < x1 - 1.2f; x += 1.0f)
-                        for (int side = 0; side < 2; side++)
-                            for (float z = side == 0 ? z0 + 0.9f : cz + 1.0f; side == 0 ? z < cz - 0.9f : z < z1 - 0.7f; z += 0.64f)
-                            {
-                                if (Chance(0.07)) continue;
-                                var ch = At(r, O + "AuditoriumChair.fbx", x, z, -90f, new Vector2(0.28f, 0.28f), keep, used);
-                                if (ch != null && Chance(0.07)) { ch.transform.rotation = Quaternion.Euler(0, Rn(0, 360), 0) * Quaternion.Euler(Rn(80, 95), 0, 0); ch.transform.position += Vector3.up * 0.25f; }
-                            }
+                    Conference(r, keep, used);
                     break;
                 case "memorial":
                     Memorial(r, keep, used);
@@ -354,13 +438,17 @@ namespace Horror.EditorTools
                     Clutter(r, keep, used, 2);
                     break;
                 case "interrogation":
-                    foreach (var dz in new[] { -3.5f, 3.5f })
+                    // tres salas de interrogatorio al norte (mesa, dos sillas y foco) y al sur la observacion con la consola de vigilancia
+                    foreach (var tx in new[] { x0 + 4.5f, cx, x1 - 4.5f })
                     {
-                        if (At(r, P + "Desk.fbx", cx, cz + dz, 0f, new Vector2(0.8f, 0.45f), keep, used) == null) continue;
-                        Place(P + "Chair.fbx", new Vector3(cx, y, cz + dz - 0.9f), Rn(-15, 15)); Place(P + "Chair.fbx", new Vector3(cx, y, cz + dz + 0.9f), 180f + Rn(-15, 15));
-                        OnTop(O + "DeskLamp.fbx", new Vector3(cx + 0.5f, y + 0.76f, cz + dz), Rn(0, 360));
+                        if (At(r, P + "Desk.fbx", tx, z1 - 3.2f, 0f, new Vector2(0.8f, 0.45f), keep, used) == null) continue;
+                        Place(P + "Chair.fbx", new Vector3(tx, y, z1 - 3.2f - 0.9f), Rn(-15, 15)); Place(P + "Chair.fbx", new Vector3(tx, y, z1 - 3.2f + 0.9f), 180f + Rn(-15, 15));
+                        OnTop(O + "DeskLamp.fbx", new Vector3(tx + 0.5f, y + 0.76f, z1 - 3.2f), Rn(0, 360));
                     }
-                    AlongWall(r, 'W', cabinets, 0.6f, 0.65f, 0.1f, keep, used, 0.5);
+                    At(r, S + "CCTVDesk.fbx", cx, z0 + 0.65f, 0f, new Vector2(1.2f, 0.5f), keep, used);
+                    At(r, O + "SwivelChair.fbx", cx - 0.5f, z0 + 1.6f, 10f, new Vector2(0.3f, 0.3f), keep, used);
+                    At(r, O + "SwivelChair.fbx", cx + 0.6f, z0 + 1.5f, -20f, new Vector2(0.3f, 0.3f), keep, used);
+                    AlongWall(r, 'E', cabinets, 0.6f, 0.65f, 0.1f, keep, used, 0.6);
                     Clutter(r, keep, used, 2);
                     break;
                 case "records":
@@ -439,27 +527,93 @@ namespace Horror.EditorTools
             }
         }
 
+        /// <summary>
+        /// Calabozos: 20 celdas en dos filas de 10 contra los muros norte y sur del bloque (cada una de ~2,2 x 3 m, con su camastro, muros
+        /// divisorios y rejas con un hueco de puerta), y entre las dos filas un pasillo central amplio con la mesa del carcelero y bancos.
+        /// </summary>
         static void Cells(ComisariaGrande.Room r, List<Rect> keep, List<Rect> used)
         {
-            float x0 = r.r.xMin, x1 = r.r.xMax, z1 = r.r.yMax, y = r.floor, cz = z1 - 5.8f;      // rejas a 5,8 m de la pared del fondo
-            int n = 4; float w = (x1 - x0) / n;
+            float x0 = r.r.xMin, x1 = r.r.xMax, y = r.floor; const int n = 10; const float depth = 3f;
+            float w = (x1 - x0) / n;
+            var wallMat = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Wall.mat");
             var bars = new GameObject("Celdas").transform; bars.SetParent(fixedRoot);
-            var doorsX = Enumerable.Range(0, n).Select(i => x0 + w * (i + 0.5f)).ToArray();
-            for (float x = x0 + 0.2f; x < x1 - 0.1f; x += 0.16f)
+            foreach (int row in new[] { 0, 1 })
             {
-                if (doorsX.Any(d => Mathf.Abs(x - d) < 0.7f)) continue;
-                ComisariaGrande.Box("Barrote", bars, new Vector3(x, y + 1.3f, cz), new Vector3(0.035f, 2.6f, 0.035f), metal, 0f, false);
+                float zBack = row == 0 ? r.r.yMin : r.r.yMax, zFront = row == 0 ? r.r.yMin + depth : r.r.yMax - depth, zMid = (zBack + zFront) / 2f;
+                for (int i = 0; i < n; i++)
+                {
+                    float xa = x0 + w * i, xb = x0 + w * (i + 1), xc = (xa + xb) / 2f;
+                    // la primera de la fila sur queda libre: es donde desemboca la puerta de calabozos (10, 42)
+                    if (row == 1 && i == 0) { used.Add(Rect.MinMaxRect(xa, Mathf.Min(zBack, zFront), xb, Mathf.Max(zBack, zFront))); continue; }
+                    // barrotes de la reja, salvo en el hueco de la puerta de la celda
+                    for (float x = xa + 0.15f; x < xb - 0.1f; x += 0.16f)
+                        if (Mathf.Abs(x - xc) >= 0.45f) ComisariaGrande.Box("Barrote", bars, new Vector3(x, y + 1.3f, zFront), new Vector3(0.035f, 2.6f, 0.035f), metal, 0f, false);
+                    // travesanos (arriba de todo el ancho; abajo y a media altura solo en las dos hojas de reja) y colision de cada hoja
+                    ComisariaGrande.Box("Travesano", bars, new Vector3(xc, y + 2.55f, zFront), new Vector3(w - 0.1f, 0.06f, 0.06f), metal, 0f, false);
+                    foreach (var (sa, sb) in new[] { (xa + 0.1f, xc - 0.45f), (xc + 0.45f, xb - 0.1f) })
+                    {
+                        foreach (float yy in new[] { 0.06f, 1.2f }) ComisariaGrande.Box("Travesano", bars, new Vector3((sa + sb) / 2f, y + yy, zFront), new Vector3(sb - sa, 0.06f, 0.06f), metal, 0f, false);
+                        var c = new GameObject("Reja_Col"); c.transform.SetParent(bars); c.transform.position = new Vector3((sa + sb) / 2f, y + 1.3f, zFront);
+                        c.AddComponent<BoxCollider>().size = new Vector3(sb - sa, 2.6f, 0.12f); c.isStatic = true;
+                    }
+                    if (i > 0) ComisariaGrande.Box("Celda_Muro", bars, new Vector3(xa, y + 1.6f, zMid), new Vector3(0.2f, 3.2f, depth), wallMat, 3f);
+                    // camastro con su lado largo a lo largo de la celda, pegado al fondo
+                    Place(P + "Cot.fbx", new Vector3(xc - 0.45f, y, row == 0 ? zBack + 1.15f : zBack - 1.15f), 90f);
+                    used.Add(Rect.MinMaxRect(xa, Mathf.Min(zBack, zFront), xb, Mathf.Max(zBack, zFront)));
+                }
             }
-            foreach (float yy in new[] { 0.06f, 1.2f, 2.55f }) ComisariaGrande.Box("Travesano", bars, new Vector3((x0 + x1) / 2f, y + yy, cz), new Vector3(x1 - x0 - 0.2f, 0.06f, 0.06f), metal, 0f, false);
-            var xs = new List<float> { x0 + 0.1f }; foreach (var d in doorsX) { xs.Add(d - 0.66f); xs.Add(d + 0.66f); } xs.Add(x1 - 0.1f);
-            for (int i = 0; i + 1 < xs.Count; i += 2) { var c = new GameObject("Reja_Col"); c.transform.SetParent(bars); c.transform.position = new Vector3((xs[i] + xs[i + 1]) / 2f, y + 1.3f, cz); c.AddComponent<BoxCollider>().size = new Vector3(xs[i + 1] - xs[i], 2.6f, 0.12f); c.isStatic = true; }
-            for (int i = 1; i < n; i++) ComisariaGrande.Box("Celda_Muro", bars, new Vector3(x0 + w * i, y + 1.6f, (cz + z1) / 2f), new Vector3(0.2f, 3.2f, z1 - cz), AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Wall.mat"), 3f);
-            for (int i = 0; i < n; i++) { Place(P + "Cot.fbx", new Vector3(x0 + w * (i + 0.5f), y, z1 - 1.0f), 0f); used.Add(Rect.MinMaxRect(x0 + w * i, cz, x0 + w * (i + 1), z1)); }
-            used.Add(Rect.MinMaxRect(x0, cz - 0.3f, x1, cz + 0.3f));
-            At(r, P + "Desk.fbx", x0 + 2.5f, r.r.yMin + 3.0f, 0f, new Vector2(0.8f, 0.45f), keep, used);
-            At(r, P + "Chair.fbx", x0 + 2.5f, r.r.yMin + 2.1f, 0f, new Vector2(0.3f, 0.3f), keep, used);
-            AlongWall(r, 'E', new[] { P + "FilingCabinet.fbx", P + "Locker.fbx" }, 0.62f, 0.6f, 0.1f, keep, used, 0.6);
+            // pasillo central: mesa del carcelero junto a la puerta, bancos para los detenidos y archivadores
+            float cz = (r.r.yMin + r.r.yMax) / 2f;
+            if (At(r, P + "Desk.fbx", x0 + 3.2f, cz + 2.8f, 90f, new Vector2(0.8f, 0.45f), keep, used) != null)
+            {
+                Place(O + "SwivelChair.fbx", new Vector3(x0 + 4.1f, y, cz + 2.8f), 90f + Rn(-15, 15));
+                OnTop(O + "DeskLamp.fbx", new Vector3(x0 + 3.2f, y + 0.76f, cz + 3.3f), Rn(0, 360));
+            }
+            foreach (float bx in new[] { x0 + 8.5f, x0 + 14.5f }) At(r, E + "WaitingBench.fbx", bx, cz - 0.4f, 0f, new Vector2(1.1f, 0.3f), keep, used);
+            At(r, P + "FilingCabinet.fbx", x1 - 0.5f, cz, -90f, new Vector2(0.35f, 0.35f), keep, used);
             Clutter(r, keep, used, 3);
+        }
+
+        /// <summary>
+        /// Sala de conferencias del usuario (estrado con dos escalones, atril, mapa enmarcado, cuatro banderas, seis filas de sillas con
+        /// pasillo central), girada 90 grados respecto a la v2 porque la puerta al memorial cae en la pared donde iba el estrado: ahora el
+        /// estrado esta pegado a la pared sur y el pasillo central apunta a la puerta norte (a la biblioteca).
+        /// </summary>
+        static void Conference(ComisariaGrande.Room r, List<Rect> keep, List<Rect> used)
+        {
+            float x0 = r.r.xMin, z0 = r.r.yMin, y = r.floor, stageH = 0.42f;
+            // (x, z) del diseno original -> aqui: x' = x0 + z, z' = z0 + 20 - x; el giro suma 90 grados
+            Vector3 T(float xo, float zo, float yy) => new Vector3(x0 + zo, yy, z0 + 20f - xo);
+            var woodMat = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Wood.mat");
+            float sy = y + stageH;
+            ComisariaGrande.Box("Estrado", fixedRoot, T(18.225f, 6f, y + stageH / 2f), new Vector3(11.2f, stageH, 3.25f), woodMat, 1f);
+            foreach (float zo in new[] { 1.4f, 10.6f }) ComisariaGrande.Box("Escalon", fixedRoot, T(16.3f, zo, y + stageH / 4f), new Vector3(1.2f, stageH / 2f, 0.6f), woodMat, 1f);
+            Place(O + "Lectern.fbx", T(17.4f, 6f, sy), 0f, true, false, null, 0.2f);
+            // mapa de la ciudad enmarcado en la pared del fondo
+            var q = GameObject.CreatePrimitive(PrimitiveType.Quad); q.name = "Mapa"; Object.DestroyImmediate(q.GetComponent<Collider>());
+            q.transform.SetParent(props); q.transform.SetPositionAndRotation(T(19.76f, 6f, sy + 1.6f), Quaternion.Euler(0, 180f, 0));
+            q.transform.localScale = new Vector3(3.4f, 2.1f, 1f); q.GetComponent<Renderer>().sharedMaterial = cityMap; q.isStatic = true;
+            foreach (var (dz, dy, sz, sx) in new[] { (0f, 1.08f, 0.06f, 3.6f), (0f, -1.08f, 0.06f, 3.6f), (1.76f, 0f, 0.06f, 0.08f), (-1.76f, 0f, 0.06f, 0.08f) })
+            {
+                var frame = ComisariaGrande.Box("Marco_Mapa", props, T(19.74f, 6f + dz, sy + 1.6f + dy), dy != 0f ? new Vector3(sx, 0.08f, sz) : new Vector3(sx, 2.24f, sz), woodMat, 0f, false);
+            }
+            // cuatro banderas, dos a cada lado del mapa
+            float[] fz = { 2.0f, 3.25f, 8.75f, 10.0f };
+            for (int i = 0; i < 4; i++) ComisariaV2Office.FlagAt(props, T(19.3f, fz[i], sy), 180f, i % 2 == 0 ? policeFlag : cityFlag);
+            // filas de sillas mirando al estrado, con el pasillo central en x = -14; alguna volcada; sin tapar las dos puertas laterales
+            for (int row = 0; row < 6; row++)
+                for (int side = 0; side < 2; side++)
+                    for (int i = 0; i < 7; i++)
+                    {
+                        float zo = side == 0 ? 0.8f + i * 0.64f : 6.9f + i * 0.64f;
+                        var p = T(15.0f - row * 1.0f, zo, y);
+                        if (Chance(0.06)) continue;
+                        if (p.z > z0 + 4.2f && p.z < z0 + 8.0f && (p.x > r.r.xMax - 2.4f || p.x < r.r.xMin + 2.4f)) continue;   // delante del arco al memorial y de la puerta del comisario
+                        var ch = Place(O + "AuditoriumChair.fbx", p, 180f, true, true, null, 1.5f);
+                        if (ch != null && Chance(0.07)) { ch.transform.rotation = Quaternion.Euler(0, Rn(0, 360), 0) * Quaternion.Euler(Rn(80, 95), 0, 0); ch.transform.position += Vector3.up * 0.25f + new Vector3(Rn(-0.4f, 0.4f), 0, Rn(-0.3f, 0.3f)); }
+                    }
+            Place(O + "WaterCooler.fbx", T(8.5f, 0.5f, y), 90f);
+            Place(O + "TrashBin.fbx", T(8.5f, 11.4f, y), 90f);
         }
 
         static void Memorial(ComisariaGrande.Room r, List<Rect> keep, List<Rect> used)
@@ -485,6 +639,10 @@ namespace Horror.EditorTools
             At(r, E + "WaitingBench.fbx", -0.6f, 10.4f, -90f, new Vector2(1.1f, 0.3f), keep, used);
             foreach (var (px, pz) in new[] { (-7.4f, 0.6f), (7.4f, 0.6f), (7.4f, 11.4f), (-7.4f, 11.4f) }) At(r, M + "PottedPlant.fbx", px, pz, Rn(0, 360), new Vector2(0.4f, 0.4f), keep, used);
             At(r, O + "TrophyCabinet.fbx", 6.0f, 11.5f, 180f, new Vector2(0.7f, 0.3f), keep, used);
+            // las dos banderas detras del monumento y la alfombra delante (diseno del usuario, recuperados)
+            ComisariaV2Office.FlagAt(props, new Vector3(-7.2f, y, 4.6f), -90f, policeFlag);
+            ComisariaV2Office.FlagAt(props, new Vector3(-7.2f, y, 7.6f), -90f, cityFlag);
+            Place(O + "Rug.fbx", new Vector3(-0.8f, y, 6.0f), 90f, false, false, null, 0.3f);
         }
 
         /// <summary>
@@ -552,6 +710,7 @@ namespace Horror.EditorTools
             fixedRoot = new GameObject("Mobiliario_Fijo").transform; fixedRoot.SetParent(level);
             metal = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Metal.mat"); wood = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Wood.mat");
             rng = new System.Random(2026); count = 0;
+            policeFlag = ComisariaV2Office.PoliceFlagMat(); cityFlag = ComisariaV2Office.CityFlagMat(); cityMap = ComisariaV2Office.CityMapMat();
             ItemTextureKit.Apply();
             var log = new List<string>();
             foreach (var r in ComisariaGrande.Rooms)

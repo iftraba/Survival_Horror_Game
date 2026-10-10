@@ -457,3 +457,17 @@ Tras probar la build, el usuario rechazó el diseño: pasillos estrechos y sin c
 - Sin comprobar: recorrer las escaleras andando con el jugador (solo NavMesh y capturas); la puerta de un sentido sigue siendo una puerta normal (`OneWayDoor` va en la etapa E).
 - Pendiente de exterior: iluminación de la rampa y la explanada (oscuras), y la puerta de coches de la verja norte por donde entrarían los vehículos.
 - Las lámparas (110) siguen con la regla antigua: etapa F.
+
+## Fase F, parte 2, etapa D: mobiliario con carácter (2026-10-10)
+
+**Qué hace.** `ComisariaGrandeProps` (menú 3) se adaptó a la planta v3 y amuebla las salas con composición y función:
+- **Conferencias** (tu diseño, girado 90° para que el estrado no choque con la puerta): estrado con escalones, atril, mapa enmarcado, 4 banderas y sillas con pasillo central. Memorial con banderas y alfombra; despacho del comisario con banderas y mesa de reuniones (`ComisariaV2Office.Flag/TexMat` pasan a `internal`, con `FlagAt`, `PoliceFlagMat`, `CityFlagMat`, `CityMapMat`).
+- **Garaje**: 5 patrullas en dos filas con carril central; taller al norte. **Calabozos**: 19 celdas en dos filas de 10 contra los muros norte y sur (3 m de fondo, rejas con hueco de puerta, camastro), pasillo central con mesa del carcelero y bancos; la primera de la fila sur queda libre porque ahí desemboca la puerta.
+- Radio y despachos, interrogatorios (3 mesas + consola de observación), atrio por piezas, galería, hall, ingreso y custodia. Zonas de exclusión (`KeepOut`) para los huecos y cajas de escalera.
+- `Puerta_Calabozos` y `Puerta_Admin_Archivo` se mueven a z=42: caían junto a un tramo de escalera sólido y quedaban tapadas.
+
+**Comprobado (Play, NavMesh con obstáculos de puerta apagados):** 65 espacios, todos con ruta desde el vestíbulo salvo `B_Shaft` (hueco del ascensor, no andable); 54 puertas con paso libre a 1,1 m de cada lado (0 tapadas). Capturas en Play: conferencias, garaje, calabozos, atrio con galería y sala de radio.
+
+**Sin comprobar:** orientación de las patrullas (en la captura se ven bien, pero no medida), colisiones de la balaustrada, camastros de cerca, resto de salas a la vista. La luz sigue siendo la antigua (etapa F): varias salas salen muy oscuras. Faltan los modelos nuevos (placas, señales, botiquín, lámpara colgante, cuadros, furgoneta) y `WallDressingKit`.
+
+**Estado:** menús 1-3 válidos (1.195 muebles); **siguen sin adaptar los menús 4-7** (puzles, zombis, botín, luces).

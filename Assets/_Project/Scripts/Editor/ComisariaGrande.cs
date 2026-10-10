@@ -104,7 +104,7 @@ namespace Horror.EditorTools
             D("Puerta_Control", -5, 29, B);
             D("Puerta_Sin_Corriente", -12, 27.75f, B, DoorKind.Power);
             D("Puerta_Calderas", -22, 29, B, DoorKind.Metal);
-            D("Puerta_Calabozos", 10, 36, B, DoorKind.ChiefCard);
+            D("Puerta_Calabozos", 10, 42, B, DoorKind.ChiefCard);
             D("Ascensor_Sotano", Shaft.xMin, 24.75f, B, DoorKind.Fixed, 1.4f);
 
             // ===== PLANTA BAJA (y 0) =====
@@ -185,7 +185,7 @@ namespace Horror.EditorTools
             D("Puerta_JefeSeguridad_Balcon", -32, 20, F1);
             D("Puerta_Galeria_HallNorte", 0, 29, F1);                           // paso de un solo sentido (OneWayDoor en la etapa E): se abre desde el hall norte
             D("Puerta_Admin_Biblioteca", -17, 29, F1);
-            D("Puerta_Admin_Archivo", -14, 36, F1);
+            D("Puerta_Admin_Archivo", -14, 42, F1);
             D("Puerta_Escalera_Archivo", -4, 34, F1);
             D("Puerta_Hall_Registro", 10, 36, F1);
             D("Puerta_Registro", 16, 29, F1);
