@@ -53,7 +53,8 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 ## 5. Rendimiento
 - [x] [PC] (2026-10-10) Occlusion culling horneado (menú 8): llamadas y CPU/GPU medidos antes y después en seis escenarios (ver `docs/rendimiento.md`); CPU por debajo de 16,7 ms en los seis.
 - [ ] [JUGAR] Con la oclusión horneada: ¿parpadean objetos al girar la cámara, sobre todo en los huecos de la galería y del caracol, o en la escalera del archivo (la peor diferencia, 0,42 % de la imagen)?
-- [ ] [PC] Idea sin hacer: puertas como `OcclusionPortal` y dormir la IA de los zombis lejanos o dormidos (4-5 ms de CPU en el vestíbulo).
+- [x] [PC] (2026-10-10) Dormir la IA de los zombis lejanos: descartado tras medir (con oclusión, quitar IA, agentes y animadores cambia la CPU dentro del ruido; ver `docs/rendimiento.md`).
+- [ ] [PC] Idea sin hacer ni medir: puertas como `OcclusionPortal` y combinar las piezas de las puertas. Solo si en una build a 1080p no llegan los 60 fps.
 - [ ] [PC] (2026-10-10, etapa G: el editor va a 10 fps con el MCP, el contador de frame timing da GPU 0 ms y no sirve; render a 1920×1080 con una cámara temporal y lectura de píxeles, en el editor: atrio 8-14 ms, garaje 8-20 ms, galería 8 ms, archivo 13 ms, espera 13 ms; con las sombras de los focos desactivadas el atrio baja de 14 a 8 ms; la medición es ruidosa (±5 ms) y no hay línea base de antes de la etapa F; 428 luces en la escena) Skill `performance-audit` en 1080p con las 252 lámparas: GPU en el atrio con el hueco (objetivo provisional ≤ 12 ms), F3 (`FpsCounter`), recuento de luces.
 - [ ] [JUGAR] fps en una **build** (no se ha medido; la build del escritorio no lleva nada de la planta nueva hasta `/recompile`, que solo se hace si lo pide el usuario).
 

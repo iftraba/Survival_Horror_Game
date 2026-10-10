@@ -24,6 +24,6 @@ Mismas posiciones, orientación y condiciones antes y después (mediana de 60 fo
 
 ## Pendiente
 - Fps reales en una build a 1080p con F3 (hace falta `/recompile`, que solo lo pide el usuario).
-- Dormir la IA de los zombis lejanos o dormidos (4-5 ms de CPU en el vestíbulo): sin hacer.
+- ~~Dormir la IA de los zombis lejanos o dormidos~~ **Descartado tras medirlo (2026-10-10, con la oclusión ya horneada):** quitar por separado el script `ZombieAI`, los `NavMeshAgent` y los `Animator` de los 55 enemigos, o desactivarlos del todo, cambia la CPU entre -1,7 y +1,8 ms según el sitio (vestíbulo 14,0 base y 15,8 sin zombis; galería del sótano 10,8 → 9,2; atrio 11,9 → 10,2; ruido de ±1,5 ms), sin ninguna tendencia clara. Los 4-5 ms que se le atribuyeron en la auditoría eran el dibujo de los zombis visibles antes de la oclusión (cuerpos, sombras), no su lógica. No se toca `ZombieAI`.
 - Puertas como `OcclusionPortal` (una puerta cerrada hoy no tapa nada) y combinar las piezas de las puertas (800 dibujos no estáticos): sin hacer, sin medir.
 - Sin línea base anterior a la etapa F (110 lámparas).
