@@ -93,7 +93,7 @@ namespace Horror.EditorTools
         static void CutBoxTo(Transform furniture, float topY)
         {
             var bc = furniture.GetComponent<BoxCollider>(); var b = bc.bounds;
-            if (topY + 0.04f >= b.max.y) return;
+            if (topY + 0.01f >= b.max.y) return;      // la malla puede quedar 2-4 cm por debajo de la caja: el objeto quedaria dentro de ella
             float h = topY + 0.005f - b.min.y;
             var c = bc.center; var s = bc.size;
             float localMin = b.min.y - furniture.position.y;
@@ -114,7 +114,7 @@ namespace Horror.EditorTools
             if (tris == null) return null;
             var center = tris.Aggregate(Vector3.zero, (acc, t) => acc + t.c * t.area) / tris.Sum(t => t.area);
             var target = pref.HasValue ? new Vector3(pref.Value.x, center.y, pref.Value.z) : center;
-            Vector3? best = null; float bestScore = float.MaxValue;
+            var cands = new List<(Vector3 p, float score)>();
             foreach (var (c, area) in tris)
             {
                 var p = c;
@@ -123,10 +123,42 @@ namespace Horror.EditorTools
                     foreach (var s in smalls)
                         if (p.x > s.min.x - clearRadius && p.x < s.max.x + clearRadius && p.z > s.min.z - clearRadius && p.z < s.max.z + clearRadius && s.min.y < p.y + 0.5f && s.max.y > p.y - 0.05f) { blocked = true; break; }
                 if (blocked) continue;
-                float score = Vector3.Distance(p, target) - area * 0.5f;      // cerca del objetivo y, a igualdad, en un triangulo grande (no en un borde)
-                if (score < bestScore) { bestScore = score; best = p; }
+                cands.Add((p, Vector3.Distance(p, target) - area * 0.5f));      // cerca del objetivo y, a igualdad, en un triangulo grande (no en un borde)
             }
-            return best;
+            float floorY = furniture.GetComponent<BoxCollider>().bounds.min.y;
+            int tested = 0;
+            foreach (var cd in cands.OrderBy(c => c.score))
+            {
+                if (tested++ > 60) break;
+                if (CanStandAndSee(cd.p, floorY, furniture)) return cd.p;     // si ningun punto es alcanzable (mesa de 2,4 m contra una pared), este mueble no sirve
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Como el PlayerInteractor: hay un sitio donde el jugador (capsula libre de 0,33 m) tiene el objeto a 2,2 m o menos de la esfera de interaccion (1 m sobre
+        /// su pivote) y a la vista desde el pecho, sin nada solido en medio salvo el propio objeto.
+        /// </summary>
+        static bool CanStandAndSee(Vector3 item, float floorY, Transform furniture)
+        {
+            var center = item + Vector3.up * 0.03f;
+            for (float dx = -1.9f; dx <= 1.9f; dx += 0.3f)
+                for (float dz = -1.9f; dz <= 1.9f; dz += 0.3f)
+                {
+                    var feet = new Vector3(item.x + dx, floorY + 0.05f, item.z + dz);
+                    if (Physics.CheckCapsule(feet + Vector3.up * 0.4f, feet + Vector3.up * 1.7f, 0.33f, ~0, QueryTriggerInteraction.Ignore)) continue;
+                    var pos = feet + Vector3.up * 1.0f;                                   // pivote del jugador
+                    if (Vector3.Distance(pos + Vector3.up, center) > 2.1f) continue;
+                    var from = pos + Vector3.up * 0.6f; var d = center - from; bool vis = true;
+                    foreach (var hit in Physics.RaycastAll(from, d.normalized, d.magnitude, ~0, QueryTriggerInteraction.Ignore))
+                    {
+                        var t = hit.collider.transform;
+                        if (hit.rigidbody != null || t.IsChildOf(furniture)) continue;
+                        vis = false; break;
+                    }
+                    if (vis) return true;
+                }
+            return false;
         }
 
         /// <summary>

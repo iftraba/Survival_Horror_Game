@@ -1,14 +1,15 @@
 # Pendiente de probar y comprobar (comisaría grande, rediseño de la planta)
 
-Lista viva de lo que **no se ha comprobado** o solo se vio a medias. Se consulta con la skill `pendiente-comprobar`. Al comprobar algo, se tacha aquí con fecha y cómo se hizo; si falla, se anota la salida real. Última actualización: 2026-10-10 (tras la etapa F).
+Lista viva de lo que **no se ha comprobado** o solo se vio a medias. Se consulta con la skill `pendiente-comprobar`. Al comprobar algo, se tacha aquí con fecha y cómo se hizo; si falla, se anota la salida real. Última actualización: 2026-10-10 (tras la etapa G).
 
 Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]** necesita al usuario jugando · **[ETAPA]** depende de una etapa por hacer.
 
 ## 1. Recorrido y progresión
-- [ ] [PC] Coger cada objeto clave andando en Play: cizalla, 2 tarjetas, 3 medallones, 3 fusibles y 8 notas (alcance real, que la interacción lo apunte sin que lo tape un mueble, altura de la cara superior). Solo se vio la cizalla en su banco.
-- [ ] [PC] Las 8 notas legibles desde donde quedan, y que cada código (4519, 0832, 7258) tenga su nota alcanzable antes de la taquilla.
+- [x] [PC] (2026-10-10, etapa G) Alcance de los interactuables: 96 de 96 (objetos clave, notas, botín, interruptores, terminales, baúles, cuadro, ascensor, monumento, reja, portón) tienen un sitio donde el jugador (cápsula libre de 0,33 m) los tiene a ≤2,2 m de la esfera del `PlayerInteractor` y a la vista desde el pecho. La prueba encontró 3 notas (turno, archivero, mantenimiento) que quedaban tapadas por la caja del escritorio; se corrigió (caja recortada a la malla, collider del papel 3 cm más alto, y las anclas exigen un sitio desde el que se alcance). **Falta andar de verdad con el jugador y pulsar E.**
+- [ ] [PC] Los 12 objetos que van dentro de taquillas (3 con código): abrir cada taquilla y coger lo de dentro.
+- [x] [PC] (2026-10-10) Las 8 notas se alcanzan y se ven (ver arriba) y, en el grafo de progresión, cada código tiene su nota en una sala alcanzable antes de su taquilla (4519 en pruebas, 0832 en vestuarios, 7258 en la sala segura del sótano). Leer el texto en el HUD sigue sin probarse.
 - [ ] [PC] Grafo de progresión incluyendo la sala de calderas y el portón final (el script de la etapa E no cubre `B_Boiler`, cota −6,5). Repetir en Play con puertas reales, no solo el grafo de `Define()`.
-- [ ] [PC] Las puertas con llave abren de verdad con su objeto: 3 candados (cizalla), 3 lectores de tarjeta recolocados (atrio→ingreso, ingreso→escalera norte, custodia→calabozos: ver que el lector está visible y de cara a quien llega), puerta sin corriente, reja del archivo, ascensor.
+- [ ] [PC] (2026-10-10: comprobado por datos que cada puerta con llave, el ascensor, el portón, el monumento y el cuadro de fusibles piden un objeto que existe en la escena o lo suelta un jefe; falta abrir cada una de verdad) Las puertas con llave abren de verdad con su objeto: 3 candados (cizalla), 3 lectores de tarjeta recolocados (atrio→ingreso, ingreso→escalera norte, custodia→calabozos: ver que el lector está visible y de cara a quien llega), puerta sin corriente, reja del archivo, ascensor.
 - [ ] [PC] `OneWayDoor` desde los dos lados con el jugador de verdad (solo se probó teletransportando): garaje↔bombas y galería↔hall norte; que los zombis no la abran por el lado malo; que tras abrirla queda abierta; y **tras guardar y cargar partida**.
 - [ ] [PC] Escaleras recorridas andando con el jugador (caracol, norte con sus dos tramos, archivo, garaje, custodia): hasta ahora solo NavMesh y capturas.
 - [ ] [PC] Rampa del garaje y persiana enrollable (cerrada): que el jugador no puede atravesarla; salida por el callejón.
@@ -23,8 +24,8 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [PC] Colisiones de la balaustrada de la galería (el jugador no cae al hueco, no la atraviesa).
 - [ ] [PC] Camastros y rejas de las celdas de cerca; la primera celda de la fila sur queda libre (entrada). Son 19 celdas, no 20.
 - [ ] [PC] Orientación del mapa enmarcado de la conferencia (quad a yaw 180) y de las banderas.
-- [ ] [PC] Captura de cada sala que no se ha visto: vestíbulo (con el mostrador reubicado), espera, seguridad, armería, descanso, vestuarios, taller, ingreso, interrogatorios, comisario, memorial, biblioteca, detectives, comedor, registro, sindicato, archivo, antesala, caseta, sótano industrial (bombas, máquinas, almacén, laboratorio, cuadro, control, calderas).
-- [ ] [PC] Mobiliario que tapa el paso o una puerta (repetir la prueba de puertas y de rutas tras cualquier cambio en los menús 3-6).
+- [x] [PC] (2026-10-10, etapa G) Hojas de contacto de las 45 salas de más de 20 m² (vista desde una esquina, luces como en el juego): todas amuebladas y con luz. Quedan sin ver de cerca la caseta (16 m²), el vestíbulo con el mostrador nuevo y los detalles del comedor; el archivo sale muy oscuro.
+- [x] [PC] (2026-10-10, etapa G, tras menús 3-7) Prueba de rutas y puertas con los obstáculos apagados: 62 de 62 salas alcanzables desde el vestíbulo, 54 de 54 puertas con paso libre a 1,1 m de cada lado, 55 enemigos (43 + 10 de la verja + 2 jefes) sobre el NavMesh. Repetir tras cualquier cambio de los menús 3-6.
 - [ ] [PC] Cajas de collider recortadas por las anclas: que ningún mueble ha quedado atravesable o con huecos (zombis, balas).
 - [ ] [ETAPA] Modelos nuevos pendientes: placas de puerta, señal de salida, botiquín, lámpara colgante, marco de ventana, cuadros/retratos (IA solo con prompt aprobado), furgoneta de detenidos, tablero de herramientas, bolsas de pruebas, mesa de comedor, llavero. Y `WallDressingKit` (apuntado a la raíz nueva, no ejecutado).
 
@@ -32,7 +33,7 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [PC] Zombis: que cada uno despierta, persigue y puede cruzar sus puertas; reptantes y carroñeros se comportan (el carroñero solo despierta si le disparan); los 18 en letargo despiertan con ruido o tiro. Están de pie (no hay animación de dormido): decidir si se acepta.
 - [ ] [PC] Los dos encuentros a mano: Cop junto a la mesa de la tarjeta y reptante junto al coche del garaje (hoy no hay disparador «sale al coger la cizalla»).
 - [ ] [PC] Los dos primeros encuentros (espera y garaje) son suaves y están cerca; ningún zombi despierto pegado a una sala segura o a un guardado.
-- [ ] [PC] Munición: recuento real en la escena por tramo (balas, cartuchos, sprays) frente al presupuesto (≈182/62/8 hasta el jefe 1; ≈96/30/4 después; reservas 18+12 y 24+12) y cuántas casillas hay que llevar con pilas 45/18/3. Comprobar que el `maxStack` nuevo no rompe el guardado ni el HUD.
+- [x] [PC] (2026-10-10, etapa G) Recuento real en la escena (suelo, muebles y taquillas): hasta el jefe 1 182 balas, 62 cartuchos y 8 sprays; sótano industrial 96, 32 y 4; arena 1 18+12; arena 2 24+12. Coincide con el presupuesto. Pendiente: cuántas casillas hay que llevar con pilas 45/18/3 y que el `maxStack` nuevo no rompa el guardado ni el HUD.
 - [ ] [PC] Objeto del cuadro eléctrico que cae al suelo (no hay banco en esa sala) y los que el log marque «al suelo».
 - [ ] [JUGAR] ¿Alcanza la munición? ¿El ritmo de zombis es justo? ¿Los sprays están bien repartidos? (cifras provisionales, calculadas con 60 % de acierto).
 - [ ] [JUGAR] ¿Se encuentran los objetos clave sin pistas externas? ¿El brillo y la lámpara de mesa bastan?
@@ -50,7 +51,7 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [PC] Lámparas rotas (5) y parpadeantes (5): que se ven bien y no molestan.
 
 ## 5. Rendimiento
-- [ ] [PC] Skill `performance-audit` en 1080p con las 252 lámparas (el contador de frame timing del editor devolvió GPU 0 ms: no sirve; usar F3 y el profiler): GPU en el atrio con el hueco (objetivo provisional ≤ 12 ms), F3 (`FpsCounter`), recuento de luces.
+- [ ] [PC] (2026-10-10, etapa G: el editor va a 10 fps con el MCP, el contador de frame timing da GPU 0 ms y no sirve; render a 1920×1080 con una cámara temporal y lectura de píxeles, en el editor: atrio 8-14 ms, garaje 8-20 ms, galería 8 ms, archivo 13 ms, espera 13 ms; con las sombras de los focos desactivadas el atrio baja de 14 a 8 ms; la medición es ruidosa (±5 ms) y no hay línea base de antes de la etapa F; 428 luces en la escena) Skill `performance-audit` en 1080p con las 252 lámparas: GPU en el atrio con el hueco (objetivo provisional ≤ 12 ms), F3 (`FpsCounter`), recuento de luces.
 - [ ] [JUGAR] fps en una **build** (no se ha medido; la build del escritorio no lleva nada de la planta nueva hasta `/recompile`, que solo se hace si lo pide el usuario).
 
 ## 6. Exterior y resto

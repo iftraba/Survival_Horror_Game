@@ -183,7 +183,7 @@ namespace Horror.EditorTools
             go.transform.SetPositionAndRotation(p + Vector3.up * 0.003f, Quaternion.Euler(0f, yaw, 0f));
             go.transform.localScale = new Vector3(0.21f, 0.004f, 0.297f);
             go.GetComponent<Renderer>().sharedMaterial = paperMat;
-            go.GetComponent<BoxCollider>().size = new Vector3(1.4f, 12f, 1.2f);
+            var col = go.GetComponent<BoxCollider>(); col.size = new Vector3(1.4f, 12f, 1.2f); col.center = new Vector3(0f, 8f, 0f);      // la caja sube 3 cm: que su centro no quede a ras de la mesa
             go.AddComponent<ReadableNote>().note = n;
         }
 

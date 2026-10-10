@@ -501,3 +501,15 @@ Tras probar la build, el usuario rechazó el diseño: pasillos estrechos y sin c
 **Sin comprobar:** rendimiento con 252 lámparas (el contador del editor no sirvió: GPU 0 ms; hay que pasar `performance-audit` y mirar F3), fugas de luz por fuera del edificio y luz real de la rampa y el callejón (solo se añadieron), si 8 % de mediana es la penumbra que quiere el usuario (valor provisional: se ajusta con el menú 7a → 4 → 7), y salas pequeñas con lámpara cerca de la cámara (G_Atrio4 sale a 31 %).
 
 **Orden tras cambiar la planta:** 1 → 2 → 3 → 4 → 5 → 6 → 7. Para ajustar solo la luz: 7a → 4 → 7.
+
+## Fase F, parte 2, etapa G: verificación (2026-10-10)
+
+Qué se comprobó y cómo (el detalle de lo que sigue abierto está en `docs/pendiente-de-comprobar.md`):
+- **Alcance de los 96 interactuables** (objetos clave, notas, botín suelto, interruptores, terminales, baúles, cuadro de fusibles, ascensor, monumento, reja, portón; sin los 12 objetos que van dentro de taquillas): para cada uno se busca un sitio con la cápsula del jugador libre, a ≤2,2 m de la esfera del `PlayerInteractor` y a la vista desde el pecho, con las mismas reglas que el interactor. Primera pasada: 66 fallos (la prueba usaba el NavMesh como proxy y era demasiado estricta); con la cápsula quedaron **3 notas inalcanzables** (turno, archivero y mantenimiento): estaban dentro de la caja de collider de su escritorio (la malla queda 2-4 cm por debajo de la caja) o en una mesa de 2,4 m de fondo contra una pared. Arreglo: `ComisariaGrandeAnchors` recorta la caja a la superficie en cuanto queda por debajo, exige un punto desde el que se alcance y se vea el objeto, y el collider del papel sube 3 cm. Resultado final: **96 de 96**.
+- **Rutas y puertas** (Play, obstáculos apagados, tras los menús 3 a 7): 62 salas alcanzables desde el vestíbulo, 54 puertas con paso libre, 55 enemigos sobre el NavMesh.
+- **Llaves**: cada puerta con llave, el ascensor, el portón, el monumento y el cuadro de fusibles piden un objeto que existe en la escena o que suelta un jefe.
+- **Munición contada en la escena**: coincide con el presupuesto (hasta el jefe 1: 182 balas, 62 cartuchos, 8 sprays; sótano industrial 96, 32, 4; arenas 18+12 y 24+12).
+- **Hojas de contacto de 45 salas** (cámara temporal desde una esquina, luces del juego): todas amuebladas y con luz razonable; calabozos, biblioteca e interrogatorios salen apagados por diseño; el archivo sale muy oscuro.
+- **Rendimiento** (1920×1080, cámara temporal en el editor, con lectura de píxeles para sincronizar): 8-20 ms por fotograma según el sitio, con ±5 ms de ruido; las sombras de los focos son la mitad del coste en el atrio (14 → 8 ms sin ellas). No hay línea base anterior a la etapa F ni medida en build.
+
+Lo que **no** se pudo comprobar aquí y queda para jugar: coger de verdad cada objeto con la tecla E, abrir cada puerta con su llave, las taquillas, guardar y cargar (revisado por lectura de `SaveSystem`, `Door.ApplySaved` y `LightSwitch.SetOn`, pero no ejecutado), el comportamiento de los zombis (despertar, perseguir, puertas), el jefe 1 en la arena nueva y el equilibrio de munición, zombis y luz.
