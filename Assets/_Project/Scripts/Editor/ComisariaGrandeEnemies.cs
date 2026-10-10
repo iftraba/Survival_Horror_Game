@@ -45,14 +45,14 @@ namespace Horror.EditorTools
         // botin: sala, clases de mueble donde puede ir (la primera que exista), objeto, cantidad, que mueble de esa clase (0 = el mas cercano al centro...)
         static readonly (string room, string[] on, string item, int n, int index)[] Loot =
         {
-            // hasta el jefe 1: balas (las taquillas aportan 35 mas) -> ~182
-            ("G_Wait", new[] { "WaitingBench" }, "I_HandgunAmmo", 12, 0), ("B_Garage", new[] { "PoliceCar" }, "I_HandgunAmmo", 10, 1),
-            ("G_Lobby", new[] { "ReceptionDesk" }, "I_HandgunAmmo", 10, 0), ("G_Radio", new[] { "Desk" }, "I_HandgunAmmo", 10, 0),
+            // hasta el jefe 1: balas (las taquillas aportan 24 mas) -> ~175, con mas al principio (la sala segura, la espera y el vestibulo) y menos en el centro
+            ("G_Safe", new[] { "Desk" }, "I_HandgunAmmo", 15, 1), ("G_Wait", new[] { "WaitingBench" }, "I_HandgunAmmo", 18, 0), ("B_Garage", new[] { "PoliceCar", "PoliceCarClean" }, "I_HandgunAmmo", 10, 1),
+            ("G_Lobby", new[] { "ReceptionDesk" }, "I_HandgunAmmo", 14, 0), ("G_Radio", new[] { "Desk" }, "I_HandgunAmmo", 10, 0),
             ("G_Brief", new[] { "Desk" }, "I_HandgunAmmo", 10, 1), ("G_Sec", new[] { "Desk" }, "I_HandgunAmmo", 8, 1),
-            ("G_Work", new[] { "Workbench" }, "I_HandgunAmmo", 12, 0), ("G_Armory", new[] { "GunRack" }, "I_HandgunAmmo", 15, 0),
-            ("G_Intake", new[] { "ReceptionDesk" }, "I_HandgunAmmo", 10, 0), ("F_Conf", new[] { "Lectern" }, "I_HandgunAmmo", 10, 0),
-            ("F_Comm", new[] { "ExecutiveDesk" }, "I_HandgunAmmo", 10, 0), ("F_Det", new[] { "Desk" }, "I_HandgunAmmo", 12, 0),
-            ("F_Canteen", new[] { "KitchenCounter" }, "I_HandgunAmmo", 8, 0), ("S_Ante", new[] { "Desk" }, "I_HandgunAmmo", 10, 0),
+            ("G_Work", new[] { "Workbench" }, "I_HandgunAmmo", 8, 0), ("G_Armory", new[] { "GunRack" }, "I_HandgunAmmo", 10, 0),
+            ("G_Intake", new[] { "ReceptionDesk" }, "I_HandgunAmmo", 6, 0), ("F_Conf", new[] { "Lectern" }, "I_HandgunAmmo", 10, 0),
+            ("F_Comm", new[] { "ExecutiveDesk" }, "I_HandgunAmmo", 10, 0), ("F_Det", new[] { "Desk" }, "I_HandgunAmmo", 8, 0),
+            ("F_Canteen", new[] { "KitchenCounter" }, "I_HandgunAmmo", 6, 0), ("S_Ante", new[] { "Desk" }, "I_HandgunAmmo", 8, 0),
             // hasta el jefe 1: cartuchos (las taquillas aportan 10 mas) -> ~68
             ("G_Armory", new[] { "GunRack" }, "I_ShotgunAmmo", 6, 1), ("G_Dark", new[] { "MetalRack" }, "I_ShotgunAmmo", 8, 0),
             ("F_Det", new[] { "Desk" }, "I_ShotgunAmmo", 6, 1), ("F_Lib", new[] { "Bookcase" }, "I_ShotgunAmmo", 6, 0),
@@ -62,11 +62,11 @@ namespace Horror.EditorTools
             ("G_Radio", new[] { "Desk" }, "I_Spray", 1, 1), ("G_Safe", new[] { "Desk" }, "I_Spray", 1, 0), ("F_Canteen", new[] { "KitchenCounter" }, "I_Spray", 1, 1),
             ("F_Det", new[] { "Desk" }, "I_Spray", 1, 2), ("F_Lib", new[] { "Bookcase" }, "I_Spray", 1, 1), ("S_Ante", new[] { "Desk" }, "I_Spray", 1, 2),
             ("B_Cells", new[] { "Desk" }, "I_Spray", 1, 1),
-            // despues del jefe 1 (sotano industrial): ~96 balas, ~34 cartuchos (6 en la taquilla del almacen), 4 sprays
-            ("B_Pump", new[] { "Barrel", "WaterPump", "Crate" }, "I_HandgunAmmo", 12, 0), ("B_Mach", new[] { "Workbench" }, "I_HandgunAmmo", 12, 0),
-            ("B_Store", new[] { "MetalRack", "Shelf" }, "I_HandgunAmmo", 12, 0), ("B_Lab", new[] { "LabBench" }, "I_HandgunAmmo", 10, 0),
-            ("B_Fuse", new[] { "Workbench" }, "I_HandgunAmmo", 12, 0), ("B_Control", new[] { "Desk" }, "I_HandgunAmmo", 12, 0),
-            ("B_Safe", new[] { "Desk" }, "I_HandgunAmmo", 14, 1), ("B_Gal", new[] { "WaitingBench" }, "I_HandgunAmmo", 12, 0),
+            // despues del jefe 1 (sotano industrial): ~71 balas, ~34 cartuchos (6 en la taquilla del almacen), 4 sprays
+            ("B_Pump", new[] { "Barrel", "WaterPump", "Crate" }, "I_HandgunAmmo", 9, 0), ("B_Mach", new[] { "Workbench" }, "I_HandgunAmmo", 9, 0),
+            ("B_Store", new[] { "MetalRack", "Shelf" }, "I_HandgunAmmo", 9, 0), ("B_Lab", new[] { "LabBench" }, "I_HandgunAmmo", 8, 0),
+            ("B_Fuse", new[] { "Workbench" }, "I_HandgunAmmo", 8, 0), ("B_Control", new[] { "Desk" }, "I_HandgunAmmo", 9, 0),
+            ("B_Safe", new[] { "Desk" }, "I_HandgunAmmo", 10, 1), ("B_Gal", new[] { "WaitingBench" }, "I_HandgunAmmo", 9, 0),
             ("B_Mach", new[] { "Generator", "Workbench" }, "I_ShotgunAmmo", 6, 1), ("B_Lab", new[] { "LabCabinet" }, "I_ShotgunAmmo", 6, 0),
             ("B_Control", new[] { "Desk" }, "I_ShotgunAmmo", 6, 1), ("B_Safe", new[] { "Shelf" }, "I_ShotgunAmmo", 8, 0),
             ("B_Lab", new[] { "LabBench" }, "I_Spray", 1, 1), ("B_Control", new[] { "Desk" }, "I_Spray", 1, 2), ("B_Safe", new[] { "Desk" }, "I_Spray", 1, 2),
@@ -148,7 +148,7 @@ namespace Horror.EditorTools
             if (card != null && NavMesh.SamplePosition(card.transform.position, out var ch, 2.5f, NavMesh.AllAreas))
             { Spawn("Zombie_Cop", ch.position, "Z_G_Sec_Cop", true); taken.Add(ch.position); }
             else log.Add("sin tarjeta de seguridad o sin NavMesh junto a ella: falta el Cop dormido");
-            var cars = ComisariaGrandeAnchors.Furniture("B_Garage", "PoliceCar").OrderBy(t => t.position.x).ToList();
+            var cars = ComisariaGrandeAnchors.Furniture("B_Garage", "PoliceCar", "PoliceCarClean").OrderBy(t => t.position.x).ToList();
             if (cars.Count > 1 && NavMesh.SamplePosition(cars[1].GetComponent<BoxCollider>().bounds.center, out var rh, 3.5f, NavMesh.AllAreas))
             { Spawn("Zombie_OficialReptante", rh.position, "Z_Reptante_B_Garage", true); reptantes++; }
             else log.Add("sin coche o sin NavMesh junto a el: falta el reptante del garaje");

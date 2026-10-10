@@ -36,11 +36,25 @@ namespace Horror
         void OnDisable() => Progress.Changed -= Check;
         void Start() { if (Progress.Has(flag)) SetOpen(true); }
 
+        bool waiting;
+
         void Check()
         {
-            if (!Progress.Has(flag)) { if (t >= 0f) SetOpen(false); return; }
-            if (t < 0f) { t = 0f; GameAudio.Play(Sfx.DoorOpen, transform.position, 1f, 0.6f); }
+            if (!Progress.Has(flag)) { if (t >= 0f) SetOpen(false); waiting = false; return; }
+            if (t >= 0f || waiting) return;
+            float delay = ProgressCutscene.DelayFor(flag);                 // si hay secuencia de camara, la reja se abre cuando la camara llega
+            if (delay > 0f) StartCoroutine(OpenAfter(delay)); else Begin();
         }
+
+        System.Collections.IEnumerator OpenAfter(float delay)
+        {
+            waiting = true;
+            yield return new WaitForSeconds(delay);
+            waiting = false;
+            if (Progress.Has(flag) && t < 0f) Begin();
+        }
+
+        void Begin() { t = 0f; GameAudio.Play(Sfx.DoorOpen, transform.position, 1f, 0.6f); }
 
         void SetOpen(bool open)
         {

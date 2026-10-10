@@ -39,3 +39,8 @@ Al abrir una puerta, el jugador hace la animación de abrir (`PlayerActions.Open
 
 ## OneWayDoor y LightSwitch.partner (2026-10-10, etapa E)
 `OneWayDoor` (va junto a `Door`): puerta atrancada por un lado (`freePoint` marca el lado libre); mientras el jugador está en el lado malo la `Door` está sellada (`Seal`), en el bueno se libera, y una vez abierta desde ahí queda libre. Usada en `Puerta_Garaje_Bombas` y `Puerta_Galeria_HallNorte`. `LightSwitch.partner` sincroniza dos interruptores de la misma sala (sala de pruebas: uno por puerta).
+
+## Objetos clave, secuencias y mapa (2026-10-10)
+- `KeyUsage.IsSpent(item)`: un objeto clave está usado por completo cuando todas las `Door` con `originalKey == item` están desbloqueadas. El inventario no deja tirar los objetos clave hasta entonces y dibuja un check rojo en su casilla. `Inventory.Drop` ya no crea un `Pickup`: desecha.
+- `ProgressCutscene` (en `Puzles/Secuencia_<marca>`): recorrido de cámara al cumplirse una marca de `Progress` (medallones → reja, fusibles → puerta de las calderas); `ServiceGate` y `ProgressSeal` esperan con `ProgressCutscene.DelayFor(flag)`.
+- Mapa: `MapData` (salas y puertas, generado por `ComisariaGrandeMapKit`), `MapTracker` (marca las salas visitadas) y `MapMemory` (se guarda en `SaveData.mapRooms`). Pestaña MAPA del inventario (M).

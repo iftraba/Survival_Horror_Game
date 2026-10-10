@@ -37,6 +37,7 @@ namespace Horror
         public List<bool> switches = new List<bool>();
         public string objective;
         public List<string> flags = new List<string>();   // marcas de progreso (Progress): medallones, reja, ascensor...
+        public List<string> mapRooms = new List<string>();   // salas visitadas (el mapa solo dibuja esas)
     }
 
     /// <summary>
@@ -179,6 +180,7 @@ namespace Horror
             foreach (var b in ItemStorage.Slots) d.box.Add(new SlotSave { item = b.item.displayName, count = b.count });
             foreach (var s in OrderedSwitches()) d.switches.Add(s.IsOn);
             d.flags = Progress.All;
+            d.mapRooms = MapMemory.Ids();
 
             try
             {
@@ -217,6 +219,7 @@ namespace Horror
             Pending = null;
             NoteArchive.Restore(d.notes);
             Progress.Restore(d.flags);
+            MapMemory.Restore(d.mapRooms);
 
             var pc = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
             if (pc != null)

@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-10 · Level/Interaction/UI/Art · **Feedback de la primera partida completa, fases 2 y 3**: objetos clave que no se pueden tirar hasta estar usados por completo (check rojo en la casilla) y tirar = desechar; tarjetas distintas (azul de seguridad y dorada del jefe) con lectores de su color y rótulo; secuencia de cámara que revela la reja del archivo y la puerta de las calderas; munición movida al principio; mapa con niebla (tecla M); sillas empujables; patrullas nuevas (intacta y quemada). Detalle en `docs/rediseno-comisaria.md`.
+
 - 2026-10-10 · Enemies/Interaction/Level/UI · **Feedback de la primera partida completa, fase 1**: el jefe 1 ya no despierta por disparos de otra planta y `PropBreaker` rompe el mobiliario nuevo (estanterías), zombis dormidos despiertan al acercarte (menos dormidos), los carroñeros usan un zombi normal con `ZombieFeeding` (ya no «comen» al dispararles), siempre teléfono de guardado y dos rincones nuevos (ingreso y memorial), tirar objetos los desecha, notas con la frase clave en rojo dentro del texto y mejor estilo. Plan en `docs/planes/feedback-primera-partida-completa.md`.
 
 - 2026-10-10 · Core/Rendimiento · **Occlusion culling horneado** (menú nuevo *8 Hornear oclusion*): llamadas de dibujo del vestíbulo 7.544 → 3.014 y CPU 21,1 → 13,1 ms (editor, mismos escenarios y condiciones); seis escenarios medidos, todos por debajo de 16,7 ms de CPU. Las estanterías, taquillas y archivadores no cuentan como occluders (tapaban cajas). Corrección visual: 3 de 1.272 vistas con diferencias, la peor 0,42 %. Auditoría completa en `docs/rendimiento.md`. Fps reales en build sin medir.

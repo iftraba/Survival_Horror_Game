@@ -77,11 +77,23 @@ namespace Horror
                 if (!GameState.InventoryOpen) { CloseInventoryPanels(); ItemPreview.Get().Show(null); }   // apaga la camara del visor
                 return;
             }
-            if (!GameState.InventoryOpen) archiveTab = false;
+            if (!GameState.InventoryOpen) { archiveTab = false; mapTab = false; }
+            if (kb.mKey.wasPressedThisFrame && !GameState.Paused)                     // M: el mapa (abre el menu en su pestana, o lo cierra si ya esta en ella)
+            {
+                if (GameState.InventoryOpen && mapTab) { CloseInventoryPanels(); GameState.SetInventoryOpen(false); mapTab = false; ItemPreview.Get().Show(null); }
+                else if (!GameState.InventoryOpen) OpenMap();
+                else { archiveTab = false; mapTab = true; mapFloor = -1; mapDoors = null; mapPhones = null; CloseInventoryPanels(); }
+                return;
+            }
             if (GameState.InventoryOpen && !GameState.Paused)
             {
-                if (kb.qKey.wasPressedThisFrame) archiveTab = !archiveTab;
-                if (archiveTab) ArchiveKeys(kb); else InventoryKeys(kb);
+                if (kb.qKey.wasPressedThisFrame)                                       // Q: objetos -> archivo -> mapa -> objetos
+                {
+                    if (mapTab) { mapTab = false; }
+                    else if (archiveTab) { archiveTab = false; mapTab = true; mapFloor = -1; mapDoors = null; mapPhones = null; CloseInventoryPanels(); }
+                    else archiveTab = true;
+                }
+                if (mapTab) MapKeys(kb); else if (archiveTab) ArchiveKeys(kb); else InventoryKeys(kb);
             }
         }
 
@@ -127,7 +139,7 @@ namespace Horror
             if (IntroCutscene.Active) return;                 // la escena del principio dibuja lo suyo
             Styles();
             // al examinar un objeto solo se ve el objeto (sin vida, municion, objetivo ni pestanas)
-            bool examineView = GameState.InventoryOpen && examining && !archiveTab;
+            bool examineView = GameState.InventoryOpen && examining && !archiveTab && !mapTab;
             if (!examineView)
             {
                 DrawHealth();
@@ -472,9 +484,23 @@ namespace Horror
                 GUI.color = new Color(0.95f, 0.85f, 0.55f);
                 GUI.Label(new Rect(x0, iy, invW + 20, 26), hoverItem.displayName + (hoverItem.maxStack > 1 ? $"  x{hoverCount}" : ""), new GUIStyle(label) { fontSize = 16, fontStyle = FontStyle.Bold });
                 GUI.color = Color.white;
-                GUI.Label(new Rect(x0, iy + 26, invW + 20, 80), hoverItem.description, new GUIStyle(label) { fontSize = 13, wordWrap = true });
+                GUI.Label(new Rect(x0, iy + 26, invW + 20, 80), hoverItem.description + (hoverItem.IsKey ? "\n" + KeyUsage.Note(hoverItem) : ""), new GUIStyle(label) { fontSize = 13, wordWrap = true });
             }
             if (GUI.Button(new Rect(x0, y0 + 28 + rows * (size + gap) - 40, 140, 34), "Cerrar  (Esc)")) GameState.SetBoxOpen(false);
+        }
+
+        /// <summary>Check rojo (dos trazos girados) en la esquina de la casilla: el objeto clave ya esta usado por completo.</summary>
+        static void DrawRedCheck(Rect r)
+        {
+            var red = new Color(0.9f, 0.1f, 0.08f, 1f);
+            Fill(new Rect(r.x - 1f, r.y - 1f, r.width + 2f, r.height + 2f), new Color(0f, 0f, 0f, 0.55f));
+            var m = GUI.matrix; float t = Mathf.Max(2f, r.width * 0.16f);
+            GUIUtility.RotateAroundPivot(-45f, new Vector2(r.x + r.width * 0.34f, r.y + r.height * 0.7f));
+            Fill(new Rect(r.x + r.width * 0.34f - t / 2f, r.y + r.height * 0.7f - r.height * 0.28f, t, r.height * 0.28f), red);
+            GUI.matrix = m;
+            GUIUtility.RotateAroundPivot(45f, new Vector2(r.x + r.width * 0.34f, r.y + r.height * 0.7f));
+            Fill(new Rect(r.x + r.width * 0.34f - t / 2f, r.y + r.height * 0.7f - r.height * 0.62f, t, r.height * 0.62f), red);
+            GUI.matrix = m;
         }
 
         void DrawSlot(Rect r, ItemStack s, bool over)
@@ -486,6 +512,7 @@ namespace Horror
                 else GUI.Label(new Rect(r.x + 4, r.y + 4, r.width - 8, r.height - 8), s.item.displayName, new GUIStyle(label) { fontSize = 10, wordWrap = true });
                 if (s.item.maxStack > 1)
                     GUI.Label(new Rect(r.x, r.y, r.width - 5, r.height - 2), s.count.ToString(), new GUIStyle(label) { fontSize = 13, fontStyle = FontStyle.Bold, alignment = TextAnchor.LowerRight });
+                if (s.item.IsKey && KeyUsage.IsSpent(s.item)) DrawRedCheck(new Rect(r.xMax - 26f, r.y + 3f, 22f, 22f));
                 if (s.item.type == ItemType.Weapon && weapons != null && weapons.Equipped == s.item.weapon)
                 {
                     var eq = new Rect(r.x + 3, r.y + 3, 18, 16);

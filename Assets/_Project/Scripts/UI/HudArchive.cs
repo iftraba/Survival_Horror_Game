@@ -68,9 +68,10 @@ namespace Horror
 
         void DrawInvTabs()
         {
-            float w = 190f, h = 34f, x = Screen.width / 2f - w - 6f, y = 14f;
-            if (TabButton(new Rect(x, y, w, h), "OBJETOS", !archiveTab)) { archiveTab = false; }
-            if (TabButton(new Rect(x + w + 12f, y, w, h), "ARCHIVO  (" + NoteArchive.Read.Count + ")", archiveTab)) { archiveTab = true; }
+            float w = 190f, h = 34f, x = Screen.width / 2f - w * 1.5f - 12f, y = 14f;
+            if (TabButton(new Rect(x, y, w, h), "OBJETOS", !archiveTab && !mapTab)) { archiveTab = false; mapTab = false; }
+            if (TabButton(new Rect(x + w + 12f, y, w, h), "ARCHIVO  (" + NoteArchive.Read.Count + ")", archiveTab)) { archiveTab = true; mapTab = false; }
+            if (TabButton(new Rect(x + (w + 12f) * 2f, y, w, h), "MAPA  (M)", mapTab)) { archiveTab = false; mapTab = true; mapFloor = -1; mapDoors = null; mapPhones = null; CloseInventoryPanels(); }
             GUI.color = new Color(1f, 1f, 1f, 0.45f);
             GUI.Label(new Rect(0, y + h + 2f, Screen.width, 20f), "Q: cambiar de pestaña", new GUIStyle(center) { alignment = TextAnchor.MiddleCenter, fontSize = 12 });
             GUI.color = Color.white;

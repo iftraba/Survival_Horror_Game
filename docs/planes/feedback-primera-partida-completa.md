@@ -60,4 +60,5 @@ Con las ya existentes quedan 5 en el mapa principal.
 5. **Salas de guardado nuevas** (mi propuesta, no vetada): `G_Intake` (ingreso, planta baja) y `F_Mem` (memorial, primera planta, junto al caracol). Teléfono siempre, nunca terminal.
 
 ## Estado
-- Fase 1: en curso (ver el registro del README y `docs/rediseno-comisaria.md`).
+- Fase 1: hecha (`ebb6689`).
+- Fases 2 y 3: hechas el 2026-10-10 (ver `docs/rediseno-comisaria.md`). Quedan sin comprobar las cosas que dependen de jugar (ver `docs/pendiente-de-comprobar.md`).

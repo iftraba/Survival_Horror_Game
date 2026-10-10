@@ -17,13 +17,36 @@ namespace Horror
         void OnDisable() => Progress.Changed -= Check;
         void Start() => Check();
 
+        bool waiting, applied;
+
         void Check()
         {
             if (door == null) return;
             bool on = Progress.Has(flag);
+            if (on && !applied && !waiting)
+            {
+                float delay = ProgressCutscene.DelayFor(flag);             // con secuencia de camara, la corriente llega cuando la camara llega a la puerta
+                if (delay > 0f) { StartCoroutine(ApplyAfter(delay)); return; }
+            }
+            if (waiting) return;
+            Apply(on);
+        }
+
+        System.Collections.IEnumerator ApplyAfter(float delay)
+        {
+            waiting = true;
+            yield return new WaitForSeconds(delay);
+            waiting = false;
+            Apply(Progress.Has(flag));
+        }
+
+        void Apply(bool on)
+        {
+            applied = on;
             if (on) door.Unseal(); else door.Seal();
             if (poweredVisual != null) poweredVisual.SetActive(on);
             if (unpoweredVisual != null) unpoweredVisual.SetActive(!on);
+            if (on) GameAudio.Play(Sfx.DoorUnlock, door.transform.position);
         }
     }
 }

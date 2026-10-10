@@ -37,7 +37,7 @@ namespace Horror.EditorTools
         public static readonly string[] DoorParts = { "DoorLeaf", "DoorJamb", "DoorHeader" };
 
         /// <summary>Recepcion y exterior de la comisaria v2 (Tools/blender/build_exterior.py), en Art/Props/Exterior.</summary>
-        public static readonly string[] ExteriorProps = { "ReceptionDesk", "WaitingBench", "PoliceCar", "FenceSegment", "StreetLamp" };
+        public static readonly string[] ExteriorProps = { "ReceptionDesk", "WaitingBench", "PoliceCar", "PoliceCarClean", "FenceSegment", "StreetLamp" };
 
         /// <summary>Mobiliario de oficina de la comisaria v2, fase 3 (Tools/blender/build_office.py), en Art/Props/Office.</summary>
         public static readonly string[] OfficeProps = { "DeskComputer", "Laptop", "PaperStack", "DeskLamp", "TrashBin", "WaterCooler", "Whiteboard", "SwivelChair",
@@ -57,7 +57,7 @@ namespace Horror.EditorTools
         public static readonly string[] StationProps = { "RestroomStall", "SinkCounter", "CCTVDesk", "Couch", "VendingMachine", "KitchenCounter", "GunRack", "TireStack" };
 
         /// <summary>Objetos y piezas de los puzles de la comisaria grande (Tools/blender/build_puzzle_items.py), en Art/Props/Puzzle.</summary>
-        public static readonly string[] PuzzleProps = { "BoltCutter", "KeyCard", "Fuse", "PadlockChain", "CardReader", "FuseBox" };
+        public static readonly string[] PuzzleProps = { "BoltCutter", "KeyCard", "KeyCardChief", "Fuse", "PadlockChain", "CardReader", "FuseBox" };
 
         public static readonly string[] WallProps = { "WallRadiator", "WallExtinguisher", "WallElectricPanel", "WallNoticeBoard", "WallVent", "WallClock", "WallPipeRun" };
 

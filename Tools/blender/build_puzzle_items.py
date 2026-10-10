@@ -32,12 +32,30 @@ def make_cutter():
 
 
 def make_card():
-    m = Mesher("card", {"plastic_white": (0.88, 0.88, 0.85), "plastic_black": (0.05, 0.05, 0.05), "plastic_photo": (0.45, 0.38, 0.32), "brass": (0.75, 0.6, 0.25)})
+    """Tarjeta de SEGURIDAD (2026-10-10): blanca con banda azul ancha, foto, codigo de barras y agujero para el cordon. Distinta de la del jefe."""
+    m = Mesher("card", {"plastic_white": (0.9, 0.9, 0.88), "plastic_blue": (0.08, 0.28, 0.78), "plastic_black": (0.05, 0.05, 0.05), "plastic_photo": (0.45, 0.38, 0.32), "brass": (0.75, 0.6, 0.25)})
     m.box((0, 0, 0.001), (0.086, 0.054, 0.002), "plastic_white", bevel=0.001)
-    m.box((0, 0.018, 0.0025), (0.086, 0.01, 0.001), "plastic_black")
-    m.box((-0.025, -0.008, 0.0025), (0.022, 0.026, 0.001), "plastic_photo")
-    m.box((0.02, -0.01, 0.0025), (0.012, 0.01, 0.001), "brass")
+    m.box((0, 0.0165, 0.0025), (0.086, 0.021, 0.001), "plastic_blue")                      # banda azul de arriba
+    m.box((-0.025, -0.006, 0.0025), (0.024, 0.028, 0.001), "plastic_photo")                # foto
+    for i, x in enumerate((0.004, 0.012, 0.018, 0.028, 0.034)):
+        m.box((x + 0.012, -0.014, 0.0025), (0.003 if i % 2 == 0 else 0.0045, 0.018, 0.001), "plastic_black")   # codigo de barras
+    m.box((0.02, 0.0165, 0.0032), (0.008, 0.008, 0.001), "plastic_black")                  # agujero del cordon
+    m.box((-0.018, -0.02, 0.0025), (0.04, 0.003, 0.001), "plastic_blue")
     return m.finish("KeyCard")
+
+
+def make_card_chief():
+    """Tarjeta del JEFE de seguridad (2026-10-10): negra con marco dorado, estrella dorada y chip; algo mas grande y gruesa."""
+    m = Mesher("cardchief", {"plastic_black": (0.04, 0.04, 0.045), "gold": (0.85, 0.62, 0.15), "plastic_dark": (0.12, 0.12, 0.13), "chip": (0.8, 0.65, 0.3)})
+    m.box((0, 0, 0.0015), (0.094, 0.06, 0.003), "plastic_black", bevel=0.0012)
+    t = 0.0035
+    m.box((0, 0.0265, 0.0035), (0.088, t, 0.001), "gold"); m.box((0, -0.0265, 0.0035), (0.088, t, 0.001), "gold")   # marco dorado
+    m.box((0.0425, 0, 0.0035), (t, 0.056, 0.001), "gold"); m.box((-0.0425, 0, 0.0035), (t, 0.056, 0.001), "gold")
+    m.box((-0.016, 0.003, 0.0035), (0.022, 0.022, 0.001), "gold", rot=(0, 0, 45))          # estrella (rombo dorado)
+    m.box((-0.016, 0.003, 0.0037), (0.012, 0.012, 0.001), "plastic_dark", rot=(0, 0, 45))
+    m.box((0.024, -0.004, 0.0035), (0.016, 0.012, 0.001), "chip")                          # chip
+    m.box((0.0, -0.021, 0.0035), (0.07, 0.005, 0.001), "gold")                             # franja inferior
+    return m.finish("KeyCardChief")
 
 
 def make_fuse():
@@ -87,7 +105,10 @@ def make_fusebox():
 if __name__ == "__main__":
     out = sys.argv[sys.argv.index("--") + 1]
     os.makedirs(out, exist_ok=True)
-    for fn in (make_cutter, make_card, make_fuse, make_padlock_chain, make_reader, make_fusebox):
+    only = [a for a in sys.argv[sys.argv.index("--") + 2:]]                 # nombres de las funciones a generar (p. ej. make_card make_card_chief); vacio = todas
+    for fn in (make_cutter, make_card, make_card_chief, make_fuse, make_padlock_chain, make_reader, make_fusebox):
+        if only and fn.__name__ not in only:
+            continue
         _clear()
         obj = fn()
         d = obj.dimensions

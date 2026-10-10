@@ -13,7 +13,14 @@ namespace Horror
     public class Door : MonoBehaviour, IInteractable
     {
         public ItemData requiredKey;
+        [Tooltip("La llave con la que se abre (se rellena al empezar). Sirve para saber si un objeto clave ya esta usado por completo (KeyUsage)")]
+        public ItemData originalKey;
         public bool consumeKey = true;
+
+        /// <summary>Puertas activas: lo usa KeyUsage para saber si una llave sigue haciendo falta.</summary>
+        public static readonly System.Collections.Generic.List<Door> All = new System.Collections.Generic.List<Door>();
+        void OnEnable() { if (!All.Contains(this)) All.Add(this); }
+        void OnDisable() => All.Remove(this);
         [Tooltip("Segunda hoja de una puerta doble: se abre, cierra y desbloquea a la vez")]
         public Door partner;
         public float openAngle = 100f;
@@ -52,6 +59,7 @@ namespace Horror
         public void ApplySaved(bool unlocked, bool isOpen)
         {
             if (unlocked) requiredKey = null;
+            KeyUsage.Invalidate();
             if (isOpen) openSign = 1f;
             open = isOpen;
             moving = false;
@@ -61,6 +69,7 @@ namespace Horror
 
         void Awake()
         {
+            if (originalKey == null) originalKey = requiredKey;
             closedRot = transform.localRotation;
             obstacle = GetComponentInChildren<NavMeshObstacle>();
             leafColliders = GetComponentsInChildren<Collider>();
@@ -157,6 +166,7 @@ namespace Horror
                 if (consumeKey || (partner != null && partner.consumeKey)) inv.Remove(requiredKey);
                 requiredKey = null;
                 if (partner != null) partner.requiredKey = null;
+                KeyUsage.Invalidate();
                 Hud.Message("Desbloqueaste la puerta");
                 GameAudio.Play(Sfx.DoorUnlock, transform.position);
             }

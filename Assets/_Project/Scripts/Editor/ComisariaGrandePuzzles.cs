@@ -187,6 +187,25 @@ namespace Horror.EditorTools
             go.AddComponent<ReadableNote>().note = n;
         }
 
+        /// <summary>Crea la secuencia de camara de una marca de progreso: camino por el NavMesh desde 'fromName' hasta 'finalCam', mirando 'focus'.</summary>
+        static void Reveal(string flag, string fromName, Vector3 finalCam, Transform focus, Vector3 focusOffset)
+        {
+            var go = new GameObject("Secuencia_" + flag); go.transform.SetParent(root);
+            var cs = go.AddComponent<ProgressCutscene>(); cs.flag = flag; cs.focus = focus; cs.focusOffset = focusOffset;
+            var from = level.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == fromName);
+            var pts = new List<Vector3>();
+            if (from != null && NavMesh.SamplePosition(from.position, out var a, 3f, NavMesh.AllAreas) && NavMesh.SamplePosition(finalCam - Vector3.up * 1.7f, out var b, 3f, NavMesh.AllAreas))
+            {
+                var np = new NavMeshPath();
+                if (NavMesh.CalculatePath(a.position, b.position, NavMesh.AllAreas, np) && np.corners.Length > 1) foreach (var c in np.corners) pts.Add(c + Vector3.up * 1.7f);
+                else log.Add("sin camino de NavMesh para la secuencia " + flag + ": recorrido en linea recta");
+            }
+            if (pts.Count == 0 && from != null) pts.Add(from.position + Vector3.up * 1.7f);
+            pts.Add(finalCam);
+            cs.path = pts.ToArray();
+            EditorUtility.SetDirty(cs);
+        }
+
         /// <summary>Paso de un solo sentido: atrancada por un lado, se abre desde el que contiene 'freePoint' (y queda abierta).</summary>
         static void OneWay(string doorName, Vector3 freePoint, string message)
         {
@@ -199,7 +218,7 @@ namespace Horror.EditorTools
         static void Padlock(string doorName, ItemData cutter, float sideYaw, Vector3 offset)
         {
             var d = DoorNamed(doorName); if (d == null) { log.Add("falta puerta " + doorName); return; }
-            d.requiredKey = cutter; d.consumeKey = false; EditorUtility.SetDirty(d);
+            d.requiredKey = cutter; d.originalKey = cutter; d.consumeKey = false; EditorUtility.SetDirty(d);
             var center = d.GetComponentInChildren<Renderer>().bounds.center;
             // Cuelga de la bisagra (escala 1), NO de la hoja: la hoja tiene escala no uniforme (1,46 x 2,36 x 0,05) y SetParent conserva la
             // escala del mundo, asi que el candado salia estirado 29 veces y aplastado a 3 cm (un sliver de ~16 m: el "candado en el aire").
@@ -209,12 +228,26 @@ namespace Horror.EditorTools
             var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = chain; lv.dropOnUnlock = true;
         }
 
-        static void CardLock(string doorName, ItemData card, Vector3 readerPos, float yaw)
+        /// <summary>Texto 3D pequeno en la pared (rotulo del lector: "Requiere: ..."), de cara a quien se acerca.</summary>
+        static void WallLabel(string name, string text, Vector3 pos, float yaw, Color color)
+        {
+            var go = new GameObject(name); go.transform.SetParent(root); go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0f, yaw + 180f, 0f));
+            var tm = go.AddComponent<TextMesh>(); tm.text = text; tm.anchor = TextAnchor.MiddleCenter; tm.alignment = TextAlignment.Center;
+            tm.characterSize = 0.02f; tm.fontSize = 48; tm.color = color; tm.fontStyle = FontStyle.Bold;
+            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); if (font != null) { tm.font = font; go.GetComponent<MeshRenderer>().sharedMaterial = font.material; }
+        }
+
+        static void CardLock(string doorName, ItemData card, Vector3 readerPos, float yaw, Color accent, string requires)
         {
             var d = DoorNamed(doorName); if (d == null) { log.Add("falta puerta " + doorName); return; }
-            d.requiredKey = card; d.consumeKey = false; EditorUtility.SetDirty(d);
+            d.requiredKey = card; d.originalKey = card; d.consumeKey = false; EditorUtility.SetDirty(d);
             var reader = Model(Pz + "CardReader.fbx", root, readerPos, yaw, false); reader.name = "Lector_" + doorName;
             var fwd = Quaternion.Euler(0, yaw, 0) * Vector3.forward;
+            // franja de color del lector (azul = seguridad, dorada = jefe) y rotulo de lo que pide, bajo el lector
+            var band = GameObject.CreatePrimitive(PrimitiveType.Cube); band.name = "Franja"; Object.DestroyImmediate(band.GetComponent<Collider>());
+            band.transform.SetParent(reader.transform); band.transform.SetPositionAndRotation(readerPos + fwd * 0.027f + Vector3.up * 0.115f, Quaternion.Euler(0, yaw, 0)); band.transform.localScale = new Vector3(0.12f, 0.03f, 0.008f);
+            band.GetComponent<Renderer>().sharedMaterial = Call<Material>("Mat", "Franja_" + ColorUtility.ToHtmlStringRGB(accent), accent);
+            WallLabel("Rotulo_" + doorName, requires, readerPos + fwd * 0.03f + Vector3.down * 0.19f, yaw, Color.Lerp(accent, Color.white, 0.25f));
             var red = Led("Piloto_Rojo", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(1f, 0.1f, 0.05f));
             var green = Led("Piloto_Verde", reader.transform, readerPos + fwd * 0.03f + Vector3.up * 0.08f, new Color(0.2f, 1f, 0.3f));
             var lv = d.gameObject.AddComponent<LockVisual>(); lv.door = d; lv.lockedVisual = red; lv.unlockedVisual = green; lv.beepOnUnlock = true;
@@ -242,14 +275,14 @@ namespace Horror.EditorTools
             foreach (var ps in level.GetComponentsInChildren<ProgressSeal>(true)) Object.DestroyImmediate(ps);
             foreach (var ow in level.GetComponentsInChildren<OneWayDoor>(true)) Object.DestroyImmediate(ow);
             foreach (var t in level.GetComponentsInChildren<Transform>(true).Where(t => t != null && t.name == "Candado").ToList()) if (t != null) Object.DestroyImmediate(t.gameObject);
-            foreach (var d in level.GetComponentsInChildren<Door>(true)) { d.requiredKey = null; d.sealedPrompt = "Atrancada"; d.sealedMessage = "La puerta se ha atrancado"; }
+            foreach (var d in level.GetComponentsInChildren<Door>(true)) { d.requiredKey = null; d.originalKey = null; d.sealedPrompt = "Atrancada"; d.sealedMessage = "La puerta se ha atrancado"; }
             root = new GameObject("Puzles").transform; root.SetParent(level);
             ItemTextureKit.Apply();
 
             // ---- objetos
             var cutter = MakeItem("I_BoltCutter", "Cizalla", ItemType.Key, Color.white, "Cizalla de mangos largos. Corta los candados de las puertas.", "Con la cizalla puedes cortar los candados (vestibulo este, pasillo sur y la puerta trasera de los vestuarios).", Pz + "BoltCutter.fbx");
-            var cardSec = MakeItem("I_CardSecurity", "Tarjeta de seguridad", ItemType.Key, new Color(0.3f, 0.6f, 1f), "Tarjeta de acceso del personal de seguridad. Abre las puertas con lector.", "La tarjeta abre la puerta del pasillo de seguridad (al este del pasillo sur) y la de la escalera norte.", Pz + "KeyCard.fbx", 2.5f);
-            var cardChief = MakeItem("I_CardChief", "Tarjeta del jefe de seguridad", ItemType.Key, new Color(1f, 0.75f, 0.2f), "Tarjeta dorada del jefe de seguridad. Abre los calabozos.", "Con la tarjeta del jefe de seguridad se abren los calabozos (pasillo norte de la planta baja).", Pz + "KeyCard.fbx", 2.5f);
+            var cardSec = MakeItem("I_CardSecurity", "Tarjeta azul de seguridad", ItemType.Key, new Color(0.25f, 0.5f, 1f), "Tarjeta blanca con la banda azul del personal de seguridad. Abre los lectores con luz AZUL: la puerta del ingreso (al norte del atrio) y la de la escalera norte.", "La tarjeta azul abre la puerta del ingreso (al norte del atrio) y la de la escalera norte.", Pz + "KeyCard.fbx", 2.5f);
+            var cardChief = MakeItem("I_CardChief", "Tarjeta dorada del jefe", ItemType.Key, new Color(1f, 0.75f, 0.2f), "Tarjeta negra con marco y estrella dorados: la del jefe de seguridad. Abre el lector con luz DORADA: los calabozos, en el sotano, al fondo de la custodia.", "La tarjeta dorada del jefe abre los calabozos (sotano, al fondo de la custodia).", Pz + "KeyCardChief.fbx", 2.5f);
             var medalModel = "Assets/_Project/Art/Props/Memorial/MemorialMedallion.fbx";
             string medalObj = "Lleva los medallones al monumento del memorial (primera planta, donde sale la escalera de caracol).";
             var medals = new[] { "I", "II", "III" }.Select((n, i) => MakeItem("I_Medal" + "ABC"[i], "Medallon de bronce (" + n + ")", ItemType.Key, new Color(0.85f, 0.65f, 0.3f), "Medallon con la estrella de la policia. Encaja en uno de los huecos del monumento del memorial.", medalObj, medalModel)).ToArray();
@@ -298,9 +331,9 @@ namespace Horror.EditorTools
             Padlock("Puerta_Vestibulo_E", cutter, -90f, new Vector3(-0.08f, 0, 0));
             Padlock("Puerta_Pasillo_Candado", cutter, -90f, new Vector3(-0.08f, 0, 0));
             Padlock("Puerta_Callejon", cutter, 90f, new Vector3(0.08f, 0, 0));
-            CardLock("Puerta_Tarjeta", cardSec, new Vector3(-0.9f, G + 1.3f, 28.86f), 180f);          // atrio -> ingreso, en el lado del atrio
-            CardLock("Puerta_Escalera_Norte", cardSec, new Vector3(1.86f, G + 1.3f, 33.7f), -90f);    // ingreso -> escalera norte, en el lado del ingreso
-            CardLock("Puerta_Calabozos", cardChief, new Vector3(9.86f, B + 1.3f, 40.4f), -90f);       // custodia -> calabozos, en el lado de la custodia
+            CardLock("Puerta_Tarjeta", cardSec, new Vector3(-0.9f, G + 1.3f, 28.86f), 180f, new Color(0.25f, 0.5f, 1f), "TARJETA AZUL" + "\n" + "DE SEGURIDAD");          // atrio -> ingreso, en el lado del atrio
+            CardLock("Puerta_Escalera_Norte", cardSec, new Vector3(1.86f, G + 1.3f, 33.7f), -90f, new Color(0.25f, 0.5f, 1f), "TARJETA AZUL" + "\n" + "DE SEGURIDAD");    // ingreso -> escalera norte, en el lado del ingreso
+            CardLock("Puerta_Calabozos", cardChief, new Vector3(9.86f, B + 1.3f, 40.4f), -90f, new Color(1f, 0.75f, 0.2f), "TARJETA DORADA" + "\n" + "DEL JEFE");       // custodia -> calabozos, en el lado de la custodia
             var power = DoorNamed("Puerta_Sin_Corriente");
             if (power != null)
             {
@@ -325,10 +358,10 @@ namespace Horror.EditorTools
             Locker(new Vector3(-8.45f, F1, 25.6f), -90f, CodeLibrary, (medals[1], 1));                      // biblioteca
             Locker(new Vector3(19.55f, B, 16.0f), -90f, CodeLab, (fuses[1], 1));                            // laboratorio del sotano
             Locker(new Vector3(-31.55f, G, 31.0f), 90f, "", (bag, 1));                                      // vestuarios: rinonera
-            Locker(new Vector3(-31.55f, G, 32.3f), 90f, "", (hgAmmo, 12));
+            Locker(new Vector3(-31.55f, G, 32.3f), 90f, "", (hgAmmo, 8));
             Locker(new Vector3(19.55f, G, 15.6f), -90f, "", (spray, 1));                                    // seguridad
-            Locker(new Vector3(20.55f, G, 2.5f), -90f, "", (hgAmmo, 15));                                   // sala de agentes
-            Locker(new Vector3(31.55f, G, 15.2f), -90f, "", (hgAmmo, 8));                                   // descanso
+            Locker(new Vector3(20.55f, G, 2.5f), -90f, "", (hgAmmo, 10));                                   // sala de agentes
+            Locker(new Vector3(31.55f, G, 15.2f), -90f, "", (hgAmmo, 6));                                   // descanso
             Locker(new Vector3(-20.45f, F1, 25.6f), -90f, "", (sgAmmo, 4));                                 // despacho del jefe
             Locker(new Vector3(31.55f, B, 2.2f), -90f, "", (sgAmmo, 6));                                    // almacen del sotano
             Locker(new Vector3(31.55f, B, 7.2f), -90f, "", (bag, 1));                                       // almacen del sotano: 2a rinonera
@@ -453,6 +486,10 @@ namespace Horror.EditorTools
             foreach (var l in rt.disableDuringBake) if (l != null) l.SetActive(false);
             surface.BuildNavMesh();
             foreach (var l in rt.disableDuringBake) if (l != null) l.SetActive(true);
+
+            // ---- secuencias de revelado: la camara va del sitio donde se coloca la ultima pieza a lo que se abre (camino sacado del NavMesh recien horneado)
+            Reveal("memorial", "Memorial_Monumento", new Vector3(-8.5f, F1 + 1.8f, 31.2f), gate.transform, new Vector3(0f, 1.3f, 0f));
+            Reveal("corriente", "Cuadro_Fusibles", new Vector3(-7.5f, B + 1.8f, 27.75f), power != null ? power.transform : null, new Vector3(0f, 1.2f, 0f));
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             return "fase D: " + root.GetComponentsInChildren<Pickup>().Length + " objetos, " + root.GetComponentsInChildren<LockerDoor>().Length + " taquillas, " + level.GetComponentsInChildren<LockVisual>().Length + " cerraduras | " + string.Join(" | ", log);

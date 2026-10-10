@@ -30,6 +30,12 @@ namespace Horror
         float curDistance, curShoulder, curFov;
         Camera cam;
 
+        // Camara cinematica (ProgressCutscene): sustituye a la camara del jugador mientras dura y vuelve con un fundido de 0,5 s.
+        bool cinematic; Vector3 cinePos; Quaternion cineRot; float cineFov, blendT = 1f;
+        public bool Cinematic => cinematic;
+        public void SetCinematic(Vector3 pos, Quaternion rot, float fieldOfView) { cinematic = true; cinePos = pos; cineRot = rot; cineFov = fieldOfView; blendT = 1f; }
+        public void EndCinematic() { if (!cinematic) return; cinematic = false; blendT = 0f; }
+
         public float Yaw => yaw;
         /// <summary>Gira la camara (el giro rapido del jugador la mueve junto al personaje).</summary>
         public void AddYaw(float degrees) => yaw += degrees;
@@ -57,6 +63,7 @@ namespace Horror
         void LateUpdate()
         {
             if (target == null) return;
+            if (cinematic) { transform.SetPositionAndRotation(cinePos, cineRot); cam.fieldOfView = cineFov; return; }
 
             if (!GameState.InputBlocked && Mouse.current != null)
             {
@@ -90,7 +97,14 @@ namespace Horror
                 closest = Mathf.Min(closest, h.distance);
             }
 
-            transform.SetPositionAndRotation(pivot + dir / dist * closest, rot);
+            var finalPos = pivot + dir / dist * closest;
+            if (blendT < 1f)                                                          // vuelta de una secuencia: de donde estaba la camara cinematica a la del jugador
+            {
+                blendT = Mathf.Min(1f, blendT + Time.unscaledDeltaTime / 0.5f);
+                float k = Mathf.SmoothStep(0f, 1f, blendT);
+                finalPos = Vector3.Lerp(cinePos, finalPos, k); rot = Quaternion.Slerp(cineRot, rot, k);
+            }
+            transform.SetPositionAndRotation(finalPos, rot);
         }
     }
 }

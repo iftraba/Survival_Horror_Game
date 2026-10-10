@@ -189,6 +189,7 @@ namespace Horror
             var s = slots[index];
             var wc = GetComponent<WeaponController>();
             if (s.item.type == ItemType.Weapon && wc != null && wc.Equipped == s.item.weapon) { Hud.Message("Equipa otra arma antes de tirar la que llevas"); return; }
+            if (s.item.IsKey && !KeyUsage.IsSpent(s.item)) { Hud.Message(s.item.displayName + ": es un objeto clave, guardalo en un baul"); return; }
             slots[index] = default;
             Changed?.Invoke();
             // Tirar es desechar: el objeto desaparece del todo (antes salia lanzado al suelo y se acumulaba por el nivel)

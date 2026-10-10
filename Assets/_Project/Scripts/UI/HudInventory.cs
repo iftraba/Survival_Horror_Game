@@ -39,7 +39,9 @@ namespace Horror
         string[] MenuOptions(ItemData item)
         {
             string act = ActionFor(item);
-            return act != null ? new[] { act, "Examinar", "Tirar", "Salir" } : new[] { "Examinar", "Tirar", "Salir" };
+            bool canDrop = !item.IsKey || KeyUsage.IsSpent(item);           // un objeto clave solo se tira cuando ya esta usado por completo
+            if (act != null) return canDrop ? new[] { act, "Examinar", "Tirar", "Salir" } : new[] { act, "Examinar", "Salir" };
+            return canDrop ? new[] { "Examinar", "Tirar", "Salir" } : new[] { "Examinar", "Salir" };
         }
 
         void RunMenuOption(int idx, string option)
@@ -98,6 +100,7 @@ namespace Horror
             Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(0.01f, 0.015f, 0.02f, 0.5f));
             Fill(new Rect(Screen.width * 0.5f, 0, Screen.width * 0.5f, Screen.height), new Color(0.01f, 0.015f, 0.02f, 0.45f));
             if (!examining) DrawInvTabs();
+            if (mapTab) { CloseInventoryPanels(); DrawMap(); ItemPreview.Get().Show(null); return; }
             if (archiveTab) { CloseInventoryPanels(); DrawArchive(); ItemPreview.Get().Show(null); return; }
             if (inventory == null) return;
 
@@ -177,6 +180,7 @@ namespace Horror
                         GUI.Label(eq, "E", new GUIStyle(label) { fontSize = Mathf.RoundToInt(12 * u), fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter });
                         GUI.color = Color.white;
                     }
+                    if (s.item.IsKey && KeyUsage.IsSpent(s.item)) DrawRedCheck(new Rect(r.xMax - 31f * u, r.y + 4f * u, 27f * u, 27f * u));       // usado por completo: ya se puede tirar
                     int hk = s.item.type == ItemType.Weapon ? WeaponHotkeys.SlotOf(s.item) : -1;
                     if (hk >= 0)                                                                    // insignia con la tecla de atajo
                     {
@@ -256,7 +260,7 @@ namespace Horror
                 GUI.Label(new Rect(gx, iy + 36f * u, iw, 24f * u), sub, new GUIStyle(label) { fontSize = Mathf.RoundToInt(16 * u), fontStyle = FontStyle.Italic });
                 Fill(new Rect(gx, iy + 64f * u, iw, 1f), new Color(1f, 1f, 1f, 0.25f));
                 GUI.color = new Color(1f, 1f, 1f, 0.92f);
-                GUI.Label(new Rect(gx, iy + 74f * u, iw - 20f, 150f * u), selItem.description, new GUIStyle(label) { fontSize = Mathf.RoundToInt(19 * u), wordWrap = true });
+                GUI.Label(new Rect(gx, iy + 74f * u, iw - 20f, 150f * u), selItem.description + (selItem.IsKey ? "\n\n" + KeyUsage.Note(selItem) : ""), new GUIStyle(label) { fontSize = Mathf.RoundToInt(19 * u), wordWrap = true });
                 GUI.color = Color.white;
             }
             else

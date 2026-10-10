@@ -781,6 +781,7 @@ namespace Horror.EditorTools
 
             var pc = Object.FindFirstObjectByType<PlayerController>();
             if (pc != null) { pc.transform.SetPositionAndRotation(new Vector3(0f, G + 1.05f, 1.6f), Quaternion.identity); var cam = pc.cam; if (cam != null) cam.SetYaw(0f); }
+            ComisariaGrandeMapKit.Fill(level);                                    // plano para la pestana MAPA del inventario
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             return "comisaria grande: " + Rooms.Count + " espacios, " + segs.Count + " tramos de pared, " + Doors.Count + " puertas, " + lamps + " lamparas";

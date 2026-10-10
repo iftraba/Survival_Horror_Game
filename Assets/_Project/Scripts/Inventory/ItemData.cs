@@ -15,6 +15,9 @@ namespace Horror
         public Color tint = Color.white;
         [Min(1)] public int maxStack = 1;
 
+        /// <summary>Objeto clave de un puzle (llaves, tarjetas, cizalla, medallones, fusibles): no se puede tirar hasta que este usado por completo.</summary>
+        public bool IsKey => type == ItemType.Key;
+
         [Header("En el mundo")]
         [Tooltip("Modelo que se ve en el suelo")] public GameObject worldPrefab;
         public float worldScale = 1f;

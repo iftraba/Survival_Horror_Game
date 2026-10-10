@@ -73,3 +73,15 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - Nunca compilar ni editar scripts con Unity en Play; no ofrecer recompilar la build.
 - Play desde `execute_code`: `EditorApplication.isPlaying = true`; avanzar con `EditorApplication.Step()` desde un callback; saltar la intro con el campo `skip` de `IntroCutscene`; para el NavMesh apagar los `NavMeshObstacle` tras ~15 fotogramas y medir a ~40; jugador a `suelo + 1,05`; cámara con `yaw`/`pitch` de `ThirdPersonCamera`.
 - Orden de menús tras cambiar la planta: 1 → 2 → 3 → 4 → 5 → 6 (el 7 no hasta la etapa F).
+
+## 8. Tras la primera partida completa (2026-10-10, fases 1 a 3 del plan `feedback-primera-partida-completa.md`)
+- [ ] [JUGAR] Jefe 1: ¿rompe las estanterías al embestir y se va abriendo la arena? (`PropBreaker` ya acepta `Mobiliario`; solo probado con una esfera, no en combate). ¿Sigue sin despertar con disparos de la planta de abajo?
+- [ ] [JUGAR] Zombis dormidos (9 al azar, el Cop y el reptante del garaje): ¿despiertan bien al acercarte? ¿Los carroñeros (3) comen junto a su cadáver y, al dispararles, se levantan normales?
+- [ ] [JUGAR] Secuencia de la reja (vista en Play) y de la puerta de las calderas (sin ver): ¿ritmo?, ¿se puede saltar?, ¿no molesta con zombis cerca?
+- [ ] [JUGAR] Munición al principio: ¿alcanza hasta abrir el garaje y el vestíbulo este? ¿Sobra menos en la segunda mitad?
+- [ ] [JUGAR] Objetos clave: tirar bloqueado, check rojo en el inventario y el baúl, desaparecen al tirarlos una vez usados; las tarjetas se distinguen en el suelo y en los lectores.
+- [ ] [JUGAR] Mapa (M): niebla, flechas, guardado y carga (las salas visitadas se guardan en `SaveData.mapRooms`; sin ejecutar).
+- [ ] [JUGAR] Sillas empujables: ¿se mueven bien?, ¿se atascan en puertas o escaleras?, ¿pesan en rendimiento (104 cuerpos rígidos, sin medir)?
+- [ ] [JUGAR] Nuevos puntos de guardado (ingreso y memorial) y la antesala del archivo: ¿se encuentran, sin muebles que los tapen?
+- [ ] [PC] Patrullas nuevas de cerca, tarjetas 3D en el suelo y lectores con franja y rótulo desde varios ángulos.
+- [ ] [PC] Estilo de las notas en las 8 notas (solo vista la del jefe de seguridad) y que ninguna se corta en la hoja.

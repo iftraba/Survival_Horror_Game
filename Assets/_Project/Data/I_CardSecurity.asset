@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fec1bc90f18f4e54caa80a75be7d65ee, type: 3}
   m_Name: I_CardSecurity
   m_EditorClassIdentifier: Assembly-CSharp::Horror.ItemData
-  displayName: Tarjeta de seguridad
-  description: Tarjeta de acceso del personal de seguridad. Abre las puertas con lector.
+  displayName: Tarjeta azul de seguridad
+  description: 'Tarjeta blanca con la banda azul del personal de seguridad. Abre los lectores con luz AZUL: la puerta del ingreso (al norte del atrio) y la de la escalera norte.'
   type: 3
   icon: {fileID: 1579947497477030661, guid: 1e75b8699865c944cb468c3520a96588, type: 3}
-  tint: {r: 0.3, g: 0.6, b: 1, a: 1}
+  tint: {r: 0.25, g: 0.5, b: 1, a: 1}
   maxStack: 1
   worldPrefab: {fileID: 919132149155446097, guid: 73d4f39b880a6744da9edb9eb5f7129d, type: 3}
   worldScale: 2.5
   mass: 0.5
   highlight: 1
-  pickupObjective: La tarjeta abre la puerta del pasillo de seguridad (al este del pasillo sur) y la de la escalera norte.
+  pickupObjective: La tarjeta azul abre la puerta del ingreso (al norte del atrio) y la de la escalera norte.
   extraSlots: 2
   healAmount: 50
   weapon: {fileID: 0}

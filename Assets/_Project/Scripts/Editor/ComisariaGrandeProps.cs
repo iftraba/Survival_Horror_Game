@@ -45,6 +45,16 @@ namespace Horror.EditorTools
             if (collider) Pickup.FitBoxCollider(holder);
             if (tint) { float v = Rn(0.8f, 1.05f); holder.AddComponent<PropVariant>().tint = new Color(v * Rn(0.96f, 1.03f), v, v * Rn(0.96f, 1.03f)); }
             foreach (var t in holder.GetComponentsInChildren<Transform>()) t.gameObject.isStatic = true;
+            // las sillas se empujan al andar (PlayerController.OnControllerColliderHit): cuerpo rigido ligero y no estatico (las butacas del auditorio, fijas)
+            string chairName = holder.name;
+            if (chairName == "Chair" || chairName == "SwivelChair" || chairName == "ExecutiveChair")
+            {
+                foreach (var t in holder.GetComponentsInChildren<Transform>()) t.gameObject.isStatic = false;
+                var rb = holder.AddComponent<Rigidbody>();
+                rb.mass = 5f; rb.linearDamping = 4f; rb.angularDamping = 6f;
+                rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+                rb.collisionDetectionMode = CollisionDetectionMode.Discrete; rb.interpolation = RigidbodyInterpolation.None;
+            }
             // las estanterias son porosas (se ve lo que hay entre las baldas): no tapan nada en el occlusion culling, si no se pierden las cajas de dentro
             string nm = holder.name;
             if (nm.Contains("Shelf") || nm.Contains("Rack") || nm.Contains("Bookcase") || nm.Contains("Cabinet"))
@@ -358,9 +368,11 @@ namespace Horror.EditorTools
                     }
                     break;
                 case "garage":
-                    // aparcamiento: 5 patrullas (las quemadas, que no llegaron a salir) en dos filas, con un carril libre entre ellas y desde la persiana; taller al norte
+                    // aparcamiento: 5 patrullas en dos filas, con un carril libre entre ellas y desde la persiana; taller al norte
+                    // 5 patrullas: cuatro intactas (las que no llegaron a salir) y una quemada; su eje largo es Z a yaw 0
+                    int carIdx = 0;
                     foreach (var (px, pz, pyaw) in new[] { (-12.5f, 8.5f, 4f), (-19.5f, 8.5f, -3f), (-26.5f, 8.5f, 5f), (-12.5f, 18.0f, 176f), (-19.5f, 18.0f, 183f) })
-                        At(r, E + "PoliceCar.fbx", px, pz, pyaw, new Vector2(2.4f, 1.1f), keep, used);
+                        At(r, E + (carIdx++ == 2 ? "PoliceCar.fbx" : "PoliceCarClean.fbx"), px, pz, pyaw, new Vector2(1.15f, 2.55f), keep, used);
                     AlongWall(r, 'N', new[] { Bm + "Workbench.fbx", S + "TireStack.fbx", Bm + "MetalRack.fbx" }, 2.4f, 0.9f, 0.6f, keep, used, 0.9);
                     AlongWall(r, 'W', new[] { Bm + "MetalRack.fbx", P + "Barrel.fbx" }, 1.5f, 0.8f, 1.2f, keep, used, 0.7);
                     AlongWall(r, 'S', new[] { S + "TireStack.fbx", P + "Barrel.fbx" }, 1.2f, 0.8f, 1.5f, keep, used, 0.6);
@@ -759,6 +771,12 @@ namespace Horror.EditorTools
                 int before = count;
                 try { Furnish(r); } catch (Exception e) { log.Add(r.id + ": " + e.Message); }
             }
+            // las sillas (cuerpos rigidos) se asientan aqui, en el editor: si se asentaran al empezar la partida se apartarian de las mesas donde estan metidas
+            // y se llevarian por delante lo que haya encima (una tarjeta colocada en una mesa acabo en el suelo)
+            Physics.SyncTransforms();
+            var oldSim = Physics.simulationMode; Physics.simulationMode = SimulationMode.Script;
+            for (int i = 0; i < 150; i++) Physics.Simulate(0.02f);
+            Physics.simulationMode = oldSim;
             var surface = rootGo.GetComponent<NavMeshSurface>(); var rt = rootGo.GetComponent<RuntimeNavMesh>();
             Physics.SyncTransforms();
             foreach (var l in rt.disableDuringBake) if (l != null) l.SetActive(false);
