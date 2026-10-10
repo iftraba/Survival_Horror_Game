@@ -14,7 +14,8 @@ namespace Horror
         [Tooltip("Barrotes que suben al abrir")] public Transform bars;
         public float liftHeight = 2.5f;
         [Tooltip("Si no es cero, la reja se desliza este desplazamiento local (hacia la pared) en vez de subir; al llegar queda oculta dentro de ella")] public Vector3 slideOffset;
-        public float liftTime = 3.6f;
+        [Tooltip("Oculta la reja al terminar de abrirse (solo si se mete dentro de una pared)")] public bool hideWhenOpen;
+        public float liftTime = 3.0f;
         [TextArea] public string lockedMessage = "Una reja de seguridad cierra la escalera. Tiene una placa: \"Acceso al archivo. Se abre desde el memorial.\"";
 
         Vector3 closedPos;
@@ -64,7 +65,7 @@ namespace Horror
         {
             t = open ? 1f : -1f;
             bars.localPosition = closedPos + (open ? OpenOffset : Vector3.zero);
-            if (slideOffset != Vector3.zero) foreach (var r in bars.GetComponentsInChildren<Renderer>(true)) r.enabled = !open;      // metida en la pared: no debe asomar por el otro lado
+            if (slideOffset != Vector3.zero && hideWhenOpen) foreach (var r in bars.GetComponentsInChildren<Renderer>(true)) r.enabled = !open;      // metida en la pared: no debe asomar por el otro lado
             foreach (var c in cols) if (c != null && !(c.isTrigger)) c.enabled = !open;
             if (obstacle != null) obstacle.enabled = !open;
         }
