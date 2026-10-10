@@ -1,7 +1,7 @@
 # Plan: esquema de la nueva planta de la comisaría (etapa B)
 
 - **Fecha:** 2026-10-10
-- **Estado:** Borrador revisado (2026-10-10, 2.ª versión: garaje y calabozos al sótano), **pendiente de que el usuario apruebe el esquema** antes de construir nada
+- **Estado:** Borrador, 3.ª versión (2026-10-10): planos redibujados tras el análisis de coherencia, **pendiente de que el usuario apruebe el esquema** antes de construir nada
 - **Autor:** Claude (Sonnet), con un agente de diseño; parte de `docs/planes/fase-f-parte-2-rediseno-planta.md`
 - **Rama:** rediseno-comisaria
 
@@ -68,11 +68,12 @@ Antesala del archivo (pasa a **sala segura**), archivo, caseta y azotea sin camb
 | B_Mach | Máquinas y taller | 10,0,24,10 | |
 | B_Store | Almacén | 24,0,32,10 | Fusible A |
 | B_Gal | Galería de servicio (tuberías vistas) | −8,10,32,14 | Antes sala de «tuberías»: aquí cae el fusible C |
-| B_Safe | Segura | −8,14,0,26 | Terminal y baúl |
-| B_Hub | Nudo del ascensor | 0,14,8,26.5 | Hueco x 5..8, z 23..26.5 |
+| B_Safe | Segura | −8,14,0,26 | Terminal y baúl. **Una sola puerta (al nudo)**: es un rincón, no un cruce |
+| B_Hub | Nudo del ascensor | 0,14,8,26 | Hueco x 5..8, z 23..26,5 (sobresale 0,5 m en la galería norte) |
 | B_Lab | Laboratorio | 8,14,20,26 | Fusible B en la taquilla 7258 |
 | B_Fuse | Cuadro eléctrico | 20,14,32,26 | |
-| B_CN | Galería norte | −32,26,32,29 | `Puerta_Sin_Corriente` en (−12, 27,5) |
+| B_CN | Galería norte | −12,26,32,29 | Puerta al nudo en (2,5; 26); `Puerta_Control` en (−5, 29) |
+| B_CalPas | Pasillo de calderas | −32,26,−12,29 | Separado de la galería norte por `Puerta_Sin_Corriente` en (−12; 27,5); `Puerta_Calderas` (metálica) en (−22, 29) |
 | B_Control | Control | −12,29,2,44 | |
 | B_Boiler | Calderas (hundida 2 m) | −32,29,−12,44 | **Sin cambios** (`Puerta_Calderas` en −22,29; escalera de calderas; jefe 2; portón) |
 | Fuera | Rampa y explanada | −42..−37 × 12..44 y −42..−32 × 4..12 | Excavación en el callejón |
@@ -126,3 +127,15 @@ Rampa por el callejón oeste; dos escaleras y zona garaje + calabozos separada d
 
 ## Resultado
 Pendiente de aprobación.
+
+
+## Versión 3 (2026-10-10): corrección tras el análisis de coherencia
+El análisis de los tres dibujos (leídos con un script sobre los SVG) encontró que **no eran coherentes**: garaje y calabozos aparecían en la planta baja y en el sótano; en el sótano el garaje tenía dos puertas libres al lado industrial (Galería de servicio y Segura) y la Custodia se unía por una puerta con tarjeta a la Galería norte, de modo que el sótano era un único componente y se llegaba a calderas sin ascensor; la Segura del sótano era un cruce de tres puertas; y escaleras, rampa, ascensor, puerta enrollable y puerta sin corriente no estaban representados. Cambios aplicados a los dibujos (cambios 1 a 4 del análisis):
+1. **Planos sincronizados.** Planta baja con *Radio y despachos* y *Interrogatorios y observación*; primera planta con *Oficinas y archivo auxiliar* en lugar de interrogatorios.
+2. **Sótano separado.** Quitadas las puertas Garaje–Galería de servicio, Garaje–Segura y Custodia–Galería norte. El garaje solo tiene: la puerta enrollable al exterior (cerrada), el paso de un solo sentido a Bombas y la escalera desde la sala de espera. La Custodia solo tiene la escalera desde el hall de ingreso y la puerta a los calabozos.
+3. **Elementos representados.** Escalera al garaje (sala de espera), escalera norte con dos tramos (sube a la primera planta y baja a la custodia), escalera norte también en la primera planta, ascensor con su puerta en las tres plantas, puerta enrollable cerrada, `Puerta_Sin_Corriente` entre la Galería norte y un Pasillo de calderas propio, y puerta metálica de Calderas.
+4. **Segura del sótano como rincón:** una sola puerta, al nudo del ascensor. El nudo se une a la Galería norte con una puerta propia.
+
+**Comprobación sobre los dibujos nuevos** (script, solo puertas dibujadas; no cuenta las escaleras ni el ascensor): sin contar la puerta de un solo sentido ni la enrollable, el sótano queda en cuatro zonas: *Garaje* (aislado), *Custodia + Calabozos*, la *zona industrial* conectada (nudo, galerías, Segura, Laboratorio, Cuadro, Control, Calderas…) y el ascensor. Con la puerta de un solo sentido (tras el jefe 1) el garaje se une a la zona industrial. La Segura tiene grado 1. **No comprobado:** que las escaleras de los tres niveles coinciden en planta (se dibujaron con las mismas coordenadas), y de qué lado se abre cada puerta de un solo sentido.
+
+**Sigue sin decidir (ver el análisis):** si el caracol deja la primera planta libre desde el inicio; la función real de Sindicato, Biblioteca, Laboratorio, Control y Comedor; aseos junto al lado público; vestuarios cerca de agentes; y dos lectores y dos candados que protegen la misma zona.
