@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: d82b9b53bd834ca44b0f2db38c5f96f8
   - enabled: 1
-    path: Assets/Scenes/Comisaria.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Scenes/Comisaria_v2.unity
+    guid: ac8e083923948d04d8358a8137c2217e
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

@@ -67,8 +67,10 @@ namespace Horror
                 if (GUI.Button(new Rect(x, y, w, h), "Opciones")) options = true;
                 y += h + gap;
                 if (GUI.Button(new Rect(x, y, w, h), "Salir")) Quit();
-                GUI.Label(new Rect(x, sh - 70, 500, 24), "WASD mover - Mayus correr - Clic dcho apuntar - Clic izq disparar", small);
-                GUI.Label(new Rect(x, sh - 46, 500, 24), "E interactuar - R recargar - Q girar - 1-4 armas - Tab inventario - Esc pausa", small);
+                // controles: una linea por grupo y ancho dentro del panel (antes dos lineas largas se partian y se pisaban)
+                string[] controls = { "WASD  mover        Mayus  correr", "Clic dcho  apuntar        Clic izq  disparar", "E  interactuar        R  recargar", "Q  girar        1-4  armas", "Tab  inventario        Esc  pausa" };
+                float cy = sh - 24f - controls.Length * 26f;
+                foreach (var line in controls) { GUI.Label(new Rect(x, cy, 480, 26), line, small); cy += 26f; }
             }
             else
             {
