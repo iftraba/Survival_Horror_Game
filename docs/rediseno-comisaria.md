@@ -426,3 +426,34 @@ Tras probar la build, el usuario rechazó el diseño: pasillos estrechos y sin c
 - **Etapa A (hecha, ver `docs/interaction.md` y `docs/enemies.md`):** zombis descartados fuera, candado corregido y con animación de corte, brillo en los objetos clave, `WallDressingKit` apuntando a la raíz de la comisaría grande (sin ejecutarlo todavía).
 - **Etapa B (siguiente):** esquema de la nueva planta para que el usuario lo apruebe **antes de construir**. Etapas C a G: estructura, salas con carácter, puzles/zombis/botín por anclas, luz y verificación.
 - Observado de paso: el pasillo sur de la planta baja y el garaje se ven muy oscuros en Play (una sola lámpara de 28 por sala de 12×12), lo que confirma la queja de la luz.
+
+## Fase F, parte 2, etapa C.1: estructura de la planta v3 (2026-10-10)
+`ComisariaGrande.Define()` rehecho con el esquema aprobado (`docs/planes/rediseno-planta.md`, versión 3): 62 espacios con propósito (antes ~70), atrio de doble altura, galería con balaustrada en la primera planta, **garaje (24×26,5 m) y calabozos (22×15 m) en el sótano**, custodia, radio y despachos, interrogatorios y observación. Construido con el menú 1 y el exterior con el menú 2.
+
+**Nuevo en `ComisariaGrande.cs`:**
+- `DoorKind.Roll`: persiana enrollable cerrada y fija (lamas y cajón) en `Puerta_Garaje_Rampa` (−32, 2, ancho 4).
+- `GarageRamp()`: rampa de coches por el callejón oeste, dentro de la verja (x −41,5..−37,2): calzada inclinada de z 44 (y 0) a z 5,5 (y −4,5), ≈11,7 % de pendiente, muros de contención de 0,9 m a ambos lados, y una explanada plana a −4,5 m (x −41,5..−32, z 0..5,5) junto a la persiana. El callejón (`G_Alley`) pasa de 8 a 5 m (x −37..−32).
+- `StraightStairX`: escalera recta a lo largo de X. La usa `EscaleraGaraje` (sala de espera → garaje, x −14,5..−23, pegada a la pared sur, baja hacia el oeste, con barandilla a ras de suelo).
+- `EscaleraCustodia`: segundo tramo de la escalera norte, que baja de z 32 a z 40 (x 7..9) a la custodia.
+- `GalleryRails()`: balaustrada de la galería alrededor del hueco `GalleryHole`.
+- Huecos de losa nuevos (`GalleryHole`, `GarageStairHole`, `CustodyStairHole`) y dos retoques de las losas: los techos del sótano se abren bajo un hueco de la planta baja (tolerancia 0,9 → 1,05 m) y las paredes del sótano llegan a −0,25 m para tocar las de la planta baja.
+- Exterior: el patio oeste ya no cubre la explanada ni la rampa, y cajas y barriles del callejón se reubican.
+
+**Desviaciones del esquema dibujado (hechas a propósito):**
+- El hueco de la galería está en x −1..5 (se dibujó en −5..1): el dibujado habría abierto el techo de los aseos.
+- La puerta de interrogatorios está en (10, 42) y no en (10, 35): el tramo que baja a la custodia deja solo ~0,9 m junto a la pared este, menos de lo que cabe un agente de NavMesh.
+- Galería norte y pasillo de calderas miden 2,5 m (z 26,5..29), como el diseño anterior, no 4 m.
+- El nudo del ascensor se parte en dos piezas del mismo grupo para dejar sitio al hueco del ascensor.
+
+**Comprobado (Play, NavMesh con los obstáculos de puerta apagados; capturas):**
+- Con todas las puertas abiertas se llega desde el vestíbulo a las 62 salas (garaje, custodia, calabozos, callejón, azotea, caseta).
+- Con el paso de un sentido (`Puerta_Garaje_Bombas`) cerrado, las únicas 13 salas inalcanzables son las industriales (bombas, máquinas, almacén, galería, segura, nudo, laboratorio, cuadro, galerías norte, pasillo de calderas, calderas, control). Desde el nudo del ascensor se llega a esas 13 y a nada más.
+- Rampa: la superficie coincide con la teórica en 8 puntos (±0,01 m); hay camino de NavMesh de 41 m desde la entrada de la rampa hasta la explanada; la persiana corta el paso en x −32,06.
+- Capturas en Play: rampa, persiana desde la explanada, atrio con la balaustrada de la galería arriba y la escalera al garaje.
+
+**El nivel está a medias (a propósito, hasta las etapas D-F):**
+- **No hay mobiliario, puzles, objetos, zombis ni botín**: el menú 1 rehace todo el nivel y borra lo que colgaba de él.
+- **No ejecutar los menús 3 a 7**: usan coordenadas y ids de salas antiguos (`G_Garage`, `G_Cells`, `G_C1W`…, puertas con coordenadas fijas) y darían resultados incoherentes hasta que se adapten (etapas D y E).
+- Sin comprobar: recorrer las escaleras andando con el jugador (solo NavMesh y capturas); la puerta de un sentido sigue siendo una puerta normal (`OneWayDoor` va en la etapa E).
+- Pendiente de exterior: iluminación de la rampa y la explanada (oscuras), y la puerta de coches de la verja norte por donde entrarían los vehículos.
+- Las lámparas (110) siguen con la regla antigua: etapa F.

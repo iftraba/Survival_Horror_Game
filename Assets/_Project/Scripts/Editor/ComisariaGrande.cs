@@ -36,7 +36,7 @@ namespace Horror.EditorTools
             public Color light = new Color(1f, 0.93f, 0.82f);
             public bool Indoor => kind == Kind.Room || kind == Kind.Corridor;
         }
-        public enum DoorKind { Wood, Double, Opening, Padlock, Card, ChiefCard, Power, Metal, Fixed }
+        public enum DoorKind { Wood, Double, Opening, Padlock, Card, ChiefCard, Power, Metal, Fixed, Roll }
         public class DoorDef { public string name; public Vector2 p; public DoorKind kind; public float width = 1.6f; public float floor; }
 
         public static readonly List<Room> Rooms = new List<Room>();
@@ -48,6 +48,12 @@ namespace Horror.EditorTools
         public const float SpiralR = 2.2f;
         public static Rect SpiralHole => new Rect(SpiralC.x - 2.5f, SpiralC.z - 2.5f, 5f, 5f);
         public static readonly Rect Shaft = Rect.MinMaxRect(5f, 23f, 8f, 26.5f);
+        /// <summary>Hueco de doble altura de la galeria de la primera planta sobre el atrio (x -1..5, z 14,5..24,5).</summary>
+        public static readonly Rect GalleryHole = Rect.MinMaxRect(-1f, 14.5f, 5f, 24.5f);
+        /// <summary>Escalera de la sala de espera al garaje (a lo largo de X, pegada a la pared sur; baja hacia el oeste).</summary>
+        public static readonly Rect GarageStairHole = Rect.MinMaxRect(-23f, 0.2f, -14.5f, 2.2f);
+        /// <summary>Tramo de la escalera norte que baja del hall de ingreso a la custodia (entra por el sur, baja hacia el norte).</summary>
+        public static readonly Rect CustodyStairHole = Rect.MinMaxRect(7f, 32f, 9f, 40f);
 
         static Room R(string id, string label, string type, float x0, float z0, float x1, float z1, float floor, float ceil, Kind k = Kind.Room, string group = null)
         {
@@ -63,52 +69,87 @@ namespace Horror.EditorTools
         {
             Rooms.Clear(); Doors.Clear(); SlabHoles.Clear();
             float gC = 3.5f, fC = 7.0f, bC = -1.0f;
+            // Version 3 del esquema (docs/planes/rediseno-planta.md, 2026-10-10): garaje y calabozos en el sotano, atrio de doble altura,
+            // galeria sobre el atrio, halls en lugar de pasillos de 2,5 m. Las salas del mismo 'group' no llevan pared entre si.
+
+            // ===== SOTANO (y -4,5): garaje y calabozos aparte de la zona industrial =====
+            R("B_Garage", "Garaje", "garage", -32, 0, -8, 26.5f, B, bC);
+            R("B_Pump", "Bombas y depositos", "pumps", -8, 0, 10, 10, B, bC);
+            R("B_Mach", "Maquinas y taller", "machines", 10, 0, 24, 10, B, bC);
+            R("B_Store", "Almacen del sotano", "storage", 24, 0, 32, 10, B, bC);
+            R("B_Gal", "Galeria de servicio", "corridor", -8, 10, 32, 14, B, bC, Kind.Corridor);
+            R("B_Safe", "Sala segura del sotano", "safe", -8, 14, 0, 26.5f, B, bC).light = new Color(1f, 0.82f, 0.6f);
+            R("B_Hub", "Nudo del ascensor", "elevator", 0, 14, 8, 23, B, bC, Kind.Room, "B_Hub");
+            R("B_HubB", "Nudo del ascensor", "elevator", 0, 23, 5, 26.5f, B, bC, Kind.Room, "B_Hub");
+            R("B_Shaft", "Ascensor", "shaft", Shaft.xMin, Shaft.yMin, Shaft.xMax, Shaft.yMax, B, bC, Kind.Shaft);
+            R("B_Lab", "Laboratorio", "lab", 8, 14, 20, 26.5f, B, bC);
+            R("B_Fuse", "Cuadro electrico", "fuse", 20, 14, 32, 26.5f, B, bC);
+            R("B_CN", "Galeria norte", "corridor", -12, 26.5f, 32, 29, B, bC, Kind.Corridor);
+            R("B_CW", "Pasillo de las calderas", "corridor", -32, 26.5f, -12, 29, B, bC, Kind.Corridor);
+            R("B_Boiler", "Sala de calderas", "boiler", -32, 29, -12, 44, -6.5f, bC).light = new Color(1f, 0.55f, 0.4f);
+            R("B_Control", "Sala de control", "control", -12, 29, 2, 44, B, bC);
+            R("B_Custody", "Custodia", "custody", 2, 29, 10, 44, B, bC);
+            R("B_Cells", "Calabozos", "cells", 10, 29, 32, 44, B, bC);
+
+            D("Puerta_Garaje_Rampa", -32, 2, B, DoorKind.Roll, 4f);              // puerta enrollable: cerrada, da a la explanada de la rampa
+            D("Puerta_Garaje_Bombas", -8, 5, B);                                 // paso de un solo sentido (OneWayDoor en la etapa E): se abre desde las bombas
+            D("Puerta_SeguraS", 0, 20, B);
+            D("Puerta_AscensorS", 4, 14, B);
+            D("Puerta_Hub_Norte", 2.5f, 26.5f, B);
+            D("Puerta_Laboratorio", 14, 14, B);
+            D("Puerta_Cuadro", 26, 14, B);
+            D("Puerta_Bombas", 1, 10, B, DoorKind.Wood, 2f);
+            D("Puerta_Maquinas", 17, 10, B);
+            D("Puerta_AlmacenS", 28, 10, B);
+            D("Puerta_Control", -5, 29, B);
+            D("Puerta_Sin_Corriente", -12, 27.75f, B, DoorKind.Power);
+            D("Puerta_Calderas", -22, 29, B, DoorKind.Metal);
+            D("Puerta_Calabozos", 10, 36, B, DoorKind.ChiefCard);
+            D("Ascensor_Sotano", Shaft.xMin, 24.75f, B, DoorKind.Fixed, 1.4f);
 
             // ===== PLANTA BAJA (y 0) =====
-            R("G_Safe", "Sala segura", "safe", -32, 0, -26, 12, G, gC).light = new Color(1f, 0.82f, 0.6f);
-            R("G_Wait", "Sala de espera", "waiting", -26, 0, -8, 12, G, gC);
+            R("G_Safe", "Sala segura", "safe", -32, 0, -25, 12, G, gC).light = new Color(1f, 0.82f, 0.6f);
+            R("G_Wait", "Espera y atencion", "waiting", -25, 0, -8, 12, G, gC);
             R("G_Lobby", "Vestibulo", "lobby", -8, 0, 8, 12, G, gC);
-            R("G_OffE", "Oficina de recepcion", "office", 8, 0, 20, 12, G, gC);
-            R("G_Armory", "Armeria", "armory", 20, 0, 32, 12, G, gC);
-            R("G_C1W", "Pasillo sur", "corridor", -32, 12, 8, 14.5f, G, gC, Kind.Corridor);
-            R("G_C1E", "Pasillo sur (este)", "corridor", 8, 12, 32, 14.5f, G, gC, Kind.Corridor);
-            R("G_Garage", "Garaje", "garage", -32, 14.5f, -20, 26.5f, G, gC);
-            R("G_Dark", "Sala de pruebas", "darkroom", -20, 14.5f, -8, 26.5f, G, gC);
-            R("G_WC", "Aseos", "restroom", -8, 14.5f, 0, 26.5f, G, gC);
-            R("G_Elev", "Vestibulo del ascensor", "elevator", 0, 14.5f, 5, 26.5f, G, gC, Kind.Room, "G_Elev");
-            R("G_ElevB", "Vestibulo del ascensor", "elevator", 5, 14.5f, 8, 23, G, gC, Kind.Room, "G_Elev");
+            R("G_Brief", "Sala de agentes", "office", 8, 0, 21, 12, G, gC);
+            R("G_Armory", "Armeria", "armory", 21, 0, 32, 12, G, gC);
+            R("G_Radio", "Radio y despachos", "radio", -32, 12, -18, 29, G, gC);
+            R("G_Dark", "Sala de pruebas", "darkroom", -18, 12, -8, 29, G, gC);
+            R("G_WC", "Aseos", "restroom", -8, 12, -2, 19, G, gC);
+            // atrio central de doble altura (hueco de la galeria en la primera planta): varias piezas del mismo grupo alrededor del aseo y del ascensor
+            R("G_Atrio1", "Atrio central", "atrium", -2, 12, 8, 19, G, gC, Kind.Room, "G_Atrio");
+            R("G_Atrio2", "Atrio central", "atrium", -8, 19, 5, 29, G, gC, Kind.Room, "G_Atrio");
+            R("G_Atrio3", "Atrio central", "atrium", 5, 19, 8, 23, G, gC, Kind.Room, "G_Atrio");
+            R("G_Atrio4", "Atrio central", "atrium", 5, 26.5f, 8, 29, G, gC, Kind.Room, "G_Atrio");
             R("G_Shaft", "Ascensor", "shaft", Shaft.xMin, Shaft.yMin, Shaft.xMax, Shaft.yMax, G, gC, Kind.Shaft);
-            R("G_Sec", "Oficina de seguridad", "security", 8, 14.5f, 20, 26.5f, G, gC);
-            R("G_Break", "Sala de descanso", "breakroom", 20, 14.5f, 29.5f, 26.5f, G, gC);
-            R("G_CE", "Pasillo de seguridad", "corridor", 29.5f, 14.5f, 32, 26.5f, G, gC, Kind.Corridor, "G_C2");
-            R("G_C2", "Pasillo norte", "corridor", -32, 26.5f, 32, 29, G, gC, Kind.Corridor, "G_C2");
-            R("G_Lock", "Vestuarios", "lockers", -32, 29, -18, 44, G, gC);
-            R("G_Cells", "Calabozos", "cells", -18, 29, 4, 44, G, gC);
-            R("G_Stair2", "Escalera de servicio norte", "stairwell", 4, 29, 10, 44, G, gC);
-            R("G_Store", "Almacen", "storage", 10, 29, 22, 44, G, gC);
-            R("G_Work", "Taller", "workshop", 22, 29, 32, 44, G, gC);
-            R("G_Alley", "Callejon", "alley", -40, 8, -32, 44, G, 0f, Kind.Outdoor);
+            R("G_Sec", "Oficina de seguridad", "security", 8, 12, 20, 29, G, gC);
+            R("G_Break", "Sala de descanso", "breakroom", 20, 12, 32, 29, G, gC);
+            R("G_Lock", "Vestuarios", "lockers", -32, 29, -20, 44, G, gC);
+            R("G_Work", "Taller y almacen", "workshop", -20, 29, -6, 44, G, gC);
+            R("G_Intake", "Ingreso", "intake", -6, 29, 2, 44, G, gC);
+            R("G_Stair2", "Escalera norte", "stairwell", 2, 29, 10, 44, G, gC);
+            R("G_Interr", "Interrogatorios y observacion", "interrogation", 10, 29, 32, 44, G, gC);
+            R("G_Alley", "Callejon", "alley", -37, 8, -32, 44, G, 0f, Kind.Outdoor);
 
             D("Puerta_Principal", 0, 0, G, DoorKind.Double, 3f);
-            D("Puerta_Espera_Vestibulo", -8, 6, G);
+            D("Puerta_Espera_Vestibulo", -8, 6, G, DoorKind.Opening, 3f);
+            D("Puerta_Segura", -25, 6, G);
             D("Puerta_Vestibulo_E", 8, 6, G, DoorKind.Padlock);
-            D("Puerta_Segura", -29, 12, G);
-            D("Puerta_Espera_Pasillo", -17, 12, G);
-            D("Puerta_Recepcion_Pasillo", 14, 12, G);
-            D("Puerta_Recepcion_Armeria", 20, 6, G);
-            D("Puerta_Pasillo_Candado", 8, 13.25f, G, DoorKind.Padlock);
-            D("Puerta_Garaje", -26, 14.5f, G);
-            D("Puerta_Pruebas", -14, 14.5f, G);
-            D("Puerta_Aseos", -4, 14.5f, G);
-            D("Puerta_Ascensor_Baja", 2.5f, 14.5f, G);
-            D("Puerta_Seguridad", 14, 14.5f, G);
-            D("Puerta_Descanso", 25, 14.5f, G);
-            D("Puerta_Tarjeta", 30.75f, 14.5f, G, DoorKind.Card);
-            D("Puerta_Vestuarios", -25, 29, G);
-            D("Puerta_Calabozos", -7, 29, G, DoorKind.ChiefCard);
-            D("Puerta_Escalera_Norte", 7, 29, G);
-            D("Puerta_Almacen", 16, 29, G);
-            D("Puerta_Taller", 27, 29, G);
+            D("Puerta_Agentes_Armeria", 21, 6, G);
+            D("Puerta_Vestibulo_Atrio", 1, 12, G, DoorKind.Opening, 6f);
+            D("Puerta_Espera_Radio", -21, 12, G);
+            D("Puerta_Radio_Pruebas", -18, 22, G);
+            D("Puerta_Pruebas", -8, 22, G);
+            D("Puerta_Aseos", -2, 15.5f, G);
+            D("Puerta_Pasillo_Candado", 8, 17, G, DoorKind.Padlock);
+            D("Puerta_Agentes_Seguridad", 14, 12, G);
+            D("Puerta_Armeria_Descanso", 26, 12, G);
+            D("Puerta_Descanso", 20, 20, G);
+            D("Puerta_Tarjeta", -2, 29, G, DoorKind.Card);
+            D("Puerta_Ingreso_Taller", -6, 36, G);
+            D("Puerta_Vestuarios", -20, 36, G);
+            D("Puerta_Escalera_Norte", 2, 35, G, DoorKind.Card);
+            D("Puerta_Interrogatorios", 10, 42, G);                              // al norte del tramo que baja a la custodia (entre ambos queda 1 m)
             D("Puerta_Callejon", -32, 40, G, DoorKind.Padlock);
             D("Ascensor_Baja", Shaft.xMin, 24.75f, G, DoorKind.Fixed, 1.4f);
 
@@ -116,45 +157,40 @@ namespace Horror.EditorTools
             R("F_Comm", "Despacho del comisario", "commissioner", -32, 0, -20, 12, F1, fC).light = new Color(1f, 0.85f, 0.65f);
             R("F_Conf", "Sala de conferencias", "conference", -20, 0, -8, 12, F1, fC);
             R("F_Mem", "Memorial", "memorial", -8, 0, 8, 12, F1, fC);
-            R("F_OffA", "Oficinas", "offices", 8, 0, 20, 12, F1, fC);
-            R("F_OffB", "Oficinas (este)", "offices", 20, 0, 32, 12, F1, fC);
-            R("F_C1", "Pasillo sur (primera)", "corridor", -32, 12, 32, 14.5f, F1, fC, Kind.Corridor, "F_C");
-            R("F_Chief", "Despacho del jefe de seguridad", "chief", -32, 14.5f, -20, 26.5f, F1, fC);
-            R("F_Lib", "Biblioteca", "library", -20, 14.5f, -8, 26.5f, F1, fC);
-            R("F_Break", "Sala de descanso (primera)", "breakroom", -8, 14.5f, 5, 26.5f, F1, fC, Kind.Room, "F_Break");
-            R("F_BreakB", "Sala de descanso (primera)", "breakroom", 5, 14.5f, 8, 23, F1, fC, Kind.Room, "F_Break");
+            R("F_Det", "Detectives", "offices", 8, 0, 32, 12, F1, fC);
+            R("F_Chief", "Despacho del jefe de seguridad", "chief", -32, 12, -20, 29, F1, fC);
+            R("F_Lib", "Biblioteca", "library", -20, 12, -8, 29, F1, fC);
+            // galeria sobre el atrio (el hueco de doble altura va como SlabHoles)
+            R("F_GalA", "Galeria", "gallery", -8, 12, 8, 23, F1, fC, Kind.Room, "F_Gal");
+            R("F_GalB", "Galeria", "gallery", -8, 23, 5, 29, F1, fC, Kind.Room, "F_Gal");
+            R("F_GalC", "Galeria", "gallery", 5, 26.5f, 8, 29, F1, fC, Kind.Room, "F_Gal");
             R("F_Shaft", "Ascensor", "shaft", Shaft.xMin, Shaft.yMin, Shaft.xMax, Shaft.yMax, F1, fC, Kind.Shaft);
-            R("F_Det", "Sala de detectives", "offices", 8, 14.5f, 29.5f, 26.5f, F1, fC);
-            R("F_CE", "Pasillo este (primera)", "corridor", 29.5f, 14.5f, 32, 26.5f, F1, fC, Kind.Corridor, "F_C");
-            R("F_C2", "Pasillo norte (primera)", "corridor", -32, 26.5f, 32, 29, F1, fC, Kind.Corridor, "F_C");
-            R("F_WC", "Aseos (primera)", "restroom", -32, 29, -24, 44, F1, fC);
-            R("F_Inter", "Interrogatorios", "interrogation", -24, 29, -14, 44, F1, fC);
+            R("F_Canteen", "Comedor y descanso", "breakroom", 8, 12, 32, 29, F1, fC);
+            R("F_Admin", "Oficinas y archivo auxiliar", "offices", -32, 29, -14, 44, F1, fC);
             R("F_Serv", "Escalera del archivo", "servicestair", -14, 29, -4, 44, F1, fC);
-            R("F_Evid", "Deposito de pruebas", "evidence", -4, 29, 4, 44, F1, fC);
-            R("F_Stair2", "Escalera de servicio norte", "stairwell", 4, 29, 10, 44, F1, fC);
-            R("F_Records", "Registro", "records", 10, 29, 22, 44, F1, fC);
+            R("F_NHall", "Hall norte", "hall", -4, 29, 10, 44, F1, fC);
+            R("F_Rec", "Registro", "records", 10, 29, 22, 44, F1, fC);
             R("F_Lounge", "Sala del sindicato", "lounge", 22, 29, 32, 44, F1, fC);
             R("F_Balcony", "Escalera de incendios", "fireescape", -36, 17, -32, 26, F1, 0f, Kind.Outdoor, "F_Balcony");
 
-            D("Puerta_Comisario", -26, 12, F1);
-            D("Puerta_Conferencias", -14, 12, F1);
-            D("Puerta_Conf_Memorial", -8, 6, F1);
-            D("Puerta_Memorial_Pasillo", 0, 12, F1);
-            D("Puerta_Memorial_Oficinas", 8, 6, F1);
-            D("Puerta_Oficinas_Pasillo", 14, 12, F1);
-            D("Puerta_Oficinas_Este", 20, 6, F1);
-            D("Puerta_OficinasB_Pasillo", 26, 12, F1);
-            D("Puerta_Biblioteca", -14, 14.5f, F1);
-            D("Puerta_Descanso_Primera", -2, 14.5f, F1);
-            D("Puerta_Detectives", 20, 14.5f, F1);
+            D("Puerta_Comisario", -20, 6, F1);
+            D("Puerta_Conf_Memorial", -8, 6, F1, DoorKind.Opening, 3f);
+            D("Puerta_Memorial_Galeria", 1, 12, F1, DoorKind.Opening, 6f);
+            D("Puerta_Memorial_Detectives", 8, 6, F1);
+            D("Puerta_Detectives_Comedor", 14, 12, F1);
+            D("Puerta_Detectives_Comedor2", 28, 12, F1);
+            D("Puerta_Biblioteca", -14, 12, F1);
+            D("Puerta_Biblioteca_Galeria", -8, 20, F1);
+            D("Puerta_Galeria_Comedor", 8, 18, F1);
             D("Puerta_JefeSeguridad_Balcon", -32, 20, F1);
-            D("Puerta_Aseos_Primera", -28, 29, F1);
-            D("Puerta_Interrogatorios", -19, 29, F1);
-            D("Puerta_Escalera_Archivo", -9, 29, F1);
-            D("Puerta_Pruebas_Primera", 0, 29, F1);
-            D("Puerta_Escalera_Norte_Primera", 7, 29, F1);
+            D("Puerta_Galeria_HallNorte", 0, 29, F1);                           // paso de un solo sentido (OneWayDoor en la etapa E): se abre desde el hall norte
+            D("Puerta_Admin_Biblioteca", -17, 29, F1);
+            D("Puerta_Admin_Archivo", -14, 36, F1);
+            D("Puerta_Escalera_Archivo", -4, 34, F1);
+            D("Puerta_Hall_Registro", 10, 36, F1);
             D("Puerta_Registro", 16, 29, F1);
             D("Puerta_Sindicato", 27, 29, F1);
+            D("Puerta_Registro_Sindicato", 22, 36, F1);
             D("Ascensor_Primera", Shaft.xMin, 24.75f, F1, DoorKind.Fixed, 1.4f);
 
             // ===== SEGUNDA PLANTA (y 7,5): antesala y archivo; el resto es azotea =====
@@ -168,45 +204,13 @@ namespace Horror.EditorTools
             D("Puerta_Caseta", -22, 30, F2);
             D("Azotea_Escalera", -32, 8.5f, F2, DoorKind.Opening, 2f);
 
-            // ===== SOTANO (y -4,5) =====
-            R("B_Pump", "Cuarto de bombas", "pumps", -32, 0, -14, 12, B, bC);
-            R("B_Tanks", "Depositos", "tanks", -14, 0, 0, 12, B, bC);
-            R("B_Mach", "Sala de maquinas", "machines", 0, 0, 18, 12, B, bC);
-            R("B_Work", "Taller de mantenimiento", "workshop", 18, 0, 32, 12, B, bC);
-            R("B_C1", "Pasillo del sotano", "corridor", -32, 12, 32, 14.5f, B, bC, Kind.Corridor, "B_C");
-            R("B_Store", "Almacen del sotano", "storage", -32, 14.5f, -14, 26.5f, B, bC);
-            R("B_Safe", "Sala segura del sotano", "safe", -14, 14.5f, 0, 26.5f, B, bC).light = new Color(1f, 0.82f, 0.6f);
-            R("B_Elev", "Vestibulo del ascensor (sotano)", "elevator", 0, 14.5f, 5, 26.5f, B, bC, Kind.Room, "B_Elev");
-            R("B_ElevB", "Vestibulo del ascensor (sotano)", "elevator", 5, 14.5f, 8, 23, B, bC, Kind.Room, "B_Elev");
-            R("B_Shaft", "Ascensor", "shaft", Shaft.xMin, Shaft.yMin, Shaft.xMax, Shaft.yMax, B, bC, Kind.Shaft);
-            R("B_Lab", "Laboratorio", "lab", 8, 14.5f, 22, 26.5f, B, bC);
-            R("B_Fuse", "Cuadro electrico", "fuse", 22, 14.5f, 29.5f, 26.5f, B, bC);
-            R("B_CE", "Pasillo del sotano (este)", "corridor", 29.5f, 14.5f, 32, 26.5f, B, bC, Kind.Corridor, "B_C");
-            R("B_C2E", "Pasillo norte del sotano", "corridor", -12, 26.5f, 32, 29, B, bC, Kind.Corridor, "B_C");
-            R("B_C2W", "Pasillo de las calderas", "corridor", -32, 26.5f, -12, 29, B, bC, Kind.Corridor);
-            R("B_Boiler", "Sala de calderas", "boiler", -32, 29, -12, 44, -6.5f, bC).light = new Color(1f, 0.55f, 0.4f);
-            R("B_Control", "Sala de control", "control", -12, 29, 4, 44, B, bC);
-            R("B_Pipes", "Galeria de tuberias", "pipes", 4, 29, 32, 44, B, bC);
-
-            D("Puerta_Bombas", -23, 12, B);
-            D("Puerta_Depositos", -7, 12, B);
-            D("Puerta_Maquinas", 9, 12, B);
-            D("Puerta_TallerS", 25, 12, B);
-            D("Puerta_AlmacenS", -23, 14.5f, B);
-            D("Puerta_SeguraS", -7, 14.5f, B);
-            D("Puerta_AscensorS", 2.5f, 14.5f, B);
-            D("Puerta_Laboratorio", 15, 14.5f, B);
-            D("Puerta_Cuadro", 26, 14.5f, B);
-            D("Puerta_Sin_Corriente", -12, 27.75f, B, DoorKind.Power);
-            D("Puerta_Calderas", -22, 29, B, DoorKind.Metal);
-            D("Puerta_Control", -4, 29, B);
-            D("Puerta_Tuberias", 18, 29, B);
-            D("Ascensor_Sotano", Shaft.xMin, 24.75f, B, DoorKind.Fixed, 1.4f);
-
-            // huecos en las losas para las escaleras
+            // huecos en las losas para las escaleras y la galeria
             SlabHoles.Add((SpiralHole, F1));                                         // caracol del vestibulo
-            SlabHoles.Add((Rect.MinMaxRect(4f, 31.6f, 6.4f, 40.0f), F1));           // escalera norte
+            SlabHoles.Add((Rect.MinMaxRect(4f, 31.6f, 6.4f, 40.0f), F1));           // escalera norte (sube a la primera)
             SlabHoles.Add((Rect.MinMaxRect(-14f, 31.6f, -11.4f, 39.0f), F2));       // escalera del archivo
+            SlabHoles.Add((GalleryHole, F1));                                        // galeria sobre el atrio (doble altura)
+            SlabHoles.Add((GarageStairHole, G));                                     // escalera de la sala de espera al garaje
+            SlabHoles.Add((CustodyStairHole, G));                                    // escalera norte, tramo que baja a la custodia
         }
 
         // ------------------------------------------------------------------ utilidades
@@ -246,7 +250,7 @@ namespace Horror.EditorTools
 
         // ------------------------------------------------------------------ paredes a partir de las salas
         /// <summary>Altura a la que llega la pared de una sala (tapa la losa de encima).</summary>
-        static float Top(Room a) => a.kind == Kind.Outdoor ? a.floor + (a.type == "alley" ? 3.2f : a.type == "fireescape" ? 0f : 1.1f) : a.ceil + 0.5f;
+        static float Top(Room a) => a.kind == Kind.Outdoor ? a.floor + (a.type == "alley" ? 3.2f : a.type == "fireescape" ? 0f : 1.1f) : a.ceil + (a.floor < -0.6f ? 0.75f : 0.5f);
 
         struct Seg { public bool alongX; public float c, s0, s1, y0, y1, t, floorA, floorB; public bool skirtA, skirtB; }
 
@@ -374,6 +378,17 @@ namespace Horror.EditorTools
                 bool alongX = Rooms.Any(r => Mathf.Abs(r.r.yMin - d.p.y) < 0.05f || Mathf.Abs(r.r.yMax - d.p.y) < 0.05f) &&
                               !Rooms.Any(r => (Mathf.Abs(r.r.xMin - d.p.x) < 0.05f || Mathf.Abs(r.r.xMax - d.p.x) < 0.05f) && d.p.y > r.r.yMin && d.p.y < r.r.yMax && Mathf.Abs(r.floor - d.floor) < 0.6f);
                 var center = new Vector3(d.p.x, d.floor, d.p.y);
+                if (d.kind == DoorKind.Roll)
+                {
+                    // puerta enrollable de garaje: cerrada y fija (la abre el progreso mas adelante). Persiana con lamas y cajon.
+                    var shutter = new GameObject(d.name).transform; shutter.SetParent(structure);
+                    Vector3 depth = alongX ? Vector3.forward : Vector3.right;
+                    Box("Persiana", shutter, center + Vector3.up * (DoorH / 2f), alongX ? new Vector3(d.width, DoorH, 0.12f) : new Vector3(0.12f, DoorH, d.width), metal, 1f);
+                    for (int i = 1; i < 12; i++)
+                        Box("Lama", shutter, center + Vector3.up * (DoorH * i / 12f) - depth * 0.08f, alongX ? new Vector3(d.width, 0.04f, 0.03f) : new Vector3(0.03f, 0.04f, d.width), metal, 0f, false);
+                    Box("Cajon", shutter, center + Vector3.up * (DoorH + 0.22f), alongX ? new Vector3(d.width + 0.3f, 0.44f, 0.45f) : new Vector3(0.45f, 0.44f, d.width + 0.3f), metal, 1f, false);
+                    continue;
+                }
                 if (d.kind == DoorKind.Fixed)
                 {
                     Box(d.name, structure, center + Vector3.up * 1.2f, alongX ? new Vector3(1.4f, 2.4f, 0.06f) : new Vector3(0.06f, 2.4f, 1.4f), metal, 1f);
@@ -406,7 +421,7 @@ namespace Horror.EditorTools
                 var fh = SlabHoles.Where(h => Mathf.Abs(h.y - r.floor) < 0.05f).Select(h => h.r);
                 SlabRect(r.id + "_Suelo", r.r, r.floor - 0.3f, r.floor, fh, r.kind == Kind.Outdoor ? outdoorM : floorM, 4f);
                 if (r.kind == Kind.Outdoor) continue;
-                var ch = SlabHoles.Where(h => Mathf.Abs(h.y - (r.ceil + 0.5f)) < 0.05f || (r.ceil < h.y && h.y - r.ceil < 0.9f)).Select(h => h.r);
+                var ch = SlabHoles.Where(h => Mathf.Abs(h.y - (r.ceil + 0.5f)) < 0.05f || (r.ceil < h.y && h.y - r.ceil < 1.05f)).Select(h => h.r);
                 SlabRect(r.id + "_Techo", r.r, r.ceil, r.ceil + 0.12f, ch, ceil, 2.4f);
                 // cubierta del archivo y de las salas de la segunda planta
                 if (r.floor >= F2 - 0.01f) Box(r.id + "_Cubierta", structure, new Vector3(r.r.center.x, r.ceil + 0.35f, r.r.center.y), new Vector3(r.r.width + 0.4f, 0.3f, r.r.height + 0.4f), wall, 3f);
@@ -454,6 +469,25 @@ namespace Horror.EditorTools
             return root;
         }
 
+        /// <summary>Escalera recta a lo largo de X (de x0 a x1, de y0 a y1; x1 puede ser menor que x0) con ancho z0..z1: peldanos (decorado) y rampa invisible.</summary>
+        public static Transform StraightStairX(string name, float x0, float x1, float z0, float z1, float y0, float y1, Material m)
+        {
+            var root = new GameObject(name).transform; root.SetParent(structure);
+            int n = Mathf.Max(4, Mathf.RoundToInt(Mathf.Abs(y1 - y0) / 0.2f));
+            float run = (x1 - x0) / n, rise = (y1 - y0) / n, zc = (z0 + z1) / 2f, w = z1 - z0;
+            float baseY = Mathf.Min(y0, y1) - 0.3f;
+            for (int k = 0; k < n; k++)
+            {
+                float top = y0 + rise * (k + 0.5f), xa = x0 + run * k, xb = xa + run;
+                Box("Peldano", root, new Vector3((xa + xb) / 2f, (top + baseY) / 2f, zc), new Vector3(Mathf.Abs(run), top - baseY, w), m, 1f, false);
+            }
+            float len = Mathf.Sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)), ang = Mathf.Atan((y1 - y0) / (x1 - x0)) * Mathf.Rad2Deg;   // atan (no atan2): la caja es simetrica y asi su 'arriba' sigue arriba
+            var ramp = new GameObject("Rampa"); ramp.transform.SetParent(root);
+            ramp.transform.SetPositionAndRotation(new Vector3((x0 + x1) / 2f, (y0 + y1) / 2f + 0.02f, zc), Quaternion.Euler(0, 0, ang));
+            var rc = ramp.AddComponent<BoxCollider>(); rc.size = new Vector3(len, 0.1f, w); rc.center = new Vector3(0, -0.05f, 0); ramp.isStatic = true;
+            return root;
+        }
+
         public static void Rail(Transform parent, Vector3 a, Vector3 b, bool bars = true)
         {
             var g = new GameObject("Barandilla").transform; g.SetParent(parent);
@@ -467,6 +501,45 @@ namespace Horror.EditorTools
             var col = new GameObject("Colision"); col.transform.SetParent(g);
             col.transform.SetPositionAndRotation((a + b) / 2f + Vector3.up * 0.6f, rot);
             col.AddComponent<BoxCollider>().size = new Vector3(0.08f, 1.2f, len); col.isStatic = true;
+        }
+
+        /// <summary>Balaustrada de la galeria de la primera planta alrededor del hueco de doble altura sobre el atrio.</summary>
+        static void GalleryRails()
+        {
+            var root = new GameObject("BalaustradaGaleria").transform; root.SetParent(structure);
+            var h = GalleryHole; float y = F1;
+            Rail(root, new Vector3(h.xMin, y, h.yMin), new Vector3(h.xMax, y, h.yMin));
+            Rail(root, new Vector3(h.xMax, y, h.yMin), new Vector3(h.xMax, y, h.yMax));
+            Rail(root, new Vector3(h.xMax, y, h.yMax), new Vector3(h.xMin, y, h.yMax));
+            Rail(root, new Vector3(h.xMin, y, h.yMax), new Vector3(h.xMin, y, h.yMin));
+        }
+
+        /// <summary>
+        /// Rampa de coches del garaje: baja por el callejon oeste (dentro de la verja, a x -41,5..-37,2) desde la calle (z 44, y 0) hasta una
+        /// explanada a -4,5 m (z 0..5,5) junto a la puerta enrollable del muro oeste del garaje. Calzada inclinada con colision, muros de contencion
+        /// a ambos lados y parapeto de 0,9 m. El lado este lo remata la pared del callejon (que empieza a -0,3).
+        /// </summary>
+        static void GarageRamp()
+        {
+            var root = new GameObject("RampaGaraje").transform; root.SetParent(structure);
+            const float xw = -41.5f, xe = -37.2f, zTop = 44f, zBot = 5.5f, zS = 0f, ex1 = -32f, top = 0.9f;
+            float L = zTop - zBot, yBot = B;
+            System.Func<float, float> surf = z => z <= zBot ? yBot : Mathf.Lerp(yBot, 0f, (z - zBot) / L);
+            float len = Mathf.Sqrt(L * L + yBot * yBot), ang = -Mathf.Atan2(-yBot, L) * Mathf.Rad2Deg;   // sube hacia +z
+            var slab = Box("Calzada", root, new Vector3((xw + xe) / 2f, yBot / 2f - 0.15f, (zTop + zBot) / 2f), new Vector3(xe - xw, 0.3f, len), outdoorM, 4f);
+            slab.transform.rotation = Quaternion.Euler(ang, 0, 0);
+            Box("Explanada", root, new Vector3((xw + ex1) / 2f, yBot - 0.15f, (zS + zBot) / 2f), new Vector3(ex1 - xw, 0.3f, zBot - zS), outdoorM, 4f);
+            for (float z = zS; z < zTop - 0.01f; z += 2f)
+            {
+                float z2 = Mathf.Min(z + 2f, zTop), zc = (z + z2) / 2f, yLow = surf(z) - 0.45f;
+                Box("Muro_O", root, new Vector3(xw - 0.175f, (yLow + top) / 2f, zc), new Vector3(0.35f, top - yLow, z2 - z + 0.02f), wall, 3f);
+                if (z < zBot - 0.01f) continue;
+                float topE = z < 8f ? top : -0.3f;
+                Box("Muro_E", root, new Vector3(xe + 0.175f, (yLow + topE) / 2f, zc), new Vector3(0.35f, topE - yLow, z2 - z + 0.02f), wall, 3f);
+            }
+            float lo = yBot - 0.45f;
+            Box("Muro_S", root, new Vector3((xw - 0.35f + ex1) / 2f, (lo + top) / 2f, zS - 0.175f), new Vector3(ex1 - xw + 0.35f, top - lo, 0.35f), wall, 3f);
+            Box("Muro_N", root, new Vector3((xe + ex1) / 2f, (lo + top) / 2f, zBot + 0.175f), new Vector3(ex1 - xe, top - lo, 0.35f), wall, 3f);
         }
 
         /// <summary>Caracol del vestibulo (de la planta baja a la primera), igual que la de la fase 1 pero en el vestibulo nuevo.</summary>
@@ -534,6 +607,17 @@ namespace Horror.EditorTools
             Rail(a, new Vector3(-11.7f, F1, 31.4f), new Vector3(-11.7f, F2, 39f));
             Rail(a, new Vector3(-11.4f, F2, 31.6f), new Vector3(-11.4f, F2, 39.0f));
             Rail(a, new Vector3(-14f, F2, 31.6f), new Vector3(-11.4f, F2, 31.6f));
+            // sala de espera -> garaje (sotano): a lo largo de X pegada a la pared sur, baja hacia el oeste; el hueco queda a ras de la planta baja con barandilla
+            var g = StraightStairX("EscaleraGaraje", -14.5f, -23f, 0.2f, 2.2f, G, B, metal);
+            Rail(g, new Vector3(-14.5f, G, 2.2f), new Vector3(-23f, G, 2.2f));        // borde norte del hueco
+            Rail(g, new Vector3(-23f, G, 0.2f), new Vector3(-23f, G, 2.2f));          // cierre oeste
+            Rail(g, new Vector3(-14.5f, G, 2.2f), new Vector3(-23f, B, 2.2f));        // pasamanos de bajada
+            // escalera norte, tramo que baja a la custodia (se entra por el sur, a z 32; baja hacia el norte)
+            var cu = StraightStairZ("EscaleraCustodia", 7f, 9f, 32f, 40f, G, B, metal);
+            Rail(cu, new Vector3(7f, G, 32f), new Vector3(7f, G, 40f));
+            Rail(cu, new Vector3(9f, G, 32f), new Vector3(9f, G, 40f));
+            Rail(cu, new Vector3(7f, G, 40f), new Vector3(9f, G, 40f));
+            Rail(cu, new Vector3(7f, G, 32f), new Vector3(7f, B, 40f));
             // sala de calderas (hundida 2 m): rellano junto a la puerta y escalera hacia el norte hasta el foso
             var c = StraightStairZ("EscaleraCalderas", -23f, -21f, 31.5f, 35.5f, B, -6.5f, metal);
             Box("Rellano_Calderas", c, new Vector3(-22f, (B - 0.3f + -6.8f) / 2f + 0.15f, 30.25f), new Vector3(4f, B - (-6.8f), 2.5f), floorM, 4f);
@@ -611,6 +695,8 @@ namespace Horror.EditorTools
             SpiralStair();
             Stairs();
             FireEscape();
+            GalleryRails();
+            GarageRamp();
 
             var surface = rootGo.AddComponent<NavMeshSurface>();
             surface.collectObjects = CollectObjects.Children;

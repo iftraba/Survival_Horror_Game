@@ -60,7 +60,8 @@ namespace Horror.EditorTools
             // suelos: patio delantero (8 m), franjas a los lados y detras dentro de la verja, acera, calzada y acera de enfrente
             Box("Patio", ext, new Vector3(-2.5f, -0.1f, -4f), new Vector3(79f, 0.2f, 8f), sidewalk, 4f);
             Box("Patio_E", ext, new Vector3(34.25f, -0.1f, 22f), new Vector3(4.5f, 0.2f, 44f), sidewalk, 4f);
-            Box("Patio_O", ext, new Vector3(-37f, -0.1f, 4f), new Vector3(10f, 0.2f, 8f), sidewalk, 4f);
+            // el patio oeste ya no cubre la explanada ni la rampa del garaje (x -41,5..-32, z 0..5,5 y la calzada inclinada al oeste de x -37,2)
+            Box("Patio_O", ext, new Vector3(-34.6f, -0.1f, 6.75f), new Vector3(5.2f, 0.2f, 2.5f), sidewalk, 4f);
             Box("Patio_N", ext, new Vector3(-2.5f, -0.1f, 46.25f), new Vector3(79f, 0.2f, 4.5f), sidewalk, 4f);
             Box("Acera", ext, new Vector3(0, -0.1f, -9f), new Vector3(180f, 0.2f, 2f), sidewalk, 4f);
             Box("Calzada", ext, new Vector3(0, -0.15f, -14f), new Vector3(180f, 0.2f, 8f), asphalt, 4f);
@@ -147,8 +148,8 @@ namespace Horror.EditorTools
                 (Props + "Barrel.fbx", new Vector3(-5f, 0f, -12.6f), 0f), (Props + "Barrel.fbx", new Vector3(28f, 0f, -12.8f), 0f),
                 (Props + "Crate.fbx", new Vector3(9f, 0f, -12.4f), 35f), (Props + "Crate.fbx", new Vector3(-24f, 0f, -5f), 10f),
                 (Props + "Crate.fbx", new Vector3(14f, 0f, -6f), 60f), (Props + "Rubble.fbx", new Vector3(-10f, 0f, -3f), 80f),
-                (Props + "Barrel.fbx", new Vector3(-37.5f, 0f, 12f), 0f), (Props + "Crate.fbx", new Vector3(-38.6f, 0f, 37f), 20f),
-                (Props + "Barrel.fbx", new Vector3(-38.8f, 0f, 41.5f), 0f), (Props + "Rubble.fbx", new Vector3(-37f, 0f, 17f), 45f),
+                (Props + "Barrel.fbx", new Vector3(-35.6f, 0f, 12.5f), 0f), (Props + "Crate.fbx", new Vector3(-35.2f, 0f, 38.5f), 20f),   // el callejon mide ahora 5 m (x -37..-32): la rampa del garaje va al oeste
+                (Props + "Barrel.fbx", new Vector3(-34.2f, 0f, 41.5f), 0f), (Props + "Rubble.fbx", new Vector3(-35.8f, 0f, 14.5f), 45f),
             };
             foreach (var (path, p, yaw) in junk) Model(path, ext, p, yaw, true);
 
