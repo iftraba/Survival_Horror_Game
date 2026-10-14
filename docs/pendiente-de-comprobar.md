@@ -93,3 +93,5 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [ ] [JUGAR] Notas con el ratón encima: la tinta ya no cambia a blanco (corregido en el estilo, sin ver en pantalla).
 - [JUGAR] Secuencia de la reja (arreglada el 2026-10-11, vista en Play con el monumento) y de las calderas (mismo arreglo, sin ver).
 - [JUGAR] Poner el 3.º medallón con la E real en la build recompilada: la cámara debe recorrer el camino (si no, la causa era otra). Guardar con la reja abierta y cargar: debe estar abierta sin cinemática.
+- [PC] Cielo nocturno en la build: luna, estrellas y nubes en la intro y desde la calle; que la niebla (0,05; 0,055; 0,07) no se vea como una pared marrón contra el cielo.
+- [PC] Coches de policía nuevos de cerca en la partida (garaje y calle): normales de los rótulos, rendimiento con ~31.000 triángulos por coche, oclusión sin rebakear.

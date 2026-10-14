@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-14 · Art/Level · **Cielo nocturno** (fase 1 del lavado de cara del exterior): panorama con luna, estrellas y nubes hecho en Blender, skybox en la escena y reflexiones del cielo. Menú *Horror/Atmosfera/Cielo nocturno*.
+
 - 2026-10-14 · Art · **Coches de policía v3**: modelo de nivel AA hecho en Blender a la vista (carrocería suavizada, rótulos y franjas proyectados sobre la chapa, barra de luces nueva, ruedas, defensa de empuje) en versión intacta y quemada, con tipos de textura nuevos (pintura de coche, vinilo, cristal, lentes, goma, chapa quemada) a 2048. Detalle en `docs/art-pipeline.md`.
 
 - 2026-10-11 · Interaction · **Secuencias de progreso**: la E que coloca el medallón ya no las salta en el mismo fotograma; al cargar partida la reja y la puerta de las calderas quedan abiertas al instante y al empezar partida nueva se reinician.
