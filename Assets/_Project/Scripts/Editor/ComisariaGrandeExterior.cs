@@ -48,6 +48,18 @@ namespace Horror.EditorTools
             Box(name, ext, c, s, m, 6f, false);
         }
 
+        /// <summary>Material sin iluminar y muy claro (HDR) para la bombilla de las farolas: con el bloom parece que brilla.</summary>
+        static Material LampGlowMaterial()
+        {
+            string path = Mats + "Farola_Foco.mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null) { m = new Material(Shader.Find("Universal Render Pipeline/Unlit")); AssetDatabase.CreateAsset(m, path); }
+            m.shader = Shader.Find("Universal Render Pipeline/Unlit");
+            m.SetColor("_BaseColor", new Color(2.6f, 1.9f, 1.0f, 1f));
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
         static void Exterior(Material fire, Material smoke)
         {
             var wall = AssetDatabase.LoadAssetAtPath<Material>(Mats + "Env_Wall.mat");
@@ -114,14 +126,19 @@ namespace Horror.EditorTools
             Model(Ext + "PoliceCar.fbx", ext, new Vector3(-20f, 0f, -14f), 100f, true, "CocheAbandonado");
             ComisariaV2Exterior.Fire(ext, new Vector3(-19f, 0.6f, -14.3f), 0.6f, fire, smoke);
             Model(Ext + "PoliceCar.fbx", ext, new Vector3(-14f, 0f, -3.6f), -70f, true, "CochePatrulla2");
+            var lampGlow = LampGlowMaterial();
             for (int i = 0; i < 13; i++)
             {
                 float x = -72f + i * 12f;
-                Model(Ext + "StreetLamp.fbx", ext, new Vector3(x, 0f, -9.3f), 0f, true, "Farola");
-                if (i % 3 == 1) continue;
-                var lg = new GameObject("Luz_Farola"); lg.transform.SetParent(ext); lg.transform.position = new Vector3(x, 5.7f, -10.6f);
-                var l = lg.AddComponent<Light>(); l.type = LightType.Spot; l.spotAngle = 110f; l.color = new Color(1f, 0.78f, 0.5f); l.intensity = 9f; l.range = 13f;
+                Model(Ext + "StreetLamp.fbx", ext, new Vector3(x, 0f, -9.3f), 180f, true, "Farola");        // el brazo con la lampara sale hacia la calle (-Z): sin girar salia hacia la verja
+                if (i % 4 == 2) continue;                                                                    // algunas farolas estan rotas y no encienden
+                var lg = new GameObject("Luz_Farola"); lg.transform.SetParent(ext); lg.transform.position = new Vector3(x, 5.7f, -10.7f);
+                var l = lg.AddComponent<Light>(); l.type = LightType.Spot; l.spotAngle = 125f; l.color = new Color(1f, 0.78f, 0.5f); l.intensity = 45f; l.range = 20f;
                 lg.transform.rotation = Quaternion.Euler(90, 0, 0);
+                var glow = GameObject.CreatePrimitive(PrimitiveType.Sphere); glow.name = "Foco_Farola"; glow.transform.SetParent(ext);      // la bombilla se ve encendida
+                Object.DestroyImmediate(glow.GetComponent<Collider>());
+                glow.transform.position = new Vector3(x, 5.62f, -10.7f); glow.transform.localScale = new Vector3(0.5f, 0.16f, 0.5f);
+                var gr = glow.GetComponent<MeshRenderer>(); gr.sharedMaterial = lampGlow; gr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; glow.isStatic = true;
             }
             var rng = new System.Random(7);
             void Building(string n, float x0, float x1, float z0, float z1, float h)
