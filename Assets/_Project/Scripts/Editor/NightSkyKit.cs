@@ -51,6 +51,8 @@ namespace Horror.EditorTools
             foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 if (cam.CompareTag("MainCamera") || cam.GetComponent<ThirdPersonCamera>() != null)
                 { cam.clearFlags = CameraClearFlags.Skybox; EditorUtility.SetDirty(cam); }
+            foreach (var l in Object.FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (l.type == LightType.Directional) { l.transform.rotation = Quaternion.Euler(23f, 270f, 0f); EditorUtility.SetDirty(l.transform); }      // la luz viene de la luna (al este, 23 grados)
             DynamicGI.UpdateEnvironment();
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             AssetDatabase.SaveAssets();

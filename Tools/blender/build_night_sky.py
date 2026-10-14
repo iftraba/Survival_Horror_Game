@@ -2,8 +2,8 @@
 
     blender --background --python build_night_sky.py -- <ruta absoluta del PNG de salida> [ancho=4096]
 
-Convencion de Unity (Skybox/Panoramic, Latitude-Longitude): u = 0.5 - atan2(z, x) / (2 pi), v = 1 - acos(y) / pi (v = 1 es el cielo). La luna se coloca en la
-direccion contraria a la luz direccional de la escena (rotacion 38, 160, 0): asi la luz y la luna coinciden. Con otra luz, cambiar MOON_DIR.
+Convencion de Unity (Skybox/Panoramic, Latitude-Longitude): u = 0.5 - atan2(z, x) / (2 pi), v = 1 - acos(y) / pi (v = 1 es el cielo). La luna esta al este (azimut 90, elevacion 23); la luz direccional de la escena
+se gira para que venga de ella (Euler(23, 270, 0)).
 """
 import math
 import sys
@@ -16,10 +16,10 @@ W = int(sys.argv[sys.argv.index("--") + 2]) if len(sys.argv) > sys.argv.index("-
 H = W // 2
 rng = np.random.default_rng(7)
 
-# direccion de la luna: contraria al avance de la luz Euler(38, 160, 0) de Unity
-pitch, yaw = math.radians(38.0), math.radians(160.0)
-fwd = np.array([math.sin(yaw) * math.cos(pitch), -math.sin(pitch), math.cos(yaw) * math.cos(pitch)])
-MOON_DIR = -fwd / np.linalg.norm(fwd)
+# direccion de la luna: al este del patio (el lado del coche en llamas, a la derecha al empezar), a 23 grados sobre el horizonte (a 20 o mas queda libre
+# por encima del Edificio_E). La luz direccional de la escena viene de ahi: rotacion Euler(23, 270, 0) (lo aplica NightSkyKit).
+AZ, EL = math.radians(90.0), math.radians(23.0)               # azimut desde el norte (+Z) hacia el este (+X), elevacion
+MOON_DIR = np.array([math.sin(AZ) * math.cos(EL), math.sin(EL), math.cos(AZ) * math.cos(EL)])
 
 # direccion de cada pixel
 uu = (np.arange(W) + 0.5) / W
