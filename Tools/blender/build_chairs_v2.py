@@ -160,7 +160,7 @@ def preview_all():
     view(72, -30, x * 1.6, (x / 2, 0, 0.5))
 
 
-if __name__ == "__main__" and "--" in sys.argv:
+if __name__ == "__main__" and "--" in sys.argv and not globals().get("_NO_MAIN"):
     out = sys.argv[sys.argv.index("--") + 1]
     only = sys.argv[sys.argv.index("--") + 2:]
     os.makedirs(out, exist_ok=True)
