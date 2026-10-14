@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-14 · Art/Level · **Fachadas y azoteas** (fase 3 del lavado de cara del exterior): zócalos, molduras y cornisas, toldos, ventanas tapiadas, pintadas, carteles, escaleras de incendios y piezas de azotea (depósitos, aires acondicionados, chimeneas, antenas) alineados con la rejilla de ventanas. Menú *Horror/Comisaria grande/11 Fachadas y azoteas*. Farolas giradas hacia la calle y con más luz.
+
 - 2026-10-14 · Art/Level · **Calle y mobiliario urbano** (fase 2 del lavado de cara del exterior): 17 modelos de Blender (semáforos, señales, hidrantes, contenedores, parada de autobús, árboles muertos...), 3 coches civiles abandonados, capa de suelo con grietas, parches, charcos, alcantarillas y pasos de cebra, y menos reflejo del cielo en el asfalto. Menú *Horror/Comisaria grande/10 Calle y mobiliario urbano*.
 
 - 2026-10-14 · Art/Level · **Cielo nocturno** (fase 1 del lavado de cara del exterior): panorama con luna, estrellas y nubes hecho en Blender, skybox en la escena y reflexiones del cielo. Menú *Horror/Atmosfera/Cielo nocturno*.

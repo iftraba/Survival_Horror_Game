@@ -96,3 +96,4 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [PC] Cielo nocturno en la build: luna, estrellas y nubes en la intro y desde la calle; que la niebla (0,05; 0,055; 0,07) no se vea como una pared marrón contra el cielo.
 - [PC] Coches de policía nuevos de cerca en la partida (garaje y calle): normales de los rótulos, rendimiento con ~31.000 triángulos por coche, oclusión sin rebakear.
 - [PC] Calle nueva (menú 10): rendimiento en el patio y en la intro, rebakear la oclusión (menú 8), aspecto desde el patio a través de la verja y en la intro, y que ningún objeto de la calle quede dentro del NavMesh al rehacer el nivel.
+- [PC] Fachadas y azoteas (menú 11): rendimiento en la intro y el patio, rebakear la oclusión (menú 8), alineado de toldos y tablones con las ventanas de cerca, y que nada de la ciudad asome dentro del patio.
