@@ -64,3 +64,4 @@ Procedimiento: `manage_build` (acción `build`, `output_path` = `Builds/Standalo
 - Exportar: `blender --background --python build_police_cars.py -- <ruta ABSOLUTA>` (copias sin hornear en `Tools/raw_generated/backup_exterior/`) y hornear con `texture_items.py blend <fbx> <carpeta texturas> <nombre> 2048`. **Rutas absolutas** en el horneado (con relativas los PNG no se escribían) y **hornear siempre desde el FBX sin hornear** (hornear dos veces estropea el material).
 - Verlo en vivo: `exec(open(ruta).read()); preview("clean")` y `view(...)` en un Blender con el puente MCP conectado.
 - Cristales opacos (un solo material horneado): sin interior visible.
+- **Silueta afinada (2026-10-14):** aletas delanteras y traseras algo más anchas que las puertas (hombros marcados), zócalo metido hacia dentro, habitáculo más ancho (techo de 0,70 de semiancho) y algo más bajo, aristas más duras (crease 0,6 a 0,95) y extremos con crease 0,75. Mide 2,07 × 5,02 × 1,78 m.
