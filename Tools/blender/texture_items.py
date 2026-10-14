@@ -140,6 +140,12 @@ def kind_of(name):
     n = name.lower()
     if "carpaint" in n:                                  # coches (2026-10-14): pintura brillante con suciedad de carretera, sin oxido
         return "carpaint"
+    if "concrete" in n:                                  # hormigon sucio (barreras, bolardos)
+        return "concrete"
+    if "bark" in n:                                      # corteza de arbol muerto
+        return "bark"
+    if "bag" in n:                                       # bolsas de basura
+        return "bag"
     if "charred" in n:                                   # chapa quemada: hollin negro con manchas de oxido y pintura levantada
         return "charred"
     if "decal" in n:                                     # rotulos y franjas pintadas o de vinilo
@@ -258,6 +264,38 @@ def build_material(mat, base_rgb, base_rough, name):
         metal = g.math("MULTIPLY", bare, 0.6)
         height = g.math("ADD", g.math("MULTIPLY", fine, 0.8), g.math("MULTIPLY", patch, 0.3))
         bump_strength = 0.4
+    elif kind == "concrete":
+        pores = g.noise(300.0, 3.0, 0.5)
+        stain = g.math("GREATER_THAN", g.noise(5.0, 4.0, 0.6), 0.5)
+        crack = g.math("GREATER_THAN", g.wave(9.0, "X", 12.0, g.coords((1, 1, 1))), 0.965)
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.8, g.math("MULTIPLY", n2, 0.35)))
+        col = g.vmath("SCALE", col, scale=g.math("ADD", 0.92, g.math("MULTIPLY", pores, 0.14)))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.45), g.math("MULTIPLY", g.math("ADD", stain, grime), 0.4))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.25), g.math("MULTIPLY", crack, 0.7))
+        col = g.lerp(col, g.vmath("ADD", base, (0.1, 0.1, 0.1)), g.math("MULTIPLY", edge, 0.4))
+        rough = g.math("ADD", 0.84, g.math("MULTIPLY", pores, 0.12))
+        metal = g.val(0.0)
+        height = g.math("ADD", g.math("MULTIPLY", pores, 0.4), g.math("MULTIPLY", crack, -0.6))
+        bump_strength = 0.3
+    elif kind == "bark":
+        vec = g.coords((6.0, 6.0, 0.7))                                  # alargado en vertical
+        fissure = g.math("GREATER_THAN", g.noise(1.6, 5.0, 0.7, vec), 0.5)
+        fine = g.noise(60.0, 5.0, 0.7, vec)
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.55, g.math("MULTIPLY", fine, 0.9)))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.3), g.math("MULTIPLY", fissure, 0.7))
+        col = g.lerp(col, g.color_const((0.2, 0.19, 0.17)), g.math("MULTIPLY", g.math("GREATER_THAN", n1, 0.62), 0.45))     # liquenes grises
+        rough = g.math("ADD", 0.88, g.math("MULTIPLY", fine, 0.1))
+        metal = g.val(0.0)
+        height = g.math("ADD", g.math("MULTIPLY", fissure, -0.9), g.math("MULTIPLY", fine, 0.4))
+        bump_strength = 0.7
+    elif kind == "bag":
+        wr = g.noise(14.0, 5.0, 0.6)
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.7, g.math("MULTIPLY", wr, 1.2)))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.4), g.math("MULTIPLY", grime, 0.5))
+        rough = g.math("ADD", 0.22, g.math("MULTIPLY", wr, 0.25))
+        metal = g.val(0.0)
+        height = g.math("MULTIPLY", wr, 0.9)
+        bump_strength = 0.5
     elif kind == "decal":
         # vinilo o pintura de rotulo: color plano, mate, algo rozado y sucio como la chapa que lo rodea
         scuff = g.math("GREATER_THAN", g.noise(70.0, 4.0, 0.6), 0.62)

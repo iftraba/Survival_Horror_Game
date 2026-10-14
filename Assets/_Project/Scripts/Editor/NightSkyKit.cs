@@ -47,6 +47,7 @@ namespace Horror.EditorTools
 
             RenderSettings.skybox = mat;
             RenderSettings.defaultReflectionMode = DefaultReflectionMode.Skybox;
+            RenderSettings.reflectionIntensity = 0.6f;       // a 1 los charcos del asfalto (suavidad alta) reflejan el horizonte y parecen nieve
             RenderSettings.fogColor = new Color(0.05f, 0.055f, 0.07f);
             foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 if (cam.CompareTag("MainCamera") || cam.GetComponent<ThirdPersonCamera>() != null)

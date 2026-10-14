@@ -27,6 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() els
 exec(open(os.path.join(HERE, "build_items.py"), encoding="utf-8").read())
 
 L, W = 4.7, 1.82
+CIVIL = None          # None = patrulla; un dict (color, techo_largo) = coche civil abandonado (sin rotulos, barra ni defensa)
 WHEEL_Y = (-1.42, 1.42)
 WHEEL_X = 0.785
 WHEEL_R = 0.36
@@ -61,7 +62,7 @@ def palette(burnt):
            "metal_dark": (0.1, 0.1, 0.11), "metal_rim": (0.2, 0.21, 0.23), "glass": (0.03, 0.045, 0.06), "lens_red": (0.85, 0.03, 0.02),
            "lens_blue": (0.03, 0.1, 0.9), "lens_head": (0.93, 0.92, 0.84), "lens_amber": (0.92, 0.45, 0.03), "lens_clear": (0.88, 0.9, 0.95),
            "plastic_white": (0.9, 0.9, 0.88), "plastic_interior": (0.025, 0.025, 0.03), "rubber": (0.022, 0.022, 0.025),
-           "decal_k": (0.015, 0.015, 0.02), "decal_w": (0.93, 0.93, 0.9), "decal_blue": (0.04, 0.12, 0.6), "decal_gold": (0.8, 0.62, 0.18), "charred": (0.05, 0.043, 0.038)}
+           "carpaint_civil": (0.2, 0.3, 0.3), "decal_k": (0.015, 0.015, 0.02), "decal_w": (0.93, 0.93, 0.9), "decal_blue": (0.04, 0.12, 0.6), "decal_gold": (0.8, 0.62, 0.18), "charred": (0.05, 0.043, 0.038)}
     if burnt:
         pal.update({"carpaint_white": (0.42, 0.4, 0.36), "carpaint_black": (0.03, 0.026, 0.025), "glass": (0.02, 0.022, 0.024), "lens_head": (0.22, 0.2, 0.17),
                     "lens_red": (0.25, 0.03, 0.02), "lens_blue": (0.03, 0.05, 0.22), "lens_amber": (0.28, 0.15, 0.04), "lens_clear": (0.3, 0.3, 0.3),
@@ -116,6 +117,8 @@ def build_shell(m, burnt=False):
                     mat = "carpaint_black"
                 elif seg == 7 and abs(slope) > 0.33:
                     mat = "glass"                              # parabrisas y luna trasera
+            if CIVIL and mat in ("carpaint_white", "carpaint_black"):
+                mat = "carpaint_civil"
             f.material_index = m._idx(mat)
     for ring in (rings[0], list(reversed(rings[-1]))):
         f = sb.faces.new(ring)
@@ -422,8 +425,13 @@ def seam_loop(m, surf, pts, width, mode, cuts):
         strip(m, surf, (ax, ay, 3.0), (bx, by, 3.0), width, "plastic_interior", mode, 1, 0.0012, cuts)
 
 
-def build(burnt):
+def build(burnt, civil=None):
+    global CIVIL, STATIONS
+    CIVIL = civil
     pal = palette(burnt)
+    if civil:
+        pal["carpaint_civil"] = civil["color"] if not burnt else tuple(c * 0.55 for c in civil["color"])
+        pal["plastic"] = (0.05, 0.05, 0.055)
     m = Mesher("policecar", pal)
     m._deco = []
     ev = shell_object(m, burnt)
@@ -436,16 +444,17 @@ def build(burnt):
             strip(m, surf, (s * 0.9, y, 0.35), (s * 0.9, y, 0.94), 0.004, "plastic_interior", "side", s, 0.001, 6)
         strip(m, surf, (s * 0.9, -0.58, 0.35), (s * 0.9, 1.28, 0.35), 0.004, "plastic_interior", "side", s, 0.001, 10)
         # franja azul y dorada, escudo
-        strip(m, surf, (s * 0.9, -0.55, 0.515), (s * 0.9, 1.25, 0.515), 0.015, "decal_blue", "side", s, 0.0014, 12)
-        strip(m, surf, (s * 0.9, -0.55, 0.4625), (s * 0.9, 1.25, 0.4625), 0.0075, "decal_gold", "side", s, 0.0014, 12)
-        shield(m, surf, s, 0.78, 0.8)
-        # texto POLICE en la puerta delantera: se crea en XY (lee hacia +X) y se lleva al lateral
-        me = text_mesh("POLICE", 0.15)
-        if s > 0:
-            mat = Matrix([[0, 0, 1, 0.9], [1, 0, 0, -0.12], [0, 1, 0, 0.67], [0, 0, 0, 1]])
-        else:
-            mat = Matrix([[0, 0, -1, -0.9], [-1, 0, 0, -0.12], [0, 1, 0, 0.67], [0, 0, 0, 1]])
-        put_mesh(m, surf, me, mat, "decal_k", "side", s, 0.0016)
+        if not CIVIL:
+            strip(m, surf, (s * 0.9, -0.55, 0.515), (s * 0.9, 1.25, 0.515), 0.015, "decal_blue", "side", s, 0.0014, 12)
+            strip(m, surf, (s * 0.9, -0.55, 0.4625), (s * 0.9, 1.25, 0.4625), 0.0075, "decal_gold", "side", s, 0.0014, 12)
+            shield(m, surf, s, 0.78, 0.8)
+            # texto POLICE en la puerta delantera: se crea en XY (lee hacia +X) y se lleva al lateral
+            me = text_mesh("POLICE", 0.15)
+            if s > 0:
+                mat = Matrix([[0, 0, 1, 0.9], [1, 0, 0, -0.12], [0, 1, 0, 0.67], [0, 0, 0, 1]])
+            else:
+                mat = Matrix([[0, 0, -1, -0.9], [-1, 0, 0, -0.12], [0, 1, 0, 0.67], [0, 0, 0, 1]])
+            put_mesh(m, surf, me, mat, "decal_k", "side", s, 0.0016)
         # tiradores, retrovisor, luz de posicion, aros de los pasos de rueda
         for y in (-0.24, 0.74):
             x = surf.side_x(y, 0.84, s)
@@ -478,11 +487,13 @@ def build(burnt):
         for k in (-1, 1):
             m.ellipsoid((sx * 0.64 + k * 0.09, -2.402, 0.68), (0.05, 0.016, 0.05), "metal", 10, 6)
         m.box((sx * 0.76, -2.372, 0.5), (0.1, 0.04, 0.06), "lens_amber", bevel=0.01)
-        m.box((sx * 0.34, -2.41, 0.6), (0.1, 0.012, 0.032), "lens_red" if sx < 0 else "lens_blue", bevel=0.004)
-    for sx in (-0.5, 0.5):
-        tube(m, [(sx, -2.46, 0.3), (sx, -2.52, 0.34), (sx, -2.52, 0.74), (sx, -2.46, 0.78)], 0.026, "plastic", 8)
-    for z in (0.74, 0.54, 0.34):
-        tube(m, [(-0.5, -2.52, z), (0.5, -2.52, z)], 0.026 if z != 0.54 else 0.02, "plastic", 8)
+        if not CIVIL:
+            m.box((sx * 0.34, -2.41, 0.6), (0.1, 0.012, 0.032), "lens_red" if sx < 0 else "lens_blue", bevel=0.004)
+    if not CIVIL:                                                                       # defensa de empuje (solo patrullas)
+        for sx in (-0.5, 0.5):
+            tube(m, [(sx, -2.46, 0.3), (sx, -2.52, 0.34), (sx, -2.52, 0.74), (sx, -2.46, 0.78)], 0.026, "plastic", 8)
+        for z in (0.74, 0.54, 0.34):
+            tube(m, [(-0.5, -2.52, z), (0.5, -2.52, z)], 0.026 if z != 0.54 else 0.02, "plastic", 8)
     # trasera
     m.box((0, 2.335, 0.42), (1.7, 0.14, 0.2), "plastic", bevel=0.045)
     for sx in (-1, 1):
@@ -493,14 +504,16 @@ def build(burnt):
     m.box((0, 2.386, 0.63), (0.36, 0.012, 0.18), "plastic_white", bevel=0.004)
     m.box((0, 2.37, 0.38), (1.2, 0.03, 0.04), "metal_dark")
     tube(m, [(0.55, 2.3, 0.26), (0.55, 2.47, 0.26)], 0.03, "metal_dark", 10)
-    me = text_mesh("POLICE", 0.105)
-    put_mesh(m, surf, me, Matrix([[-1, 0, 0, 0], [0, 0, 1, 2.3], [0, 1, 0, 0.815], [0, 0, 0, 1]]), "decal_w", "back", 1, 0.0016, 2)
-    # techo
-    lightbar(m, surf, burnt)
+    if not CIVIL:
+        me = text_mesh("POLICE", 0.105)
+        put_mesh(m, surf, me, Matrix([[-1, 0, 0, 0], [0, 0, 1, 2.3], [0, 1, 0, 0.815], [0, 0, 0, 1]]), "decal_w", "back", 1, 0.0016, 2)
+        lightbar(m, surf, burnt)                                                        # techo
     tube(m, [(-0.58, 1.22, 1.4), (-0.58, 1.22, 1.78)], 0.005, "plastic", 5)
     for y in WHEEL_Y:
         for sx in (-1, 1):
             wheel(m, sx * WHEEL_X, y, burnt, sx)
+    if civil:
+        return finish(m, civil["name"])
     return finish(m, "PoliceCar" if burnt else "PoliceCarClean")
 
 
@@ -527,7 +540,7 @@ def preview(kind="clean"):
     return obj
 
 
-if __name__ == "__main__" and "--" in sys.argv:
+if __name__ == "__main__" and "--" in sys.argv and not globals().get("_NO_MAIN"):
     out = sys.argv[sys.argv.index("--") + 1]
     only = [a for a in sys.argv[sys.argv.index("--") + 2:]]
     os.makedirs(out, exist_ok=True)

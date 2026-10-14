@@ -144,7 +144,6 @@ namespace Horror.EditorTools
                     new Color(0.08f, 0.08f, 0.08f, 0.6f), new Color(0.2f, 0.2f, 0.2f, 0.2f), 3f, -0.03f, 80);
             var junk = new (string path, Vector3 p, float yaw)[]
             {
-                (Props + "Rubble.fbx", new Vector3(-8f, 0f, -14f), 30f), (Props + "Rubble.fbx", new Vector3(18f, 0f, -16f), 140f),
                 (Props + "Barrel.fbx", new Vector3(-5f, 0f, -12.6f), 0f), (Props + "Barrel.fbx", new Vector3(28f, 0f, -12.8f), 0f),
                 (Props + "Crate.fbx", new Vector3(9f, 0f, -12.4f), 35f), (Props + "Crate.fbx", new Vector3(-24f, 0f, -5f), 10f),
                 (Props + "Crate.fbx", new Vector3(14f, 0f, -6f), 60f), (Props + "Rubble.fbx", new Vector3(-10f, 0f, -3f), 80f),
@@ -187,8 +186,8 @@ namespace Horror.EditorTools
             Exterior(fire, smoke);
 
             var sun = Object.FindObjectsByType<Light>(FindObjectsSortMode.None).FirstOrDefault(l => l.type == LightType.Directional);
-            if (sun != null) { sun.color = new Color(0.55f, 0.62f, 0.8f); sun.intensity = 0.25f; sun.transform.rotation = Quaternion.Euler(38f, 160f, 0f); }
-            RenderSettings.fog = true; RenderSettings.fogMode = FogMode.ExponentialSquared; RenderSettings.fogDensity = 0.011f; RenderSettings.fogColor = new Color(0.07f, 0.06f, 0.06f);
+            if (sun != null) { sun.color = new Color(0.55f, 0.62f, 0.8f); sun.intensity = 0.25f; sun.transform.rotation = Quaternion.Euler(23f, 270f, 0f); }      // la luz viene de la luna (NightSkyKit): al este, 23 grados
+            RenderSettings.fog = true; RenderSettings.fogMode = FogMode.ExponentialSquared; RenderSettings.fogDensity = 0.011f; RenderSettings.fogColor = new Color(0.05f, 0.055f, 0.07f);      // como NightSkyKit: que case con el horizonte del cielo
 
             var intro = new GameObject("Intro"); intro.transform.SetParent(level);
             var ic = intro.AddComponent<IntroCutscene>();

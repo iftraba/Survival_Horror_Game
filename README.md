@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-14 · Art/Level · **Calle y mobiliario urbano** (fase 2 del lavado de cara del exterior): 17 modelos de Blender (semáforos, señales, hidrantes, contenedores, parada de autobús, árboles muertos...), 3 coches civiles abandonados, capa de suelo con grietas, parches, charcos, alcantarillas y pasos de cebra, y menos reflejo del cielo en el asfalto. Menú *Horror/Comisaria grande/10 Calle y mobiliario urbano*.
+
 - 2026-10-14 · Art/Level · **Cielo nocturno** (fase 1 del lavado de cara del exterior): panorama con luna, estrellas y nubes hecho en Blender, skybox en la escena y reflexiones del cielo. Menú *Horror/Atmosfera/Cielo nocturno*.
 
 - 2026-10-14 · Art · **Coches de policía v3**: modelo de nivel AA hecho en Blender a la vista (carrocería suavizada, rótulos y franjas proyectados sobre la chapa, barra de luces nueva, ruedas, defensa de empuje) en versión intacta y quemada, con tipos de textura nuevos (pintura de coche, vinilo, cristal, lentes, goma, chapa quemada) a 2048. Detalle en `docs/art-pipeline.md`.

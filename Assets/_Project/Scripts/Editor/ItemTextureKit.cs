@@ -59,6 +59,10 @@ namespace Horror.EditorTools
         /// <summary>Objetos y piezas de los puzles de la comisaria grande (Tools/blender/build_puzzle_items.py), en Art/Props/Puzzle.</summary>
         public static readonly string[] PuzzleProps = { "BoltCutter", "KeyCard", "KeyCardChief", "Fuse", "PadlockChain", "CardReader", "FuseBox" };
 
+        /// <summary>Mobiliario urbano de la calle (Tools/blender/build_street.py), en Art/Props/Street.</summary>
+        public static readonly string[] StreetProps = { "Hydrant", "TrashCan", "Dumpster", "NewsBox", "Mailbox", "ParkingMeter", "JerseyBarrier", "TrafficCone", "Barricade", "Bollard",
+            "GarbageBags", "SignStop", "SignOneWay", "SignNoParking", "TrafficLight", "BusShelter", "DeadTree", "CivilCarA", "CivilCarB", "CivilCarC" };
+
         public static readonly string[] WallProps = { "WallRadiator", "WallExtinguisher", "WallElectricPanel", "WallNoticeBoard", "WallVent", "WallClock", "WallPipeRun" };
 
         static readonly (string mat, string name, bool baseColor)[] Meshy =
@@ -73,11 +77,12 @@ namespace Horror.EditorTools
         static string dir = T;
         static Texture2D Tex(string file) => AssetDatabase.LoadAssetAtPath<Texture2D>(dir + file);
 
-        static void Importers()
+        static void Importers(string[] names = null)
         {
             foreach (var path in Directory.GetFiles(T, "*.png").Concat(Directory.Exists(TP) ? Directory.GetFiles(TP, "*.png") : new string[0]))
             {
                 var p = path.Replace('\\', '/');
+                if (names != null && !names.Any(n => Path.GetFileName(p).StartsWith(n + "_"))) continue;      // solo las texturas de estos modelos
                 var ti = (TextureImporter)AssetImporter.GetAtPath(p);
                 if (ti == null) continue;
                 bool normal = p.EndsWith("_Normal.png"), ms = p.EndsWith("_MetallicSmoothness.png");
@@ -111,9 +116,10 @@ namespace Horror.EditorTools
         [MenuItem("Horror/Aplicar texturas de objetos")]
         public static void Menu() { Debug.Log("[Horror] " + Apply()); }
 
-        public static string Apply()
+        /// <param name="only">Si no es nulo, solo se procesan los modelos cuya ruta contenga este texto (p. ej. "/Street/") y no se tocan los de Meshy.</param>
+        public static string Apply(string only = null)
         {
-            Importers();
+            Importers(only != null ? StreetProps : null);
             var log = new List<string>();
             var lit = Shader.Find("Universal Render Pipeline/Lit");
             var all = Baked.Select(b => (b.fbx, b.name, T)).Concat(Props.Select(n => ("Assets/_Project/Art/Props/" + n + ".fbx", n, TP)))
@@ -125,7 +131,9 @@ namespace Horror.EditorTools
                 .Concat(ArchiveProps.Select(n => ("Assets/_Project/Art/Props/Archive/" + n + ".fbx", n, TP)))
                 .Concat(BasementProps.Select(n => ("Assets/_Project/Art/Props/Basement/" + n + ".fbx", n, TP)))
                 .Concat(StationProps.Select(n => ("Assets/_Project/Art/Props/Station/" + n + ".fbx", n, TP)))
-                .Concat(PuzzleProps.Select(n => ("Assets/_Project/Art/Props/Puzzle/" + n + ".fbx", n, TP)));
+                .Concat(PuzzleProps.Select(n => ("Assets/_Project/Art/Props/Puzzle/" + n + ".fbx", n, TP)))
+                .Concat(StreetProps.Select(n => ("Assets/_Project/Art/Props/Street/" + n + ".fbx", n, TP)));
+            if (only != null) all = all.Where(t => t.Item1.Contains(only));
             foreach (var (fbx, name, folder) in all)
             {
                 dir = folder;
@@ -143,6 +151,7 @@ namespace Horror.EditorTools
                 log.Add(name);
             }
             dir = T;
+            if (only != null) { AssetDatabase.SaveAssets(); return "texturas aplicadas (" + only + "): " + string.Join(", ", log); }
             foreach (var (mat, name, bc) in Meshy)
             {
                 var m = AssetDatabase.LoadAssetAtPath<Material>(mat);
