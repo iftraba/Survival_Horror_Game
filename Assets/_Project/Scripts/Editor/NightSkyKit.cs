@@ -16,6 +16,31 @@ namespace Horror.EditorTools
         const string TexPath = "Assets/_Project/Art/Textures/Sky/NightSky.png";
         const string MatPath = "Assets/_Project/Materials/NightSky.mat";
 
+        const string ReflPath = "Assets/_Project/Art/Textures/Sky/NeutralReflection.asset";
+
+        /// <summary>Cubemap de 32 px con un degradado gris azulado oscuro (suelo casi negro): las reflexiones del nivel no dependen del color del cielo.</summary>
+        static Cubemap NeutralReflection()
+        {
+            var cm = AssetDatabase.LoadAssetAtPath<Cubemap>(ReflPath);
+            if (cm == null) { cm = new Cubemap(32, TextureFormat.RGBA32, true); AssetDatabase.CreateAsset(cm, ReflPath); }
+            for (int f = 0; f < 6; f++)
+            {
+                var px = new Color[32 * 32];
+                for (int y = 0; y < 32; y++)
+                    for (int x = 0; x < 32; x++)
+                    {
+                        float v = 1f - y / 31f;                                       // 1 = arriba de la cara
+                        float up = f == 2 ? 1f : f == 3 ? 0f : v;                      // +Y todo cielo, -Y todo suelo, laterales: degradado
+                        var col = Color.Lerp(new Color(0.015f, 0.015f, 0.018f), new Color(0.11f, 0.12f, 0.14f), Mathf.Clamp01(up * 1.4f));
+                        px[y * 32 + x] = col;
+                    }
+                cm.SetPixels(px, (CubemapFace)f);
+            }
+            cm.Apply(true);
+            EditorUtility.SetDirty(cm);
+            return cm;
+        }
+
         [MenuItem("Horror/Atmosfera/Cielo nocturno")]
         public static void Apply()
         {
@@ -46,8 +71,11 @@ namespace Horror.EditorTools
             EditorUtility.SetDirty(mat);
 
             RenderSettings.skybox = mat;
-            RenderSettings.defaultReflectionMode = DefaultReflectionMode.Skybox;
-            RenderSettings.reflectionIntensity = 0.6f;       // a 1 los charcos del asfalto (suavidad alta) reflejan el horizonte y parecen nieve
+            // reflexiones: un cubemap neutro y oscuro propio, NO el cielo. Con el cielo (horizonte anaranjado) todo lo metalico del interior (taquillas, archivadores...)
+            // salia teñido de naranja, y los charcos del asfalto parecian nieve.
+            RenderSettings.defaultReflectionMode = DefaultReflectionMode.Custom;
+            RenderSettings.customReflectionTexture = NeutralReflection();
+            RenderSettings.reflectionIntensity = 0.7f;
             RenderSettings.fogColor = new Color(0.05f, 0.055f, 0.07f);
             foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 if (cam.CompareTag("MainCamera") || cam.GetComponent<ThirdPersonCamera>() != null)
