@@ -597,3 +597,10 @@ Menú nuevo **12 Fachada de la comisaría** (`ComisariaGrandeFront`, repetible; 
 - **8 lámparas de pared** con luz cálida a lo largo de la fachada, **4 jardineras** secas, **4 muros de sacos de arena**, **2 focos de obra** de dos faros (con luces tipo foco apuntando a la verja), **alambre de espino** (26 tramos) sobre la verja de delante y **señales de peligro** cada 12 m.
 - Piezas de Blender en `Tools/blender/build_station_front.py` (`Art/Props/Front`), registradas en `ItemTextureKit.FrontProps` (`FlagCloth` no se hornea).
 - Comprobado con cámaras temporales (desde el patio, la calle y detrás de la verja). **Sin comprobar:** rendimiento (unas 20 luces puntuales/focos nuevas sin sombra y ~55 piezas), oclusión sin rebakear (menú 8), cómo se ve la placa desde dentro del patio con el pitch por defecto del juego, y que los colisionadores de jardineras y sacos no estorben el recorrido de los zombis de la verja.
+
+## Lavado de cara del interior, molduras de pared (2026-10-14)
+Menú nuevo **13 Molduras de pared** (`ComisariaGrandeTrim`, repetible; rehace solo «Interior_Molduras»; **no hace falta rehacer el nivel**).
+- Cada «Rodapie» que genera el menú 1 marca un tramo de pared interior (lado, largo y suelo de su sala). Sobre cada uno se pone un **friso oscuro** (lambrín verde grisáceo, material `Env_Lambrin` derivado de `Env_Wall`) de 0,14 a 1,05 m, una **moldura de madera** a 1,05 m y una **cornisa de techo** (`Env_Cornisa`) de 14 cm. Las puertas quedan libres porque ahí no hay rodapié.
+- Resultado: 673 piezas (0 rodapiés sin sala), estáticas y sin colisión. Si se rehace el nivel (menús 1 a 7), hay que volver a lanzar el 13.
+- Visto en el vestíbulo y en un pasillo: las paredes dejan de ser un plano continuo y el friso ayuda a leer la altura de la sala.
+- Sin comprobar: rendimiento (673 cajas largas más, sin medir), oclusión sin rebakear (menú 8) y salas con techos bajos o escaleras.
