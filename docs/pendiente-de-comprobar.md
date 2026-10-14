@@ -98,3 +98,4 @@ Leyenda: **[PC]** se puede comprobar con herramientas (Play + MCP) · **[JUGAR]*
 - [PC] Calle nueva (menú 10): rendimiento en el patio y en la intro, rebakear la oclusión (menú 8), aspecto desde el patio a través de la verja y en la intro, y que ningún objeto de la calle quede dentro del NavMesh al rehacer el nivel.
 - [PC] Fachadas y azoteas (menú 11): rendimiento en la intro y el patio, rebakear la oclusión (menú 8), alineado de toldos y tablones con las ventanas de cerca, y que nada de la ciudad asome dentro del patio.
 - [PC] Fachada de la comisaría (menú 12): rendimiento de las ~20 luces nuevas, oclusión (menú 8), placa y banderas vistas desde el patio en juego, y que jardineras y sacos no cierren pasos.
+- [JUGAR] Luz de relleno (menú 15): que las salas oscuras sigan dando miedo (sótano, calabozos) y que no haya zonas aplanadas; halos de los objetos a distancia y que no se confundan entre sí.

@@ -604,3 +604,10 @@ Menú nuevo **13 Molduras de pared** (`ComisariaGrandeTrim`, repetible; rehace s
 - Resultado: 673 piezas (0 rodapiés sin sala), estáticas y sin colisión. Si se rehace el nivel (menús 1 a 7), hay que volver a lanzar el 13.
 - Visto en el vestíbulo y en un pasillo: las paredes dejan de ser un plano continuo y el friso ayuda a leer la altura de la sala.
 - Sin comprobar: rendimiento (673 cajas largas más, sin medir), oclusión sin rebakear (menú 8) y salas con techos bajos o escaleras.
+
+## Luz de relleno y objetos más visibles (2026-10-14)
+Feedback tras la build: «faltan luces en algunas salas» y «los objetos de recoger deberían verse más, hay algunos en el suelo o incrustados en los coches».
+- **Luz de relleno** (menú nuevo **15 Luz de relleno**, `ComisariaGrandeLightBoost`, repetible; rehace solo «Luz_Relleno»): mide el brillo medio de cada sala (4 vistas desde el centro a 1,5 m, 80°) y, a las que quedan bajo 0,2, les añade luces puntuales sin sombra en una rejilla de 5,5 a 9 m, en hasta 3 pasadas. Las salas más oscuras eran la escalera norte (0,07), vestuarios (0,10), archivo (0,11), calderas (0,12) y garaje (0,13). Resultado: 88 luces, todas las afectadas suben a 0,20 o más (archivo 0,12 → 0,21 con 20 luces; calderas y garaje con 12 cada una). `G_Dark` (sala de pruebas) se excluye: es oscura a propósito.
+- **Objetos recogibles**: `PickupGlint` ahora se añade a **todos** (antes solo a los objetos clave): luz puntual pequeña más un halo aditivo que mira a la cámara (`Resources/PickupHalo`), visibles a menos de 12 m (10 los clave) y pulsando; los clave brillan más y con halo mayor. Se añadió a los 60 objetos de la escena que no lo llevaban y `Pickup.Spawn` lo pone siempre.
+- **Munición dentro de un coche:** una caja de 9 mm (x10) del garaje quedó dentro de la patrulla quemada, que ahora es más ancha; movida junto a la pared oeste. Con 9 coches y 69 objetos, solo ese estaba dentro.
+- Sin comprobar: que la luz de relleno no aplane el ambiente de las salas que debían ser oscuras (sótano, calabozos), el coste de 88 luces más y los halos a distancia.

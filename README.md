@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-14 · Level/Art · **Luz de relleno y objetos más visibles**: 88 luces de relleno en las salas más oscuras (menú *Horror/Comisaria grande/15*), brillo y halo en todos los objetos recogibles y una caja de munición sacada de un coche.
+
 - 2026-10-14 · Art/Level · **Fachada de la comisaría** (fase 4 del lavado de cara del exterior): placa SECTOR 7 con letras doradas, dos banderas, lámparas de pared, jardineras, sacos de arena, focos de obra y alambre de espino sobre la verja. Menú *Horror/Comisaria grande/12 Fachada de la comisaría*.
 
 - 2026-10-14 · Art/Level · **Fachadas y azoteas** (fase 3 del lavado de cara del exterior): zócalos, molduras y cornisas, toldos, ventanas tapiadas, pintadas, carteles, escaleras de incendios y piezas de azotea (depósitos, aires acondicionados, chimeneas, antenas) alineados con la rejilla de ventanas. Menú *Horror/Comisaria grande/11 Fachadas y azoteas*. Farolas giradas hacia la calle y con más luz.

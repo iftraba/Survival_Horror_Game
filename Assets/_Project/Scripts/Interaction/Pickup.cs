@@ -93,7 +93,7 @@ namespace Horror
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             if (impulse != default) rb.linearVelocity = impulse;
-            if (item.highlight) root.AddComponent<PickupGlint>();
+            root.AddComponent<PickupGlint>();          // todos brillan un poco; los objetos clave (item.highlight) mas
             return p;
         }
 
