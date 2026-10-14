@@ -66,6 +66,9 @@ namespace Horror.EditorTools
         /// <summary>Piezas de fachadas y azoteas (Tools/blender/build_city.py), en Art/Props/City.</summary>
         public static readonly string[] CityProps = { "Awning", "AwningTorn", "BoardsX", "RoofAC", "WaterTower", "Chimney", "Dish", "Antenna", "RoofAccess", "FireEscape" };
 
+        /// <summary>Fachada de la comisaria y patio (Tools/blender/build_station_front.py), en Art/Props/Front. FlagCloth no se hornea: usa la textura de la bandera.</summary>
+        public static readonly string[] FrontProps = { "StationSign", "FlagPole", "Planter", "SandbagWall", "Floodlight", "WallLamp", "RazorWire", "SignHazard" };
+
         public static readonly string[] WallProps = { "WallRadiator", "WallExtinguisher", "WallElectricPanel", "WallNoticeBoard", "WallVent", "WallClock", "WallPipeRun" };
 
         static readonly (string mat, string name, bool baseColor)[] Meshy =
@@ -122,7 +125,7 @@ namespace Horror.EditorTools
         /// <param name="only">Si no es nulo, solo se procesan los modelos cuya ruta contenga este texto (p. ej. "/Street/") y no se tocan los de Meshy.</param>
         public static string Apply(string only = null)
         {
-            Importers(only != null ? StreetProps.Concat(CityProps).ToArray() : null);
+            Importers(only != null ? StreetProps.Concat(CityProps).Concat(FrontProps).ToArray() : null);
             var log = new List<string>();
             var lit = Shader.Find("Universal Render Pipeline/Lit");
             var all = Baked.Select(b => (b.fbx, b.name, T)).Concat(Props.Select(n => ("Assets/_Project/Art/Props/" + n + ".fbx", n, TP)))
@@ -136,7 +139,8 @@ namespace Horror.EditorTools
                 .Concat(StationProps.Select(n => ("Assets/_Project/Art/Props/Station/" + n + ".fbx", n, TP)))
                 .Concat(PuzzleProps.Select(n => ("Assets/_Project/Art/Props/Puzzle/" + n + ".fbx", n, TP)))
                 .Concat(StreetProps.Select(n => ("Assets/_Project/Art/Props/Street/" + n + ".fbx", n, TP)))
-                .Concat(CityProps.Select(n => ("Assets/_Project/Art/Props/City/" + n + ".fbx", n, TP)));
+                .Concat(CityProps.Select(n => ("Assets/_Project/Art/Props/City/" + n + ".fbx", n, TP)))
+                .Concat(FrontProps.Select(n => ("Assets/_Project/Art/Props/Front/" + n + ".fbx", n, TP)));
             if (only != null) all = all.Where(t => t.Item1.Contains(only));
             foreach (var (fbx, name, folder) in all)
             {

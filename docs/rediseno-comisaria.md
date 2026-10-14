@@ -589,3 +589,11 @@ Menú nuevo **11 Fachadas y azoteas** (`ComisariaGrandeCity`, repetible; rehace 
 - **Piezas de Blender** (`Tools/blender/build_city.py`, en `Art/Props/City`, horneadas con `texture_items.py` y registradas en `ItemTextureKit.CityProps`) y **decals** con alfa (`build_city_decals.py`, en `Art/Textures/City`: pintadas, cartel, chorretón, hollín).
 - Resultado de la última ejecución: 14 fachadas, 53 toldos, 35 ventanas tapiadas, 56 pintadas, 42 carteles, 5 escaleras de incendios y 89 piezas en azoteas.
 - **Sin comprobar:** rendimiento (cientos de objetos nuevos, sin medir), oclusión sin rebakear (menú 8), el alineado fino de toldos y tablones con las ventanas desde cerca, y el aspecto de las azoteas de noche.
+
+## Lavado de cara del exterior, fase 4: fachada de la comisaría (2026-10-14)
+Menú nuevo **12 Fachada de la comisaría** (`ComisariaGrandeFront`, repetible; rehace solo «Fachada_Detalle» y apaga el «Rotulo» liso del menú 2).
+- **Placa «SECTOR 7 / POLICE DEPARTMENT»** (azul marino con filetes y letras doradas con grosor, escudo con estrella) sobre la marquesina, con dos focos de cuello de cisne y una luz propia.
+- **Dos banderas** en mastiles inclinados a ambos lados (la de la comisaría y la de la ciudad, con las texturas existentes `tex_flag_police`/`tex_flag_city` sobre una tela con ondas y doble cara).
+- **8 lámparas de pared** con luz cálida a lo largo de la fachada, **4 jardineras** secas, **4 muros de sacos de arena**, **2 focos de obra** de dos faros (con luces tipo foco apuntando a la verja), **alambre de espino** (26 tramos) sobre la verja de delante y **señales de peligro** cada 12 m.
+- Piezas de Blender en `Tools/blender/build_station_front.py` (`Art/Props/Front`), registradas en `ItemTextureKit.FrontProps` (`FlagCloth` no se hornea).
+- Comprobado con cámaras temporales (desde el patio, la calle y detrás de la verja). **Sin comprobar:** rendimiento (unas 20 luces puntuales/focos nuevas sin sombra y ~55 piezas), oclusión sin rebakear (menú 8), cómo se ve la placa desde dentro del patio con el pitch por defecto del juego, y que los colisionadores de jardineras y sacos no estorben el recorrido de los zombis de la verja.
