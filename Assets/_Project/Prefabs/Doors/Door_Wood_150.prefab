@@ -1054,6 +1054,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.Door
   requiredKey: {fileID: 0}
+  originalKey: {fileID: 0}
   consumeKey: 1
   partner: {fileID: 0}
   openAngle: 100
@@ -1062,6 +1063,8 @@ MonoBehaviour:
   zombiesCanForce: 1
   zombieReach: 1.5
   openedObjective: 
+  sealedPrompt: Atrancada
+  sealedMessage: La puerta se ha atrancado
 --- !u!1 &6574286499946690072
 GameObject:
   m_ObjectHideFlags: 0
