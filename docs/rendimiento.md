@@ -27,3 +27,18 @@ Mismas posiciones, orientación y condiciones antes y después (mediana de 60 fo
 - ~~Dormir la IA de los zombis lejanos o dormidos~~ **Descartado tras medirlo (2026-10-10, con la oclusión ya horneada):** quitar por separado el script `ZombieAI`, los `NavMeshAgent` y los `Animator` de los 55 enemigos, o desactivarlos del todo, cambia la CPU entre -1,7 y +1,8 ms según el sitio (vestíbulo 14,0 base y 15,8 sin zombis; galería del sótano 10,8 → 9,2; atrio 11,9 → 10,2; ruido de ±1,5 ms), sin ninguna tendencia clara. Los 4-5 ms que se le atribuyeron en la auditoría eran el dibujo de los zombis visibles antes de la oclusión (cuerpos, sombras), no su lógica. No se toca `ZombieAI`.
 - Puertas como `OcclusionPortal` (una puerta cerrada hoy no tapa nada) y combinar las piezas de las puertas (800 dibujos no estáticos): sin hacer, sin medir.
 - Sin línea base anterior a la etapa F (110 lámparas).
+
+## Tras el lavado de cara del exterior y del interior (2026-10-14)
+Oclusión rebakeada (menú 8) con todo lo nuevo (calle, ciudad, fachada, molduras, muebles, sillas, luminarias). Medido en Play del editor con `EditorApplication.Step()` (40 fotogramas por punto tras 30 de calentamiento; `UnityStats` y `FrameTimingManager`), 1 jugador, sin zombis activos en cámara:
+
+| Punto | Llamadas de dibujo | Triángulos | CPU (ms) |
+|---|---|---|---|
+| Patio (inicio) | 2.770 | 1,67 M | 8,8 |
+| Vestíbulo | 3.653 | 1,97 M | 9,3 |
+| Pasillo oeste | 1.974 | 1,67 M | 8,8 |
+| Planta 1 (mando) | 3.936 | 2,75 M | 11,2 |
+| Sótano | 1.285 | 1,25 M | 8,3 |
+
+- Referencia anterior (2026-10-10, vestíbulo con oclusión): 3.014 llamadas y 13,1 ms de CPU. Ahora el vestíbulo tiene +21 % de llamadas (3.653) y la CPU medida no es comparable (otro método). **Sin dato de GPU** y sin build medida: el editor no es la build.
+- Los triángulos (1,3 a 2,8 millones por vista) son lo que más ha subido: muebles más detallados, 673 molduras, 252 marcos de luminaria y la ciudad. Si en una máquina floja hay problemas, las palancas son: bajar a la mitad las subdivisiones de los muebles repetidos, quitar los marcos de las luminarias lejanas y reducir la ciudad (menú 11) a las fachadas que se ven desde el patio.
+- Pendiente: medir en la build con `F3` en una máquina objetivo.
