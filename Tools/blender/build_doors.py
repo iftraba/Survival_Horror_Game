@@ -19,7 +19,7 @@ W0, W1, H0, H1, T = 0.02, 1.48, 0.02, 2.38, 0.05
 
 
 def make_leaf():
-    m = Mesher("doorleaf", {"wood": (0.36, 0.20, 0.10), "board": (0.30, 0.17, 0.08), "steel": (0.62, 0.62, 0.64), "brass": (0.70, 0.55, 0.25)})
+    m = Mesher("doorleaf", {"wood": (0.19, 0.115, 0.075), "board": (0.13, 0.082, 0.055), "steel": (0.5, 0.52, 0.54), "brass": (0.55, 0.42, 0.18)})
     cx, w = (W0 + W1) / 2, W1 - W0
     st, rl = 0.13, 0.13                                      # ancho de largueros y travesanos
     win = (1.47, 1.97, cx - 0.31, cx + 0.31)                 # hueco del cristal (z0, z1, x0, x1): el de Window del prefab
@@ -53,6 +53,16 @@ def make_leaf():
         m.loft_y([(hx, s * (T / 2 + 0.01), 1.0, 0.009, 0.009), (hx, s * (T / 2 + 0.05), 1.0, 0.009, 0.009)], "steel", 10)   # cuello
         m.box((hx - 0.055, s * (T / 2 + 0.055), 1.0), (0.13, 0.016, 0.018), "steel", bevel=0.006)                       # manivela
         m.loft_y([(hx, s * (T / 2), 0.9, 0.012, 0.012), (hx, s * (T / 2 + 0.006), 0.9, 0.012, 0.012)], "brass", 10)    # bocallave
+        # placa de empuje de acero a la altura de la mano, tornillos, y brazo del cierrapuertas arriba (en la cara -1)
+        m.box((hx - 0.0, s * (T / 2 + 0.002), 1.28), (0.14, 0.004, 0.34), "steel", bevel=0.004)
+        for dz in (-0.14, 0.14):
+            m.loft_y([(hx, s * (T / 2 + 0.004), 1.28 + dz, 0.007, 0.007), (hx, s * (T / 2 + 0.008), 1.28 + dz, 0.007, 0.007)], "brass", 8)
+        if s < 0:
+            m.box((cx - 0.38, s * (T / 2 + 0.03), H1 - 0.2), (0.3, 0.05, 0.07), "steel", bevel=0.01)                   # cuerpo del cierrapuertas
+            m.box((cx - 0.12, s * (T / 2 + 0.05), H1 - 0.16), (0.46, 0.018, 0.018), "steel", rot=(0, 0, 8))          # brazo
+        # rotulo de latón con la zona (sin texto) a la altura de los ojos, en la cara +1
+        if s > 0:
+            m.box((cx, s * (T / 2 + 0.001), 1.78), (0.22, 0.004, 0.07), "brass", bevel=0.003)
     for z in (0.3, 1.2, 2.1):                                # bisagras
         m.loft_z([(W0 - 0.004, 0, z - 0.06, 0.01, 0.01), (W0 - 0.004, 0, z + 0.06, 0.01, 0.01)], "brass", 10)
         m.box((W0 + 0.01, 0, z), (0.03, T + 0.004, 0.11), "brass")
@@ -61,7 +71,7 @@ def make_leaf():
 
 def make_jamb():
     """Jamba con moldura (la pieza Jamb del prefab: 0,1 x 2,45 x 0,05, de y = -0,025 a 2,425) con plinto abajo."""
-    m = Mesher("doorjamb", {"wood": (0.34, 0.19, 0.09), "board": (0.28, 0.16, 0.08)})
+    m = Mesher("doorjamb", {"wood": (0.17, 0.105, 0.07), "board": (0.12, 0.075, 0.05)})
     x0, x1, z0, z1 = -0.09, 0.01, -0.025, 2.425
     cx = (x0 + x1) / 2
     m.box((cx, 0, (z0 + z1) / 2), (x1 - x0, 0.03, z1 - z0), "board")
@@ -73,7 +83,7 @@ def make_jamb():
 
 def make_header():
     """Dintel con cornisa (la pieza Header de la puerta de 1,50: 1,68 x 0,1 x 0,05)."""
-    m = Mesher("doorheader", {"wood": (0.34, 0.19, 0.09), "board": (0.28, 0.16, 0.08)})
+    m = Mesher("doorheader", {"wood": (0.17, 0.105, 0.07), "board": (0.12, 0.075, 0.05)})
     x0, x1, z0, z1 = -0.09, 1.59, 2.40, 2.50
     cx = (x0 + x1) / 2
     m.box((cx, 0, (z0 + z1) / 2), (x1 - x0, 0.03, z1 - z0), "board")
