@@ -47,7 +47,7 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
-- 2026-10-14 · Art · **Coches de policía v2**: modelo nuevo de nivel AA hecho en Blender a la vista (carrocería suavizada, pintura bicolor, barra de luces, defensa de empuje, ruedas reales, rótulos) en versión intacta y quemada, texturas de 2048. Detalle en `docs/art-pipeline.md`.
+- 2026-10-14 · Art · **Coches de policía v3**: modelo de nivel AA hecho en Blender a la vista (carrocería suavizada, rótulos y franjas proyectados sobre la chapa, barra de luces nueva, ruedas, defensa de empuje) en versión intacta y quemada, con tipos de textura nuevos (pintura de coche, vinilo, cristal, lentes, goma, chapa quemada) a 2048. Detalle en `docs/art-pipeline.md`.
 
 - 2026-10-11 · Interaction · **Secuencias de progreso**: la E que coloca el medallón ya no las salta en el mismo fotograma; al cargar partida la reja y la puerta de las calderas quedan abiertas al instante y al empezar partida nueva se reinician.
 

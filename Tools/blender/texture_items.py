@@ -138,6 +138,18 @@ class G:
 
 def kind_of(name):
     n = name.lower()
+    if "carpaint" in n:                                  # coches (2026-10-14): pintura brillante con suciedad de carretera, sin oxido
+        return "carpaint"
+    if "charred" in n:                                   # chapa quemada: hollin negro con manchas de oxido y pintura levantada
+        return "charred"
+    if "decal" in n:                                     # rotulos y franjas pintadas o de vinilo
+        return "decal"
+    if "glass" in n:
+        return "glass"
+    if "lens" in n:                                      # lentes de faros, pilotos y barra de luces
+        return "lens"
+    if "rubber" in n:
+        return "rubber"
     if any(k in n for k in ("stone", "marble")):        # memorial (2026-10-08): piedra con vetas
         return "stone"
     if any(k in n for k in ("wood", "board")):
@@ -213,6 +225,69 @@ def build_material(mat, base_rgb, base_rough, name):
         metal = g.math("MULTIPLY", chips, 0.9)
         height = g.math("ADD", g.math("MULTIPLY", chips, -0.5), g.math("MULTIPLY", n1, 0.2))
         bump_strength = 0.2
+    elif kind == "carpaint":
+        # pintura de coche: barniz brillante, suciedad de carretera que sube desde abajo (por altura del objeto), mugre en las juntas y
+        # pequenos desconchones solo en los bordes mas vivos. Nada de oxido.
+        sep = g.node("ShaderNodeSeparateXYZ")
+        g.link(g.coords(), sep.inputs["Vector"])
+        dirt = g.math("SUBTRACT", 1.0, g.math("MULTIPLY", g.math("SUBTRACT", sep.outputs["Z"], 0.22), 1.7), clamp=True)
+        dn = g.noise(30.0, 5.0, 0.62)
+        road = g.math("MULTIPLY", dirt, g.math("ADD", 0.5, g.math("MULTIPLY", dn, 0.7)), clamp=True)
+        chips_n = g.noise(40.0, 6.0, 0.7)
+        chips = g.math("GREATER_THAN", g.math("ADD", g.math("MULTIPLY", edge, 0.5), g.math("MULTIPLY", chips_n, 0.55)), 0.97)
+        paint = g.vmath("SCALE", base, scale=g.math("ADD", 0.96, g.math("MULTIPLY", n2, 0.08)))
+        col = g.lerp(paint, g.color_const((0.2, 0.18, 0.14)), g.math("MULTIPLY", road, 0.5))
+        col = g.lerp(col, g.vmath("SCALE", paint, scale=0.55), g.math("MULTIPLY", grime, 0.45))
+        col = g.lerp(col, g.color_const((0.5, 0.5, 0.52)), chips)
+        rough = g.math("ADD", 0.2, g.math("MULTIPLY", n2, 0.1))
+        rough = g.math("ADD", rough, g.math("MULTIPLY", road, 0.45))
+        rough = g.math("ADD", rough, g.math("MULTIPLY", grime, 0.2))
+        metal = g.math("MULTIPLY", chips, 0.8)
+        height = g.math("ADD", g.math("MULTIPLY", n1, 0.05), g.math("MULTIPLY", chips, -0.3))
+        bump_strength = 0.06
+    elif kind == "charred":
+        patch = g.math("GREATER_THAN", g.noise(7.0, 6.0, 0.65), 0.52)
+        fine = g.noise(80.0, 6.0, 0.7)
+        rust_mask = g.math("MINIMUM", g.math("ADD", g.math("MULTIPLY", patch, 0.65), g.math("MULTIPLY", grime, 0.5)), 1.0)
+        soot = g.vmath("SCALE", g.color_const((0.05, 0.043, 0.038)), scale=g.math("ADD", 0.6, g.math("MULTIPLY", fine, 0.9)))
+        rust_col = g.lerp(g.color_const((0.2, 0.085, 0.04)), g.color_const((0.36, 0.17, 0.07)), fine)
+        col = g.lerp(soot, rust_col, g.math("MULTIPLY", rust_mask, 0.8))
+        bare = g.math("GREATER_THAN", g.math("ADD", g.math("MULTIPLY", edge, 0.6), g.math("MULTIPLY", fine, 0.5)), 0.95)
+        col = g.lerp(col, g.color_const((0.3, 0.29, 0.28)), bare)
+        rough = g.math("ADD", 0.7, g.math("MULTIPLY", fine, 0.25))
+        metal = g.math("MULTIPLY", bare, 0.6)
+        height = g.math("ADD", g.math("MULTIPLY", fine, 0.8), g.math("MULTIPLY", patch, 0.3))
+        bump_strength = 0.4
+    elif kind == "decal":
+        # vinilo o pintura de rotulo: color plano, mate, algo rozado y sucio como la chapa que lo rodea
+        scuff = g.math("GREATER_THAN", g.noise(70.0, 4.0, 0.6), 0.62)
+        col = g.lerp(base, g.vmath("SCALE", base, scale=0.7), g.math("MULTIPLY", grime, 0.5))
+        col = g.lerp(col, g.vmath("ADD", base, (0.1, 0.1, 0.1)), g.math("MULTIPLY", scuff, 0.25))
+        rough = g.math("ADD", 0.5, g.math("MULTIPLY", scuff, 0.2))
+        metal = g.val(0.0)
+        height = g.math("MULTIPLY", scuff, -0.1)
+        bump_strength = 0.03
+    elif kind == "glass":
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.9, g.math("MULTIPLY", n2, 0.2)))
+        col = g.lerp(col, g.color_const((0.12, 0.11, 0.1)), g.math("MULTIPLY", grime, 0.5))
+        rough = g.math("ADD", 0.06, g.math("MULTIPLY", grime, 0.3))
+        metal = g.val(0.0)
+        height = g.val(0.0)
+        bump_strength = 0.0
+    elif kind == "lens":
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.92, g.math("MULTIPLY", n1, 0.1)))
+        col = g.lerp(col, g.vmath("SCALE", base, scale=0.5), g.math("MULTIPLY", grime, 0.5))
+        rough = g.math("ADD", 0.1, g.math("MULTIPLY", grime, 0.3))
+        metal = g.val(0.0)
+        height = g.math("MULTIPLY", n1, 0.05)
+        bump_strength = 0.03
+    elif kind == "rubber":
+        col = g.vmath("SCALE", base, scale=g.math("ADD", 0.8, g.math("MULTIPLY", n1, 0.5)))
+        col = g.lerp(col, g.color_const((0.17, 0.15, 0.12)), g.math("MULTIPLY", g.math("MULTIPLY", n2, n1), 0.7))      # polvo de carretera
+        rough = g.math("ADD", 0.86, g.math("MULTIPLY", n1, 0.12))
+        metal = g.val(0.0)
+        height = g.math("MULTIPLY", n1, 0.5)
+        bump_strength = 0.25
     elif kind == "rust":
         r1 = g.noise(18.0, 8.0, 0.65)
         col = g.lerp(g.color_const((0.18, 0.08, 0.04)), g.color_const((0.5, 0.24, 0.08)), r1)

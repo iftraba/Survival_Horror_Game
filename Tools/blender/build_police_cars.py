@@ -1,16 +1,18 @@
-"""Coches patrulla de la comisaria (v2, 2026-10-14): modelo de nivel AA, en dos versiones.
+"""Coches patrulla de la comisaria (v3, 2026-10-14): modelo de nivel AA, en dos versiones.
 
     blender --background --python build_police_cars.py -- <carpeta Assets/_Project/Art/Props/Exterior> [PoliceCar PoliceCarClean]
-    (en un Blender abierto: exec(open(ruta).read()); preview("clean") o preview("burnt"))
+    (en un Blender abierto: exec(open(ruta).read()); preview("clean") o preview("burnt"); view(rx, rz, distancia, (x, y, z)))
 
-  PoliceCar       quemado y abandonado: chapa chamuscada y oxidada, neumaticos desinflados, luces apagadas
+  PoliceCar       quemado y abandonado: capo, maletero y techo calcinados y oxidados, neumaticos aplastados, luces apagadas
   PoliceCarClean  intacto: bicolor negro y blanco, barra de luces, rotulos POLICE y placa, faros
-Mismas medidas que el modelo anterior (4,7 x 1,82 m, origen en el centro de la base, frente a -Y de Blender = +Z de Unity), asi que sustituye al
-modelo antiguo sin tocar la escena. Los nombres de material deciden el material horneado de texture_items.py (body* = chapa pintada,
-rust = chamusco/oxido, metal* = cromo; el resto plastico).
+Mismas medidas base que el modelo anterior (4,7 x 1,82 m de carroceria), origen en el centro de la base, frente a -Y de Blender = +Z de Unity.
+Los nombres de material deciden el material horneado de texture_items.py: carpaint* = pintura de coche, decal* = rotulos, glass = cristal,
+lens* = lentes y luces, rubber = goma, rust = oxido/chamusco, metal* = cromo y acero; el resto, plastico.
 
-Carroceria: una sola malla por secciones (cuerpo + habitaculo) suavizada con subdivision y con los pasos de rueda recortados con booleanos; encima,
-piezas sueltas (parachoques, faros, rejilla, retrovisores, barra de luces, ruedas con neumatico, llanta, disco y pinza) y rotulos de texto en malla.
+Carroceria: una sola malla por secciones (cuerpo + habitaculo) suavizada con subdivision, con aristas marcadas y pasos de rueda recortados con
+booleanos. Rotulos, franjas, escudo, juntas de puertas, capo y maletero son malla PLANA proyectada sobre la superficie real de la carroceria
+(rayos contra la malla suavizada), asi que no flotan ni se hunden. El resto son piezas sueltas (parachoques, faros, rejilla, retrovisores,
+barra de luces, ruedas).
 """
 import math
 import os
@@ -19,6 +21,7 @@ import sys
 import bmesh
 import bpy
 from mathutils import Euler, Matrix, Vector
+from mathutils.bvhtree import BVHTree
 
 HERE = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else r"C:\Users\iftra\My project\Tools\blender"
 exec(open(os.path.join(HERE, "build_items.py"), encoding="utf-8").read())
@@ -32,35 +35,38 @@ WHEEL_R = 0.36
 STATIONS = [
     (-2.35, 0.36, 0.60, 0.64, 0.72, 0.58),
     (-2.32, 0.27, 0.66, 0.70, 0.83, 0.68),
-    (-2.22, 0.23, 0.76, 0.80, 0.89, 0.74),
-    (-1.90, 0.22, 0.86, 0.90, 0.91, 0.78),
-    (-1.40, 0.22, 0.90, 0.94, 0.91, 0.78),
-    (-0.98, 0.22, 0.94, 0.98, 0.91, 0.77),
+    (-2.22, 0.23, 0.77, 0.81, 0.89, 0.74),
+    (-1.90, 0.22, 0.87, 0.91, 0.91, 0.78),
+    (-1.40, 0.22, 0.91, 0.95, 0.915, 0.78),
+    (-0.98, 0.22, 0.94, 0.98, 0.915, 0.77),
     (-0.78, 0.22, 0.95, 1.14, 0.91, 0.72),
     (-0.58, 0.22, 0.95, 1.253, 0.91, 0.70),
     (-0.48, 0.22, 0.95, 1.31, 0.91, 0.69),
-    (-0.14, 0.22, 0.95, 1.42, 0.91, 0.67),
-    (0.40, 0.22, 0.95, 1.46, 0.91, 0.66),
-    (1.00, 0.22, 0.95, 1.45, 0.91, 0.66),
-    (1.28, 0.22, 0.95, 1.413, 0.91, 0.664),
-    (1.38, 0.22, 0.95, 1.40, 0.91, 0.67),
+    (-0.14, 0.22, 0.95, 1.41, 0.91, 0.67),
+    (0.40, 0.22, 0.95, 1.45, 0.91, 0.66),
+    (1.00, 0.22, 0.95, 1.44, 0.91, 0.66),
+    (1.28, 0.22, 0.95, 1.41, 0.91, 0.664),
+    (1.38, 0.22, 0.95, 1.395, 0.91, 0.67),
     (1.68, 0.22, 0.95, 1.20, 0.91, 0.70),
-    (1.94, 0.22, 0.95, 1.02, 0.91, 0.76),
-    (2.12, 0.22, 0.94, 0.98, 0.91, 0.78),
-    (2.27, 0.23, 0.89, 0.93, 0.89, 0.77),
-    (2.33, 0.27, 0.82, 0.86, 0.83, 0.70),
+    (1.94, 0.22, 0.95, 1.02, 0.915, 0.77),
+    (2.12, 0.22, 0.95, 0.99, 0.915, 0.79),
+    (2.27, 0.23, 0.90, 0.94, 0.89, 0.77),
+    (2.33, 0.27, 0.83, 0.87, 0.83, 0.70),
     (2.35, 0.36, 0.70, 0.74, 0.72, 0.58),
 ]
 
 
 def palette(burnt):
-    pal = {"body": (0.88, 0.88, 0.86), "bodyblack": (0.035, 0.035, 0.04), "plastic": (0.035, 0.035, 0.038), "metal": (0.72, 0.74, 0.77), "metal_dark": (0.1, 0.1, 0.11),
-           "metal_rim": (0.46, 0.47, 0.5), "glass": (0.04, 0.06, 0.08), "red": (0.8, 0.03, 0.02), "blue": (0.04, 0.12, 0.85), "lights": (0.95, 0.93, 0.82),
-           "amber": (0.9, 0.45, 0.04), "plastic_white": (0.9, 0.9, 0.88), "plastic_interior": (0.03, 0.03, 0.035), "rubber": (0.02, 0.02, 0.022),
-           "decal_k": (0.02, 0.02, 0.03), "decal_w": (0.92, 0.92, 0.9), "decal_blue": (0.05, 0.13, 0.55), "decal_gold": (0.78, 0.6, 0.18), "rust": (0.16, 0.08, 0.04)}
+    pal = {"carpaint_white": (0.9, 0.9, 0.88), "carpaint_black": (0.018, 0.018, 0.022), "plastic": (0.04, 0.04, 0.043), "metal": (0.74, 0.76, 0.79),
+           "metal_dark": (0.1, 0.1, 0.11), "metal_rim": (0.2, 0.21, 0.23), "glass": (0.03, 0.045, 0.06), "lens_red": (0.85, 0.03, 0.02),
+           "lens_blue": (0.03, 0.1, 0.9), "lens_head": (0.93, 0.92, 0.84), "lens_amber": (0.92, 0.45, 0.03), "lens_clear": (0.88, 0.9, 0.95),
+           "plastic_white": (0.9, 0.9, 0.88), "plastic_interior": (0.025, 0.025, 0.03), "rubber": (0.022, 0.022, 0.025),
+           "decal_k": (0.015, 0.015, 0.02), "decal_w": (0.93, 0.93, 0.9), "decal_blue": (0.04, 0.12, 0.6), "decal_gold": (0.8, 0.62, 0.18), "charred": (0.05, 0.043, 0.038)}
     if burnt:
-        pal.update({"body": (0.44, 0.41, 0.37), "bodyblack": (0.03, 0.025, 0.024), "glass": (0.025, 0.028, 0.03), "lights": (0.2, 0.18, 0.15), "red": (0.22, 0.03, 0.02),
-                    "blue": (0.04, 0.06, 0.2), "amber": (0.25, 0.14, 0.04), "decal_w": (0.5, 0.48, 0.44), "decal_blue": (0.04, 0.06, 0.18), "decal_gold": (0.3, 0.24, 0.1)})
+        pal.update({"carpaint_white": (0.42, 0.4, 0.36), "carpaint_black": (0.03, 0.026, 0.025), "glass": (0.02, 0.022, 0.024), "lens_head": (0.22, 0.2, 0.17),
+                    "lens_red": (0.25, 0.03, 0.02), "lens_blue": (0.03, 0.05, 0.22), "lens_amber": (0.28, 0.15, 0.04), "lens_clear": (0.3, 0.3, 0.3),
+                    "decal_w": (0.5, 0.48, 0.44), "decal_blue": (0.04, 0.06, 0.2), "decal_gold": (0.32, 0.26, 0.1), "plastic_white": (0.35, 0.34, 0.32),
+                    "charred": (0.05, 0.043, 0.038)})
     return pal
 
 
@@ -75,7 +81,7 @@ def half_profile(st):
             (hwr + 0.03, z6), (hwr - 0.05, z7), (0.0, z7 + 0.012)]
 
 
-def build_shell(m, pal, burnt=False):
+def build_shell(m, burnt=False):
     """Malla (sin suavizar) del cuerpo por secciones; el material de cada cara ya es de paleta."""
     sb = bmesh.new()
     rings = []
@@ -93,34 +99,33 @@ def build_shell(m, pal, burnt=False):
             f = sb.faces.new((rings[i][j], rings[i][j2], rings[i + 1][j2], rings[i + 1][j]))
             f.smooth = True
             seg = j if j <= 7 else 15 - j                      # 0 base ... 5 cristal lateral, 6 borde del techo, 7 techo
-            mat = "bodyblack"
+            mat = "carpaint_black"
             in_doors = s0[0] >= -0.581 and s1[0] <= 1.281
             if in_doors and seg in (2, 3, 4):
-                mat = "body"                                   # puertas blancas
+                mat = "carpaint_white"                         # puertas blancas
             if seg == 7 and -0.15 <= s0[0] and s1[0] <= 1.39 and cab > 0.2:
-                mat = "body"                                   # techo blanco
+                mat = "carpaint_white"                         # techo blanco
             if burnt and cab <= 0.2 and seg in (4, 5, 6, 7):
-                mat = "rust"                                   # capo y maletero calcinados
-            if burnt and seg == 7 and cab > 0.2 and mat == "body":
-                mat = "rust"                                   # techo quemado
+                mat = "charred"                                # capo y maletero calcinados
+            if burnt and seg == 7 and cab > 0.2 and mat == "carpaint_white":
+                mat = "charred"                                # techo quemado
             if cab > 0.2:
                 if seg == 5:
                     mat = "glass"
                 elif seg == 6:
-                    mat = "bodyblack"
+                    mat = "carpaint_black"
                 elif seg == 7 and abs(slope) > 0.33:
-                    mat = "glass"                                # parabrisas y luna trasera
+                    mat = "glass"                              # parabrisas y luna trasera
             f.material_index = m._idx(mat)
     for ring in (rings[0], list(reversed(rings[-1]))):
         f = sb.faces.new(ring)
-        f.material_index = m._idx("bodyblack")
+        f.material_index = m._idx("carpaint_black")
+    # aristas marcadas: zocalo, hombro, cintura y borde del techo, y los extremos (parachoques)
     cl = sb.edges.layers.float.get("crease_edge") or sb.edges.layers.float.new("crease_edge")
-    sharp = {2: 0.55, 4: 0.5, 5: 0.9, 6: 0.9, 7: 0.5}                                       # puntos del perfil que quedan marcados (zocalo, hombro, cintura, borde del techo)
-    for ring in rings:
-        pass
+    sharp = {2: 0.55, 4: 0.5, 5: 0.9, 6: 0.9, 7: 0.5}
     for i in range(len(rings) - 1):
         for j in range(n):
-            pj = j if j <= 8 else n - j                                                         # indice del punto en el perfil de la derecha
+            pj = j if j <= 8 else n - j
             if pj in sharp:
                 e = sb.edges.get((rings[i][j], rings[i + 1][j]))
                 if e is not None:
@@ -129,7 +134,7 @@ def build_shell(m, pal, burnt=False):
         for j in range(n):
             e = sb.edges.get((ring[j], ring[(j + 1) % n]))
             if e is not None:
-                e[cl] = max(e[cl], 0.4)
+                e[cl] = max(e[cl], 0.45)
     mesh = bpy.data.meshes.new("shell")
     sb.normal_update()
     sb.to_mesh(mesh)
@@ -137,22 +142,19 @@ def build_shell(m, pal, burnt=False):
     return mesh
 
 
-def shell_object(m, pal, burnt):
-    mesh = build_shell(m, pal, burnt)
-    # los indices de material del shell son indices de paleta: hace falta un hueco por cada nombre para que los modificadores no los recorten
-    for nme in m.names:
+def shell_object(m, burnt):
+    mesh = build_shell(m, burnt)
+    for nme in m.names:                    # un hueco por cada nombre: asi los modificadores no recortan los indices de material
         mesh.materials.append(bpy.data.materials.get("tmp_" + nme) or bpy.data.materials.new("tmp_" + nme))
     obj = bpy.data.objects.new("shell", mesh)
     bpy.context.scene.collection.objects.link(obj)
     sub = obj.modifiers.new("sub", "SUBSURF")
     sub.levels = 2
     sub.render_levels = 2
-    sub.subdivision_type = "CATMULL_CLARK"
-    # pasos de rueda: cilindros que atraviesan el lateral
     cutters = []
     for y in WHEEL_Y:
         for sx in (-1, 1):
-            bpy.ops.mesh.primitive_cylinder_add(vertices=40, radius=WHEEL_R + 0.08, depth=0.5, location=(sx * (WHEEL_X + 0.13), y, WHEEL_R), rotation=(0, math.radians(90), 0))
+            bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=WHEEL_R + 0.08, depth=0.5, location=(sx * (WHEEL_X + 0.13), y, WHEEL_R), rotation=(0, math.radians(90), 0))
             c = bpy.context.active_object
             c.name = "cut"
             c.data.materials.append(bpy.data.materials["tmp_plastic_interior"])
@@ -168,158 +170,132 @@ def shell_object(m, pal, burnt):
         bpy.data.objects.remove(c, do_unlink=True)
     bpy.data.objects.remove(obj, do_unlink=True)
     bpy.data.meshes.remove(mesh)
+    for p in ev.polygons:
+        p.use_smooth = True
     return ev
 
 
-def insert_shell(m, ev, burnt):
-    """Pasa la malla evaluada (con los colores ya repartidos por las caras gruesas) a m.bm."""
-    for p in ev.polygons:
-        p.use_smooth = True
-    m.bm.from_mesh(ev)
-    bpy.data.meshes.remove(ev)
+class Surface:
+    """Superficie real de la carroceria (malla suavizada): da la X de la chapa en un punto del lateral y la Z en un punto del capo/techo."""
+
+    def __init__(self, bm):
+        bm.faces.ensure_lookup_table()
+        self.tree = BVHTree.FromBMesh(bm)
+
+    def side_x(self, y, z, s):
+        hit = self.tree.ray_cast(Vector((s * 2.0, y, z)), Vector((-s, 0.0, 0.0)))
+        return hit[0].x if hit[0] is not None else s * 0.9
+
+    def top_z(self, x, y):
+        hit = self.tree.ray_cast(Vector((x, y, 3.0)), Vector((0.0, 0.0, -1.0)))
+        return hit[0].z if hit[0] is not None else 0.95
+
+    def rear_y(self, x, z, s):
+        """Y de la chapa en la parte delantera (s=-1) o trasera (s=+1) en un punto."""
+        hit = self.tree.ray_cast(Vector((x, s * 4.0, z)), Vector((0.0, -s, 0.0)))
+        return hit[0].y if hit[0] is not None else s * 2.3
 
 
-# ------------------------------------------------------------------ piezas
-def tube(m, pts, r, mat, segs=8):
-    """Tubo por una poligonal (barra de choque, antenas)."""
-    for a, b in zip(pts[:-1], pts[1:]):
-        a, b = Vector(a), Vector(b)
-        d = b - a
-        length = d.length
-        mid = (a + b) / 2
-        rot = d.to_track_quat("Z", "Y").to_euler()
-        rings = []
-        for s in (-0.5, 0.5):
-            ring = []
-            for k in range(segs):
-                ang = 2 * math.pi * k / segs
-                ring.append(Vector((r * math.cos(ang), r * math.sin(ang), s * length)))
-            rings.append(ring)
-        mat3 = rot.to_matrix()
-        rr = [[mid + mat3 @ p for p in ring] for ring in rings]
-        m._loft_rings(rr, mat, True)
+def drape(surf, v, mode, s, off):
+    if mode == "side":
+        v.co.x = surf.side_x(v.co.y, v.co.z, s) + s * off
+    elif mode == "top":
+        v.co.z = surf.top_z(v.co.x, v.co.y) + off
+    elif mode == "back":
+        v.co.y = surf.rear_y(v.co.x, v.co.z, s) + s * off
 
 
-def wheel(m, x, y, flat, side):
-    """Rueda: neumatico con flancos y dibujo, llanta de chapa con tapacubos y tornillos."""
-    r = WHEEL_R - (0.03 if flat else 0.0)
-    half = [(0.0, 1.0), (0.05, 0.998), (0.085, 0.99), (0.108, 0.94), (0.118, 0.84), (0.116, 0.72), (0.10, 0.62)]
-    prof = [(-xo, f) for (xo, f) in reversed(half[1:])] + half
-    rings = []
-    for xo, f in prof:
-        rr = r * f
-        rings.append([(x + xo, y + rr * math.cos(a), r + rr * math.sin(a) + (-0.035 if (flat and f > 0.9 and math.sin(a) < -0.5) else 0.0)) for a in (2 * math.pi * k / 32 for k in range(32))])
-    m._loft_rings(rings, "rubber", True)
-    # llanta de chapa casi plana, con el borde elevado, y tapacubos pequeno
-    rim = [(0.112, 0.62), (0.108, 0.58), (0.096, 0.54), (0.09, 0.46), (0.09, 0.22)]
-    rings = [[(x + side * xo, y + r * f * math.cos(a), r + r * f * math.sin(a)) for a in (2 * math.pi * k / 28 for k in range(28))] for xo, f in rim]
-    m._loft_rings(rings, "metal_rim", True)
-    cap = [(0.09, 0.2), (0.1, 0.19), (0.108, 0.15), (0.113, 0.08), (0.114, 0.01)]
-    rings = [[(x + side * xo, y + r * f * math.cos(a), r + r * f * math.sin(a)) for a in (2 * math.pi * k / 20 for k in range(20))] for xo, f in cap]
-    m._loft_rings(rings, "metal", True)
-    for i in range(5):                                                                         # tornillos
-        a = i * 2 * math.pi / 5
-        m.box((x + side * 0.095, y + 0.29 * r * math.cos(a), r + 0.29 * r * math.sin(a)), (0.016, 0.026, 0.026), "metal", rot=(math.degrees(a), 0, 0))
+def _emit(m, bm, surf, mat, mode, s, off):
+    for v in bm.verts:
+        drape(surf, v, mode, s, off)
+    mi = m._idx(mat)
+    vmap = {v: m.bm.verts.new(v.co) for v in bm.verts}
+    for f in bm.faces:
+        try:
+            nf = m.bm.faces.new([vmap[v] for v in f.verts])
+        except ValueError:
+            continue
+        nf.material_index = mi
+        nf.smooth = False
+        m._deco.append((nf, Vector((s, 0.0, 0.0)) if mode == "side" else Vector((0.0, 0.0, 1.0)) if mode == "top" else Vector((0.0, s, 0.0))))
+    bm.free()
 
 
-def rounded(m, c, s, mat, r=0.02, rot=(0, 0, 0)):
-    m.box(c, s, mat, rot=rot, bevel=r)
+def finish(m, name):
+    """Como Mesher.finish, pero las caras planas de los rotulos (abiertas) se orientan hacia fuera de la chapa en vez de dejar que la recalculo las gire al azar."""
+    bm = m.bm
+    deco = {f for f, _ in m._deco if f.is_valid}
+    bmesh.ops.recalc_face_normals(bm, faces=[f for f in bm.faces if f not in deco])
+    for f, out in m._deco:
+        if f.is_valid and f.normal.dot(out) < 0:
+            f.normal_flip()
+    used = sorted({f.material_index for f in bm.faces})
+    remap = {old: new for new, old in enumerate(used)}
+    for f in bm.faces:
+        f.material_index = remap[f.material_index]
+    mesh = bpy.data.meshes.new(name + "Mesh")
+    bm.to_mesh(mesh)
+    bm.free()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    for old in used:
+        mesh.materials.append(_mat(f"{m.prefix}_{m.names[old]}", m.palette[m.names[old]]))
+    return obj
 
 
-def lightbar(m, burnt):
-    z0 = 1.465 + 0.0
-    cy = 0.12
-    # base y soporte
-    m.box((0, cy, z0 + 0.02), (1.18, 0.28, 0.04), "plastic", bevel=0.012)
-    for sx in (-0.4, 0.4):
-        m.box((sx, cy, z0 + 0.005), (0.06, 0.2, 0.03), "plastic")                           # patas
-    # cuerpo de las lentes: cinco modulos de cupula
-    mods = [(-0.5, "red"), (-0.25, "red"), (0.0, "plastic_white"), (0.25, "blue"), (0.5, "blue")]
-    for x, mat in mods:
-        w = 0.22
-        if burnt and mat in ("red", "blue", "plastic_white"):
-            mat = "plastic"
-        secs = []
-        for k in range(7):
-            t = math.pi * (k + 0.5) / 7
-            secs.append((x, cy, z0 + 0.04 + 0.075 * math.cos(t) * 0.0, 0, 0))
-        # cupula achatada: elipsoide
-        m.ellipsoid((x, cy, z0 + 0.045), (w / 2, 0.135, 0.07), mat, 12, 7)
-    # remates de los extremos y rejillas
-    for sx in (-1, 1):
-        m.box((sx * 0.63, cy, z0 + 0.06), (0.05, 0.26, 0.1), "plastic", bevel=0.015)
-    m.box((0, cy - 0.145, z0 + 0.065), (1.2, 0.012, 0.06), "plastic")
-    m.box((0, cy + 0.145, z0 + 0.065), (1.2, 0.012, 0.06), "plastic")
+def flat_decal(m, surf, corners, mat, mode, s=1, off=0.0012, cuts=8):
+    """Poligono plano (esquinas en coordenadas de mundo) subdividido y proyectado sobre la chapa. mode: 'side' (lateral, s = +1/-1), 'top', 'back'."""
+    bm = bmesh.new()
+    vs = [bm.verts.new(Vector(c)) for c in corners]
+    try:
+        bm.faces.new(vs)
+    except ValueError:
+        bm.free()
+        return
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=cuts, use_grid_fill=True)
+    _emit(m, bm, surf, mat, mode, s, off)
 
 
-def build(burnt):
-    pal = palette(burnt)
-    m = Mesher("policecar", pal)
-    # --- carroceria
-    ev = shell_object(m, pal, burnt)
-    insert_shell(m, ev, burnt)
-    for sx in (-1, 1):
-        wx = sx * (W / 2)
-        # juntas de puertas, zocalo y tiradores
-        for y in (-0.58, 0.36, 1.28):
-            m.box((sx * (0.915), y, 0.66), (0.012, 0.014, 0.58), "bodyblack")
-        m.box((sx * 0.915, 0.35, 0.385), (0.012, 1.86, 0.014), "bodyblack")
-        for y in (-0.22, 0.74):
-            rounded(m, (sx * 0.93, y, 0.8), (0.03, 0.16, 0.03), "metal", 0.008)
-        # retrovisor: brazo y carcasa
-        tube(m, [(sx * 0.82, -0.7, 1.0), (sx * 1.0, -0.82, 1.06)], 0.014, "plastic")
-        m.ellipsoid((sx * 1.04, -0.84, 1.1), (0.045, 0.07, 0.08), "bodyblack", 10, 6)
-        # luz de posicion y embellecedor de la aleta
-        m.box((sx * 0.92, -2.0, 0.66), (0.01, 0.2, 0.05), "amber", bevel=0.005)
-    # --- frontal: parachoques, rejilla, faros
-    m.box((0, -2.33, 0.42), (1.7, 0.14, 0.2), "plastic", bevel=0.045)                                 # parachoques
-    m.box((0, -2.405, 0.32), (1.0, 0.05, 0.1), "plastic_interior", bevel=0.01)                           # toma de aire inferior
-    for i in range(5):
-        m.box((0, -2.435, 0.28 + i * 0.03), (0.92, 0.012, 0.012), "metal_dark")
-    m.box((0, -2.39, 0.6), (1.0, 0.03, 0.16), "plastic_interior", bevel=0.01)                            # rejilla superior
-    for i in range(4):
-        m.box((0, -2.41, 0.55 + i * 0.035), (0.96, 0.012, 0.012), "metal")
-    for sx in (-1, 1):
-        m.box((sx * 0.64, -2.36, 0.68), (0.4, 0.06, 0.13), "plastic_interior", bevel=0.02)             # carcasa del faro
-        m.box((sx * 0.64, -2.385, 0.68), (0.36, 0.02, 0.1), "lights", bevel=0.015)                       # lente
-        m.box((sx * 0.64, -2.395, 0.68), (0.14, 0.012, 0.07), "metal", bevel=0.005)                      # reflector
-        m.box((sx * 0.75, -2.37, 0.5), (0.1, 0.04, 0.06), "amber", bevel=0.01)                           # intermitente
-    # defensa de empuje (negra)
-    tube(m, [(-0.5, -2.46, 0.3), (-0.5, -2.52, 0.34), (-0.5, -2.52, 0.74), (-0.5, -2.46, 0.78)], 0.026, "plastic", 8)
-    tube(m, [(0.5, -2.46, 0.3), (0.5, -2.52, 0.34), (0.5, -2.52, 0.74), (0.5, -2.46, 0.78)], 0.026, "plastic", 8)
-    tube(m, [(-0.5, -2.52, 0.74), (0.5, -2.52, 0.74)], 0.026, "plastic", 8)
-    tube(m, [(-0.5, -2.52, 0.34), (0.5, -2.52, 0.34)], 0.026, "plastic", 8)
-    tube(m, [(-0.5, -2.52, 0.54), (0.5, -2.52, 0.54)], 0.02, "plastic", 8)
-    # --- trasera
-    m.box((0, 2.33, 0.42), (1.7, 0.14, 0.2), "plastic", bevel=0.045)
-    for sx in (-1, 1):
-        m.box((sx * 0.66, 2.36, 0.78), (0.44, 0.05, 0.14), "red", bevel=0.02)                            # piloto
-        m.box((sx * 0.66, 2.38, 0.78), (0.2, 0.02, 0.1), "plastic_white" if not burnt else "plastic", bevel=0.01)
-    m.box((0, 2.37, 0.62), (0.42, 0.02, 0.2), "bodyblack", bevel=0.01)                                  # hueco de la matricula
-    m.box((0, 2.385, 0.62), (0.34, 0.012, 0.17), "plastic_white" if not burnt else "plastic", bevel=0.004)  # matricula
-    m.box((0, 2.37, 0.38), (1.2, 0.03, 0.04), "metal_dark")                                             # difusor
-    tube(m, [(0.55, 2.3, 0.26), (0.55, 2.47, 0.26)], 0.03, "metal_dark", 10)                           # escape
-    # --- barra de luces y accesorios del techo
-    lightbar(m, burnt)
-    m.box((0.62, -0.66, 1.1), (0.04, 0.06, 0.06), "metal_dark", bevel=0.012)                            # foco lateral
-    tube(m, [(-0.62, 1.2, 1.45), (-0.62, 1.2, 1.78)], 0.005, "plastic", 5)                              # antena
-    # --- ruedas
-    for y in WHEEL_Y:
-        for sx in (-1, 1):
-            wheel(m, sx * WHEEL_X, y, burnt, sx)
-    # --- rotulos y escudo (solo la patrulla intacta lleva los colores vivos; la quemada los lleva apagados)
-    decals(m, burnt)
-    return m.finish("PoliceCar" if burnt else "PoliceCarClean")
+def strip(m, surf, p0, p1, half_w, mat, mode, s=1, off=0.0012, n=8):
+    """Tira plana de n tramos entre p0 y p1 (mundo) con semiancho half_w en la direccion perpendicular a lo largo de la superficie."""
+    p0, p1 = Vector(p0), Vector(p1)
+    d = (p1 - p0).normalized()
+    if mode == "side":
+        w = Vector((0.0, -d.z, d.y)) if abs(d.x) < 0.5 else Vector((0, 0, 1))      # perpendicular dentro del plano YZ
+        w = Vector((0.0, -d.z, d.y)).normalized()
+    else:
+        w = Vector((-d.y, d.x, 0.0)).normalized()                                  # perpendicular dentro del plano XY
+    bm = bmesh.new()
+    cols = []
+    for k in range(n + 1):
+        p = p0 + (p1 - p0) * (k / n)
+        cols.append((bm.verts.new(p - w * half_w), bm.verts.new(p + w * half_w)))
+    for k in range(n):
+        bm.faces.new((cols[k][0], cols[k + 1][0], cols[k + 1][1], cols[k][1]))
+    _emit(m, bm, surf, mat, mode, s, off)
 
 
-# ------------------------------------------------------------------ rotulos
-def text_mesh(text, size, extrude=0.004, font=None, align="CENTER"):
+def put_mesh(m, surf, me, matrix, mat, mode, s=1, off=0.0012, cuts=0):
+    """Inserta una malla plana (rotulo) llevandola a 'matrix' y proyectandola sobre la chapa."""
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bpy.data.meshes.remove(me)
+    bmesh.ops.transform(bm, matrix=matrix, verts=bm.verts[:])
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    if cuts:
+        bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=cuts, use_grid_fill=True)
+    _emit(m, bm, surf, mat, mode, s, off)
+
+
+def text_mesh(text, size):
     cu = bpy.data.curves.new("txt", "FONT")
     cu.body = text
     cu.size = size
-    cu.extrude = extrude
-    cu.align_x = align
+    cu.extrude = 0.0
+    cu.align_x = "CENTER"
     cu.align_y = "CENTER"
+    cu.space_character = 1.12
     obj = bpy.data.objects.new("txt", cu)
     bpy.context.scene.collection.objects.link(obj)
     dg = bpy.context.evaluated_depsgraph_get()
@@ -329,48 +305,203 @@ def text_mesh(text, size, extrude=0.004, font=None, align="CENTER"):
     return me
 
 
-def put_mesh(m, me, mat, matrix):
-    bm = m.bm
-    vmap = {}
-    for v in me.vertices:
-        vmap[v.index] = bm.verts.new(matrix @ v.co)
-    mi = m._idx(mat)
-    for p in me.polygons:
-        try:
-            f = bm.faces.new([vmap[i] for i in p.vertices])
-            f.material_index = mi
-        except ValueError:
-            pass
-    bpy.data.meshes.remove(me)
+# ------------------------------------------------------------------ piezas
+def tube(m, pts, r, mat, segs=8):
+    """Tubo por una poligonal (defensa de empuje, antena, aro del paso de rueda)."""
+    for a, b in zip(pts[:-1], pts[1:]):
+        a, b = Vector(a), Vector(b)
+        d = b - a
+        length = d.length
+        if length < 1e-5:
+            continue
+        mid = (a + b) / 2
+        mat3 = d.to_track_quat("Z", "Y").to_matrix()
+        rr = []
+        for sgn in (-0.5, 0.5):
+            rr.append([mid + mat3 @ Vector((r * math.cos(2 * math.pi * k / segs), r * math.sin(2 * math.pi * k / segs), sgn * length)) for k in range(segs)])
+        m._loft_rings(rr, mat, True)
 
 
-def decals(m, burnt):
-    """Rotulos: POLICE en la puerta trasera (negro sobre blanco) y en el maletero (blanco), franja azul y dorada y escudo en la puerta delantera."""
-    for sx in (-1, 1):
-        me = text_mesh("POLICE", 0.14, 0.004)
-        # el texto se crea en el plano XY (lee hacia +X, arriba +Y, relieve +Z): se lleva al lateral para que se lea desde fuera
-        rows = [[0, 0, sx, 0], [sx if sx > 0 else -1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]]
-        if sx > 0:
-            rows = [[0, 0, 1, 0.922], [1, 0, 0, -0.12], [0, 1, 0, 0.66], [0, 0, 0, 1]]
+def tube_path(m, pts, r, mat, segs=6):
+    """Tubo continuo por una poligonal (un solo anillo por punto, sin tapas intermedias)."""
+    pts = [Vector(p) for p in pts]
+    rings = []
+    for i, p in enumerate(pts):
+        t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+        q = t.to_track_quat("Z", "Y").to_matrix()
+        rings.append([p + q @ Vector((r * math.cos(2 * math.pi * k / segs), r * math.sin(2 * math.pi * k / segs), 0.0)) for k in range(segs)])
+    m._loft_rings(rings, mat, True)
+
+
+def wheel(m, x, y, flat, side):
+    """Rueda: neumatico con flancos curvos y bandas de rodadura, llanta de chapa oscura con tapacubos cromado y tornillos."""
+    r = WHEEL_R - (0.03 if flat else 0.0)
+    half = [(0.0, 0.992), (0.012, 1.0), (0.03, 0.992), (0.04, 1.0), (0.06, 0.992), (0.07, 1.0), (0.088, 0.99), (0.106, 0.945), (0.117, 0.86), (0.118, 0.76), (0.108, 0.66), (0.1, 0.6)]
+    prof = [(-xo, f) for (xo, f) in reversed(half[1:])] + half
+    rings = []
+    for xo, f in prof:
+        rr = r * f
+        rings.append([(x + xo, y + rr * math.cos(a), r + rr * math.sin(a) + (-0.035 if (flat and f > 0.9 and math.sin(a) < -0.5) else 0.0)) for a in (2 * math.pi * k / 32 for k in range(32))])
+    m._loft_rings(rings, "rubber", True)
+    rim = [(0.112, 0.62), (0.108, 0.585), (0.1, 0.55), (0.094, 0.5), (0.09, 0.46), (0.092, 0.24), (0.09, 0.2)]
+    rings = [[(x + side * xo, y + r * f * math.cos(a), r + r * f * math.sin(a)) for a in (2 * math.pi * k / 32 for k in range(32))] for xo, f in rim]
+    m._loft_rings(rings, "metal_rim", True)
+    cap = [(0.09, 0.2), (0.102, 0.19), (0.11, 0.15), (0.115, 0.09), (0.117, 0.01)]
+    rings = [[(x + side * xo, y + r * f * math.cos(a), r + r * f * math.sin(a)) for a in (2 * math.pi * k / 24 for k in range(24))] for xo, f in cap]
+    m._loft_rings(rings, "metal", True)
+    for i in range(8):                                                                         # tornillos y orificios
+        a = i * 2 * math.pi / 8
+        m.box((x + side * 0.097, y + 0.34 * r * math.cos(a), r + 0.34 * r * math.sin(a)), (0.014, 0.024, 0.024), "metal", rot=(math.degrees(a), 0, 0))
+        m.box((x + side * 0.094, y + 0.4 * r * math.cos(a + 0.4), r + 0.4 * r * math.sin(a + 0.4)), (0.008, 0.04, 0.016), "plastic_interior", rot=(math.degrees(a + 0.4) + 90, 0, 0))
+
+
+def lightbar(m, surf, burnt):
+    """Barra de luces de perfil bajo: base de aluminio con patas, siete modulos de lente (rojo, blanco, azul), divisores, filas de LED y remates."""
+    cy = 0.14
+    z0 = surf.top_z(0.0, cy) + 0.012
+    half_len = 0.68
+    m.box((0, cy, z0 + 0.012), (2 * half_len, 0.31, 0.026), "plastic", bevel=0.008)
+    for sx in (-0.44, 0.44):
+        m.box((sx, cy, z0 - 0.004), (0.14, 0.24, 0.02), "plastic", bevel=0.004)
+    mods = [(-0.68, -0.46, "lens_red"), (-0.46, -0.24, "lens_red"), (-0.24, -0.08, "lens_clear"), (-0.08, 0.08, "lens_clear"), (0.08, 0.24, "lens_clear"),
+            (0.24, 0.46, "lens_blue"), (0.46, 0.68, "lens_blue")]
+    for (x0, x1, mat) in mods:
+        use = "plastic_interior" if (burnt and mat != "lens_clear") else mat
+        steps = 5
+        rings = []
+        for k in range(steps + 1):
+            x = x0 + (x1 - x0) * k / steps
+            taper = 1.0
+            edge = min(abs(x + half_len), abs(half_len - x))
+            if edge < 0.1:                                  # remates redondeados de los extremos de la barra
+                taper = 0.55 + 0.45 * (edge / 0.1)
+            ring = []
+            for a_i in range(16):
+                a = 2 * math.pi * a_i / 16
+                dy = 0.15 * math.cos(a) * taper
+                dz = (0.082 * math.sin(a) if math.sin(a) > 0 else 0.012 * math.sin(a)) * taper
+                ring.append((x, cy + dy, z0 + 0.026 + dz))
+            rings.append(ring)
+        m._loft_rings(rings, use, True)
+        xs = [x0 + (x1 - x0) * (i + 0.5) / 3 for i in range(3)]
+        for fy in (-1, 1):                                  # filas de LED en cada cara
+            for x in xs:
+                m.box((x, cy + fy * 0.1, z0 + 0.062), (0.03, 0.012, 0.018), "lens_clear" if not burnt else "plastic_interior")
+                m.box((x, cy + fy * 0.14, z0 + 0.046), (0.03, 0.012, 0.014), "lens_clear" if not burnt else "plastic_interior")
+        m.box((x1, cy, z0 + 0.05), (0.012, 0.31, 0.1), "plastic", bevel=0.003)           # divisor negro
+    m.box((-half_len, cy, z0 + 0.05), (0.014, 0.31, 0.1), "plastic", bevel=0.004)
+    m.box((half_len, cy, z0 + 0.05), (0.014, 0.31, 0.1), "plastic", bevel=0.004)
+
+
+def mirror(m, surf, s):
+    x = surf.side_x(-0.78, 0.99, s)
+    tube(m, [(x - s * 0.02, -0.74, 1.0), (x + s * 0.1, -0.83, 1.06)], 0.013, "plastic")
+    m.ellipsoid((x + s * 0.145, -0.84, 1.1), (0.04, 0.075, 0.075), "carpaint_black", 12, 7)
+    m.box((x + s * 0.145, -0.9, 1.1), (0.03, 0.012, 0.05), "metal_dark")
+
+
+def shield(m, surf, s, y, z):
+    """Escudo en la puerta trasera: pentagono azul con borde dorado y una estrella dorada."""
+    def at(dy, dz):
+        return (s * 0.9, y + dy * (-s), z + dz)
+    out = [(-0.075, 0.075), (0.075, 0.075), (0.08, -0.02), (0.0, -0.09), (-0.08, -0.02)]
+    flat_decal(m, surf, [at(*p) for p in out], "decal_gold", "side", s, 0.0014, 3)
+    inn = [(-0.065, 0.065), (0.065, 0.065), (0.07, -0.015), (0.0, -0.078), (-0.07, -0.015)]
+    flat_decal(m, surf, [at(*p) for p in inn], "decal_blue", "side", s, 0.0018, 3)
+    star = []
+    for k in range(10):
+        a = math.radians(90 + 36 * k)
+        rr = 0.045 if k % 2 == 0 else 0.019
+        star.append(at(rr * math.cos(a), 0.005 + rr * math.sin(a)))
+    flat_decal(m, surf, star, "decal_gold", "side", s, 0.0022, 2)
+
+
+def seam_loop(m, surf, pts, width, mode, cuts):
+    """Junta oscura (capo, maletero) que sigue un poligono cerrado de puntos (x, y), proyectada sobre la chapa por arriba."""
+    for (ax, ay), (bx, by) in zip(pts, pts[1:] + pts[:1]):
+        strip(m, surf, (ax, ay, 3.0), (bx, by, 3.0), width, "plastic_interior", mode, 1, 0.0012, cuts)
+
+
+def build(burnt):
+    pal = palette(burnt)
+    m = Mesher("policecar", pal)
+    m._deco = []
+    ev = shell_object(m, burnt)
+    m.bm.from_mesh(ev)
+    bpy.data.meshes.remove(ev)
+    surf = Surface(m.bm)
+    for s in (-1, 1):
+        # juntas de puertas y zocalo: lineas planas oscuras sobre la chapa
+        for y in (-0.58, 0.36, 1.28):
+            strip(m, surf, (s * 0.9, y, 0.35), (s * 0.9, y, 0.94), 0.004, "plastic_interior", "side", s, 0.001, 6)
+        strip(m, surf, (s * 0.9, -0.58, 0.35), (s * 0.9, 1.28, 0.35), 0.004, "plastic_interior", "side", s, 0.001, 10)
+        # franja azul y dorada, escudo
+        strip(m, surf, (s * 0.9, -0.55, 0.515), (s * 0.9, 1.25, 0.515), 0.015, "decal_blue", "side", s, 0.0014, 12)
+        strip(m, surf, (s * 0.9, -0.55, 0.4625), (s * 0.9, 1.25, 0.4625), 0.0075, "decal_gold", "side", s, 0.0014, 12)
+        shield(m, surf, s, 0.78, 0.8)
+        # texto POLICE en la puerta delantera: se crea en XY (lee hacia +X) y se lleva al lateral
+        me = text_mesh("POLICE", 0.15)
+        if s > 0:
+            mat = Matrix([[0, 0, 1, 0.9], [1, 0, 0, -0.12], [0, 1, 0, 0.67], [0, 0, 0, 1]])
         else:
-            rows = [[0, 0, -1, -0.922], [-1, 0, 0, -0.12], [0, 1, 0, 0.66], [0, 0, 0, 1]]
-        put_mesh(m, me, "decal_k", Matrix(rows))
-        m.box((sx * 0.921, 0.36, 0.5), (0.008, 1.66, 0.028), "decal_blue")
-        m.box((sx * 0.921, 0.36, 0.465), (0.008, 1.66, 0.012), "decal_gold")
-        shield(m, sx, 0.78, 0.8)
-    me = text_mesh("POLICE", 0.2, 0.004)
-    put_mesh(m, me, "decal_w", Matrix([[-1, 0, 0, 0], [0, 0, 1, 2.372], [0, 1, 0, 0.9], [0, 0, 0, 1]]))
-
-
-def shield(m, sx, y, z):
-    """Escudo: pentagono con una estrella dorada, sobre la puerta."""
-    bm = m.bm
-    pts = [(-0.07, 0.07), (0.07, 0.07), (0.075, -0.02), (0.0, -0.085), (-0.075, -0.02)]
-    verts = [bm.verts.new(Vector((sx * 0.921, y + (p[0] * (-sx)), z + p[1]))) for p in pts]
-    f = bm.faces.new(verts)
-    f.material_index = m._idx("decal_blue")
-    m.box((sx * 0.923, y, z), (0.006, 0.07, 0.07), "decal_gold", rot=(45, 0, 0))
-    m.box((sx * 0.923, y, z), (0.006, 0.07, 0.07), "decal_gold")
+            mat = Matrix([[0, 0, -1, -0.9], [-1, 0, 0, -0.12], [0, 1, 0, 0.67], [0, 0, 0, 1]])
+        put_mesh(m, surf, me, mat, "decal_k", "side", s, 0.0016)
+        # tiradores, retrovisor, luz de posicion, aros de los pasos de rueda
+        for y in (-0.24, 0.74):
+            x = surf.side_x(y, 0.84, s)
+            m.box((x + s * 0.004, y, 0.84), (0.018, 0.17, 0.03), "metal", bevel=0.008)
+            m.box((x - s * 0.001, y, 0.84), (0.008, 0.2, 0.05), "plastic_interior")
+        mirror(m, surf, s)
+        x = surf.side_x(-2.0, 0.66, s)
+        m.box((x, -2.0, 0.66), (0.012, 0.2, 0.045), "lens_amber", bevel=0.004)
+        for wy in WHEEL_Y:
+            pts = []
+            for k in range(0, 21):
+                th = math.radians(-8 + 196 * k / 20)
+                yy, zz = wy + (WHEEL_R + 0.088) * math.cos(th), WHEEL_R + (WHEEL_R + 0.088) * math.sin(th)
+                pts.append((surf.side_x(yy, zz, s) + s * 0.004, yy, zz))
+            tube_path(m, pts, 0.012, "plastic", 6)
+    # capo y maletero: juntas planas
+    seam_loop(m, surf, [(-0.62, -2.18), (0.62, -2.18), (0.62, -0.99), (-0.62, -0.99)], 0.0035, "top", 16)
+    seam_loop(m, surf, [(-0.62, 1.97), (0.62, 1.97), (0.62, 2.3), (-0.62, 2.3)], 0.0035, "top", 12)
+    # frontal
+    m.box((0, -2.335, 0.42), (1.7, 0.14, 0.2), "plastic", bevel=0.045)
+    m.box((0, -2.41, 0.32), (1.0, 0.05, 0.1), "plastic_interior", bevel=0.01)
+    for i in range(5):
+        m.box((0, -2.44, 0.28 + i * 0.03), (0.92, 0.012, 0.012), "metal_dark")
+    m.box((0, -2.395, 0.6), (1.0, 0.03, 0.16), "plastic_interior", bevel=0.01)
+    for i in range(4):
+        m.box((0, -2.415, 0.55 + i * 0.035), (0.96, 0.012, 0.012), "metal")
+    for sx in (-1, 1):
+        m.box((sx * 0.64, -2.36, 0.68), (0.42, 0.065, 0.14), "metal_dark", bevel=0.02)
+        m.box((sx * 0.64, -2.39, 0.68), (0.37, 0.02, 0.105), "lens_head", bevel=0.015)
+        for k in (-1, 1):
+            m.ellipsoid((sx * 0.64 + k * 0.09, -2.402, 0.68), (0.05, 0.016, 0.05), "metal", 10, 6)
+        m.box((sx * 0.76, -2.372, 0.5), (0.1, 0.04, 0.06), "lens_amber", bevel=0.01)
+        m.box((sx * 0.34, -2.41, 0.6), (0.1, 0.012, 0.032), "lens_red" if sx < 0 else "lens_blue", bevel=0.004)
+    for sx in (-0.5, 0.5):
+        tube(m, [(sx, -2.46, 0.3), (sx, -2.52, 0.34), (sx, -2.52, 0.74), (sx, -2.46, 0.78)], 0.026, "plastic", 8)
+    for z in (0.74, 0.54, 0.34):
+        tube(m, [(-0.5, -2.52, z), (0.5, -2.52, z)], 0.026 if z != 0.54 else 0.02, "plastic", 8)
+    # trasera
+    m.box((0, 2.335, 0.42), (1.7, 0.14, 0.2), "plastic", bevel=0.045)
+    for sx in (-1, 1):
+        m.box((sx * 0.66, 2.36, 0.78), (0.46, 0.05, 0.14), "lens_red", bevel=0.02)
+        m.box((sx * 0.5, 2.385, 0.78), (0.12, 0.012, 0.09), "plastic_white" if not burnt else "plastic", bevel=0.01)
+        m.box((sx * 0.8, 2.372, 0.78), (0.08, 0.02, 0.1), "lens_amber", bevel=0.01)
+    m.box((0, 2.372, 0.63), (0.44, 0.02, 0.21), "plastic_interior", bevel=0.01)
+    m.box((0, 2.386, 0.63), (0.36, 0.012, 0.18), "plastic_white", bevel=0.004)
+    m.box((0, 2.37, 0.38), (1.2, 0.03, 0.04), "metal_dark")
+    tube(m, [(0.55, 2.3, 0.26), (0.55, 2.47, 0.26)], 0.03, "metal_dark", 10)
+    me = text_mesh("POLICE", 0.105)
+    put_mesh(m, surf, me, Matrix([[-1, 0, 0, 0], [0, 0, 1, 2.3], [0, 1, 0, 0.815], [0, 0, 0, 1]]), "decal_w", "back", 1, 0.0016, 2)
+    # techo
+    lightbar(m, surf, burnt)
+    tube(m, [(-0.58, 1.22, 1.4), (-0.58, 1.22, 1.78)], 0.005, "plastic", 5)
+    for y in WHEEL_Y:
+        for sx in (-1, 1):
+            wheel(m, sx * WHEEL_X, y, burnt, sx)
+    return finish(m, "PoliceCar" if burnt else "PoliceCarClean")
 
 
 # ------------------------------------------------------------------ vista previa y exportacion
@@ -390,10 +521,7 @@ def preview(kind="clean"):
     for area in bpy.context.window.screen.areas:
         if area.type == "VIEW_3D":
             area.spaces[0].shading.type = "MATERIAL"
-            r3d = area.spaces[0].region_3d
-            r3d.view_rotation = Euler((math.radians(72), 0, math.radians(35))).to_quaternion()
-            r3d.view_distance = 8.5
-            r3d.view_location = (0, 0, 0.7)
+    view(72, 40, 7.5, (0, 0, 0.7))
     d = obj.dimensions
     print("modelo %.2f x %.2f x %.2f m, %d caras, %d tris" % (d.x, d.y, d.z, len(obj.data.polygons), sum(len(p.vertices) - 2 for p in obj.data.polygons)))
     return obj
