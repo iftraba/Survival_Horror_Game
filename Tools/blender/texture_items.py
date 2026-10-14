@@ -382,7 +382,7 @@ def build_material(mat, base_rgb, base_rough, name):
         col = g.vmath("SCALE", base, scale=g.math("ADD", 0.72, g.math("MULTIPLY", weave, 0.45)))
         col = g.vmath("SCALE", col, scale=g.math("ADD", 0.85, g.math("MULTIPLY", n2, 0.3)))
         col = g.lerp(col, g.vmath("SCALE", base, scale=0.4), g.math("MULTIPLY", grime, 0.6))
-        dust = g.math("MULTIPLY", g.math("GREATER_THAN", g.noise(14.0, 4.0, 0.6), 0.58), 0.25)
+        dust = g.math("MULTIPLY", g.math("GREATER_THAN", g.noise(70.0, 5.0, 0.7), 0.6), 0.1)
         col = g.lerp(col, g.color_const((0.55, 0.52, 0.47)), dust)                                    # polvo
         col = g.lerp(col, g.vmath("ADD", base, (0.1, 0.1, 0.1)), g.math("MULTIPLY", edge, 0.5))        # roce en los bordes
         rough = g.math("ADD", 0.82, g.math("MULTIPLY", n1, 0.12))
