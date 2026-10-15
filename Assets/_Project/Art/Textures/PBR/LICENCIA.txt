@@ -1,4 +1,5 @@
 Texturas de Poly Haven (https://polyhaven.com), licencia CC0 (dominio publico). Descargadas el 2026-10-15 a 2K (JPG):
 worn_tile_floor, floor_tiles_06, painted_plaster_wall, plaster_grey_04, ceiling_interior, concrete_floor_worn_001, dirty_concrete,
 rusty_metal_02, painted_metal_shutter, dark_wood, asphalt_02, red_brick_03.
+Lote 2, descargado el 2026-10-15 a 2K (JPG), para los muebles AA: blue_metal_plate, green_metal_rust, poly_wool_herringbone.
 Los *_ms.png se generan a partir de la rugosidad (R metal, A suavidad); la rugosidad original no se guarda.

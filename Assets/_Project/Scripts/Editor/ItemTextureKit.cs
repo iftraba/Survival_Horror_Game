@@ -148,6 +148,8 @@ namespace Horror.EditorTools
             if (only != null) all = all.Where(t => t.Item1.Contains(only));
             foreach (var (fbx, name, folder) in all)
             {
+                if (AAMaterialKit.IsAA(fbx)) continue;          // modelos AA: sus materiales los pone AAMaterialKit
+
                 dir = folder;
                 string mp = folder + name + "_baked.mat";
                 var m = AssetDatabase.LoadAssetAtPath<Material>(mp);

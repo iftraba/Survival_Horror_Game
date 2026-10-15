@@ -7,23 +7,28 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Desk_baked
-    second: {fileID: 2100000, guid: d5e274efc9dc56846a72f0b7668055e7, type: 2}
+      name: AA_Cromo
+    second: {fileID: 2100000, guid: d6aae8114fb69a640bec2678975cfc28, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: desk_dark
-    second: {fileID: 2100000, guid: 0c37e0d4141c5eb4d9365fc5531f5b56, type: 2}
+      name: AA_Laminado
+    second: {fileID: 2100000, guid: d13ff927be971064793818c019102c3c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: desk_handle
-    second: {fileID: 2100000, guid: 4fe26c3c93cc64d45affb71c1a45c200, type: 2}
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: desk_wood
-    second: {fileID: 2100000, guid: 6c2b8686c1708bc4a8cb0ab56ad61bdc, type: 2}
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaGris
+    second: {fileID: 2100000, guid: f991f46c7bbf4a940b9965537a9837a0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

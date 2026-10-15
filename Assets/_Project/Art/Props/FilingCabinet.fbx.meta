@@ -7,28 +7,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: FilingCabinet_baked
-    second: {fileID: 2100000, guid: 85b0354848d97094a8d6c27a193220a7, type: 2}
+      name: AA_Cromo
+    second: {fileID: 2100000, guid: d6aae8114fb69a640bec2678975cfc28, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: cabinet_body
-    second: {fileID: 2100000, guid: 2af1d75ca8aeec34195c9bb4ed31eaa6, type: 2}
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: cabinet_dark
-    second: {fileID: 2100000, guid: 6f270b5d8c9457d459d88130350c7bd7, type: 2}
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: cabinet_handle
-    second: {fileID: 2100000, guid: d148fcb82d9d33848aa192cc8a364bcd, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: cabinet_paper
-    second: {fileID: 2100000, guid: 26a4a3d1d530ff34ea89ee99fe401f42, type: 2}
+      name: AA_PinturaGris
+    second: {fileID: 2100000, guid: f991f46c7bbf4a940b9965537a9837a0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -7,8 +7,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: SwivelChair_baked
-    second: {fileID: 2100000, guid: 399e360518b31b849a0ca6cf3c88ded0, type: 2}
+      name: AA_Cromo
+    second: {fileID: 2100000, guid: d6aae8114fb69a640bec2678975cfc28, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Goma
+    second: {fileID: 2100000, guid: 349232918f9d06b4cbcf329008b5e03e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Plastico
+    second: {fileID: 2100000, guid: a913b633e108f704fadc6d21b12287c5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Tela
+    second: {fileID: 2100000, guid: eb8f4cd2b6721474985a00551d747b3d, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
