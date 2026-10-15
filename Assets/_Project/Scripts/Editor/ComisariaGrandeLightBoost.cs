@@ -15,7 +15,7 @@ namespace Horror.EditorTools
     /// </summary>
     public static class ComisariaGrandeLightBoost
     {
-        public const float Target = 0.2f;
+        public const float Target = 0.15f;              // 0,2 dejaba algunas salas demasiado iluminadas para un juego de terror
         static readonly string[] Skip = { "G_Dark" };
 
         public static float Measure(Camera cam, RenderTexture rt, Texture2D tex, ComisariaGrande.Room r)

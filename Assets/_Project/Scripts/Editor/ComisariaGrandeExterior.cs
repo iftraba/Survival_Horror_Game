@@ -87,7 +87,7 @@ namespace Horror.EditorTools
             Clad("Fachada_S", true, -0.23f, X0, X1, facB, (0f, 0f, 3.2f, 2.5f));
             Clad("Fachada_N", true, Z1 + 0.23f, X0, X1, facB);
             Clad("Fachada_E", false, X1 + 0.23f, 0f, Z1, facB);
-            Clad("Fachada_O", false, X0 - 0.23f, 0f, Z1, facB, (40f, 0f, 1.7f, 2.5f), (20f, 4f, 1.7f, 2.5f));
+            Clad("Fachada_O", false, X0 - 0.23f, 0f, Z1, facB, (40f, 0f, 1.7f, 2.5f), (20f, 4f, 1.7f, 2.5f), (8.5f, 7.5f, 2.0f, 1.2f));   // el ultimo: salida de la escalera de incendios a la azotea (si no, el revestimiento quedaba flotando en el paso)
             Box("Marquesina", ext, new Vector3(0f, 3.0f, -1.4f), new Vector3(6f, 0.18f, 2.6f), metal, 1f, false);
             foreach (float x in new[] { -2.8f, 2.8f }) Box("Pilar_Marquesina", ext, new Vector3(x, 1.45f, -2.55f), new Vector3(0.18f, 2.9f, 0.18f), metal, 1f);
             Box("Rotulo", ext, new Vector3(0f, 3.55f, -0.32f), new Vector3(5.2f, 0.7f, 0.12f), metal, 1f, false);

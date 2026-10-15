@@ -32,7 +32,7 @@ namespace Horror.EditorTools
             var p = vol.sharedProfile;
             var tm = Get<Tonemapping>(p); tm.mode.Override(TonemappingMode.ACES);
             var ca = Get<ColorAdjustments>(p);
-            ca.postExposure.Override(0.9f); ca.contrast.Override(8f); ca.saturation.Override(-10f); ca.colorFilter.Override(new Color(0.96f, 0.98f, 1f));
+            ca.postExposure.Override(0.35f); ca.contrast.Override(14f); ca.saturation.Override(-10f); ca.colorFilter.Override(new Color(0.96f, 0.98f, 1f));
             var smh = Get<ShadowsMidtonesHighlights>(p);
             smh.shadows.Override(new Vector4(0.96f, 1.0f, 1.03f, 0.02f));
             smh.midtones.Override(new Vector4(1.0f, 1.0f, 0.99f, 0f));

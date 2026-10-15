@@ -401,6 +401,9 @@ namespace Horror.EditorTools
                     var r2 = (GameObject)PrefabUtility.InstantiatePrefab(w150, level); r2.name = d.name + "_E";
                     r2.transform.SetPositionAndRotation(center + new Vector3(1.5f, 0, 0), Quaternion.Euler(0, 180f, 0));
                     var d1 = l.GetComponentInChildren<Door>(); var d2 = r2.GetComponentInChildren<Door>(); d1.partner = d2; d2.partner = d1;
+                    // cada prefab trae su jamba del lado de la cerradura: en una puerta doble esas dos jambas quedan en el centro y tapan el paso
+                    foreach (var t in l.GetComponentsInChildren<Transform>(true).Concat(r2.GetComponentsInChildren<Transform>(true)))
+                        if (t.name.StartsWith("Jamb") && Mathf.Abs(t.GetComponent<Renderer>() != null ? t.GetComponent<Renderer>().bounds.center.x - center.x : t.position.x - center.x) < 0.4f) t.gameObject.SetActive(false);
                     foreach (var t in l.GetComponentsInChildren<Transform>().Concat(r2.GetComponentsInChildren<Transform>())) if (t.name == "Leaf") leaves.Add(t.gameObject);
                     continue;
                 }
