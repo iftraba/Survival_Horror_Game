@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -54,6 +55,16 @@ namespace Horror.EditorTools
             };
             // madera barnizada oscura, como el resto de la madera del escenario (el horneado sale clara y anaranjada)
             foreach (var mt in mats.Values) if (mt != null) { mt.SetColor("_BaseColor", new Color(0.55f, 0.42f, 0.36f)); EditorUtility.SetDirty(mt); }
+            // puerta AA (Tools/blender/build_door_aa.py): varias submallas, una por material del FBX; cada una con su material de Unity
+            var multi = new Dictionary<string, Material[]>();
+            foreach (var (fbx, _, _) in Parts)
+            {
+                var model = AssetDatabase.LoadAssetAtPath<GameObject>(Dir + fbx + ".fbx");
+                var r = model.GetComponentInChildren<MeshRenderer>();
+                if (r == null || r.sharedMaterials.Length < 1 || !r.sharedMaterials[0].name.StartsWith("Puerta_")) continue;
+                multi[fbx] = r.sharedMaterials.Select(m => AAMaterial(m.name)).ToArray();
+            }
+            if (multi.ContainsKey("DoorJamb")) multi["DoorJambB"] = multi["DoorJamb"];
             foreach (var pf in new[] { "Door_Wood_150", "Door_Wood_140" })
             {
                 string pp = "Assets/_Project/Prefabs/Doors/" + pf + ".prefab";
@@ -65,10 +76,10 @@ namespace Horror.EditorTools
                     if (mf == null || mr == null) continue;
                     switch (t.name)
                     {
-                        case "Leaf": mf.sharedMesh = meshes["DoorLeaf"]; mr.sharedMaterial = mats["DoorLeaf"]; n++; break;
-                        case "Jamb_A": mf.sharedMesh = meshes["DoorJamb"]; mr.sharedMaterial = mats["DoorJamb"]; n++; break;
-                        case "Jamb_B": mf.sharedMesh = meshes["DoorJambB"]; mr.sharedMaterial = mats["DoorJamb"]; n++; break;
-                        case "Header": mf.sharedMesh = meshes["DoorHeader"]; mr.sharedMaterial = mats["DoorHeader"]; n++; break;
+                        case "Leaf": mf.sharedMesh = meshes["DoorLeaf"]; if (multi.ContainsKey("DoorLeaf")) mr.sharedMaterials = multi["DoorLeaf"]; else mr.sharedMaterial = mats["DoorLeaf"]; n++; break;
+                        case "Jamb_A": mf.sharedMesh = meshes["DoorJamb"]; if (multi.ContainsKey("DoorJamb")) mr.sharedMaterials = multi["DoorJamb"]; else mr.sharedMaterial = mats["DoorJamb"]; n++; break;
+                        case "Jamb_B": mf.sharedMesh = meshes["DoorJambB"]; if (multi.ContainsKey("DoorJambB")) mr.sharedMaterials = multi["DoorJambB"]; else mr.sharedMaterial = mats["DoorJamb"]; n++; break;
+                        case "Header": mf.sharedMesh = meshes["DoorHeader"]; if (multi.ContainsKey("DoorHeader")) mr.sharedMaterials = multi["DoorHeader"]; else mr.sharedMaterial = mats["DoorHeader"]; n++; break;
                         case "PanelLow": case "KickPlate": case "Handle": case "Escutcheon": mr.enabled = false; break;   // ya van en la hoja
                     }
                 }
@@ -78,6 +89,32 @@ namespace Horror.EditorTools
             }
             AssetDatabase.SaveAssets();
             return string.Join(" | ", log);
+        }
+
+        const string PBR = "Assets/_Project/Art/Textures/PBR/";
+
+        /// <summary>Materiales de la puerta AA: madera escaneada (UV en metros, veta en U), laton, acero y negro.</summary>
+        static Material AAMaterial(string name)
+        {
+            string path = "Assets/_Project/Materials/" + name + ".mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null) { m = new Material(Shader.Find("Universal Render Pipeline/Lit")); AssetDatabase.CreateAsset(m, path); }
+            m.shader = Shader.Find("Universal Render Pipeline/Lit");
+            switch (name)
+            {
+                case "Puerta_Madera":
+                    m.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(PBR + "dark_wood_diff.jpg"));
+                    m.SetColor("_BaseColor", new Color(0.62f, 0.5f, 0.45f));
+                    var n = AssetDatabase.LoadAssetAtPath<Texture2D>(PBR + "dark_wood_nor.jpg"); if (n != null) { m.SetTexture("_BumpMap", n); m.EnableKeyword("_NORMALMAP"); m.SetFloat("_BumpScale", 0.6f); }
+                    var ms = AssetDatabase.LoadAssetAtPath<Texture2D>(PBR + "dark_wood_ms.png"); if (ms != null) { m.SetTexture("_MetallicGlossMap", ms); m.EnableKeyword("_METALLICSPECGLOSSMAP"); m.SetFloat("_Smoothness", 0.6f); m.SetFloat("_SmoothnessTextureChannel", 0f); }
+                    m.SetTextureScale("_BaseMap", new Vector2(1.2f, 1.2f));
+                    break;
+                case "Puerta_Laton": m.SetColor("_BaseColor", new Color(0.62f, 0.47f, 0.22f)); m.SetFloat("_Metallic", 1f); m.SetFloat("_Smoothness", 0.62f); m.SetTexture("_MetallicGlossMap", null); m.DisableKeyword("_METALLICSPECGLOSSMAP"); break;
+                case "Puerta_Acero": m.SetColor("_BaseColor", new Color(0.62f, 0.63f, 0.65f)); m.SetFloat("_Metallic", 1f); m.SetFloat("_Smoothness", 0.5f); m.SetTexture("_MetallicGlossMap", null); m.DisableKeyword("_METALLICSPECGLOSSMAP"); break;
+                default: m.SetColor("_BaseColor", new Color(0.04f, 0.04f, 0.045f)); m.SetFloat("_Metallic", 0.2f); m.SetFloat("_Smoothness", 0.35f); m.SetTexture("_MetallicGlossMap", null); m.DisableKeyword("_METALLICSPECGLOSSMAP"); break;
+            }
+            EditorUtility.SetDirty(m);
+            return m;
         }
 
         /// <summary>
