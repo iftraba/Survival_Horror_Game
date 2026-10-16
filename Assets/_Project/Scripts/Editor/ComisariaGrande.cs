@@ -649,6 +649,7 @@ namespace Horror.EditorTools
             Rail(root, new Vector3(rx1, yf, hole.yMax), new Vector3(hole.xMax, yf, hole.yMax));
             Rail(root, new Vector3(hole.xMin, yf, hole.yMin), new Vector3(hole.xMin, yf, rz0));
             Rail(root, new Vector3(rx1, yf, rz0), new Vector3(rx1, yf, hole.yMax));
+            AAMaterialKit.SpiralSwap(root);                                            // modelo AA de lo que se ve (si existe)
         }
 
         /// <summary>Escalera de servicio norte (baja -> primera) y la del archivo (primera -> segunda), con barandillas en el hueco.</summary>

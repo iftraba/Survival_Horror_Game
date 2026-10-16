@@ -27,7 +27,10 @@ namespace Horror.EditorTools
             ("Desk", "Assets/_Project/Art/Props/Desk.fbx"),
             ("SwivelChair", "Assets/_Project/Art/Props/Office/SwivelChair.fbx"),
             ("ReceptionDesk", "Assets/_Project/Art/Props/Exterior/ReceptionDesk.fbx"),
+            ("SpiralStairAA", SpiralPath),
         };
+
+        public const string SpiralPath = "Assets/_Project/Art/Props/Station/SpiralStairAA.fbx";
 
         public static bool IsAA(string fbxPath) => Models.Any(m => m.path == fbxPath);
 
@@ -48,6 +51,7 @@ namespace Horror.EditorTools
             { "AA_Plastico", (null, null, new Color(0.05f, 0.05f, 0.055f), 1f, 0f, 0f, 0.42f) },
             { "AA_Goma", (null, null, new Color(0.025f, 0.025f, 0.028f), 1f, 0f, 0f, 0.15f) },
             { "AA_Papel", (null, null, new Color(0.78f, 0.75f, 0.66f), 1f, 0f, 0f, 0.08f) },
+            { "AA_Hierro", ("green_metal_rust", "_neutral_diff", new Color(0.17f, 0.18f, 0.17f), 1.0f, 1.0f, 0f, 1f) },   // fundicion pintada de negro
             { "AA_Pantalla", (null, null, new Color(0.015f, 0.018f, 0.022f), 1f, 0f, 0f, 0.88f) },     // pantalla apagada, cristal brillante
         };
 
@@ -114,6 +118,7 @@ namespace Horror.EditorTools
                 var imp = AssetImporter.GetAtPath(path) as ModelImporter;
                 if (imp == null) { log.Add("falta " + path); continue; }
                 imp.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
+                if (name == "SpiralStairAA") imp.generateSecondaryUV = true;                // estatica: UV2 para la luz horneada
                 foreach (var old in imp.GetExternalObjectMap().Keys.Where(k => k.type == typeof(Material) && !k.name.StartsWith("AA_")).ToList()) imp.RemoveRemap(old);
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);      // los materiales del modelo (los suyos o ya reasignados: se llaman igual)
                 var names = go == null ? new List<string>() : go.GetComponentsInChildren<Renderer>(true).SelectMany(r => r.sharedMaterials).Where(x => x != null)
@@ -123,7 +128,32 @@ namespace Horror.EditorTools
                 log.Add(name + " (" + string.Join(", ", names) + ")");
             }
             AssetDatabase.SaveAssets();
+            var esc = GameObject.Find("EscaleraCaracol");
+            if (esc != null) log.Add(SpiralSwap(esc.transform));
             return "muebles AA: " + string.Join(" | ", log);
+        }
+
+        /// <summary>
+        /// Escalera de caracol del vestibulo: quita lo que se ve de la de primitivas (peldanos, pies derechos, barrotes, pasamanos y la malla de la
+        /// columna, que conserva su colision) y pone el modelo AA en el centro. La rampa de colision, el rellano y las barandillas del hueco se quedan.
+        /// La llama tambien ComisariaGrande.SpiralStair (menu 1). Repetible.
+        /// </summary>
+        public static string SpiralSwap(Transform root)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SpiralPath);
+            if (prefab == null) return "caracol AA: falta el modelo";
+            int removed = 0;
+            foreach (Transform t in root.Cast<Transform>().ToList())
+            {
+                if (t.name == "Peldano" || t.name == "PieDerecho" || t.name == "Barrote" || t.name == "Pasamanos" || t.name == "CaracolAA") { Object.DestroyImmediate(t.gameObject); removed++; }
+                else if (t.name == "Columna") { var r = t.GetComponent<MeshRenderer>(); if (r != null) Object.DestroyImmediate(r); }
+            }
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab, root);
+            go.name = "CaracolAA";
+            go.transform.position = ComisariaGrande.SpiralC;
+            foreach (var t in go.GetComponentsInChildren<Transform>(true)) GameObjectUtility.SetStaticEditorFlags(t.gameObject, (StaticEditorFlags)~0);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(root.gameObject.scene);
+            return "caracol AA puesto (" + removed + " piezas de primitivas quitadas)";
         }
     }
 }

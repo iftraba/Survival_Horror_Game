@@ -335,8 +335,92 @@ def make_reception_desk():
     return b.finish("ReceptionDesk")
 
 
+# ------------------------------------------------------------------ escalera de caracol del vestibulo
+# Misma helice que ComisariaGrande.SpiralStair (la rampa de colision se queda alli): 22 peldanos, una vuelta, radio 2,2, subida 4 m.
+# Angulo en grados de Unity (x, z) = (cos a, sin a), a(k) = 180 - 360 k. Al importar en Unity, la X de Blender sale como -X y la Y como -Z
+# (comprobado con rayos desde Unity: con (x, -z) los peldanos salian en espejo en X y con (-x, z) en espejo en Z).
+SPIRAL_R, SPIRAL_IN, SPIRAL_RISE, SPIRAL_STEPS = 2.2, 0.3, 4.0, 22
+
+
+def _sp(k, r, z):
+    a = math.radians(180.0 - 360.0 * k)
+    return (-r * math.cos(a), -r * math.sin(a), z)
+
+
+def _tread(b, k0, k1, r0, r1, z_top, th, mat):
+    """Peldano en abanico (sector de corona) con cantos biselados."""
+    bm = bmesh.new()
+    n = 8
+    pts = [_sp(k0 + (k1 - k0) * i / n, r1, z_top) for i in range(n + 1)] + [_sp(k1 + (k0 - k1) * i / 2, r0, z_top) for i in range(3)]
+    vs = [bm.verts.new(p) for p in pts]
+    f = bm.faces.new(vs)
+    bmesh.ops.recalc_face_normals(bm, faces=[f])
+    if f.normal.z < 0:
+        f.normal_flip()
+    ext = bmesh.ops.extrude_face_region(bm, geom=[f])
+    nv = [e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=nv, vec=Vector((0, 0, -th)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    bmesh.ops.bevel(bm, geom=list(bm.edges), offset=0.004, offset_type="OFFSET", segments=2, profile=0.5, affect="EDGES", clamp_overlap=True)
+    b.parts.append(Part(bm, mat, "x"))
+
+
+def make_spiral_stair():
+    b = Builder()
+    R, RIN, RISE, N = SPIRAL_R, SPIRAL_IN, SPIRAL_RISE, SPIRAL_STEPS
+    iron, wood = "AA_Hierro", "AA_Madera"
+    # columna central con basa, anillos por peldano y remate
+    b.cyl((0, 0, 2.45), 0.085, 4.9, "z", iron, 24, 0.0)
+    b.cyl((0, 0, 0.03), 0.2, 0.06, "z", iron, 28, 0.01)
+    b.cyl((0, 0, 0.1), 0.13, 0.08, "z", iron, 28, 0.012, r_top=0.095)
+    b.cyl((0, 0, 4.93), 0.11, 0.06, "z", iron, 24, 0.012)
+    b.cyl((0, 0, 5.0), 0.05, 0.1, "z", iron, 16, 0.01, r_top=0.02)
+    for i in range(N):
+        k0, k1 = i / N, (i + 1) / N
+        z = RISE * (i + 1) / N - 0.005                                           # cara de pisada como la del peldano anterior
+        _tread(b, k0 - 0.004, k1 + 0.004, RIN - 0.2, R, z, 0.035, iron)         # chapa de pisada (llega hasta la columna)
+        km = (k0 + k1) / 2
+        for kk in (k0 + 0.25 / N, km, k1 - 0.25 / N):                           # nervios antideslizantes en la pisada
+            p0, p1 = _sp(kk, 0.35, z + 0.004), _sp(kk, R - 0.1, z + 0.004)
+            ang = math.degrees(math.atan2(p1[1] - p0[1], p1[0] - p0[0]))
+            b.box(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2, z + 0.003), (R - 0.45, 0.012, 0.006), iron, 0.002, seg=1, rot=(0, 0, ang))
+        p0, p1 = _sp(k0 + 0.03 / N, 0.12, z - 0.035), _sp(k0 + 0.03 / N, R - 0.08, z - 0.035)           # nervio de carga bajo el canto delantero
+        ang = math.degrees(math.atan2(p1[1] - p0[1], p1[0] - p0[0]))
+        b.box(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2, z - 0.07), (R - 0.2, 0.025, 0.08), iron, 0.006, rot=(0, 0, ang))
+        b.cyl((0, 0, z - 0.06), 0.12, 0.13, "z", iron, 24, 0.012)               # casquillo del peldano en la columna
+        # balaustres: uno grueso con bolas en el arranque de cada peldano y uno fino en medio
+        for j, kk in enumerate((k0 + 0.15 / N, k0 + 0.6 / N)):
+            x, y, _ = _sp(kk, R - 0.07, 0)
+            zb, zt = z, RISE * kk + 0.95 + (RISE / N) * 0.5
+            rr = 0.016 if j == 0 else 0.011
+            b.cyl((x, y, (zb + zt) / 2), rr, zt - zb, "z", iron, 10, 0.0)
+            b.cyl((x, y, zb + 0.02), rr + 0.012, 0.04, "z", iron, 12, 0.006)
+            if j == 0:
+                for t in (0.3, 0.62):
+                    b.cyl((x, y, zb + (zt - zb) * t), 0.026, 0.035, "z", iron, 12, 0.012)
+    # pasamanos helicoidal de madera sobre una pletina de hierro, y pletina baja que une los balaustres
+    pts_h, pts_p, pts_b = [], [], []
+    M = 160
+    for i in range(M + 1):
+        k = i / M
+        zz = RISE * k + 0.95 + (RISE / N) * 0.5
+        pts_h.append(_sp(k, R - 0.07, zz + 0.03))
+        pts_p.append(_sp(k, R - 0.07, zz - 0.005))
+        pts_b.append(_sp(k, R - 0.07, RISE * k + (RISE / N) * 0.5 + 0.11))
+    b.sweep(pts_h, 0.03, wood, 14)
+    b.sweep(pts_p, 0.012, iron, 8)
+    b.sweep(pts_b, 0.01, iron, 8)
+    # voluta de arranque del pasamanos
+    x0, y0, z0 = pts_h[0]
+    vol = [(x0 + 0.06 * math.cos(t), y0 + 0.06 * math.sin(t) + 0.06, z0 - 0.02 * t / 6) for t in [i * 0.4 for i in range(16)]]
+    b.sweep([pts_h[2], pts_h[1], pts_h[0]] + vol[1:], 0.028, wood, 12, r_end=0.02)
+    b.cyl((x0, y0, z0 / 2), 0.03, z0, "z", iron, 14, 0.0)                         # poste de arranque
+    b.cyl((x0, y0, 0.04), 0.06, 0.08, "z", iron, 16, 0.012)
+    return b.finish("SpiralStairAA", smooth_angle=35)
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
-            "ReceptionDesk": make_reception_desk}
+            "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair}
 
 
 def preview(name):
