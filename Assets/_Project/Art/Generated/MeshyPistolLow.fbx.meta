@@ -7,8 +7,38 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: MeshyPistolLow_mat
-    second: {fileID: 2100000, guid: d266bae0658af7946ae99fa2f362cc9b, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Goma
+    second: {fileID: 2100000, guid: 349232918f9d06b4cbcf329008b5e03e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Pavonado
+    second: {fileID: 2100000, guid: adc099cd90fe264409c75cc18ac57b04, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PlasticoRojo
+    second: {fileID: 2100000, guid: 8de62a6a26a30734b93fd7f3f7283e9c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Polimero
+    second: {fileID: 2100000, guid: 43940a57f755e2c4e927303d5a9d217a, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

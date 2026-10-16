@@ -836,11 +836,102 @@ def make_cot():
     return b.finish("Cot")
 
 
+# ------------------------------------------------------------------ cartel de la fachada
+def _text(b, text, size, matrix, mat, depth=0.03, spacing=1.2, bevel=0.0015):
+    """Texto con grosor (fuente de Blender, Inter, licencia libre) como pieza del Builder. Se escribe en el plano XY y 'matrix' lo coloca."""
+    cu = bpy.data.curves.new("txt", "FONT")
+    cu.body = text
+    cu.size = size
+    cu.extrude = depth / 2
+    cu.bevel_depth = bevel
+    cu.bevel_resolution = 1
+    cu.resolution_u = 3
+    cu.align_x = "CENTER"
+    cu.align_y = "CENTER"
+    cu.space_character = spacing
+    obj = bpy.data.objects.new("txt", cu)
+    bpy.context.scene.collection.objects.link(obj)
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(obj.evaluated_get(dg))
+    bpy.data.objects.remove(obj, do_unlink=True)
+    bpy.data.curves.remove(cu)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bpy.data.meshes.remove(me)
+    bmesh.ops.transform(bm, matrix=matrix, verts=bm.verts[:])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    b.parts.append(Part(bm, mat, "x"))
+
+
+def _star(b, cx, y, cz, r_out, r_in, n, depth, mat):
+    """Estrella de n puntas extruida hacia -Y (mirando al frente)."""
+    bm = bmesh.new()
+    vs = []
+    for k in range(2 * n):
+        a = math.radians(90 + 180 / n * k)
+        rr = r_out if k % 2 == 0 else r_in
+        vs.append(bm.verts.new((cx + rr * math.cos(a), y, cz + rr * math.sin(a))))
+    f = bm.faces.new(vs)
+    bmesh.ops.recalc_face_normals(bm, faces=[f])
+    if f.normal.y > 0:
+        f.normal_flip()
+    ext = bmesh.ops.extrude_face_region(bm, geom=[f])
+    nv = [e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)]
+    bmesh.ops.translate(bm, verts=nv, vec=Vector((0, -depth, 0)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    b.parts.append(Part(bm, mat, "x"))
+
+
+def make_station_sign():
+    """Rotulo de la comisaria sobre la marquesina: faja de piedra con moldura, letras de laton sueltas sobre tacos ('SECTOR 7' y 'POLICE DEPARTMENT'),
+    escudo de bronce con estrella esmaltada de siete puntas y dos focos de cuello de cisne. Todo queda delante del plano y = 0 (la fachada): la trasera
+    toca ese plano y nada lo atraviesa (antes la placa se metia en el muro y parpadeaba). Frente hacia -Y, origen en el centro del borde inferior trasero."""
+    b = Builder()
+    W, H, D = 5.4, 0.82, 0.07
+    stone = "AA_Piedra"
+    b.box((0, -D / 2, H / 2), (W, D, H), stone, 0.012, seg=2)                                       # faja
+    for z, hh in ((0.03, 0.06), (H - 0.03, 0.06)):                                                  # molduras arriba y abajo
+        b.box((0, -D - 0.012, z), (W + 0.04, 0.03, hh), stone, 0.014, seg=3)
+    for sx in (-1, 1):                                                                              # remates laterales
+        b.box((sx * (W / 2 - 0.05), -D - 0.008, H / 2), (0.1, 0.022, H - 0.12), stone, 0.01, seg=2, grain="z")
+    b.box((0, -D - 0.003, H / 2), (W - 0.24, 0.006, H - 0.16), stone, 0.002, seg=1)                 # campo rehundido (filete)
+    # letras de laton sobre tacos
+    rot = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))                         # plano XY -> XZ mirando a -Y
+    fy = -D - 0.03
+    _text(b, "SECTOR 7", 0.36, Matrix.Translation((0.42, fy - 0.015, 0.5)) @ rot, "AA_Laton", 0.03, 1.25)
+    _text(b, "POLICE DEPARTMENT", 0.12, Matrix.Translation((0.42, fy - 0.01, 0.19)) @ rot, "AA_Laton", 0.02, 1.45)
+    for x in (-0.55, 0.0, 0.55, 1.05, 1.4):                                                         # tacos (casi ocultos tras las letras)
+        b.cyl((0.42 + x, -D - 0.015, 0.5), 0.006, 0.03, "y", "AA_Acero", 8, 0.0)
+    # escudo: disco de bronce con aro, estrella esmaltada y una estrella de laton encima
+    ex, ez = -2.05, H / 2
+    b.cyl((ex, -D - 0.02, ez), 0.33, 0.04, "y", "AA_Laton", 48, 0.008)
+    ring = [(ex + 0.3 * math.cos(2 * math.pi * k / 64), -D - 0.042, ez + 0.3 * math.sin(2 * math.pi * k / 64)) for k in range(65)]
+    b.sweep(ring, 0.012, "AA_Laton", 8)
+    b.cyl((ex, -D - 0.041, ez), 0.26, 0.004, "y", "AA_EsmalteAzul", 48, 0.0)
+    _star(b, ex, -D - 0.043, ez, 0.21, 0.09, 7, 0.012, "AA_Laton")
+    b.cyl((ex, -D - 0.057, ez), 0.055, 0.006, "y", "AA_EsmalteAzul", 24, 0.001)
+    _text(b, "7", 0.08, Matrix.Translation((ex, -D - 0.062, ez)) @ rot, "AA_Laton", 0.006, 1.0, 0.0)
+    for k in range(4):                                                                              # tornillos del escudo
+        a = math.radians(45 + 90 * k)
+        b.cyl((ex + 0.315 * math.cos(a), -D - 0.042, ez + 0.315 * math.sin(a)), 0.008, 0.004, "y", "AA_Acero", 8, 0.0)
+    # focos de cuello de cisne que iluminan la faja desde arriba
+    for sx in (-1.4, 1.6):
+        b.cyl((sx, -0.008, H + 0.18), 0.04, 0.016, "y", "AA_Negro", 16, 0.003)                       # placa de anclaje
+        b.sweep([(sx, -0.016, H + 0.18), (sx, -0.1, H + 0.3), (sx, -0.3, H + 0.36), (sx, -0.42, H + 0.3)], 0.014, "AA_Negro", 10)
+        _shell(b, (sx, -0.46, H + 0.24), 0.08, 0.035, 0.09, 20, "AA_Negro", "AA_PinturaCrema")
+        b.cyl((sx, -0.46, H + 0.25), 0.025, 0.04, "z", "AA_Papel", 12, 0.01)
+    return b.finish("StationSign")
+
+
+# La pistola esta en build_pistol_aa.py (siluetas extruidas y cortes booleanos).
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
             "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair,
             "CeilingLampAA": make_ceiling_lamp, "DeskComputer": make_desk_computer, "DeskLamp": make_desk_lamp,
             "TrashBin": make_trash_bin, "Chair": make_visitor_chair, "Bookcase": make_bookcase,
-            "AuditoriumChair": make_auditorium_chair, "WaitingBench": make_waiting_bench, "VendingMachine": make_vending, "Cot": make_cot}
+            "AuditoriumChair": make_auditorium_chair, "WaitingBench": make_waiting_bench, "VendingMachine": make_vending, "Cot": make_cot,
+            "StationSign": make_station_sign}
 
 
 def preview(name):

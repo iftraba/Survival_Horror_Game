@@ -38,6 +38,8 @@ namespace Horror.EditorTools
             ("WaitingBench", "Assets/_Project/Art/Props/Exterior/WaitingBench.fbx"),
             ("VendingMachine", "Assets/_Project/Art/Props/Station/VendingMachine.fbx"),
             ("Cot", "Assets/_Project/Art/Props/Cot.fbx"),
+            ("StationSign", "Assets/_Project/Art/Props/Front/StationSign.fbx"),
+            ("MeshyPistolLow", "Assets/_Project/Art/Generated/MeshyPistolLow.fbx"),    // pistola AA (el nombre se conserva: la usan W_Pistol e I_Pistol)
         };
 
         public const string LampPath = "Assets/_Project/Art/Props/Lamp/CeilingLampAA.fbx";
@@ -77,6 +79,10 @@ namespace Horror.EditorTools
             { "AA_Colchon", ("poly_wool_herringbone", "_diff", new Color(0.95f, 0.92f, 0.82f), 2.5f, 0.8f, 0f, 1f) },        // colchon de lona
             { "AA_Manta", ("poly_wool_herringbone", "_diff", new Color(0.5f, 0.55f, 0.4f), 1.5f, 1.0f, 0f, 1f) },             // manta militar
             { "AA_Cristal", (null, null, new Color(0.55f, 0.62f, 0.65f, 0.12f), 1f, 0f, 0f, 0.95f) },                         // transparente (ver Transparent)
+            { "AA_Piedra", ("plaster_grey_04", "_diff", new Color(0.85f, 0.83f, 0.78f), 1.0f, 1.0f, 0f, 1f) },                 // faja del rotulo
+            { "AA_EsmalteAzul", (null, null, new Color(0.04f, 0.09f, 0.28f), 1f, 0f, 0f, 0.75f) },                            // esmalte del escudo
+            { "AA_Pavonado", (null, null, new Color(0.16f, 0.165f, 0.17f), 1f, 0f, 0.55f, 0.42f) },                             // acero fosfatado gris oscuro mate y limpio (corredera de la pistola)
+            { "AA_Polimero", ("poly_wool_herringbone", "_diff", new Color(0.07f, 0.07f, 0.075f), 12.0f, 0.15f, 0f, 0.45f) },      // polimero negro con grano fino
             { "AA_Pantalla", (null, null, new Color(0.015f, 0.018f, 0.022f), 1f, 0f, 0f, 0.88f) },     // pantalla apagada, cristal brillante
         };
 

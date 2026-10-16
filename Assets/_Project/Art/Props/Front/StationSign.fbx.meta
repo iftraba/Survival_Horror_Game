@@ -7,8 +7,38 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: StationSign_baked
-    second: {fileID: 2100000, guid: 2cd2e41c625b9ca4b93b6213e273605f, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_EsmalteAzul
+    second: {fileID: 2100000, guid: a523001d68c859548be94b9f94ca833e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Laton
+    second: {fileID: 2100000, guid: 5b37310192562bd47b01eeac3a9b80b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Piedra
+    second: {fileID: 2100000, guid: 6af3a52ed57eb15488c3edc357bfee7d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaCrema
+    second: {fileID: 2100000, guid: 42f38e41fee469148bb13b8a90705514, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

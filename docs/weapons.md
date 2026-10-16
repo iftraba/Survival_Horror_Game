@@ -27,3 +27,7 @@ El jugador **siempre lleva un arma equipada**: ya no se puede desequipar (el men
 ## Decisiones
 - La dirección de disparo es la de la cámara; el torso del jugador se alinea con ella (`PlayerAnimation.LateUpdate`, ver `animation.md`).
 - El retroceso visual es por código (no hay clip de disparo específico de pistola).
+
+
+## Modelo de la pistola (2026-10-16)
+La pistola (`W_Pistol` / `I_Pistol`) usa `Art/Generated/MeshyPistolLow.fbx`, que ahora es un modelo hecho en Blender (`Tools/blender/build_pistol_aa.py`, línea VP70, 51.400 tris) en lugar del de Meshy (tenía dos empuñaduras). Mismo nombre, caja y rotación: los datos del arma no cambian. Ver `docs/art-pipeline.md`.

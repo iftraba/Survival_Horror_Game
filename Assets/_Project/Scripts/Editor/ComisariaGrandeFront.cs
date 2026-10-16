@@ -77,8 +77,9 @@ namespace Horror.EditorTools
             var ext = level.transform.Find("Exterior");
             if (ext != null) foreach (Transform t in ext) if (t.name == "Rotulo") t.gameObject.SetActive(false);
 
-            // placa sobre la marquesina (pared sur en z -0,23; la fachada mira a -Z: yaw 180)
-            var sign = Place("StationSign", new Vector3(0f, 3.3f, -0.26f), 180f, false); if (sign != null) n++;
+            // rotulo sobre la marquesina (la fachada mira a -Z: yaw 180). El revestimiento Fachada_S tiene la cara en z -0,26: la trasera del rotulo AA
+            // queda 5 mm por delante (antes la placa estaba en el mismo plano y se metia en el muro: parpadeaba). Por debajo de las ventanas de la 1.a planta.
+            var sign = Place("StationSign", new Vector3(0f, 3.12f, -0.265f), 180f, false); if (sign != null) n++;
             Lamp("Luz_Placa", new Vector3(0f, 3.4f, -1.4f), new Color(1f, 0.9f, 0.7f), 1.8f, 5f);
 
             // banderas: mastiles inclinados a ambos lados de la placa, con tela de la comisaria y de la ciudad
