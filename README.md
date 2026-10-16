@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-17 · Art · **Pistola**: segundo diseño de Meshy elegido por el usuario (sustituye al anterior), sin marcas: corredera limpia y logo de las cachas quitado de la geometría, las normales y las texturas.
+
 - 2026-10-16 · Art · **Rótulo de la fachada** rehecho (faja de piedra, letras de latón y escudo) y separado del muro: ya no parpadea. **Pistola** sustituida por la VP70 de Meshy elegida por el usuario, sin marcas registradas (grabados propios «M'19Z», «GRIMHEIM ARMS» y «S7» con grafía parecida).
 
 - 2026-10-16 · Art/Core · **Fase C AA, punto 5, tanda 3**: máquina expendedora con cristal transparente y productos, y catre de calabozo. **Arreglo** de `PropVariant`: en juego teñía todos los materiales de un modelo con el color del primero.

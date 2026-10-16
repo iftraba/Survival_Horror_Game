@@ -7,7 +7,7 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: PistolaVP_mat
+      name: PistolaVP_mat.004
     second: {fileID: 2100000, guid: 785df5aba26c50a45b804bebd1a868cb, type: 2}
   materials:
     materialImportMode: 2

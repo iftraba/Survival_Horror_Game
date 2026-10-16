@@ -193,7 +193,9 @@ namespace Horror.EditorTools
             var imp = (ModelImporter)AssetImporter.GetAtPath(fbx);
             imp.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
             foreach (var old in imp.GetExternalObjectMap().Keys.Where(k => k.type == typeof(Material)).ToList()) imp.RemoveRemap(old);
-            imp.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "PistolaVP_mat"), m);
+            imp.SaveAndReimport();                                                          // los nombres de material del FBX (Blender les pone sufijos .001...)
+            foreach (var n in AssetDatabase.LoadAssetAtPath<GameObject>(fbx).GetComponentsInChildren<Renderer>(true).SelectMany(r => r.sharedMaterials).Where(x => x != null).Select(x => x.name).Distinct().ToList())
+                imp.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), n), m);
             imp.SaveAndReimport();
             AssetDatabase.SaveAssets();
             var go = AssetDatabase.LoadAssetAtPath<GameObject>(fbx);

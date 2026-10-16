@@ -29,5 +29,5 @@ El jugador **siempre lleva un arma equipada**: ya no se puede desequipar (el men
 - El retroceso visual es por código (no hay clip de disparo específico de pistola).
 
 
-## Modelo de la pistola (2026-10-16)
-La pistola (`W_Pistol` / `I_Pistol`) usa `Art/Generated/MeshyPistolLow.fbx`, que ahora es la VP70 de Meshy elegida por el usuario, girada y escalada a la caja anterior y sin marcas registradas (`Tools/blender/debrand_pistol.py`). Mismo nombre, caja y rotación: los datos del arma no cambian. Ver `docs/art-pipeline.md`.
+## Modelo de la pistola (2026-10-17)
+La pistola (`W_Pistol` / `I_Pistol`) usa `Art/Generated/MeshyPistolLow.fbx`: el segundo diseño de Meshy elegido por el usuario, girado y escalado a la caja anterior y sin marcas registradas (logo de las cachas quitado). Mismo nombre, caja y rotación: los datos del arma no cambian. Ver `docs/art-pipeline.md`.
