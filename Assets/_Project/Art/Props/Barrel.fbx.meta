@@ -7,23 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Barrel_baked
-    second: {fileID: 2100000, guid: 0f1f36902d315fd4ca798bff31bf84d0, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: barrel_body
-    second: {fileID: 2100000, guid: 1df26040ddd553c4788be5085db1895d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: barrel_dark
-    second: {fileID: 2100000, guid: 34e405cdd90be19459e75956fc9b7ae7, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: barrel_rust
-    second: {fileID: 2100000, guid: 657a550c3f92d9b4397f8699df45c79f, type: 2}
+      name: AA_Oxido
+    second: {fileID: 2100000, guid: bd65ff51a930cd945baf766cc3d4c1f0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

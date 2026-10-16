@@ -1200,6 +1200,567 @@ def make_archive_cart():
     return b.finish("ArchiveCart")
 
 
+# ------------------------------------------------------------------ sotano (sustituye a build_basement.py / build_basement_v2.py; mismas medidas, frente -Y)
+def aa_gauge(b, c, r, face=-1, depth=0.035, rng=None):
+    """Manometro mirando a -Y: caja con aro biselado, esfera con marcas, zona roja, aguja con eje y cristal."""
+    y = c[1]
+    b.cyl((c[0], y + face * depth / 2, c[2]), r, depth, "y", "AA_Acero", 32, 0.004)
+    b.cyl((c[0], y + face * depth, c[2]), r * 0.88, 0.003, "y", "AA_Esfera", 32, 0.0)
+    for k in range(13):                                                                         # marcas de 270 grados
+        a = math.radians(225 - k * 22.5)
+        L = r * (0.16 if k % 3 == 0 else 0.09)
+        rr = r * 0.78
+        b.box((c[0] + math.cos(a) * (rr - L / 2), y + face * (depth + 0.0018), c[2] + math.sin(a) * (rr - L / 2)), (L, 0.0006, r * 0.025), "AA_Negro", 0.0,
+              rot=(0, -math.degrees(a), 0))
+    for k in range(3):                                                                          # sector rojo
+        a = math.radians(-20 - k * 10)
+        b.box((c[0] + math.cos(a) * r * 0.7, y + face * (depth + 0.0016), c[2] + math.sin(a) * r * 0.7), (r * 0.08, 0.0006, r * 0.12), "AA_PlasticoRojo", 0.0,
+              rot=(0, -math.degrees(a), 0))
+    a = math.radians((rng.uniform(40, 160)) if rng else 100)
+    b.box((c[0] + math.cos(a) * r * 0.3, y + face * (depth + 0.003), c[2] + math.sin(a) * r * 0.3), (r * 0.7, 0.001, r * 0.035), "AA_Negro", 0.0,
+          rot=(0, -math.degrees(a), 0))
+    b.cyl((c[0], y + face * (depth + 0.003), c[2]), r * 0.07, 0.003, "y", "AA_Negro", 12, 0.0)
+    ring = [(c[0] + r * 0.95 * math.cos(2 * math.pi * k / 32), y + face * (depth + 0.001), c[2] + r * 0.95 * math.sin(2 * math.pi * k / 32)) for k in range(33)]
+    b.sweep(ring, r * 0.06, "AA_Acero", 8)
+    b.cyl((c[0], y - face * 0.01, c[2] - r - 0.015), r * 0.15, 0.04, "z", "AA_Laton", 12, 0.002)   # racor
+
+
+def aa_wheel(b, c, r, mat="AA_PinturaRoja", face=-1):
+    """Volante de valvula en el plano XZ: llanta toroidal ondulada para el agarre, tres radios curvos, cubo y tuerca."""
+    n = 48
+    ring = [(c[0] + (r + 0.004 * math.sin(k * 6 * 2 * math.pi / n)) * math.cos(2 * math.pi * k / n), c[1],
+             c[2] + (r + 0.004 * math.sin(k * 6 * 2 * math.pi / n)) * math.sin(2 * math.pi * k / n)) for k in range(n + 1)]
+    b.sweep(ring, r * 0.09, mat, 10)
+    for k in range(3):
+        a = 2 * math.pi * k / 3 + 0.3
+        b.sweep([(c[0] + 0.03 * math.cos(a), c[1] - face * 0.01, c[2] + 0.03 * math.sin(a)),
+                 (c[0] + r * 0.55 * math.cos(a + 0.2), c[1], c[2] + r * 0.55 * math.sin(a + 0.2)),
+                 (c[0] + r * 0.95 * math.cos(a + 0.12), c[1], c[2] + r * 0.95 * math.sin(a + 0.12))], r * 0.06, mat, 8)
+    b.cyl((c[0], c[1], c[2]), 0.035, 0.045, "y", mat, 18, 0.006)
+    b.cyl((c[0], c[1] + face * 0.03, c[2]), 0.016, 0.022, "y", "AA_Acero", 6, 0.002)               # tuerca hexagonal
+    b.cyl((c[0], c[1] - face * 0.05, c[2]), 0.012, 0.08, "y", "AA_Acero", 12, 0.0)                 # vastago
+
+
+def aa_flange(b, c, r, axis="z", bolts=8, mat="AA_Hierro"):
+    """Brida con pernos y tuercas alrededor de una tuberia."""
+    b.cyl(c, r * 1.6, 0.03, axis, mat, 32, 0.004)
+    for k in range(bolts):
+        a = 2 * math.pi * (k + 0.5) / bolts
+        ox, oy = r * 1.35 * math.cos(a), r * 1.35 * math.sin(a)
+        p = {"z": (c[0] + ox, c[1] + oy, c[2]), "x": (c[0], c[1] + ox, c[2] + oy), "y": (c[0] + ox, c[1], c[2] + oy)}[axis]
+        b.cyl(p, r * 0.13 + 0.004, 0.05, axis, "AA_Acero", 6, 0.001)
+
+
+def aa_pipe(b, pts, r, mat="AA_Oxido"):
+    b.sweep(pts, r, mat, 20)
+
+
+def aa_rivets(b, pts, r=0.008, face="y", mat="AA_Hierro"):
+    for p in pts:
+        b.cyl(p, r, r * 0.8, face, mat, 8, r * 0.35)
+
+
+def make_boiler():
+    """Caldera industrial horizontal: cuerpo con virolas remachadas y anillos, tapas abombadas, hogar con puerta, mirilla y bisagras, manometros, nivel de
+    agua con cristal, valvula de seguridad, tubos al techo con bridas, cunas y bancada, escalerilla y placa del fabricante."""
+    import random
+    rng = random.Random(2)
+    b = Builder()
+    L, R0, zc = 4.6, 1.15, 1.55
+    body = "AA_PinturaGris"
+    segs = 48
+    secs = [(-L / 2 - 0.25, 0.35), (-L / 2 - 0.2, 0.7), (-L / 2 - 0.12, 0.95), (-L / 2 - 0.04, 1.1), (-L / 2, R0), (L / 2, R0), (L / 2 + 0.04, 1.1),
+            (L / 2 + 0.12, 0.95), (L / 2 + 0.2, 0.7), (L / 2 + 0.25, 0.35)]
+    bm = bmesh.new()
+    rings = [[bm.verts.new((x, r * math.cos(2 * math.pi * k / segs), zc + r * math.sin(2 * math.pi * k / segs))) for k in range(segs)] for x, r in secs]
+    for a_, c_ in zip(rings[:-1], rings[1:]):
+        for k in range(segs):
+            bm.faces.new((a_[k], a_[(k + 1) % segs], c_[(k + 1) % segs], c_[k]))
+    bm.faces.new(rings[0])
+    bm.faces.new(list(reversed(rings[-1])))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    b.parts.append(Part(bm, body, "x"))
+    for x in (-1.5, -0.5, 0.5, 1.5):                                                            # juntas de virola con remaches
+        ring = [(x, (R0 + 0.012) * math.cos(2 * math.pi * k / 64), zc + (R0 + 0.012) * math.sin(2 * math.pi * k / 64)) for k in range(65)]
+        b.sweep(ring, 0.022, "AA_Hierro", 8)
+        for k in range(40):
+            a = 2 * math.pi * k / 40
+            b.cyl((x + 0.045, (R0 + 0.006) * math.cos(a), zc + (R0 + 0.006) * math.sin(a)), 0.011, 0.012, "x", "AA_Hierro", 8, 0.004)
+    # hogar en el frente (-Y)
+    fy = -R0
+    b.box((-0.6, fy - 0.02, zc - 0.25), (1.0, 0.14, 0.82), "AA_Hierro", 0.02, seg=3)
+    b.box((-0.6, fy - 0.1, zc - 0.25), (0.82, 0.045, 0.62), "AA_Oxido", 0.012, seg=3)
+    b.cyl((-0.6, fy - 0.13, zc - 0.1), 0.07, 0.02, "y", "AA_Hierro", 24, 0.004)                     # mirilla
+    b.cyl((-0.6, fy - 0.14, zc - 0.1), 0.05, 0.005, "y", "AA_LuzFuego", 24, 0.0)
+    for dz in (-0.2, 0.15):
+        b.cyl((-1.02, fy - 0.11, zc - 0.25 + dz), 0.03, 0.12, "z", "AA_Hierro", 14, 0.004)            # bisagras
+        b.box((-0.92, fy - 0.11, zc - 0.25 + dz), (0.2, 0.025, 0.05), "AA_Hierro", 0.005)
+    b.box((-0.2, fy - 0.14, zc - 0.22), (0.2, 0.03, 0.05), "AA_Acero", 0.008)                     # pestillo
+    b.sweep([(-0.12, fy - 0.15, zc - 0.22), (-0.06, fy - 0.2, zc - 0.22), (0.05, fy - 0.2, zc - 0.22)], 0.012, "AA_Acero", 10)
+    for i, x in enumerate((0.5, 0.85, 1.2)):
+        aa_pipe(b, [(x, fy + 0.05, zc + 0.1), (x, fy - 0.05, zc + 0.12), (x, fy - 0.06, zc + 0.22)], 0.012, "AA_Laton")
+        aa_gauge(b, (x, fy - 0.07, zc + 0.35), 0.11, rng=rng)
+    b.cyl((1.6, fy - 0.06, zc - 0.1), 0.025, 1.0, "z", "AA_Cristal", 16, 0.0)                     # nivel de agua
+    for z in (zc - 0.62, zc + 0.42):
+        b.box((1.6, fy - 0.04, z), (0.1, 0.12, 0.08), "AA_Laton", 0.01)
+    b.box((1.6, fy - 0.025, zc - 0.25), (0.06, 0.01, 0.22), "AA_Agua", 0.0)
+    b.box((0.85, fy - 0.03, zc - 0.55), (0.42, 0.012, 0.22), "AA_Laton", 0.004)                   # placa del fabricante
+    for k in range(4):
+        b.box((0.85, fy - 0.037, zc - 0.5 - k * 0.035), (0.34 - k * 0.04, 0.002, 0.012), "AA_Negro", 0.0)
+    # cunas y bancada
+    for x in (-1.5, 0, 1.5):
+        b.box((x, 0, 0.32), (0.3, 1.9, 0.5), "AA_Hierro", 0.012)
+        b.box((x, 0, 0.05), (0.4, 2.1, 0.06), "AA_Hierro", 0.008)
+        for sy in (-1, 1):
+            b.cyl((x + 0.15, sy * 0.85, 0.09), 0.025, 0.04, "z", "AA_Acero", 6, 0.003)
+    b.box((0, 0, 0.02), (L + 0.4, 2.4, 0.04), "AA_Hormigon", 0.01)
+    # tubos al techo con bridas y una valvula
+    for x, r in ((-1.4, 0.16), (0.2, 0.12), (1.5, 0.2)):
+        aa_pipe(b, [(x, 0.3, zc + R0 - 0.1), (x, 0.3, 5.4)], r)
+        aa_flange(b, (x, 0.3, zc + R0 + 0.3), r)
+        aa_flange(b, (x, 0.3, 4.2), r)
+    aa_wheel(b, (0.2, 0.3 - 0.22, zc + R0 + 0.65), 0.17)
+    b.box((0.2, 0.3, zc + R0 + 0.65), (0.3, 0.3, 0.3), "AA_Hierro", 0.03)
+    b.cyl((1.0, 0.0, zc + R0 + 0.15), 0.06, 0.3, "z", "AA_Laton", 18, 0.01)                         # valvula de seguridad
+    b.cyl((1.0, 0.0, zc + R0 + 0.33), 0.035, 0.08, "z", "AA_Laton", 14, 0.006)
+    b.sweep([(1.0, 0.0, zc + R0 + 0.36), (1.0, 0.0, zc + R0 + 0.42), (1.18, 0.0, zc + R0 + 0.42)], 0.008, "AA_Acero", 8)
+    # tuberia lateral hasta el suelo con codo
+    aa_pipe(b, [(2.1, -0.6, 0.1), (2.1, -0.6, zc - 0.1), (2.1, -0.6, zc), (2.0, -0.6, zc + 0.05), (1.9, -0.6, zc + 0.05)], 0.1)
+    aa_flange(b, (2.1, -0.6, 0.6), 0.1)
+    # escalerilla
+    for sx in (-1, 1):
+        b.cyl((-2.0 + sx * 0.22, -R0 - 0.35, 1.4), 0.02, 2.8, "z", "AA_Acero", 14, 0.0)
+    for k in range(8):
+        b.cyl((-2.0, -R0 - 0.35, 0.3 + k * 0.32), 0.014, 0.44, "x", "AA_Acero", 12, 0.0)
+    for z in (0.6, 2.4):
+        b.box((-2.0, -R0 - 0.2, z), (0.04, 0.3, 0.03), "AA_Acero", 0.005)
+    return b.finish("Boiler")
+
+
+def make_water_pump():
+    """Bomba centrifuga: bancada con pernos, motor electrico con aletas, caja de bornas y placa, acoplamiento con proteccion, voluta, tuberias con bridas,
+    valvula y manometro."""
+    import random
+    rng = random.Random(4)
+    b = Builder()
+    blue = "AA_PinturaAzul"
+    b.box((0, 0, 0.08), (1.7, 0.7, 0.16), "AA_Hierro", 0.012, seg=2)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            b.cyl((sx * 0.78, sy * 0.3, 0.17), 0.018, 0.03, "z", "AA_Acero", 6, 0.003)
+    b.cyl((-0.35, 0, 0.45), 0.25, 0.8, "x", blue, 40, 0.02)                                      # motor
+    for k in range(20):                                                                        # aletas
+        a = 2 * math.pi * k / 20
+        if math.sin(a) < -0.6:
+            continue
+        b.box((-0.35, 0.272 * math.cos(a), 0.45 + 0.272 * math.sin(a)), (0.66, 0.008, 0.045), blue, 0.002, seg=1, rot=(math.degrees(a) + 90, 0, 0))
+    b.cyl((-0.78, 0, 0.45), 0.2, 0.06, "x", blue, 32, 0.015)                                     # tapa del ventilador
+    for k in range(10):
+        b.box((-0.812, 0, 0.3 + k * 0.03), (0.004, 0.3, 0.012), "AA_Negro", 0.0)
+    b.box((-0.35, 0, 0.75), (0.25, 0.2, 0.12), blue, 0.015)
+    b.box((-0.35, -0.101, 0.73), (0.12, 0.002, 0.06), "AA_Acero", 0.0)                          # placa
+    b.sweep([(-0.25, 0.0, 0.8), (-0.1, 0.05, 0.9), (0.1, 0.25, 0.9)], 0.012, "AA_Negro", 8)     # cable
+    for sx in (-1, 1):
+        b.box((-0.35 + sx * 0.25, 0, 0.21), (0.08, 0.5, 0.04), blue, 0.008)                    # patas del motor
+    b.cyl((0.16, 0, 0.45), 0.1, 0.14, "x", "AA_PinturaAmarilla", 24, 0.01)                         # proteccion del acoplamiento
+    b.ellipsoid((0.5, 0, 0.45), (0.26, 0.22, 0.3), "AA_PinturaRoja", 24, 12) if hasattr(b, "ellipsoid") else b.cyl((0.5, 0, 0.45), 0.28, 0.22, "y", "AA_PinturaRoja", 32, 0.04)
+    b.box((0.5, 0, 0.2), (0.3, 0.3, 0.1), "AA_Hierro", 0.01)
+    aa_pipe(b, [(0.5, 0, 0.7), (0.5, 0, 1.5)], 0.09)
+    aa_flange(b, (0.5, 0, 0.76), 0.09)
+    aa_flange(b, (0.5, 0, 1.3), 0.09)
+    b.box((0.5, 0, 1.05), (0.24, 0.24, 0.22), "AA_Hierro", 0.02)
+    aa_wheel(b, (0.5, -0.17, 1.05), 0.13)
+    aa_gauge(b, (0.5, -0.1, 1.4), 0.07, rng=rng)
+    aa_pipe(b, [(0.72, 0, 0.42), (0.95, 0, 0.42), (1.05, 0, 0.36), (1.06, 0, 0.0)], 0.09)        # aspiracion con codo al suelo
+    aa_flange(b, (0.8, 0, 0.42), 0.09, "x")
+    return b.finish("WaterPump")
+
+
+def make_generator():
+    """Grupo electrogeno insonorizado: bancada con antivibratorios, carcasa amarilla con puertas, bisagras y cerraduras, rejillas de lamas, cuadro con
+    instrumentos y pulsadores, escape con silenciador, tapon de deposito, cancamos y franja de aviso."""
+    import random
+    rng = random.Random(6)
+    b = Builder()
+    yel = "AA_PinturaAmarilla"
+    b.box((0, 0, 0.08), (2.7, 1.15, 0.16), "AA_Hierro", 0.012, seg=2)
+    for sx in (-1, 1):
+        for x in (0.4, 1.1):
+            b.cyl((sx * x, 0, 0.19), 0.06, 0.06, "z", "AA_Goma", 16, 0.01)
+    b.box((0, 0, 0.94), (2.5, 1.05, 1.44), yel, 0.025, seg=3)
+    for x0 in (-0.85, 0.85):                                                                   # puertas laterales con lamas
+        b.box((x0, -0.53, 0.94), (0.72, 0.012, 1.2), yel, 0.006, seg=2)
+        for k in range(14):
+            b.box((x0, -0.543, 0.5 + k * 0.065), (0.6, 0.02, 0.012), yel, 0.003, seg=1, rot=(-30, 0, 0))
+            b.box((x0, -0.537, 0.5 + k * 0.065 - 0.012), (0.6, 0.002, 0.018), "AA_Negro", 0.0)
+        for z in (0.5, 1.38):
+            b.cyl((x0 - 0.37, -0.54, z), 0.012, 0.08, "z", "AA_Acero", 10, 0.002)
+        b.cyl((x0 + 0.3, -0.54, 0.94), 0.018, 0.01, "y", "AA_Acero", 14, 0.002)
+    b.box((0, -0.536, 0.95), (0.62, 0.02, 0.56), "AA_Negro", 0.006)                            # cuadro
+    for i, x in enumerate((-0.18, 0, 0.18)):
+        aa_gauge(b, (x, -0.546, 1.1), 0.065, depth=0.02, rng=rng)
+    for x, mat in ((-0.18, "AA_PlasticoRojo"), (-0.06, "AA_PinturaVerde"), (0.06, "AA_Plastico"), (0.18, "AA_PlasticoAmarillo")):
+        b.cyl((x, -0.556, 0.84), 0.022, 0.02, "y", mat, 16, 0.004)
+    b.box((0, -0.548, 0.73), (0.4, 0.002, 0.05), "AA_Papel", 0.0)
+    for k in range(8):                                                                         # franja de aviso
+        b.box((-1.2 + k * 0.1 + 0.05, -0.531, 0.25), (0.05, 0.002, 0.08), "AA_Negro", 0.0, rot=(0, 30, 0))
+    b.box((0, -0.53, 0.25), (2.4, 0.001, 0.08), "AA_PlasticoAmarillo", 0.0)
+    b.cyl((0.9, 0.2, 1.9), 0.08, 0.6, "z", "AA_Oxido", 20, 0.0)                                  # escape y silenciador
+    b.cyl((0.9, 0.2, 1.75), 0.14, 0.3, "z", "AA_Oxido", 24, 0.02)
+    b.sweep([(0.9, 0.2, 2.2), (0.9, 0.2, 2.25), (0.97, 0.2, 2.28)], 0.08, "AA_Oxido", 16)
+    b.cyl((-0.9, 0.3, 1.69), 0.08, 0.05, "z", "AA_Plastico", 20, 0.01)                             # tapon del deposito
+    for sx in (-1, 1):
+        b.sweep([(sx * 1.1 - 0.06, 0, 1.66), (sx * 1.1 - 0.06, 0, 1.73), (sx * 1.1 + 0.06, 0, 1.73), (sx * 1.1 + 0.06, 0, 1.66)], 0.012, "AA_Acero", 8)
+    return b.finish("Generator")
+
+
+def make_control_panel():
+    """Fila de armarios electricos: zocalo, cuatro puertas con junta y bisagras, maneta de cuarto de vuelta, voltimetros, pilotos, pulsadores, selector,
+    rotulos, rejilla de ventilacion, triangulo de riesgo electrico y bandejas de cable al techo con cables."""
+    import random
+    rng = random.Random(3)
+    b = Builder()
+    L, D, H = 3.0, 0.6, 2.2
+    gray = "AA_PinturaGris"
+    b.box((0, 0, 0.05), (L, D, 0.1), "AA_Negro", 0.008)
+    b.box((0, 0, H / 2 + 0.05), (L, D, H - 0.1), gray, 0.012, seg=2)
+    b.box((0, 0, H + 0.03), (L + 0.04, D + 0.04, 0.06), gray, 0.01, seg=2)
+    for i in range(4):
+        x = -L / 2 + 0.375 + i * 0.75
+        fy = -D / 2
+        b.box((x, fy - 0.012, 1.1), (0.7, 0.022, 1.9), gray, 0.008, seg=2)
+        b.frame_profile((x - 0.34, x + 0.34, 0.16, 2.04), [(0.0, 0.0), (0.0, 0.004), (0.004, 0.004)], fy - 0.0, -1, "AA_Negro")    # junta
+        for z in (0.4, 1.8):
+            b.cyl((x - 0.36, fy - 0.02, z), 0.012, 0.09, "z", "AA_Acero", 12, 0.002)
+        b.cyl((x + 0.28, fy - 0.03, 1.1), 0.022, 0.02, "y", "AA_Negro", 16, 0.004)                   # maneta
+        b.box((x + 0.28, fy - 0.045, 1.1), (0.012, 0.012, 0.05), "AA_Negro", 0.003)
+        for j in range(2):
+            aa_gauge(b, (x - 0.12 + j * 0.24, fy - 0.022, 1.72), 0.07, depth=0.025, rng=rng)
+        for j in range(4):
+            col = rng.choice(("AA_PlasticoRojo", "AA_PinturaVerde", "AA_PlasticoAmarillo", "AA_Plastico"))
+            b.cyl((x - 0.18 + j * 0.12, fy - 0.03, 1.42), 0.022, 0.02, "y", "AA_Acero", 16, 0.003)
+            b.cyl((x - 0.18 + j * 0.12, fy - 0.042, 1.42), 0.017, 0.008, "y", col, 16, 0.003)
+            b.box((x - 0.18 + j * 0.12, fy - 0.0235, 1.36), (0.06, 0.001, 0.014), "AA_Papel", 0.0)
+        b.cyl((x, fy - 0.03, 1.22), 0.03, 0.02, "y", "AA_Negro", 16, 0.004)                         # selector
+        b.box((x, fy - 0.045, 1.22), (0.01, 0.01, 0.05), "AA_Negro", 0.003, rot=(0, 30, 0))
+        b.box((x, fy - 0.024, 0.95), (0.4, 0.002, 0.12), "AA_Papel", 0.0)                           # rotulo
+        for k in range(2):
+            b.box((x - 0.05, fy - 0.026, 0.97 - k * 0.04), (0.25, 0.0006, 0.012), "AA_Tinta", 0.0)
+        tri = [(x, fy - 0.025, 1.98), (x - 0.06, fy - 0.025, 1.88), (x + 0.06, fy - 0.025, 1.88)]
+        b.box((x, fy - 0.024, 1.91), (0.08, 0.001, 0.07), "AA_PlasticoAmarillo", 0.0)
+        for k in range(8):
+            b.box((x, fy - 0.024, 0.32 + k * 0.035), (0.5, 0.018, 0.012), gray, 0.003, seg=1, rot=(-30, 0, 0))
+            b.box((x, fy - 0.021, 0.32 + k * 0.035 - 0.01), (0.5, 0.002, 0.016), "AA_Negro", 0.0)
+    for x in (-1.2, -0.3, 0.8):                                                                 # bandejas de cable al techo
+        b.box((x, 0.1, H + 0.6), (0.15, 0.12, 1.2), "AA_Acero", 0.004, seg=1, grain="z")
+        for k in range(4):
+            b.sweep([(x - 0.045 + k * 0.03, 0.06, H + 0.06), (x - 0.045 + k * 0.03, 0.06, H + 1.2)], 0.008, rng.choice(("AA_Negro", "AA_PlasticoRojo", "AA_Plastico")), 6)
+    return b.finish("ControlPanel")
+
+
+def _bottle(b, x, y, z, h, r, mat, rng):
+    """Frasco de laboratorio con cuello, tapon y etiqueta."""
+    bm = bmesh.new()
+    prof = [(r, 0), (r, h * 0.7), (r * 0.6, h * 0.8), (r * 0.4, h * 0.86), (r * 0.4, h)]
+    n = 16
+    rings = [[bm.verts.new((x + rr * math.cos(2 * math.pi * k / n), y + rr * math.sin(2 * math.pi * k / n), z + zz)) for k in range(n)] for rr, zz in prof]
+    for a_, c_ in zip(rings[:-1], rings[1:]):
+        for k in range(n):
+            bm.faces.new((a_[k], a_[(k + 1) % n], c_[(k + 1) % n], c_[k]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    b.parts.append(Part(bm, mat, "z"))
+    b.cyl((x, y, z + h + 0.008), r * 0.45, 0.018, "z", rng.choice(("AA_Plastico", "AA_PlasticoRojo", "AA_PlasticoAzul")), 12, 0.003)
+    if rng.random() < 0.7:
+        b.box((x, y - r - 0.0008, z + h * 0.38), (r * 1.1, 0.0015, h * 0.32), "AA_Papel", 0.0)
+
+
+def make_lab_bench():
+    """Mesa de laboratorio: armarios con puertas y tiradores, encimera de resina negra con canto, balda alta sobre montantes con frascos, microscopio,
+    gradilla con tubos de ensayo, matraces, mechero y papeles."""
+    import random
+    rng = random.Random(5)
+    b = Builder()
+    L, D = 2.4, 0.8
+    white = "AA_PinturaCrema"
+    b.box((0, 0.0, 0.45), (L - 0.1, D - 0.08, 0.86), white, 0.01)
+    b.box((0, -0.0, 0.04), (L - 0.14, D - 0.14, 0.08), "AA_Negro", 0.006)
+    for i in range(4):
+        x = -L / 2 + 0.33 + i * 0.58
+        b.box((x, -D / 2 + 0.03, 0.48), (0.54, 0.02, 0.74), white, 0.005, seg=2)
+        b.sweep([(x + 0.2, -D / 2 + 0.02, 0.7), (x + 0.2, -D / 2 - 0.0, 0.7), (x + 0.2, -D / 2 - 0.0, 0.82), (x + 0.2, -D / 2 + 0.02, 0.82)], 0.006, "AA_Acero", 8)
+    b.box((0, 0, 0.9), (L, D, 0.035), "AA_Negro", 0.008, seg=3)
+    for sx in (-1, 1):
+        b.box((sx * (L / 2 - 0.05), 0.3, 1.35), (0.035, 0.035, 0.9), "AA_Acero", 0.006, grain="z")
+    b.box((0, 0.3, 1.6), (L, 0.25, 0.02), "AA_Cristal", 0.003)
+    b.box((0, 0.3, 1.6), (L, 0.02, 0.03), "AA_Acero", 0.004)
+    x = -L / 2 + 0.1
+    while x < L / 2 - 0.1:
+        _bottle(b, x, 0.3, 1.61, rng.uniform(0.12, 0.24), rng.uniform(0.035, 0.05), rng.choice(("AA_Cristal", "AA_VidrioAmbar", "AA_VidrioAmbar", "AA_PinturaCrema")), rng)
+        x += rng.uniform(0.1, 0.16)
+    # microscopio
+    b.box((-0.6, -0.05, 0.935), (0.16, 0.22, 0.03), "AA_PinturaCrema", 0.008)
+    b.sweep([(-0.6, 0.05, 0.94), (-0.6, 0.06, 1.12), (-0.6, 0.0, 1.22)], 0.025, "AA_PinturaCrema", 12)
+    b.box((-0.6, -0.04, 1.04), (0.12, 0.1, 0.012), "AA_Negro", 0.003)
+    b.cyl((-0.6, -0.03, 1.2), 0.022, 0.16, "z", "AA_Negro", 16, 0.004)
+    b.cyl((-0.6, 0.0, 1.31), 0.014, 0.1, "y", "AA_Negro", 14, 0.003)
+    b.cyl((-0.57, 0.06, 1.1), 0.03, 0.02, "x", "AA_Cromo", 16, 0.004)
+    # gradilla con tubos
+    b.box((0.3, -0.1, 0.97), (0.32, 0.08, 0.06), "AA_Madera", 0.004)
+    for k in range(6):
+        b.cyl((0.17 + k * 0.052, -0.1, 1.0), 0.009, 0.15, "z", rng.choice(("AA_Cristal", "AA_VidrioAmbar")), 12, 0.0)
+    for (x, y) in ((0.75, 0.05), (0.95, -0.12)):                                               # matraces
+        bm_r = [(0.07, 0), (0.07, 0.02), (0.05, 0.08), (0.02, 0.12), (0.02, 0.2)]
+        _bottle(b, x, y, 0.92, 0.2, 0.065, "AA_Cristal", rng)
+    b.cyl((1.05, 0.15, 0.95), 0.03, 0.04, "z", "AA_Acero", 16, 0.004)                           # mechero
+    b.cyl((1.05, 0.15, 1.02), 0.008, 0.1, "z", "AA_Laton", 10, 0.0)
+    b.sweep([(1.05, 0.18, 0.93), (1.1, 0.35, 0.92), (1.0, 0.39, 0.92)], 0.005, "AA_Goma", 6)
+    _sheet(b, (-0.1, 0.15, 0.919), 12, rng)
+    _sheet(b, (0.0, 0.2, 0.92), -20, rng)
+    return b.finish("LabBench")
+
+
+def make_lab_cabinet():
+    """Vitrina de laboratorio: cuerpo con zocalo, baldas de cristal, puertas de cristal con marco, tiradores y cerradura, armario bajo con puertas, frascos."""
+    import random
+    rng = random.Random(8)
+    b = Builder()
+    W, D, H = 1.0, 0.45, 1.9
+    white = "AA_PinturaCrema"
+    b.box((0, 0, 0.36), (W, D, 0.72), white, 0.008)
+    b.box((0, 0.01, 0.035), (W - 0.04, D - 0.06, 0.07), "AA_Negro", 0.005)
+    for sx in (-1, 1):
+        b.box((sx * (W / 2 - 0.02), 0, 1.3), (0.04, D, 1.2), white, 0.006, grain="z")
+    b.box((0, D / 2 - 0.01, 1.3), (W, 0.02, 1.2), white, 0.004)
+    b.box((0, 0, H - 0.02), (W + 0.02, D + 0.02, 0.04), white, 0.008)
+    for z in (1.0, 1.4):
+        b.box((0, 0, z), (W - 0.06, D - 0.04, 0.008), "AA_Cristal", 0.002)
+    for z in (0.725, 1.006, 1.406):
+        x = -W / 2 + 0.1
+        while x < W / 2 - 0.08:
+            _bottle(b, x, rng.uniform(-0.06, 0.06), z, rng.uniform(0.1, 0.22), rng.uniform(0.03, 0.045),
+                    rng.choice(("AA_Cristal", "AA_VidrioAmbar", "AA_PinturaCrema", "AA_VidrioAmbar")), rng)
+            x += rng.uniform(0.09, 0.14)
+    for sx in (-1, 1):
+        cx = sx * W / 4
+        b.box((cx, -D / 2 - 0.004, 1.3), (W / 2 - 0.03, 0.006, 1.16), "AA_Cristal", 0.0)
+        b.frame_profile((cx - W / 4 + 0.03, cx + W / 4 - 0.03, 0.73, 1.87), [(0.0, 0.0), (0.0, 0.012), (0.02, 0.012), (0.02, 0.0)], -D / 2 - 0.0, -1, white)
+        b.sweep([(sx * 0.04, -D / 2 - 0.01, 1.22), (sx * 0.04, -D / 2 - 0.025, 1.22), (sx * 0.04, -D / 2 - 0.025, 1.38), (sx * 0.04, -D / 2 - 0.01, 1.38)], 0.006, "AA_Acero", 8)
+        b.box((cx, -D / 2 - 0.01, 0.37), (W / 2 - 0.03, 0.02, 0.62), white, 0.005, seg=2)
+        b.cyl((sx * 0.06, -D / 2 - 0.025, 0.6), 0.012, 0.025, "y", "AA_Acero", 14, 0.003)
+    b.cyl((0.0, -D / 2 - 0.012, 1.5), 0.01, 0.01, "y", "AA_Laton", 12, 0.002)
+    return b.finish("LabCabinet")
+
+
+def make_metal_rack():
+    """Estanteria de carga: puntales azules perforados con placas base, largueros naranjas con conectores, entablado de madera, cajas, bidones y garrafas."""
+    import random
+    rng = random.Random(11)
+    b = Builder()
+    L, D, H = 2.4, 0.8, 2.4
+    blue, orange = "AA_PinturaAzul", "AA_PinturaNaranja"
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            x, y = sx * (L / 2 - 0.04), sy * (D / 2 - 0.04)
+            b.box((x, y, H / 2), (0.08, 0.06, H), blue, 0.006, grain="z")
+            for k in range(int(H / 0.05)):
+                b.box((x, y - sy * 0.0302, 0.03 + k * 0.05), (0.012, 0.0008, 0.03), "AA_Negro", 0.0)
+            b.box((x, y, 0.005), (0.14, 0.12, 0.01), blue, 0.003)
+            for k in range(2):
+                b.cyl((x + (k - 0.5) * 0.08, y, 0.012), 0.008, 0.008, "z", "AA_Acero", 6, 0.002)
+        for k in range(6):                                                                    # diagonales del bastidor lateral
+            z0 = 0.2 + k * 0.38
+            ang = math.degrees(math.atan2(D - 0.1, 0.38)) * (1 if k % 2 else -1)
+            b.box((sx * (L / 2 - 0.04), 0, z0 + 0.19), (0.03, 0.02, math.hypot(D - 0.1, 0.38)), blue, 0.004, rot=(ang, 0, 0))
+    for z in (0.15, 1.05, 1.95):
+        for sy in (-1, 1):
+            b.box((0, sy * (D / 2 - 0.04), z), (L - 0.16, 0.05, 0.1), orange, 0.006)
+            for sx in (-1, 1):
+                b.box((sx * (L / 2 - 0.11), sy * (D / 2 - 0.04), z), (0.06, 0.055, 0.12), orange, 0.006)
+        for k in range(6):
+            b.box((-L / 2 + 0.2 + k * (L - 0.4) / 5, 0, z + 0.065), ((L - 0.4) / 5 - 0.01, D - 0.12, 0.022), "AA_Madera", 0.003, seg=1)
+    for z in (0.226, 1.126, 2.026):
+        x = -L / 2 + 0.15
+        while x < L / 2 - 0.3:
+            r = rng.random()
+            if r < 0.45:
+                w = rng.uniform(0.35, 0.55)
+                h = rng.uniform(0.25, 0.5)
+                bb = b.box((x + w / 2, rng.uniform(-0.05, 0.05), z + h / 2), (w, 0.55, h), rng.choice(("AA_Carton", "AA_CartonOscuro")), 0.006, seg=2,
+                           rot=(0, 0, rng.uniform(-6, 6)))
+                b.box((x + w / 2, -0.277, z + h * 0.9), (w * 0.95, 0.002, 0.04), "AA_CintaAdhesiva", 0.0)
+                b.box((x + w / 2, -0.277, z + h * 0.5), (w * 0.4, 0.002, h * 0.2), "AA_Papel", 0.0)
+                x += w + 0.04
+            elif r < 0.7:
+                drum(b, (x + 0.2, 0, z), 0.19, 0.62, rng.choice(("AA_Oxido", "AA_PinturaAzul", "AA_PinturaRoja")))
+                x += 0.43
+            elif r < 0.9:
+                for k in range(2):
+                    jerry(b, (x + 0.1 + k * 0.18, 0, z), rng.choice(("AA_PinturaCrema", "AA_PlasticoAzul")), rng.uniform(-8, 8))
+                x += 0.4
+            else:
+                x += 0.35
+    return b.finish("MetalRack")
+
+
+def drum(b, c, r, h, mat):
+    """Bidon de 200 l: aros de rodadura, bordes enrollados, tapones."""
+    x, y, z = c
+    b.cyl((x, y, z + h / 2), r, h - 0.02, "z", mat, 32, 0.0)
+    for zz in (0.012, h - 0.012):
+        ring = [(x + (r - 0.004) * math.cos(2 * math.pi * k / 40), y + (r - 0.004) * math.sin(2 * math.pi * k / 40), z + zz) for k in range(41)]
+        b.sweep(ring, 0.012, mat, 8)
+    for zz in (h * 0.33, h * 0.66):
+        ring = [(x + (r + 0.004) * math.cos(2 * math.pi * k / 40), y + (r + 0.004) * math.sin(2 * math.pi * k / 40), z + zz) for k in range(41)]
+        b.sweep(ring, 0.009, mat, 6)
+    b.cyl((x + r * 0.5, y, z + h - 0.008), r * 0.15, 0.012, "z", "AA_Acero", 12, 0.003)
+    b.cyl((x - r * 0.55, y, z + h - 0.008), r * 0.08, 0.012, "z", "AA_Acero", 10, 0.002)
+
+
+def jerry(b, c, mat, rot):
+    """Garrafa de plastico con asa y tapon."""
+    x, y, z = c
+    b.box((x, y, z + 0.17), (0.15, 0.25, 0.32), mat, 0.03, seg=3, rot=(0, 0, rot))
+    b.box((x, y + 0.03, z + 0.35), (0.04, 0.12, 0.04), mat, 0.015, seg=2, rot=(0, 0, rot))
+    b.cyl((x, y - 0.08, z + 0.35), 0.025, 0.04, "z", "AA_PlasticoRojo", 14, 0.005)
+
+
+def make_workbench():
+    """Banco de trabajo: patas de angular con travesanos, tablero de madera gruesa con canto gastado, balda baja, panel perforado con herramientas (llaves,
+    martillo, alicates, sierra, destornilladores), tornillo de banco, caja de herramientas, piezas sueltas y lampara."""
+    import random
+    rng = random.Random(13)
+    b = Builder()
+    L, D = 2.0, 0.8
+    st = "AA_PinturaGris"
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            b.box((sx * (L / 2 - 0.05), sy * (D / 2 - 0.05), 0.45), (0.06, 0.06, 0.9), st, 0.004, grain="z")
+        b.box((sx * (L / 2 - 0.05), 0, 0.2), (0.04, D - 0.1, 0.04), st, 0.004)
+    b.box((0, 0, 0.92), (L, D, 0.06), "AA_MaderaCaja", 0.008, seg=3)
+    b.box((0, 0, 0.2), (L - 0.1, D - 0.1, 0.025), "AA_MaderaCaja", 0.004)
+    b.box((0, D / 2 - 0.02, 1.55), (L, 0.02, 1.2), "AA_CartonClaro", 0.003)                      # panel perforado
+    for i in range(24):
+        for j in range(12):
+            b.cyl((-L / 2 + 0.05 + i * 0.0826, D / 2 - 0.031, 1.0 + j * 0.095), 0.004, 0.002, "y", "AA_Negro", 6, 0.0)
+    # herramientas colgadas
+    for k in range(5):                                                                           # llaves fijas de mayor a menor
+        x = -0.85 + k * 0.06
+        h = 0.22 - k * 0.025
+        b.box((x, D / 2 - 0.045, 1.6 - h / 2), (0.016, 0.006, h), "AA_Cromo", 0.002, seg=1)
+        b.cyl((x, D / 2 - 0.045, 1.6 - h), 0.016, 0.006, "y", "AA_Cromo", 12, 0.002)
+    b.box((-0.4, D / 2 - 0.05, 1.5), (0.025, 0.025, 0.3), "AA_Madera", 0.008, seg=2, grain="z")    # martillo
+    b.box((-0.4, D / 2 - 0.05, 1.66), (0.12, 0.03, 0.035), "AA_Hierro", 0.006)
+    b.sweep([(-0.15, D / 2 - 0.05, 1.7), (-0.16, D / 2 - 0.05, 1.5)], 0.01, "AA_PlasticoRojo", 8)   # alicates
+    b.sweep([(-0.11, D / 2 - 0.05, 1.7), (-0.1, D / 2 - 0.05, 1.5)], 0.01, "AA_PlasticoRojo", 8)
+    b.box((-0.13, D / 2 - 0.05, 1.75), (0.04, 0.012, 0.08), "AA_Hierro", 0.004)
+    b.box((0.25, D / 2 - 0.045, 1.55), (0.45, 0.004, 0.11), "AA_Acero", 0.001, rot=(0, 8, 0))       # sierra
+    b.box((0.03, D / 2 - 0.05, 1.56), (0.08, 0.03, 0.1), "AA_Madera", 0.012, seg=2)
+    for k in range(4):                                                                           # destornilladores
+        x = 0.62 + k * 0.05
+        b.cyl((x, D / 2 - 0.05, 1.68), 0.014, 0.1, "z", rng.choice(("AA_PlasticoAmarillo", "AA_PlasticoRojo")), 12, 0.004)
+        b.cyl((x, D / 2 - 0.05, 1.55), 0.004, 0.16, "z", "AA_Cromo", 8, 0.0)
+    # tornillo de banco
+    b.box((-0.75, -0.35, 1.0), (0.24, 0.16, 0.1), "AA_PinturaAzul", 0.012, seg=2)
+    b.box((-0.75, -0.42, 1.07), (0.2, 0.04, 0.1), "AA_PinturaAzul", 0.008)
+    b.box((-0.75, -0.32, 1.07), (0.2, 0.04, 0.1), "AA_PinturaAzul", 0.008)
+    b.cyl((-0.75, -0.5, 1.06), 0.012, 0.16, "y", "AA_Cromo", 12, 0.0)
+    b.cyl((-0.75, -0.58, 1.06), 0.008, 0.16, "x", "AA_Cromo", 10, 0.0)
+    # caja de herramientas
+    b.box((0.5, 0.05, 1.03), (0.45, 0.22, 0.16), "AA_PlasticoRojo", 0.012, seg=2)
+    b.box((0.5, 0.05, 1.12), (0.46, 0.23, 0.02), "AA_PlasticoRojo", 0.006)
+    b.sweep([(0.38, 0.05, 1.13), (0.4, 0.05, 1.18), (0.6, 0.05, 1.18), (0.62, 0.05, 1.13)], 0.009, "AA_Negro", 8)
+    for sx in (-1, 1):
+        b.box((0.5 + sx * 0.18, -0.065, 1.08), (0.04, 0.01, 0.025), "AA_Cromo", 0.003)
+    for k in range(7):                                                                           # piezas sueltas (tuercas, tornillos, llaves)
+        p = (rng.uniform(-0.3, 0.2), rng.uniform(-0.3, 0.1), 0.955)
+        if k % 2:
+            b.cyl(p, 0.012, 0.01, "z", "AA_Acero", 6, 0.002)
+        else:
+            b.box((p[0], p[1], 0.954), (rng.uniform(0.08, 0.15), 0.014, 0.008), "AA_Cromo", 0.002, rot=(0, 0, rng.uniform(0, 180)))
+    _sheet(b, (0.05, -0.2, 0.952), 25, rng, "AA_PapelAmarillo")
+    return b.finish("Workbench")
+
+
+def make_pipe_valves():
+    """Colector de pared: cuatro tuberias verticales con bridas y valvulas de compuerta con volante, colector horizontal con te, manometros, abrazaderas
+    a la pared con tacos, etiquetas de fluido y flechas."""
+    import random
+    rng = random.Random(7)
+    b = Builder()
+    for x, r in ((-0.7, 0.09), (-0.2, 0.07), (0.3, 0.1), (0.75, 0.06)):
+        aa_pipe(b, [(x, 0.1, 0.0), (x, 0.1, 2.8)], r, rng.choice(("AA_Oxido", "AA_PinturaVerde", "AA_PinturaGris")))
+        aa_flange(b, (x, 0.1, 0.4), r)
+        aa_flange(b, (x, 0.1, 2.2), r)
+        b.box((x, 0.1, 1.3), (r * 2.8, r * 2.4, r * 3.0), "AA_Hierro", r * 0.3, seg=3)            # cuerpo de la valvula
+        aa_flange(b, (x, 0.1, 1.3 - r * 1.6), r)
+        aa_flange(b, (x, 0.1, 1.3 + r * 1.6), r)
+        b.cyl((x, 0.1 - r * 1.2 - 0.05, 1.3), 0.02, 0.1, "y", "AA_Acero", 12, 0.0)
+        aa_wheel(b, (x, 0.1 - r * 1.2 - 0.11, 1.3), 0.12 + r * 0.3, "AA_PinturaRoja" if x < 0 else "AA_PinturaAmarilla")
+        b.box((x, 0.1 - r - 0.002, 0.8), (r * 1.6, 0.003, 0.05), "AA_PlasticoAmarillo", 0.0)        # etiqueta de fluido
+        b.box((x, 0.1 - r - 0.004, 0.8), (r * 1.0, 0.002, 0.012), "AA_Negro", 0.0)
+        for z in (0.15, 2.6):                                                                     # abrazaderas a la pared
+            ring = [(x + (r + 0.006) * math.cos(math.pi * k / 16), 0.1 - (r + 0.006) * math.sin(math.pi * k / 16), z) for k in range(17)]
+            b.sweep(ring, 0.006, "AA_Acero", 6)
+            b.box((x, 0.21, z), (r * 2.6, 0.02, 0.03), "AA_Acero", 0.004)
+    aa_pipe(b, [(-0.95, 0.15, 1.95), (0.95, 0.15, 1.95)], 0.06)
+    for x in (-0.45, 0.55):
+        aa_pipe(b, [(x, 0.15, 1.95), (x, 0.05, 1.95)], 0.015, "AA_Laton")
+        aa_gauge(b, (x, 0.04, 1.95), 0.08, rng=rng)
+    for x in (-0.9, 0.9):
+        b.box((x, 0.2, 2.5), (0.08, 0.06, 0.08), "AA_Acero", 0.008)
+    return b.finish("PipeValves")
+
+
+def make_barrel():
+    """Bidon de 200 l oxidado con aros, bordes enrollados y tapones."""
+    b = Builder()
+    drum(b, (0, 0, 0), 0.30, 0.925, "AA_Oxido")
+    return b.finish("Barrel")
+
+
+def make_crate():
+    """Caja de madera de transporte: tablas con juntas, listones de refuerzo en diagonal, clavos, esquineras metalicas y estarcido."""
+    import random
+    rng = random.Random(3)
+    b = Builder()
+    S, H = 1.0, 0.9
+    wood = "AA_MaderaCaja"
+    for face in range(4):
+        rot = face * 90
+        ca, sa = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+
+        def at(lx, ly, lz):
+            return (lx * ca - ly * sa, lx * sa + ly * ca, lz)
+        for k in range(5):                                                                      # tablas
+            z = 0.06 + k * (H - 0.12) / 5 + (H - 0.12) / 10
+            b.box(at(0, -S / 2 + 0.012, z), _rs((S - 0.06, 0.024, (H - 0.12) / 5 - 0.006), rot), wood, 0.004, seg=2, rot=(0, 0, rot))
+        for sx in (-1, 1):                                                                      # listones verticales y diagonal
+            b.box(at(sx * (S / 2 - 0.06), -S / 2 - 0.004, H / 2), _rs((0.09, 0.024, H - 0.02), rot), wood, 0.005, seg=2, rot=(0, 0, rot), grain="z")
+        for z in (0.05, H - 0.05):
+            b.box(at(0, -S / 2 - 0.004, z), _rs((S - 0.21, 0.024, 0.09), rot), wood, 0.005, seg=2, rot=(0, 0, rot))
+        diag = math.hypot(S - 0.21, H - 0.2)
+        ang = math.degrees(math.atan2(H - 0.2, S - 0.21)) * (1 if face % 2 else -1)
+        b.box(at(0, -S / 2 - 0.006, H / 2), (diag, 0.024, 0.08), wood, 0.005, seg=2, rot=(0, ang, rot))
+        for sx in (-1, 1):
+            for z in (0.05, H - 0.05):
+                b.cyl(at(sx * (S / 2 - 0.06), -S / 2 - 0.0165, z), 0.004, 0.002, "y", "AA_Hierro", 6, 0.0) if face in (0, 2) else None
+        if face == 0:                                                                            # estarcido
+            for k in range(3):
+                b.box(at(-0.08, -S / 2 - 0.0005, 0.62 - k * 0.06), (0.3 - k * 0.07, 0.001, 0.028), "AA_Tinta", 0.0, rot=(0, 0, rot))
+    b.box((0, 0, H - 0.012), (S, S, 0.024), wood, 0.004, seg=2)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            b.box((sx * (S / 2 - 0.02), sy * (S / 2 - 0.02), H - 0.04), (0.07, 0.07, 0.08), "AA_Hierro", 0.004)
+            b.box((sx * (S / 2 - 0.02), sy * (S / 2 - 0.02), 0.04), (0.07, 0.07, 0.08), "AA_Hierro", 0.004)
+    return b.finish("Crate")
+
+
+def _rs(s, rot):
+    return s
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
             "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair,
             "CeilingLampAA": make_ceiling_lamp, "DeskComputer": make_desk_computer, "DeskLamp": make_desk_lamp,
@@ -1209,7 +1770,9 @@ BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk":
             "ArchiveShelfA": lambda: aa_archive_shelf("ArchiveShelfA", 1, 0.2), "ArchiveShelfB": lambda: aa_archive_shelf("ArchiveShelfB", 2, 0.5),
             "ArchiveShelfC": lambda: aa_archive_shelf("ArchiveShelfC", 3, 1.0), "ArchiveWallShelf": make_archive_wall_shelf,
             "ArchiveBoxStackA": lambda: aa_box_stack("ArchiveBoxStackA", 4), "ArchiveBoxStackB": lambda: aa_box_stack("ArchiveBoxStackB", 8),
-            "PaperScatter": make_paper_scatter, "RollingLadder": make_rolling_ladder, "CardCatalog": make_card_catalog, "ArchiveCart": make_archive_cart}
+            "PaperScatter": make_paper_scatter, "RollingLadder": make_rolling_ladder, "CardCatalog": make_card_catalog, "ArchiveCart": make_archive_cart,
+            "Boiler": make_boiler, "WaterPump": make_water_pump, "Generator": make_generator, "ControlPanel": make_control_panel, "LabBench": make_lab_bench,
+            "LabCabinet": make_lab_cabinet, "MetalRack": make_metal_rack, "Workbench": make_workbench, "PipeValves": make_pipe_valves, "Barrel": make_barrel, "Crate": make_crate}
 
 
 def preview(name):

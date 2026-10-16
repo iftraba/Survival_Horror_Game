@@ -7,8 +7,73 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: LabBench_baked
-    second: {fileID: 2100000, guid: 7d063d7a1753ac643a612feedd2b4a79, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Cristal
+    second: {fileID: 2100000, guid: 110f428a17eee7943b391f251e1040de, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Cromo
+    second: {fileID: 2100000, guid: d6aae8114fb69a640bec2678975cfc28, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Goma
+    second: {fileID: 2100000, guid: 349232918f9d06b4cbcf329008b5e03e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Laton
+    second: {fileID: 2100000, guid: 5b37310192562bd47b01eeac3a9b80b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Madera
+    second: {fileID: 2100000, guid: 57a012089bdd0bd4ebe826f78d05e2e8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaCrema
+    second: {fileID: 2100000, guid: 42f38e41fee469148bb13b8a90705514, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Plastico
+    second: {fileID: 2100000, guid: a913b633e108f704fadc6d21b12287c5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PlasticoAzul
+    second: {fileID: 2100000, guid: df89fc7b198b7f244840e8df1f2b5351, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PlasticoRojo
+    second: {fileID: 2100000, guid: 8de62a6a26a30734b93fd7f3f7283e9c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Tinta
+    second: {fileID: 2100000, guid: d527963d566d60446a9295144dfd9c0e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_VidrioAmbar
+    second: {fileID: 2100000, guid: 7a804e81b27eff84090b759f3159996e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

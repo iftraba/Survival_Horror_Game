@@ -7,23 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Crate_baked
-    second: {fileID: 2100000, guid: c6903a0125d9e2242b4c0dbcf3820d56, type: 2}
+      name: AA_Hierro
+    second: {fileID: 2100000, guid: 3d2c7b687215c884b8e5ed6e64419612, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: crate_dark
-    second: {fileID: 2100000, guid: 3ce84226fc535954980ccfdb2064fccc, type: 2}
+      name: AA_MaderaCaja
+    second: {fileID: 2100000, guid: 694dc936b08be044e94600b82d2cbc49, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: crate_iron
-    second: {fileID: 2100000, guid: 8a56e74b6bcaee4408eec0d09e8a8816, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: crate_wood
-    second: {fileID: 2100000, guid: 1c11063158891744589a99cf5a119a27, type: 2}
+      name: AA_Tinta
+    second: {fileID: 2100000, guid: d527963d566d60446a9295144dfd9c0e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-17 · Art · **Fase C AA, punto 5, tanda 5: sótano**: caldera, bomba, generador, armarios eléctricos, laboratorio, estanterías de carga, banco de trabajo, colector de válvulas, barriles y cajas, con manómetros, volantes y bridas modelados y óxido escaneado.
+
 - 2026-10-17 · Art · **Fase C AA, punto 5, tanda 4: archivo**: estanterías de ángulo ranurado con cajas y archivadores, estantería de pared, montones de cajas, papeles, escalera con ruedas, fichero de cajones y carro (todas las instancias del archivo).
 
 - 2026-10-17 · Art · **Pistola**: segundo diseño de Meshy elegido por el usuario (sustituye al anterior), sin marcas: corredera limpia y logo de las cachas quitado de la geometría, las normales y las texturas.

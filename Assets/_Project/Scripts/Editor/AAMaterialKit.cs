@@ -39,6 +39,17 @@ namespace Horror.EditorTools
             ("VendingMachine", "Assets/_Project/Art/Props/Station/VendingMachine.fbx"),
             ("Cot", "Assets/_Project/Art/Props/Cot.fbx"),
             ("StationSign", "Assets/_Project/Art/Props/Front/StationSign.fbx"),
+            ("Boiler", "Assets/_Project/Art/Props/Basement/Boiler.fbx"),
+            ("WaterPump", "Assets/_Project/Art/Props/Basement/WaterPump.fbx"),
+            ("Generator", "Assets/_Project/Art/Props/Basement/Generator.fbx"),
+            ("ControlPanel", "Assets/_Project/Art/Props/Basement/ControlPanel.fbx"),
+            ("LabBench", "Assets/_Project/Art/Props/Basement/LabBench.fbx"),
+            ("LabCabinet", "Assets/_Project/Art/Props/Basement/LabCabinet.fbx"),
+            ("MetalRack", "Assets/_Project/Art/Props/Basement/MetalRack.fbx"),
+            ("Workbench", "Assets/_Project/Art/Props/Basement/Workbench.fbx"),
+            ("PipeValves", "Assets/_Project/Art/Props/Basement/PipeValves.fbx"),
+            ("Barrel", "Assets/_Project/Art/Props/Barrel.fbx"),
+            ("Crate", "Assets/_Project/Art/Props/Crate.fbx"),
             ("ArchiveShelfA", "Assets/_Project/Art/Props/Archive/ArchiveShelfA.fbx"),
             ("ArchiveShelfB", "Assets/_Project/Art/Props/Archive/ArchiveShelfB.fbx"),
             ("ArchiveShelfC", "Assets/_Project/Art/Props/Archive/ArchiveShelfC.fbx"),
@@ -96,6 +107,17 @@ namespace Horror.EditorTools
             { "AA_CartonClaro", (null, null, new Color(0.6f, 0.5f, 0.34f), 1f, 0f, 0f, 0.12f) },
             { "AA_Tinta", (null, null, new Color(0.05f, 0.06f, 0.12f), 1f, 0f, 0f, 0.2f) },
             { "AA_PapelAmarillo", (null, null, new Color(0.78f, 0.72f, 0.52f), 1f, 0f, 0f, 0.08f) },
+            { "AA_Oxido", ("rusty_metal_02", "_diff", new Color(0.9f, 0.85f, 0.8f), 1.0f, 1.0f, 0f, 1f) },                      // oxido escaneado
+            { "AA_PinturaAzul", ("green_metal_rust", "_neutral_diff", new Color(0.16f, 0.3f, 0.55f), 1.0f, 1.0f, 0f, 1f) },
+            { "AA_PinturaAmarilla", ("green_metal_rust", "_neutral_diff", new Color(0.85f, 0.62f, 0.1f), 1.0f, 1.0f, 0f, 1f) },
+            { "AA_PinturaNaranja", ("green_metal_rust", "_neutral_diff", new Color(0.85f, 0.38f, 0.08f), 1.0f, 1.0f, 0f, 1f) },
+            { "AA_Esfera", (null, null, new Color(0.88f, 0.86f, 0.8f), 1f, 0f, 0f, 0.3f) },
+            { "AA_LuzFuego", (null, null, new Color(0.9f, 0.35f, 0.05f), 1f, 0f, 0f, 0.9f) },
+            { "AA_Agua", (null, null, new Color(0.25f, 0.4f, 0.45f), 1f, 0f, 0f, 0.95f) },
+            { "AA_Hormigon", ("dirty_concrete", "_diff", new Color(0.8f, 0.8f, 0.8f), 1.0f, 1.0f, 0f, 1f) },
+            { "AA_VidrioAmbar", (null, null, new Color(0.5f, 0.27f, 0.05f, 0.55f), 1f, 0f, 0f, 0.92f) },
+            { "AA_CintaAdhesiva", (null, null, new Color(0.62f, 0.52f, 0.34f), 1f, 0f, 0f, 0.55f) },
+            { "AA_MaderaCaja", ("dark_wood", "_neutral_diff", new Color(0.82f, 0.66f, 0.46f), 1.0f, 0.8f, 0f, 0.3f) },     // pino de embalaje (veta del nogal en gris, tenida)
             { "AA_Pantalla", (null, null, new Color(0.015f, 0.018f, 0.022f), 1f, 0f, 0f, 0.88f) },     // pantalla apagada, cristal brillante
         };
 
@@ -141,7 +163,7 @@ namespace Horror.EditorTools
             m.SetTexture("_MetallicGlossMap", ms);
             if (ms != null) { m.EnableKeyword("_METALLICSPECGLOSSMAP"); m.SetFloat("_SmoothnessTextureChannel", 0f); m.SetFloat("_Metallic", 1f); m.SetFloat("_Smoothness", d.smooth); }
             else { m.DisableKeyword("_METALLICSPECGLOSSMAP"); m.SetFloat("_Metallic", d.metal); m.SetFloat("_Smoothness", d.smooth); }
-            if (name == "AA_Cristal") Transparent(m); else Opaque(m);
+            if (name == "AA_Cristal" || name == "AA_VidrioAmbar") Transparent(m); else Opaque(m);
             m.SetTexture("_OcclusionMap", ao);
             if (ao != null) { m.EnableKeyword("_OCCLUSIONMAP"); m.SetFloat("_OcclusionStrength", 0.8f); } else m.DisableKeyword("_OCCLUSIONMAP");
             EditorUtility.SetDirty(m);

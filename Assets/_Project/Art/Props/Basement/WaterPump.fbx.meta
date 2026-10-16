@@ -7,8 +7,53 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: WaterPump_baked
-    second: {fileID: 2100000, guid: 5d659d7ff7694ce479ea3f1575fb806d, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Esfera
+    second: {fileID: 2100000, guid: 0c071d624ac87d54abe2b2f5994cf463, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Hierro
+    second: {fileID: 2100000, guid: 3d2c7b687215c884b8e5ed6e64419612, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Laton
+    second: {fileID: 2100000, guid: 5b37310192562bd47b01eeac3a9b80b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Oxido
+    second: {fileID: 2100000, guid: bd65ff51a930cd945baf766cc3d4c1f0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaAmarilla
+    second: {fileID: 2100000, guid: fc3eb9228a2a8c946905c88d7ddb0edd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaAzul
+    second: {fileID: 2100000, guid: 546ace441ea396344bc7df5c5c03156d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaRoja
+    second: {fileID: 2100000, guid: 50a816a6dd7db7b4782f9d962badeb70, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PlasticoRojo
+    second: {fileID: 2100000, guid: 8de62a6a26a30734b93fd7f3f7283e9c, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

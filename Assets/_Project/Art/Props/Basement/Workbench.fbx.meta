@@ -7,8 +7,68 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Workbench_baked
-    second: {fileID: 2100000, guid: d704f025addd6f047bffee9bad1be88b, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_CartonClaro
+    second: {fileID: 2100000, guid: 3debe59c17bfa4a47879c6e2d7d0d7b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Cromo
+    second: {fileID: 2100000, guid: d6aae8114fb69a640bec2678975cfc28, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Hierro
+    second: {fileID: 2100000, guid: 3d2c7b687215c884b8e5ed6e64419612, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Madera
+    second: {fileID: 2100000, guid: 57a012089bdd0bd4ebe826f78d05e2e8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_MaderaCaja
+    second: {fileID: 2100000, guid: 694dc936b08be044e94600b82d2cbc49, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PapelAmarillo
+    second: {fileID: 2100000, guid: 497d716fcd42bf445a7f540cb17a4477, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaAzul
+    second: {fileID: 2100000, guid: 546ace441ea396344bc7df5c5c03156d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaGris
+    second: {fileID: 2100000, guid: f991f46c7bbf4a940b9965537a9837a0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PlasticoAmarillo
+    second: {fileID: 2100000, guid: 28f9b35bad627054b82084aa498801ef, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PlasticoRojo
+    second: {fileID: 2100000, guid: 8de62a6a26a30734b93fd7f3f7283e9c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Tinta
+    second: {fileID: 2100000, guid: d527963d566d60446a9295144dfd9c0e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
