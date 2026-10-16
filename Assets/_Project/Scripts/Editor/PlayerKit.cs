@@ -19,7 +19,7 @@ namespace Horror.EditorTools
         const string M = "Assets/_Project/Art/Mixamo/";
         const string AnimDir = "Assets/_Project/Animation/";
 
-        static AnimationClip First(params string[] names)
+        internal static AnimationClip First(params string[] names)
         {
             foreach (var n in names)
             {

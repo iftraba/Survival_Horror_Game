@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-17 · Player/UI · **Menú oculto de selección de personaje**: F3 siete veces en el menú principal; Soldado o Chica (modelo de Meshy del usuario, rig corregido con `fix_meshy_rig.py`). Empieza partida nueva con el elegido y se guarda en la partida.
+
 - 2026-10-17 · Art · **Fase C AA, punto 5, tanda 5: sótano**: caldera, bomba, generador, armarios eléctricos, laboratorio, estanterías de carga, banco de trabajo, colector de válvulas, barriles y cajas, con manómetros, volantes y bridas modelados y óxido escaneado.
 
 - 2026-10-17 · Art · **Fase C AA, punto 5, tanda 4: archivo**: estanterías de ángulo ranurado con cajas y archivadores, estantería de pared, montones de cajas, papeles, escalera con ruedas, fichero de cajones y carro (todas las instancias del archivo).

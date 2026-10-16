@@ -34,6 +34,13 @@ Raíz con `PlayerController`, `CharacterController`, `Health`, `Inventory`, `Wea
 `PlayerInteractor`. Hijo `Model` = Soldier de Mixamo (Humanoid) con los *holders* de arma en la mano derecha.
 Lo regenera el menú **Horror/Construir protagonista** (ver `editor-tools.md`).
 
+## Personajes jugables (menú oculto, 2026-10-17)
+- **Cómo se abre:** en el menú principal, F3 siete veces seguidas (menos de 1,5 s entre pulsaciones) abre «Selección de personaje». No hay otra forma de abrirlo. Elegir uno empieza una partida nueva con él; «Nueva partida» normal siempre usa el soldado.
+- **Personajes:** 0 = Soldado (el `Model` del prefab) y 1 = Chica (biped rigeado de Meshy que descargó el usuario).
+- **Cómo funciona:** `GameSettings.Character` guarda el elegido; `PlayerModelSwap` (en el prefab Player, orden −100) instancia `Prefabs/Characters/PlayerModel_Chica.prefab` en lugar de `Model` antes de que lo lean `PlayerAnimation` y `WeaponController` (les pasa su Animator y sus `WeaponHolder`/`LongWeaponHolder`). Va en la partida guardada (`SaveData.character`) y se restaura al cargar, antes de recargar la escena.
+- **Modelo:** `Art/Mixamo/Characters/Chica/` (FBX, material URP con color, normal y metal-suavidad 4K). El FBX de Meshy traía el esqueleto tumbado y la cadera a ~100 m (unidades mezcladas) y la malla explotaba al animar; se arregla con `Tools/blender/fix_meshy_rig.py` antes de copiarlo. Lo monta el menú **Horror/Personajes/Construir chica (menú oculto)** (`PlayerCharacterKit`): Humanoid sin animaciones propias (usa las del soldado), altura al 95 % del soldado (escala ×1,06) y agarres del arma calculados con la pose de apuntar, como en `PlayerKit`.
+- **Pendiente:** se ve algún corte en la piel de los muslos al animar (pesos del rig automático de Meshy). Probado en Play solo en reposo con la pistola; apuntar, disparar, la escopeta y las acciones (puertas, cobertura, agarre) no se han mirado con ella.
+
 ## Decisiones
 - El movimiento lo da el `CharacterController`; el `Animator` no usa root motion (`applyRootMotion = false`).
 - La velocidad al apuntar coincide con los clips de pasos laterales para que los pies no patinen.

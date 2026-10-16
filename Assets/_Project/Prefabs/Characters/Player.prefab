@@ -80,6 +80,7 @@ GameObject:
   - component: {fileID: 7323300788575840168}
   - component: {fileID: 7870154034900173985}
   - component: {fileID: 8117662910916794675}
+  - component: {fileID: 4510499082962940382}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -150,6 +151,7 @@ MonoBehaviour:
   hardLandHeight: 3.5
   crouchSpeed: 1.2
   jumpSpeed: 4.8
+  jumpEnabled: 0
   quickTurnTime: 0.22
   pushPower: 2.2
 --- !u!114 &7775246276366263216
@@ -254,6 +256,21 @@ MonoBehaviour:
   animator: {fileID: 5586286681972580549}
   handgunController: {fileID: 9100000, guid: 1c3a730fd76f7be49ade80b564562e27, type: 2}
   longGunController: {fileID: 22100000, guid: 030221514884f644d9b630de14480983, type: 2}
+--- !u!114 &4510499082962940382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6939996379250810105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de91a4b4c3762ec4484cd4e003ca0d85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Horror.PlayerModelSwap
+  models:
+  - {fileID: 0}
+  - {fileID: 4909151694739763540, guid: 4408190344476774ba56d60c833b8667, type: 3}
 --- !u!1001 &2084304104485035348
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 namespace Horror
@@ -10,7 +11,8 @@ namespace Horror
         public string subtitle = "una noche muy larga";
 
         GUIStyle titleStyle, subStyle, small;
-        bool options, loadList;
+        bool options, loadList, charSelect;
+        int f3Count; float f3Time;        // menu oculto: F3 siete veces seguidas (menos de 1,5 s entre pulsaciones)
 
         void Start()
         {
@@ -18,6 +20,15 @@ namespace Horror
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+
+        void Update()
+        {
+            var kb = Keyboard.current;
+            if (kb == null || !kb.f3Key.wasPressedThisFrame) return;
+            f3Count = Time.unscaledTime - f3Time < 1.5f ? f3Count + 1 : 1;
+            f3Time = Time.unscaledTime;
+            if (f3Count >= 7) { f3Count = 0; charSelect = true; options = loadList = false; }
         }
 
         void Styles()
@@ -48,7 +59,18 @@ namespace Horror
             GUI.color = Color.white;
 
             float x = 64, y = sh * 0.45f, w = 340, h = 46, gap = 12;
-            if (loadList)
+            if (charSelect)
+            {
+                // menu oculto de seleccion de personaje: elegir uno empieza una partida nueva con el
+                GUI.Label(new Rect(x, y - 44, w, 30), "Seleccion de personaje", small);
+                for (int i = 0; i < GameSettings.CharacterNames.Length; i++)
+                {
+                    if (GUI.Button(new Rect(x, y, w, h), GameSettings.CharacterNames[i])) NewGame(i);
+                    y += h + gap;
+                }
+                if (GUI.Button(new Rect(x, y, w, h), "Volver")) charSelect = false;
+            }
+            else if (loadList)
             {
                 GUI.Label(new Rect(x, y - 44, w, 30), "Cargar partida", small);
                 int slot = SaveSlotsGUI.Draw(x, y, 440, false, SaveSystem.CurrentSlot);
@@ -85,8 +107,12 @@ namespace Horror
             GUI.matrix = old;
         }
 
-        public static void NewGame()
+        public static void NewGame() => NewGame(0);
+
+        /// <summary>Partida nueva con el personaje indicado (0 = soldado; los demas solo desde el menu oculto).</summary>
+        public static void NewGame(int character)
         {
+            GameSettings.Character = character;
             SaveSystem.ClearPending();
             GameState.ResetAll();
             SceneManager.LoadScene(GameSettings.GameScene);

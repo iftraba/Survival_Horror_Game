@@ -15,6 +15,11 @@ namespace Horror
         public static bool IsV2 => GameScene == SceneV2;
         public const string MenuScene = "MainMenu";
 
+        /// <summary>Personaje jugable (menu oculto: F3 siete veces en el menu principal, 2026-10-17). 0 = soldado, 1 = chica.
+        /// Se elige antes de cargar la escena; PlayerModelSwap lo aplica al aparecer el jugador y va en la partida guardada.</summary>
+        public static int Character;
+        public static readonly string[] CharacterNames = { "Soldado", "Chica" };
+
         public static float Volume
         {
             get => PlayerPrefs.GetFloat("opt_volume", 1f);

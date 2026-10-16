@@ -19,6 +19,7 @@ namespace Horror
         public string savedAt;
         public Vector3 playerPos;
         public float playerYaw;
+        public int character;           // personaje jugable (GameSettings.Character)
         public float cameraYaw;
         public float health;
         public int bagSlots;            // casillas extra ganadas con bolsas
@@ -153,6 +154,7 @@ namespace Horror
                 cameraYaw = cam != null ? cam.Yaw : pc.transform.eulerAngles.y,
                 health = health != null ? health.Current : 100f,
                 objective = Objectives.Current,
+                character = GameSettings.Character,
             };
 
             d.notes = NoteArchive.Ids();
@@ -200,7 +202,7 @@ namespace Horror
         {
             slot = Mathf.Clamp(slot, 1, SlotCount);
             if (!HasSave(slot)) return false;
-            try { Pending = JsonUtility.FromJson<SaveData>(File.ReadAllText(PathFor(slot))); CurrentSlot = slot; }
+            try { Pending = JsonUtility.FromJson<SaveData>(File.ReadAllText(PathFor(slot))); CurrentSlot = slot; GameSettings.Character = Pending.character; }
             catch (Exception e)
             {
                 Debug.LogWarning("[Horror] Partida guardada ilegible: " + e.Message);

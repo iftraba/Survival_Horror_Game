@@ -6,6 +6,7 @@ Scripts de editor (envueltos en `#if UNITY_EDITOR`) en `Assets/_Project/Scripts/
 |---|---|---|
 | `MixamoImport` | — | Configura personajes y animaciones como Humanoid. Cada clip tiene su avatar; el desplazamiento XZ de la raíz se **extrae** (no se hornea), Y y rotación sí; la velocidad de zancada sale de `AnimationClip.averageSpeed`. Descarta el clip vacío "Take 001" que trae Mixamo. |
 | `PlayerKit` | Horror/Construir protagonista | Construye `PlayerHumanoid.controller` y `UpperBodyHumanoid.mask` con los clips `P_*` que haya y reemplaza el modelo del prefab `Player` por el Soldier, con los agarres de arma. Se repite al llegar clips nuevos. |
+| `PlayerCharacterKit` | Horror/Personajes/Construir chica (menú oculto) | Importa `Player_Chica.fbx` como Humanoid, empaqueta su metal-suavidad, crea `Chica_mat`, monta `PlayerModel_Chica.prefab` (Animator del protagonista, escala al 95 % del soldado, agarres de arma) y lo registra en `PlayerModelSwap` del prefab Player (ver `player.md`). Repetible. |
 | `ZombieKit` | Horror/Construir zombis y jefe | Genera `ZombieHumanoid.controller`, un override por tipo, `Boss.controller` y los prefabs de zombis y jefe. Tiempos de impacto de ataque detectados automáticamente (primer pico de velocidad de mano/pie). |
 | `BossBalance` | — | Simula disparos para fijar la vida del jefe (`Apply`). |
 | `BossWing` | Horror/Reformar zona del jefe | Reforma la zona final: pasillo, sala segura 2, puertas, sala del jefe, loot y zombis. |
