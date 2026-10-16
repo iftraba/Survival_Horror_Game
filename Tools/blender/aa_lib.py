@@ -17,6 +17,8 @@ AA_COLORS = {
     "AA_PinturaVerde": (0.3, 0.37, 0.34), "AA_PinturaGris": (0.36, 0.38, 0.36), "AA_PinturaCrema": (0.62, 0.6, 0.52), "AA_Papel": (0.82, 0.8, 0.7),
     "AA_Tela": (0.1, 0.11, 0.13), "AA_Plastico": (0.05, 0.05, 0.055), "AA_Goma": (0.02, 0.02, 0.022), "AA_Laminado": (0.32, 0.3, 0.26),
     "AA_Cromo": (0.8, 0.8, 0.82), "AA_Pantalla": (0.02, 0.025, 0.03), "AA_Hierro": (0.08, 0.09, 0.085),
+    "AA_LibroRojo": (0.35, 0.06, 0.05), "AA_LibroAzul": (0.07, 0.12, 0.28), "AA_LibroVerde": (0.08, 0.22, 0.1), "AA_LibroMarron": (0.25, 0.15, 0.08),
+    "AA_LibroCrema": (0.6, 0.55, 0.42), "AA_Carton": (0.45, 0.33, 0.2), "AA_TelaAzul": (0.12, 0.16, 0.35),
 }
 
 

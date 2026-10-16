@@ -7,8 +7,33 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: AuditoriumChair_baked
-    second: {fileID: 2100000, guid: a395c6bf8df112e43bcc5987ec690afc, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Hierro
+    second: {fileID: 2100000, guid: 3d2c7b687215c884b8e5ed6e64419612, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Laton
+    second: {fileID: 2100000, guid: 5b37310192562bd47b01eeac3a9b80b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Madera
+    second: {fileID: 2100000, guid: 57a012089bdd0bd4ebe826f78d05e2e8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_TelaAzul
+    second: {fileID: 2100000, guid: eab1a28c6f0d39648aae8fcf22ebefcd, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

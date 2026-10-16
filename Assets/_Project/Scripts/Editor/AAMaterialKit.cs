@@ -33,6 +33,9 @@ namespace Horror.EditorTools
             ("DeskLamp", "Assets/_Project/Art/Props/Office/DeskLamp.fbx"),
             ("TrashBin", "Assets/_Project/Art/Props/Office/TrashBin.fbx"),
             ("Chair", "Assets/_Project/Art/Props/Chair.fbx"),
+            ("Bookcase", "Assets/_Project/Art/Props/Office/Bookcase.fbx"),
+            ("AuditoriumChair", "Assets/_Project/Art/Props/Office/AuditoriumChair.fbx"),
+            ("WaitingBench", "Assets/_Project/Art/Props/Exterior/WaitingBench.fbx"),
         };
 
         public const string LampPath = "Assets/_Project/Art/Props/Lamp/CeilingLampAA.fbx";
@@ -58,6 +61,13 @@ namespace Horror.EditorTools
             { "AA_Goma", (null, null, new Color(0.025f, 0.025f, 0.028f), 1f, 0f, 0f, 0.15f) },
             { "AA_Papel", (null, null, new Color(0.78f, 0.75f, 0.66f), 1f, 0f, 0f, 0.08f) },
             { "AA_Hierro", ("green_metal_rust", "_neutral_diff", new Color(0.17f, 0.18f, 0.17f), 1.0f, 1.0f, 0f, 1f) },   // fundicion pintada de negro
+            { "AA_TelaAzul", ("poly_wool_herringbone", "_diff", new Color(0.22f, 0.28f, 0.55f), 2.0f, 1.0f, 0f, 1f) },     // butacas del auditorio
+            { "AA_LibroRojo", ("poly_wool_herringbone", "_diff", new Color(0.72f, 0.22f, 0.17f), 6.0f, 0.5f, 0f, 1f) },    // tela de encuadernar (la textura de lana es oscura: tintes altos)
+            { "AA_LibroAzul", ("poly_wool_herringbone", "_diff", new Color(0.27f, 0.35f, 0.58f), 6.0f, 0.5f, 0f, 1f) },
+            { "AA_LibroVerde", ("poly_wool_herringbone", "_diff", new Color(0.27f, 0.46f, 0.3f), 6.0f, 0.5f, 0f, 1f) },
+            { "AA_LibroMarron", ("poly_wool_herringbone", "_diff", new Color(0.6f, 0.42f, 0.28f), 6.0f, 0.5f, 0f, 1f) },
+            { "AA_LibroCrema", ("poly_wool_herringbone", "_diff", new Color(0.85f, 0.8f, 0.68f), 6.0f, 0.5f, 0f, 1f) },
+            { "AA_Carton", (null, null, new Color(0.45f, 0.34f, 0.21f), 1f, 0f, 0f, 0.12f) },
             { "AA_Pantalla", (null, null, new Color(0.015f, 0.018f, 0.022f), 1f, 0f, 0f, 0.88f) },     // pantalla apagada, cristal brillante
         };
 

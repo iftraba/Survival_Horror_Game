@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-16 · Art · **Fase C AA, punto 5, tanda 2**: estantería de libros (lomos con nervios, cajas de archivo), butaca del auditorio y banco de espera de fundición y madera (141 instancias).
+
 - 2026-10-16 · Art · **Fase C AA, punto 5: equipamiento de oficina**: ordenador, flexo articulado, papelera y silla de visitas con materiales escaneados (171 instancias).
 
 - 2026-10-16 · Art/Level · **Fase C AA: luminarias de techo** (pantalla fluorescente con marco de aluminio, rejilla de celdas y tapas) en las 252 lámparas por el menú 14. **Arreglo**: los paneles de las lámparas no brillaban porque sus materiales perdían `_EMISSION` al guardarse; ahora usan emisión en tiempo real.

@@ -7,8 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: WaitingBench_baked
-    second: {fileID: 2100000, guid: 3558711ff20f6be429f436d5a55c9f14, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Hierro
+    second: {fileID: 2100000, guid: 3d2c7b687215c884b8e5ed6e64419612, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Madera
+    second: {fileID: 2100000, guid: 57a012089bdd0bd4ebe826f78d05e2e8, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

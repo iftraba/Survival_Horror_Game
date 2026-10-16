@@ -605,10 +605,121 @@ def make_visitor_chair():
     return b.finish("Chair")
 
 
+# ------------------------------------------------------------------ tanda 2 del punto 5: estanteria de libros, butaca del auditorio, banco de espera
+BOOK_MATS = ("AA_LibroRojo", "AA_LibroAzul", "AA_LibroVerde", "AA_LibroMarron", "AA_LibroCrema")
+
+
+def make_bookcase():
+    """Libreria de madera de 1,2 m: costados con zocalo y cornisa moldurada, trasera de tablas, baldas con canto, y libros variados (tela con nervios dorados
+    en el lomo, algunos inclinados, montones tumbados y cajas de archivo)."""
+    import random
+    b = Builder()
+    W, D, H = 1.2, 0.36, 2.1
+    wood = "AA_Madera"
+    for sx in (-1, 1):
+        b.box((sx * (W / 2 - 0.016), 0, H / 2 - 0.02), (0.032, D - 0.01, H - 0.12), wood, 0.004, grain="z")
+    for i in range(6):                                                                            # trasera de tablas machihembradas
+        b.box((-W / 2 + 0.03 + (W - 0.06) * (i + 0.5) / 6, D / 2 - 0.012, H / 2), ((W - 0.06) / 6 - 0.003, 0.012, H - 0.1), wood, 0.002, seg=1, grain="z")
+    b.box((0, -0.005, 0.045), (W, D - 0.02, 0.09), wood, 0.006)                                    # zocalo
+    b.box((0, -0.01, H - 0.045), (W + 0.04, D + 0.01, 0.05), wood, 0.008)                          # cornisa: cuerpo
+    b.box((0, -0.02, H - 0.012), (W + 0.07, D + 0.04, 0.024), wood, 0.01, seg=3)                    # vuelo superior redondeado
+    b.box((0, -D / 2 + 0.01, H - 0.08), (W - 0.04, 0.02, 0.03), wood, 0.008)                         # moldura bajo la cornisa
+    shelves = [0.09, 0.5, 0.91, 1.32, 1.72]
+    for z in shelves[1:]:
+        b.box((0, 0, z), (W - 0.064, D - 0.03, 0.025), wood, 0.003)
+        b.box((0, -D / 2 + 0.02, z - 0.004), (W - 0.064, 0.012, 0.035), wood, 0.004)                 # canto de la balda
+    rnd = random.Random(7)
+    tops = shelves[1:] + [H - 0.07]
+    for s in range(5):
+        z0 = shelves[s] + (0.0125 if s else 0.0)
+        room = tops[s] - z0 - 0.02
+        x = -W / 2 + 0.04
+        while x < W / 2 - 0.07:
+            r = rnd.random()
+            if r < 0.07:                                                                          # hueco
+                x += rnd.uniform(0.06, 0.14); continue
+            if r < 0.13 and x < W / 2 - 0.34:                                                     # caja de archivo
+                bw = 0.26
+                b.box((x + bw / 2, 0.0, z0 + 0.13), (bw, 0.3, 0.26), "AA_Carton", 0.004, grain="x")
+                b.box((x + bw / 2, -0.151, z0 + 0.17), (0.06, 0.002, 0.025), "AA_Negro", 0.0)           # asa
+                b.box((x + bw / 2, -0.151, z0 + 0.09), (0.14, 0.002, 0.07), "AA_Papel", 0.0)            # etiqueta
+                x += bw + 0.01; continue
+            if r < 0.19 and x < W / 2 - 0.3:                                                      # montoncito tumbado
+                for k in range(rnd.randint(2, 4)):
+                    hh = rnd.uniform(0.028, 0.045)
+                    b.box((x + 0.12 + rnd.uniform(-0.01, 0.01), rnd.uniform(-0.02, 0.01), z0 + 0.003 + k * 0.045 + hh / 2), (0.23, rnd.uniform(0.16, 0.2), hh), rnd.choice(BOOK_MATS), 0.003, seg=1)
+                x += 0.26; continue
+            w = rnd.uniform(0.022, 0.055); h = min(room, rnd.uniform(0.21, 0.33)); dd = rnd.uniform(0.17, 0.24)
+            tilt = rnd.uniform(4, 10) if rnd.random() < 0.12 else 0.0
+            cx = x + w / 2 + (math.sin(math.radians(tilt)) * h / 2 if tilt else 0.0)
+            mat = rnd.choice(BOOK_MATS)
+            yb = -D / 2 + 0.035 + dd / 2 + rnd.uniform(0, 0.02)
+            b.box((cx, yb, z0 + h / 2), (w, dd, h), mat, 0.003, seg=1, rot=(0, tilt, 0))
+            if rnd.random() < 0.5 and not tilt:                                                  # nervios dorados del lomo
+                for zz in (z0 + h * 0.82, z0 + h * 0.18):
+                    b.box((cx, yb - dd / 2 - 0.0008, zz), (w - 0.004, 0.0015, 0.006), "AA_Laton", 0.0)
+            x += w + (0.012 + h * 0.4 if tilt else 0.003)
+    return b.finish("Bookcase")
+
+
+def make_auditorium_chair():
+    """Butaca de sala de actos: laterales de fundicion con pie, reposabrazos de madera, asiento abatible y respaldo tapizados sobre carcasas de
+    contrachapado y placa de numero de laton."""
+    b = Builder()
+    iron, fab = "AA_Hierro", "AA_TelaAzul"
+    for sx in (-1, 1):
+        x = 0.245 * sx
+        # lateral: perfil con cintura (barrido grueso aplanado no; se hace con un tubo grueso y una placa)
+        b.box((x, 0.02, 0.33), (0.035, 0.16, 0.5), iron, 0.012, grain="z")
+        b.box((x, 0.03, 0.025), (0.07, 0.26, 0.05), iron, 0.012)                                    # pie
+        b.cyl((x, -0.07, 0.006), 0.012, 0.012, "z", "AA_Acero", 10, 0.002)                          # pernos al suelo
+        b.cyl((x, 0.13, 0.006), 0.012, 0.012, "z", "AA_Acero", 10, 0.002)
+        b.sweep([(x, 0.08, 0.55), (x, 0.17, 0.68), (x, 0.22, 0.85), (x, 0.235, 0.98)], 0.016, iron, 10)  # montante del respaldo
+        b.box((x, 0.01, 0.635), (0.06, 0.42, 0.035), "AA_Madera", 0.014, seg=3)                      # reposabrazos
+        b.box((x, 0.06, 0.6), (0.03, 0.06, 0.04), iron, 0.008)
+        b.cyl((x, 0.04, 0.45), 0.025, 0.04, "x", "AA_Acero", 16, 0.004)                              # eje del asiento abatible
+    b.box((0.245 + 0.019, -0.03, 0.42), (0.004, 0.05, 0.03), "AA_Laton", 0.001)                    # placa de numero
+    b.box((0, 0.02, 0.43), (0.43, 0.42, 0.02), "AA_Madera", 0.006, rot=(-4, 0, 0))                 # carcasa del asiento
+    b.cushion((0, 0.0, 0.47), (0.44, 0.43, 0.065), fab, 0.022, round_edge=0.025)
+    b.box((0, 0.27, 0.75), (0.45, 0.025, 0.5), "AA_Madera", 0.008, rot=(-8, 0, 0), grain="z")       # carcasa del respaldo
+    b.cushion((0, 0.245, 0.76), (0.42, 0.06, 0.46), fab, 0.02, round_edge=0.022)
+    for z in (0.66, 0.86):                                                                        # costuras horizontales
+        b.box((0, 0.21, z), (0.36, 0.006, 0.006), "AA_Negro", 0.0)
+    b.box((0, 0.03, 0.2), (0.46, 0.03, 0.03), iron, 0.008)                                          # travesano
+    return b.finish("AuditoriumChair")
+
+
+def make_waiting_bench():
+    """Banco de espera de 2 m: tres bastidores de hierro fundido curvados, listones de madera atornillados en asiento y respaldo, reposabrazos."""
+    b = Builder()
+    L, iron, wood = 2.0, "AA_Hierro", "AA_Madera"
+    for x in (-L / 2 + 0.12, 0.0, L / 2 - 0.12):
+        b.sweep([(x, -0.18, 0.02), (x, -0.17, 0.25), (x, -0.15, 0.43)], 0.02, iron, 10)            # pata delantera
+        b.sweep([(x, 0.22, 0.02), (x, 0.21, 0.3), (x, 0.24, 0.55), (x, 0.3, 0.88)], 0.02, iron, 10)  # pata trasera y respaldo
+        b.box((x, 0.02, 0.425), (0.04, 0.42, 0.03), iron, 0.01)                                     # travesano del asiento
+        for y in (-0.18, 0.22):
+            b.cyl((x, y, 0.008), 0.03, 0.016, "z", iron, 14, 0.004)                                  # pies
+    for x in (-L / 2 + 0.12, L / 2 - 0.12):                                                      # reposabrazos con voluta
+        b.sweep([(x, 0.18, 0.66), (x, 0.0, 0.67), (x, -0.16, 0.65), (x, -0.2, 0.6), (x, -0.17, 0.55), (x, -0.155, 0.45)], 0.018, iron, 10)
+        b.box((x, -0.0, 0.675), (0.06, 0.34, 0.03), wood, 0.012, seg=3)
+    for i in range(5):                                                                            # listones del asiento
+        y = -0.17 + i * 0.085
+        b.box((0, y, 0.455), (L - 0.04, 0.07, 0.03), wood, 0.007, seg=2)
+        for x in (-L / 2 + 0.12, 0.0, L / 2 - 0.12):
+            b.cyl((x, y, 0.471), 0.006, 0.003, "z", "AA_Acero", 8, 0.0)                              # cabezas de tornillo
+    for i in range(3):                                                                            # listones del respaldo inclinado
+        t = 0.3 + i * 0.25
+        y = 0.24 + (0.3 - 0.24) * t * 1.1
+        z = 0.55 + (0.88 - 0.55) * t
+        b.box((0, y - 0.03, z), (L - 0.04, 0.03, 0.085), wood, 0.007, seg=2, rot=(14, 0, 0))
+    return b.finish("WaitingBench")
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
             "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair,
             "CeilingLampAA": make_ceiling_lamp, "DeskComputer": make_desk_computer, "DeskLamp": make_desk_lamp,
-            "TrashBin": make_trash_bin, "Chair": make_visitor_chair}
+            "TrashBin": make_trash_bin, "Chair": make_visitor_chair, "Bookcase": make_bookcase,
+            "AuditoriumChair": make_auditorium_chair, "WaitingBench": make_waiting_bench}
 
 
 def preview(name):

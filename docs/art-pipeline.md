@@ -143,3 +143,9 @@ Lo más repetido dentro del edificio (recuento de instancias en la escena): sill
 - **Chair** (3.364 tris): silla de visitas de tubo cromado con las curvas redondeadas (helper `bend`), tacos de goma, carcasas de plástico y asiento y respaldo tapizados.
 - El teléfono (`Phone.fbx`, 3.512 tris de `build_phone.py`) ya tenía detalle y no se tocó.
 - Comprobado: 171 instancias con la malla nueva (0 sin malla); capturas en la sala de agentes (general y de cerca al flexo). GI rehorneada. Sin medir rendimiento (unos +400.000 triángulos en total entre las cuatro).
+
+### Punto 5, tanda 2: estantería de libros, butaca del auditorio y banco de espera (2026-10-16)
+- **Bookcase** (6.932 tris, antes 10.272; 48 instancias): libreria de 1,2 × 0,36 × 2,1 m con costados, zócalo, cornisa moldurada con vuelo redondeado, trasera de tablas, baldas con canto y libros de tela (5 materiales `AA_Libro*` sobre la textura de lana, con tintes altos porque la textura es oscura y apagados para que no parezcan de juguete), nervios dorados en la mitad de los lomos, libros inclinados, montones tumbados y cajas de archivo de cartón con asa y etiqueta.
+- **AuditoriumChair** (4.288 tris; 63): laterales y pie de fundición con pernos, montante curvo del respaldo, reposabrazos de madera, eje del asiento abatible, carcasas de contrachapado, tapizado azul (`AA_TelaAzul`) con costuras y placa de número de latón.
+- **WaitingBench** (3.836 tris; 30): tres bastidores de hierro curvados con pies, reposabrazos con voluta y apoyo de madera, cinco listones de asiento atornillados y tres de respaldo inclinados.
+- Comprobado: 141 instancias con la malla nueva; capturas en la biblioteca (con una linterna temporal en la cámara: sin ella los lomos salen negros porque la lámpara queda encima y detrás de las estanterías; con ella se ven bien, no es un fallo de normales), en el auditorio y en la sala de espera. GI rehorneada.
