@@ -39,7 +39,6 @@ namespace Horror.EditorTools
             ("VendingMachine", "Assets/_Project/Art/Props/Station/VendingMachine.fbx"),
             ("Cot", "Assets/_Project/Art/Props/Cot.fbx"),
             ("StationSign", "Assets/_Project/Art/Props/Front/StationSign.fbx"),
-            ("MeshyPistolLow", "Assets/_Project/Art/Generated/MeshyPistolLow.fbx"),    // pistola AA (el nombre se conserva: la usan W_Pistol e I_Pistol)
         };
 
         public const string LampPath = "Assets/_Project/Art/Props/Lamp/CeilingLampAA.fbx";
@@ -153,6 +152,53 @@ namespace Horror.EditorTools
             m.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One); m.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
             m.DisableKeyword("_SURFACE_TYPE_TRANSPARENT"); m.SetOverrideTag("RenderType", "Opaque"); m.renderQueue = -1;
             m.SetShaderPassEnabled("DepthOnly", true); m.SetShaderPassEnabled("ShadowCaster", true);
+        }
+
+        /// <summary>
+        /// Pistola VP70 de Meshy (elegida por el usuario, 2026-10-16): Tools/raw_generated/pistola_vp70 (FBX girado y escalado en Blender a la caja de la
+        /// pistola anterior, boca hacia -Y, mas sus texturas) se copia sobre Art/Generated/MeshyPistolLow.fbx (mismo .meta: W_Pistol e I_Pistol la siguen
+        /// usando) y sus texturas a Art/Generated/PistolaVP; material URP con color, normales y metal/suavidad. Repetible.
+        /// </summary>
+        [MenuItem("Horror/Calidad AA/Pistola VP70 (Meshy)")]
+        public static void MenuPistol() { Debug.Log("[Horror] " + PistolVP()); }
+
+        public static string PistolVP()
+        {
+            if (EditorApplication.isPlaying) return "no con el editor en Play";
+            string root = Directory.GetParent(Application.dataPath).FullName.Replace('\\', '/') + "/";
+            string raw = root + "Tools/raw_generated/pistola_vp70/", dir = "Assets/_Project/Art/Generated/PistolaVP/", fbx = "Assets/_Project/Art/Generated/MeshyPistolLow.fbx";
+            if (!File.Exists(raw + "MeshyPistolLow.fbx")) return "falta " + raw + "MeshyPistolLow.fbx";
+            Directory.CreateDirectory(root + dir);
+            foreach (var f in new[] { "PistolaVP_diff.png", "PistolaVP_nor.png", "PistolaVP_ms.png" }) File.Copy(raw + f, root + dir + f, true);
+            File.Copy(raw + "MeshyPistolLow.fbx", root + fbx, true);
+            AssetDatabase.Refresh();
+            Texture2D T(string f, bool normal, bool srgb)
+            {
+                var ti = (TextureImporter)AssetImporter.GetAtPath(dir + f);
+                ti.textureType = normal ? TextureImporterType.NormalMap : TextureImporterType.Default;
+                ti.sRGBTexture = srgb; ti.maxTextureSize = 4096; ti.textureCompression = TextureImporterCompression.CompressedHQ; ti.anisoLevel = 8;
+                if (f.EndsWith("_ms.png")) ti.alphaSource = TextureImporterAlphaSource.FromInput;
+                ti.SaveAndReimport();
+                return AssetDatabase.LoadAssetAtPath<Texture2D>(dir + f);
+            }
+            var lit = Shader.Find("Universal Render Pipeline/Lit");
+            var m = AssetDatabase.LoadAssetAtPath<Material>(dir + "PistolaVP_mat.mat");
+            if (m == null) { m = new Material(lit); AssetDatabase.CreateAsset(m, dir + "PistolaVP_mat.mat"); }
+            m.shader = lit;
+            m.SetTexture("_BaseMap", T("PistolaVP_diff.png", false, true)); m.SetColor("_BaseColor", Color.white);
+            m.SetTexture("_BumpMap", T("PistolaVP_nor.png", true, false)); m.EnableKeyword("_NORMALMAP"); m.SetFloat("_BumpScale", 1f);
+            m.SetTexture("_MetallicGlossMap", T("PistolaVP_ms.png", false, false)); m.EnableKeyword("_METALLICSPECGLOSSMAP");
+            m.SetFloat("_Metallic", 1f); m.SetFloat("_Smoothness", 1f); m.SetFloat("_SmoothnessTextureChannel", 0f);
+            EditorUtility.SetDirty(m);
+            var imp = (ModelImporter)AssetImporter.GetAtPath(fbx);
+            imp.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
+            foreach (var old in imp.GetExternalObjectMap().Keys.Where(k => k.type == typeof(Material)).ToList()) imp.RemoveRemap(old);
+            imp.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), "PistolaVP_mat"), m);
+            imp.SaveAndReimport();
+            AssetDatabase.SaveAssets();
+            var go = AssetDatabase.LoadAssetAtPath<GameObject>(fbx);
+            var mf = go.GetComponentInChildren<MeshFilter>();
+            return "pistola VP70: " + (mf.sharedMesh.triangles.Length / 3) + " tris, caja " + mf.sharedMesh.bounds.size.ToString("F3") + ", material " + go.GetComponentInChildren<Renderer>().sharedMaterial.name;
         }
 
         [MenuItem("Horror/Calidad AA/Muebles AA (taquilla, archivador, escritorio, silla)")]

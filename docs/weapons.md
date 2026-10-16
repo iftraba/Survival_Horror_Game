@@ -30,4 +30,4 @@ El jugador **siempre lleva un arma equipada**: ya no se puede desequipar (el men
 
 
 ## Modelo de la pistola (2026-10-16)
-La pistola (`W_Pistol` / `I_Pistol`) usa `Art/Generated/MeshyPistolLow.fbx`, que ahora es un modelo hecho en Blender (`Tools/blender/build_pistol_aa.py`, línea VP70, 51.400 tris) en lugar del de Meshy (tenía dos empuñaduras). Mismo nombre, caja y rotación: los datos del arma no cambian. Ver `docs/art-pipeline.md`.
+La pistola (`W_Pistol` / `I_Pistol`) usa `Art/Generated/MeshyPistolLow.fbx`, que ahora es la VP70 de Meshy elegida por el usuario, girada y escalada a la caja anterior y sin marcas registradas (`Tools/blender/debrand_pistol.py`). Mismo nombre, caja y rotación: los datos del arma no cambian. Ver `docs/art-pipeline.md`.
