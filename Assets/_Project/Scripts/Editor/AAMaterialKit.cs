@@ -26,6 +26,7 @@ namespace Horror.EditorTools
             ("FilingCabinet", "Assets/_Project/Art/Props/FilingCabinet.fbx"),
             ("Desk", "Assets/_Project/Art/Props/Desk.fbx"),
             ("SwivelChair", "Assets/_Project/Art/Props/Office/SwivelChair.fbx"),
+            ("ReceptionDesk", "Assets/_Project/Art/Props/Exterior/ReceptionDesk.fbx"),
         };
 
         public static bool IsAA(string fbxPath) => Models.Any(m => m.path == fbxPath);
@@ -47,6 +48,7 @@ namespace Horror.EditorTools
             { "AA_Plastico", (null, null, new Color(0.05f, 0.05f, 0.055f), 1f, 0f, 0f, 0.42f) },
             { "AA_Goma", (null, null, new Color(0.025f, 0.025f, 0.028f), 1f, 0f, 0f, 0.15f) },
             { "AA_Papel", (null, null, new Color(0.78f, 0.75f, 0.66f), 1f, 0f, 0f, 0.08f) },
+            { "AA_Pantalla", (null, null, new Color(0.015f, 0.018f, 0.022f), 1f, 0f, 0f, 0.88f) },     // pantalla apagada, cristal brillante
         };
 
         static Texture2D Tex(string file, bool normal, bool srgb)

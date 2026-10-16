@@ -26,9 +26,9 @@ Lo hecho hasta ahora (modelos por código con cajas biseladas y texturas procedu
 ### Fase C. Modelos AA, por orden de lo que más se ve
 Cada pieza: referencia real → modelo de alta en Blender con superficie dura de verdad (no cajas) → malla de juego → horneado de normales/AO/curvatura → texturas con los materiales escaneados de la fase B como base + desgaste por capas → revisión con captura en el motor junto a la versión actual → tu OK.
 1. Puertas y marcos (150 instancias). **Hecho 2026-10-15.**
-2. Taquilla, archivador, escritorio, silla giratoria (≈350 instancias). **Hecho 2026-10-15** (con materiales escaneados por submalla en vez de horneado, ver `docs/art-pipeline.md`; falta rehornear la GI).
-3. Coche de policía (pieza estrella del exterior).
-4. Mostrador del vestíbulo, escalera de caracol, luminarias.
+2. Taquilla, archivador, escritorio, silla giratoria (≈350 instancias). **Hecho 2026-10-15** (con materiales escaneados por submalla en vez de horneado, ver `docs/art-pipeline.md`; GI rehorneada el 2026-10-16).
+3. Coche de policía (pieza estrella del exterior). Ya se rehízo en la v3 de `build_police_cars.py` (lavado de cara del exterior); se deja para el final por si se quiere pasar a materiales por submalla.
+4. Mostrador del vestíbulo (**hecho 2026-10-16**), escalera de caracol, luminarias.
 5. Resto de muebles por zonas.
 Calculo 1-2 piezas por sesión a esta calidad.
 

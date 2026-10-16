@@ -178,7 +178,165 @@ def make_swivel_chair():
     return b.finish("SwivelChair")
 
 
-BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair}
+# ------------------------------------------------------------------ mostrador del vestibulo
+def _fc(face, p, u, n, z):
+    """Punto en una cara: 'y-' (frente, plano y=p), 'x+' / 'x-' (laterales, plano x=p). u corre a lo largo de la cara, n sale de ella."""
+    if face == "y-":
+        return (u, p - n, z)
+    return (p + n, u, z) if face == "x+" else (p - n, u, z)
+
+
+def _sz(face, su, sn, sz):
+    return (su, sn, sz) if face == "y-" else (sn, su, sz)
+
+
+def _bay(b, face, p, u0, u1, z0, z1):
+    """Plafon de madera en relieve con junquillo alrededor (el bastidor va aparte)."""
+    w, h, uc, zc = u1 - u0, z1 - z0, (u0 + u1) / 2, (z0 + z1) / 2
+    gz = "z"
+    b.box(_fc(face, p, uc, 0.004, zc), _sz(face, w, 0.008, h), "AA_Madera", 0.002, seg=2, grain=gz)
+    b.box(_fc(face, p, uc, 0.010, zc), _sz(face, w - 0.08, 0.008, h - 0.08), "AA_Madera", 0.0035, seg=2, grain=gz)
+    b.box(_fc(face, p, uc, 0.0135, zc), _sz(face, w - 0.13, 0.006, h - 0.13), "AA_Madera", 0.0027, seg=2, grain=gz)
+    t = 0.022
+    for z in (z0 + t / 2 - 0.004, z1 - t / 2 + 0.004):
+        b.box(_fc(face, p, uc, 0.012, z), _sz(face, w + 0.008, 0.016, t), "AA_Madera", 0.0065, seg=2, grain="x" if face == "y-" else "z")
+    for u in (u0 + t / 2 - 0.004, u1 - t / 2 + 0.004):
+        b.box(_fc(face, p, u, 0.012, zc), _sz(face, t, 0.016, h - 0.03), "AA_Madera", 0.0065, seg=2, grain=gz)
+
+
+def _panelled(b, face, p, u0, u1, bays, z_rail0=0.12, z_open0=0.26, z_open1=0.90, z_rail1=1.06, stile=0.08):
+    """Bastidor (largueros y travesanos de 20 mm) con 'bays' plafones."""
+    length = u1 - u0
+    for (za, zb) in ((z_rail0, z_open0), (z_open1, z_rail1)):
+        b.box(_fc(face, p, (u0 + u1) / 2, 0.01, (za + zb) / 2), _sz(face, length, 0.02, zb - za), "AA_Madera", 0.003, seg=2)
+    step = length / bays
+    for i in range(bays + 1):
+        u = u0 + i * step
+        w = stile * (0.75 if i in (0, bays) else 1.0)
+        uc = u + (w / 2 if i == 0 else (-w / 2 if i == bays else 0))
+        b.box(_fc(face, p, uc, 0.01, (z_open0 + z_open1) / 2), _sz(face, w, 0.02, z_open1 - z_open0), "AA_Madera", 0.003, seg=2, grain="z")
+    for i in range(bays):
+        a = u0 + i * step + (stile * 0.75 if i == 0 else stile / 2)
+        c = u0 + (i + 1) * step - (stile * 0.75 if i == bays - 1 else stile / 2)
+        _bay(b, face, p, a, c, z_open0, z_open1)
+
+
+def _monitor(b, x, y, z):
+    """Monitor plano de los 2000 mirando a +Y (al funcionario)."""
+    b.box((x, y, z + 0.008), (0.24, 0.18, 0.016), "AA_Plastico", 0.006)
+    b.box((x, y - 0.03, z + 0.11), (0.06, 0.03, 0.2), "AA_Plastico", 0.008, rot=(8, 0, 0))
+    b.box((x, y, z + 0.33), (0.52, 0.055, 0.35), "AA_Plastico", 0.012)
+    b.box((x, y - 0.045, z + 0.33), (0.3, 0.04, 0.22), "AA_Plastico", 0.015)                                 # joroba trasera
+    b.box((x, y + 0.0285, z + 0.345), (0.47, 0.004, 0.29), "AA_Pantalla", 0.0)
+    b.box((x + 0.21, y + 0.029, z + 0.172), (0.012, 0.004, 0.006), "AA_Cromo", 0.0)                         # piloto
+    for i in range(3):
+        b.box((x - 0.18 + i * 0.03, y + 0.0285, z + 0.172), (0.016, 0.003, 0.006), "AA_Negro", 0.0)          # botones
+
+
+def _keyboard(b, x, y, z):
+    b.box((x, y, z + 0.013), (0.45, 0.165, 0.026), "AA_Plastico", 0.006, rot=(-3, 0, 0))
+    for r in range(5):
+        n = 14 if r < 4 else 7
+        for k in range(n):
+            w = 0.022 if r < 4 else (0.13 if k == 3 else 0.022)
+            kx = x - 0.19 + k * 0.0275 + (0.0 if r < 4 else (0.05 if k > 3 else 0.0))
+            if r == 4 and k == 3:
+                kx = x - 0.19 + 3 * 0.0275 + 0.054
+            b.box((kx, y + 0.06 - r * 0.0285, z + 0.03 + r * 0.0014), (w, 0.022, 0.009), "AA_Negro", 0.0)
+    b.box((x + 0.32, y + 0.01, z + 0.012), (0.06, 0.1, 0.024), "AA_Plastico", 0.01)                         # raton
+
+
+def _rotary_phone(b, x, y, z, yaw=0.0):
+    rot = (0, 0, yaw)
+    b.box((x, y, z + 0.035), (0.21, 0.24, 0.07), "AA_Negro", 0.025, seg=4, rot=rot)
+    b.box((x, y + 0.01, z + 0.075), (0.15, 0.13, 0.03), "AA_Negro", 0.012, seg=3, rot=rot)
+    b.cyl((x, y - 0.06, z + 0.072), 0.05, 0.012, "z", "AA_Cromo", 28, 0.002)                                # dial
+    b.cyl((x, y - 0.06, z + 0.08), 0.018, 0.006, "z", "AA_Papel", 18, 0.001)
+    hy = y + 0.03
+    b.sweep([(x - 0.11, hy, z + 0.105), (x - 0.06, hy, z + 0.118), (x + 0.06, hy, z + 0.118), (x + 0.11, hy, z + 0.105)], 0.016, "AA_Negro", 12)
+    for sx in (-1, 1):
+        b.cyl((x + sx * 0.11, hy, z + 0.098), 0.03, 0.035, "z", "AA_Negro", 20, 0.008)
+    b.sweep([(x + 0.105, y + 0.12, z + 0.02), (x + 0.16, y + 0.2, z + 0.006), (x + 0.12, y + 0.3, z + 0.004), (x + 0.0, y + 0.34, z + 0.004)], 0.004, "AA_Negro", 6)
+
+
+def make_reception_desk():
+    """Mostrador del vestibulo en L (frente de 4,2 m, retorno derecho de 2,2 m, encimera a 1,10 m) con el puesto del funcionario detras."""
+    b = Builder()
+    L, H = 4.2, 1.10
+    # carcasas (tablero de 40 mm) y zocalos retranqueados
+    b.box((0, 0.0, 0.12 + (H - 0.12) / 2), (L, 0.04, H - 0.12), "AA_Madera", 0.003, grain="z")
+    b.box((0, 0.03, 0.06), (L - 0.02, 0.06, 0.12), "AA_Negro", 0.006)
+    b.box((L / 2 - 0.02, 1.1, 0.12 + (H - 0.12) / 2), (0.04, 2.2, H - 0.12), "AA_Madera", 0.003, grain="z")
+    b.box((L / 2 - 0.04, 1.1, 0.06), (0.06, 2.18, 0.12), "AA_Negro", 0.006)
+    b.box((-L / 2 + 0.02, 0.4, 0.12 + (H - 0.12) / 2), (0.04, 0.8, H - 0.12), "AA_Madera", 0.003, grain="z")
+    b.box((-L / 2 + 0.04, 0.4, 0.06), (0.06, 0.78, 0.12), "AA_Negro", 0.006)
+    # frente y laterales con plafones en relieve
+    _panelled(b, "y-", -0.02, -L / 2, L / 2, 6)
+    _panelled(b, "x+", L / 2, 0.0, 2.2, 3)
+    _panelled(b, "x-", -L / 2, 0.0, 0.8, 1)
+    # encimeras: laminado con canto de madera en media cana (el del frente hace de reborde)
+    b.box((0, 0.32, H + 0.0175), (L + 0.1, 0.70, 0.035), "AA_Laminado", 0.002, grain="x")
+    b.box((0, -0.055, H + 0.005), (L + 0.14, 0.07, 0.075), "AA_Madera", 0.03, seg=5, grain="x")
+    b.box((L / 2 + 0.23, 1.12, H + 0.0175), (0.56, 2.24, 0.035), "AA_Laminado", 0.002, grain="z")
+    b.box((L / 2 + 0.515, 1.11, H + 0.005), (0.07, 2.25, 0.075), "AA_Madera", 0.03, seg=5, grain="z")
+    b.box((-L / 2 - 0.0, 0.4, H + 0.0175), (0.1, 0.8, 0.035), "AA_Laminado", 0.002, grain="z")
+    b.box((-L / 2 - 0.02, 0.4, H + 0.005), (0.07, 0.86, 0.075), "AA_Madera", 0.03, seg=5, grain="z")
+    for y in (0.35, 1.1, 1.85):                                                                              # mensulas del vuelo del retorno
+        b.box((L / 2 + 0.08, y, H - 0.09), (0.16, 0.05, 0.15), "AA_Madera", 0.012, grain="z")
+        b.box((L / 2 + 0.2, y, H - 0.03), (0.12, 0.05, 0.05), "AA_Madera", 0.012)
+    # reposapies de laton con brazos curvos y rosetas
+    ry, rz = -0.14, 0.17
+    b.sweep([(-L / 2 + 0.12, ry, rz), (L / 2 - 0.12, ry, rz)], 0.019, "AA_Laton", 16)
+    for x in (-L / 2 + 0.12, L / 2 - 0.12):
+        b.cyl((x, ry, rz), 0.022, 0.02, "x", "AA_Laton", 16, 0.006)
+    for i in range(6):
+        x = -L / 2 + 0.3 + i * (L - 0.6) / 5
+        b.cyl((x, -0.027, 0.25), 0.032, 0.012, "y", "AA_Laton", 18, 0.003)
+        b.sweep([(x, -0.03, 0.25), (x, -0.08, 0.245), (x, -0.115, 0.21), (x, ry, rz + 0.02)], 0.009, "AA_Laton", 10)
+        b.cyl((x, ry, rz), 0.025, 0.035, "x", "AA_Laton", 18, 0.004)
+    # puesto del funcionario: mesa de trabajo sobre dos cajoneras (los cajones miran a +Y)
+    b.box((0, 0.65, 0.76), (L - 0.1, 0.7, 0.032), "AA_Laminado", 0.003, grain="x")
+    for px in (-1.55, 0.25):
+        b.box((px, 0.62, 0.37), (0.42, 0.6, 0.72), "AA_PinturaGris", 0.006, grain="z")
+        for k, (z0, z1) in enumerate(((0.06, 0.34), (0.36, 0.53), (0.55, 0.72))):
+            cz = (z0 + z1) / 2
+            b.box((px, 0.93, cz), (0.4, 0.018, z1 - z0 - 0.008), "AA_PinturaGris", 0.004)
+            b.box((px, 0.942, cz + (z1 - z0) * 0.25), (0.18, 0.006, 0.026), "AA_Cromo", 0.0025)
+            b.box((px, 0.944, cz + (z1 - z0) * 0.25 - 0.007), (0.15, 0.004, 0.007), "AA_Negro", 0.0)
+    for x in (-1.2, 0.6):
+        _monitor(b, x, 0.74, 0.776)
+        _keyboard(b, x, 0.9, 0.776)
+    for k, x in enumerate([1.25 + i * 0.055 for i in range(9)]):                                              # archivadores de anillas
+        mat = ("AA_PinturaVerde", "AA_Negro", "AA_Plastico", "AA_PinturaCrema")[k % 4]
+        b.box((x, 0.8, 0.776 + 0.145), (0.05, 0.28, 0.29), mat, 0.004, grain="z")
+        b.cyl((x, 0.659, 0.776 + 0.19), 0.012, 0.004, "y", "AA_Cromo", 12, 0.0)
+    for x in (1.2, 1.76):
+        b.box((x, 0.8, 0.776 + 0.12), (0.012, 0.22, 0.24), "AA_Acero", 0.003)                                # sujetalibros
+    for k in range(2):                                                                                      # bandejas de papel apiladas
+        z = 0.776 + 0.005 + k * 0.07
+        b.box((-0.35, 0.55, z + 0.03), (0.27, 0.35, 0.004), "AA_Acero", 0.001)
+        for sx in (-1, 1):
+            b.box((-0.35 + sx * 0.135, 0.55, z + 0.03), (0.004, 0.35, 0.06), "AA_Acero", 0.001)
+        b.box((-0.35, 0.55, z + 0.04 + k * 0.004), (0.21, 0.297, 0.012 + 0.008 * k), "AA_Papel", 0.001)
+    for (x, y, r) in ((-0.75, 0.62, 8), (1.0, 0.7, -12), (-1.75, 0.66, 4)):
+        b.box((x, y, 0.776 + 0.003), (0.21, 0.297, 0.003), "AA_Papel", 0.0, rot=(0, 0, r))
+    # sobre el mostrador: telefono de disco, timbre, libro de registro con boligrafo de cadena
+    _rotary_phone(b, -1.6, 0.3, H + 0.035, 0)
+    b.cyl((1.8, 0.25, H + 0.045), 0.045, 0.02, "z", "AA_Negro", 24, 0.004)                                   # timbre
+    b.cyl((1.8, 0.25, H + 0.07), 0.04, 0.03, "z", "AA_Cromo", 24, 0.004, r_top=0.014)
+    b.cyl((1.8, 0.25, H + 0.09), 0.005, 0.014, "z", "AA_Cromo", 10, 0.0)
+    b.cyl((1.8, 0.25, H + 0.098), 0.009, 0.005, "z", "AA_Cromo", 12, 0.001)
+    b.box((0.3, 0.12, H + 0.04), (0.42, 0.3, 0.012), "AA_PinturaVerde", 0.003)                               # libro de registro abierto
+    for sx in (-1, 1):
+        b.box((0.3 + sx * 0.103, 0.12, H + 0.048), (0.195, 0.28, 0.006), "AA_Papel", 0.001)
+    b.sweep([(0.6, 0.1, H + 0.04), (0.64, 0.08, H + 0.045), (0.66, 0.02, H + 0.042)], 0.004, "AA_Negro", 8)   # boligrafo
+    b.cyl((0.6, 0.18, H + 0.04), 0.014, 0.01, "z", "AA_Cromo", 14, 0.002)
+    b.sweep([(0.6, 0.18, H + 0.045), (0.62, 0.14, H + 0.04), (0.6, 0.1, H + 0.042)], 0.0012, "AA_Cromo", 5)  # cadena
+    return b.finish("ReceptionDesk")
+
+
+BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
+            "ReceptionDesk": make_reception_desk}
 
 
 def preview(name):

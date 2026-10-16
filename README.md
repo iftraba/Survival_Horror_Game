@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-16 · Art · **Fase C AA: mostrador del vestíbulo** (plafones en relieve, canto de media caña, reposapiés de latón, puesto del funcionario con monitores, teclados, teléfono de disco, timbre y libro de registro) con materiales escaneados por `AAMaterialKit`; GI rehorneada tras los muebles AA.
+
 - 2026-10-15 · Art · **Fase C AA: taquilla, archivador, escritorio y silla giratoria** rehechos con `Tools/blender/aa_lib.py` y `build_furniture_aa.py` (biseles reales, rejillas estampadas, tiradores, ruedas, cojines) y con materiales escaneados de Poly Haven (lote 2: `green_metal_rust`, `poly_wool_herringbone`) puestos por `AAMaterialKit` (menú *Horror/Calidad AA/Muebles AA*). Sustituyen a los anteriores en las 343 instancias de la escena. Falta rehornear la GI (menú 17).
 
 - 2026-10-14 · Level/Art · **Luz de relleno y objetos más visibles**: 88 luces de relleno en las salas más oscuras (menú *Horror/Comisaria grande/15*), brillo y halo en todos los objetos recogibles y una caja de munición sacada de un coche.

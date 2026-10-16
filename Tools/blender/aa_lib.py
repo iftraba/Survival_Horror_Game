@@ -16,7 +16,7 @@ AA_COLORS = {
     "AA_Madera": (0.2, 0.11, 0.06), "AA_Laton": (0.6, 0.45, 0.18), "AA_Acero": (0.6, 0.62, 0.64), "AA_Negro": (0.03, 0.03, 0.035),
     "AA_PinturaVerde": (0.3, 0.37, 0.34), "AA_PinturaGris": (0.36, 0.38, 0.36), "AA_PinturaCrema": (0.62, 0.6, 0.52), "AA_Papel": (0.82, 0.8, 0.7),
     "AA_Tela": (0.1, 0.11, 0.13), "AA_Plastico": (0.05, 0.05, 0.055), "AA_Goma": (0.02, 0.02, 0.022), "AA_Laminado": (0.32, 0.3, 0.26),
-    "AA_Cromo": (0.8, 0.8, 0.82),
+    "AA_Cromo": (0.8, 0.8, 0.82), "AA_Pantalla": (0.02, 0.025, 0.03),
 }
 
 
