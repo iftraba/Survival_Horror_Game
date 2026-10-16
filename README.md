@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-16 · Art/Core · **Fase C AA, punto 5, tanda 3**: máquina expendedora con cristal transparente y productos, y catre de calabozo. **Arreglo** de `PropVariant`: en juego teñía todos los materiales de un modelo con el color del primero.
+
 - 2026-10-16 · Art · **Fase C AA, punto 5, tanda 2**: estantería de libros (lomos con nervios, cajas de archivo), butaca del auditorio y banco de espera de fundición y madera (141 instancias).
 
 - 2026-10-16 · Art · **Fase C AA, punto 5: equipamiento de oficina**: ordenador, flexo articulado, papelera y silla de visitas con materiales escaneados (171 instancias).

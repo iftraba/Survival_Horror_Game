@@ -36,6 +36,8 @@ namespace Horror.EditorTools
             ("Bookcase", "Assets/_Project/Art/Props/Office/Bookcase.fbx"),
             ("AuditoriumChair", "Assets/_Project/Art/Props/Office/AuditoriumChair.fbx"),
             ("WaitingBench", "Assets/_Project/Art/Props/Exterior/WaitingBench.fbx"),
+            ("VendingMachine", "Assets/_Project/Art/Props/Station/VendingMachine.fbx"),
+            ("Cot", "Assets/_Project/Art/Props/Cot.fbx"),
         };
 
         public const string LampPath = "Assets/_Project/Art/Props/Lamp/CeilingLampAA.fbx";
@@ -68,6 +70,13 @@ namespace Horror.EditorTools
             { "AA_LibroMarron", ("poly_wool_herringbone", "_diff", new Color(0.6f, 0.42f, 0.28f), 6.0f, 0.5f, 0f, 1f) },
             { "AA_LibroCrema", ("poly_wool_herringbone", "_diff", new Color(0.85f, 0.8f, 0.68f), 6.0f, 0.5f, 0f, 1f) },
             { "AA_Carton", (null, null, new Color(0.45f, 0.34f, 0.21f), 1f, 0f, 0f, 0.12f) },
+            { "AA_PinturaRoja", ("green_metal_rust", "_neutral_diff", new Color(0.62f, 0.12f, 0.1f), 1.0f, 1.0f, 0f, 1f) },    // maquina expendedora
+            { "AA_PlasticoRojo", (null, null, new Color(0.6f, 0.07f, 0.05f), 1f, 0f, 0f, 0.6f) },                              // envoltorios y latas
+            { "AA_PlasticoAzul", (null, null, new Color(0.07f, 0.18f, 0.5f), 1f, 0f, 0f, 0.6f) },
+            { "AA_PlasticoAmarillo", (null, null, new Color(0.75f, 0.55f, 0.05f), 1f, 0f, 0f, 0.6f) },
+            { "AA_Colchon", ("poly_wool_herringbone", "_diff", new Color(0.95f, 0.92f, 0.82f), 2.5f, 0.8f, 0f, 1f) },        // colchon de lona
+            { "AA_Manta", ("poly_wool_herringbone", "_diff", new Color(0.5f, 0.55f, 0.4f), 1.5f, 1.0f, 0f, 1f) },             // manta militar
+            { "AA_Cristal", (null, null, new Color(0.55f, 0.62f, 0.65f, 0.12f), 1f, 0f, 0f, 0.95f) },                         // transparente (ver Transparent)
             { "AA_Pantalla", (null, null, new Color(0.015f, 0.018f, 0.022f), 1f, 0f, 0f, 0.88f) },     // pantalla apagada, cristal brillante
         };
 
@@ -113,10 +122,31 @@ namespace Horror.EditorTools
             m.SetTexture("_MetallicGlossMap", ms);
             if (ms != null) { m.EnableKeyword("_METALLICSPECGLOSSMAP"); m.SetFloat("_SmoothnessTextureChannel", 0f); m.SetFloat("_Metallic", 1f); m.SetFloat("_Smoothness", d.smooth); }
             else { m.DisableKeyword("_METALLICSPECGLOSSMAP"); m.SetFloat("_Metallic", d.metal); m.SetFloat("_Smoothness", d.smooth); }
+            if (name == "AA_Cristal") Transparent(m); else Opaque(m);
             m.SetTexture("_OcclusionMap", ao);
             if (ao != null) { m.EnableKeyword("_OCCLUSIONMAP"); m.SetFloat("_OcclusionStrength", 0.8f); } else m.DisableKeyword("_OCCLUSIONMAP");
             EditorUtility.SetDirty(m);
             return m;
+        }
+
+        /// <summary>URP Lit transparente (alfa del color base, sin escribir profundidad): el cristal de la vitrina.</summary>
+        static void Transparent(Material m)
+        {
+            m.SetFloat("_Surface", 1f); m.SetFloat("_Blend", 0f); m.SetFloat("_ZWrite", 0f);
+            m.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha); m.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            m.SetFloat("_SrcBlendAlpha", (float)UnityEngine.Rendering.BlendMode.One); m.SetFloat("_DstBlendAlpha", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT"); m.SetOverrideTag("RenderType", "Transparent");
+            m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            m.SetShaderPassEnabled("DepthOnly", false); m.SetShaderPassEnabled("ShadowCaster", false);
+        }
+
+        static void Opaque(Material m)
+        {
+            if (m.GetFloat("_Surface") == 0f) return;
+            m.SetFloat("_Surface", 0f); m.SetFloat("_ZWrite", 1f);
+            m.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One); m.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
+            m.DisableKeyword("_SURFACE_TYPE_TRANSPARENT"); m.SetOverrideTag("RenderType", "Opaque"); m.renderQueue = -1;
+            m.SetShaderPassEnabled("DepthOnly", true); m.SetShaderPassEnabled("ShadowCaster", true);
         }
 
         [MenuItem("Horror/Calidad AA/Muebles AA (taquilla, archivador, escritorio, silla)")]

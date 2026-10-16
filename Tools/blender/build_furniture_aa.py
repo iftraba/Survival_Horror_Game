@@ -460,7 +460,7 @@ def _crumple(b, c, r, seed, mat="AA_Papel"):
     import random
     rnd = random.Random(seed)
     bm = bmesh.new()
-    bmesh.ops.create_icosphere(bm, subdivisions=1, radius=r)
+    bmesh.ops.create_icosphere(bm, subdivisions=2, radius=r)
     for v in bm.verts:
         v.co *= 0.75 + rnd.random() * 0.45
     bmesh.ops.translate(bm, verts=bm.verts[:], vec=Vector(c))
@@ -529,12 +529,12 @@ def make_desk_lamp():
         b.sweep([(p1[0] + dx, p1[1], p1[2]), (p2[0] + dx, p2[1], p2[2])], 0.0045, steel, 8)
     for (a, c) in ((p0, p1), (p1, p2)):                                                          # muelles en espiral junto a cada brazo
         pts = []
-        for i in range(37):
-            t = 0.15 + 0.5 * i / 36
+        for i in range(61):
+            t = 0.15 + 0.5 * i / 60
             px, py, pz = a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t, a[2] + (c[2] - a[2]) * t
-            ang = i * 1.5
+            ang = i * 0.9
             pts.append((px + 0.026 + 0.006 * math.cos(ang), py + 0.006 * math.sin(ang), pz))
-        b.sweep(pts, 0.0012, steel, 3)
+        b.sweep(pts, 0.0012, steel, 4)
     for p in (p1, p2):
         b.cyl(p, 0.014, 0.034, "x", steel, 14, 0.003)                                            # rotulas con pomo
         b.cyl((p[0] + 0.022, p[1], p[2]), 0.009, 0.012, "x", "AA_Negro", 12, 0.002)
@@ -553,15 +553,15 @@ def make_trash_bin():
     """Papelera de chapa troncoconica con borde enrollado, aros embutidos, fondo y papeles arrugados."""
     b = Builder()
     paint = "AA_PinturaGris"
-    _shell(b, (0, 0, 0.185), 0.12, 0.148, 0.35, 28, paint, paint, t=0.003)
+    _shell(b, (0, 0, 0.185), 0.12, 0.148, 0.35, 32, paint, paint, t=0.003)
     b.cyl((0, 0, 0.006), 0.122, 0.012, "z", paint, 32, 0.004)                                    # fondo
     b.cyl((0, 0, 0.003), 0.11, 0.006, "z", "AA_Negro", 32, 0.002)                                # zocalo de goma
     rim = [(0.153 * math.cos(2 * math.pi * k / 48), 0.153 * math.sin(2 * math.pi * k / 48), 0.36) for k in range(49)]
-    b.sweep(rim, 0.006, paint, 6)                                                               # borde enrollado
+    b.sweep(rim, 0.006, paint, 10)                                                               # borde enrollado
     for z in (0.11, 0.24):                                                                       # aros embutidos
         r = 0.12 + (z - 0.01) / 0.35 * 0.028 + 0.002
         ring = [(r * math.cos(2 * math.pi * k / 48), r * math.sin(2 * math.pi * k / 48), z) for k in range(49)]
-        b.sweep(ring, 0.004, paint, 4)
+        b.sweep(ring, 0.004, paint, 6)
     for i, (x, y, z, r) in enumerate(((0.04, 0.02, 0.33, 0.055), (-0.05, 0.03, 0.34, 0.05), (0.0, -0.06, 0.35, 0.048), (0.06, -0.04, 0.37, 0.045))):
         _crumple(b, (x, y, z), r, i + 3)
     b.box((0.05, -0.02, 0.405), (0.15, 0.1, 0.002), "AA_Papel", 0.0, rot=(0, 28, 20))           # hoja asomando
@@ -715,11 +715,132 @@ def make_waiting_bench():
     return b.finish("WaitingBench")
 
 
+# ------------------------------------------------------------------ tanda 3 del punto 5: maquina expendedora y catre
+def _coil(b, x, y, z, length, r=0.03, turns=6, mat="AA_Acero"):
+    """Espiral de la maquina expendedora a lo largo de Y."""
+    pts = []
+    n = turns * 8
+    for i in range(n + 1):
+        t = i / n
+        a = 2 * math.pi * turns * t
+        pts.append((x + r * math.cos(a), y + length * t, z + r * math.sin(a)))
+    b.sweep(pts, 0.0025, mat, 3)
+
+
+def make_vending():
+    """Maquina expendedora de los 80: chapa roja, vitrina de cristal transparente con baldas, espirales y productos, panel de monedas con teclado,
+    pantalla y ranuras, trampilla de recogida, cartel superior y rejilla."""
+    import random
+    rnd = random.Random(11)
+    b = Builder()
+    W, D, H = 0.95, 0.8, 1.85
+    red = "AA_PinturaRoja"
+    fy = -D / 2
+    # mueble: costados, techo, trasera y zocalo; frente abierto donde va la vitrina
+    for sx in (-1, 1):
+        b.box((sx * (W / 2 - 0.015), 0.0, H / 2), (0.03, D, H), red, 0.012, grain="z")
+    b.box((0, 0.0, H - 0.015), (W, D, 0.03), red, 0.01)
+    b.box((0, D / 2 - 0.01, H / 2), (W - 0.03, 0.02, H - 0.02), red, 0.004, grain="z")
+    b.box((0, 0.01, 0.05), (W - 0.04, D - 0.04, 0.1), "AA_Negro", 0.006)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            b.cyl((sx * 0.4, sy * 0.33, 0.012), 0.025, 0.024, "z", "AA_Negro", 12, 0.004)       # patas niveladoras
+    # puerta: marco de chapa con la vitrina a la izquierda y el panel de pago a la derecha
+    b.box((0, fy + 0.02, 0.27), (W - 0.01, 0.04, 0.34), red, 0.008)                                 # parte baja de la puerta
+    b.box((0, fy + 0.02, 1.73), (W - 0.01, 0.04, 0.24), red, 0.008)                                 # cabecero
+    b.box((-W / 2 + 0.035, fy + 0.02, 1.03), (0.07, 0.04, 1.18), red, 0.008, grain="z")
+    b.box((0.21, fy + 0.02, 1.03), (0.04, 0.04, 1.18), red, 0.008, grain="z")
+    b.box((0.355, fy + 0.02, 1.03), (0.25, 0.04, 1.18), red, 0.008, grain="z")                      # columna del panel
+    # vitrina: marco negro, cristal transparente e interior
+    gx0, gx1, gz0, gz1 = -W / 2 + 0.07, 0.19, 0.44, 1.62
+    gcx, gw = (gx0 + gx1) / 2, gx1 - gx0
+    b.frame_profile((gx0, gx1, gz0, gz1), [(0.0, 0.0), (0.0, 0.012), (0.018, 0.012), (0.018, 0.0)], fy - 0.0, -1, "AA_Negro")
+    b.box((gcx, fy + 0.012, (gz0 + gz1) / 2), (gw, 0.004, gz1 - gz0), "AA_Cristal", 0.0)
+    b.box((gcx, D / 2 - 0.025, (gz0 + gz1) / 2), (gw, 0.004, gz1 - gz0), "AA_PinturaCrema", 0.0)   # fondo claro del interior
+    cols = 5
+    for r in range(5):
+        z = gz0 + 0.06 + r * 0.23
+        b.box((gcx, 0.02, z - 0.012), (gw - 0.02, D - 0.12, 0.01), "AA_Acero", 0.002, seg=1)       # bandeja
+        b.box((gcx, fy + 0.07, z + 0.01), (gw - 0.02, 0.012, 0.035), "AA_Negro", 0.002, seg=1)       # canto con precios
+        for c in range(cols):
+            x = gx0 + 0.04 + c * (gw - 0.08) / (cols - 1)
+            b.box((x, fy + 0.0705, z + 0.02), (0.04, 0.002, 0.012), "AA_Papel", 0.0)               # etiqueta de precio
+            _coil(b, x, fy + 0.09, z + 0.035, 0.42, 0.032, 5)
+            kind = rnd.random()
+            for k in range(3 if r % 2 == 0 else 4):
+                py = fy + 0.13 + k * 0.1
+                if r % 2 == 0:                                                                      # latas
+                    b.cyl((x, py, z + 0.065), 0.031, 0.115, "z", rnd.choice(("AA_PlasticoRojo", "AA_PlasticoAzul", "AA_PlasticoAmarillo", "AA_Cromo")), 14, 0.004)
+                else:                                                                               # bolsas y chocolatinas
+                    mat = ("AA_PlasticoRojo", "AA_PlasticoAzul", "AA_PlasticoAmarillo", "AA_Carton")[int(kind * 4) % 4]
+                    b.box((x, py, z + 0.07), (0.085, 0.03, 0.13), mat, 0.008, seg=2)
+            if rnd.random() < 0.15:                                                                # una bolsa caida sobre la bandeja
+                b.box((x + 0.01, fy + 0.11, z + 0.01), (0.085, 0.13, 0.025), "AA_PlasticoAmarillo", 0.008, seg=2, rot=(0, 0, 25))
+    # panel de pago
+    px = 0.355
+    b.box((px, fy - 0.004, 1.3), (0.2, 0.012, 0.5), "AA_Negro", 0.004)
+    b.box((px, fy - 0.011, 1.47), (0.14, 0.004, 0.05), "AA_Pantalla", 0.0)                         # pantalla de precio
+    for r in range(4):
+        for c in range(3):
+            b.box((px - 0.045 + c * 0.045, fy - 0.014, 1.38 - r * 0.045), (0.032, 0.008, 0.032), "AA_Cromo", 0.004, seg=2)
+    b.box((px, fy - 0.012, 1.15), (0.06, 0.006, 0.02), "AA_Cromo", 0.003)                           # ranura de monedas
+    b.box((px, fy - 0.013, 1.15), (0.035, 0.004, 0.004), "AA_Negro", 0.0)
+    b.cyl((px + 0.06, fy - 0.012, 1.15), 0.013, 0.01, "y", "AA_Cromo", 14, 0.002)                   # boton de devolucion
+    b.box((px, fy - 0.01, 1.08), (0.08, 0.004, 0.035), "AA_Negro", 0.0)                             # ranura de billetes
+    b.box((px, fy - 0.03, 0.82), (0.12, 0.05, 0.1), "AA_Negro", 0.012)                              # cajetin del cambio
+    b.box((px, fy - 0.055, 0.81), (0.09, 0.004, 0.05), "AA_Cromo", 0.002)
+    b.box((px, fy - 0.006, 1.6), (0.18, 0.006, 0.12), "AA_Papel", 0.0)                              # pegatina de instrucciones
+    # trampilla de recogida y rejilla
+    b.box((-0.12, fy - 0.025, 0.25), (0.55, 0.05, 0.18), "AA_Negro", 0.012)
+    b.box((-0.12, fy - 0.052, 0.25), (0.47, 0.004, 0.11), "AA_Plastico", 0.0, rot=(-8, 0, 0))
+    for i in range(8):
+        b.box((-0.32 + i * 0.09, fy - 0.003, 0.08), (0.06, 0.006, 0.012), "AA_Negro", 0.0)          # rejilla de ventilacion
+    # cartel superior con marco cromado
+    b.box((0, fy - 0.006, 1.74), (W - 0.1, 0.012, 0.15), "AA_PinturaCrema", 0.004)
+    b.frame_profile((-W / 2 + 0.05, W / 2 - 0.05, 1.665, 1.815), [(0.0, 0.0), (0.0, 0.014), (0.012, 0.014), (0.012, 0.0)], fy - 0.012, -1, "AA_Cromo")
+    b.box((-0.18, fy - 0.0125, 1.74), (0.42, 0.002, 0.07), "AA_PinturaRoja", 0.0)                    # franja del rotulo
+    b.box((0.3, fy - 0.0125, 1.74), (0.2, 0.002, 0.05), "AA_PlasticoAzul", 0.0)
+    return b.finish("VendingMachine")
+
+
+def make_cot():
+    """Catre de calabozo: bastidor de angular de acero soldado, patas de tubo cuadrado con zapatas, somier de pletinas cruzadas, colchon fino,
+    manta militar doblada y almohada."""
+    b = Builder()
+    steel = "AA_Hierro"
+    W, L, zr = 0.88, 1.88, 0.4
+    for sx in (-1, 1):                                                                               # largueros en L
+        b.box((sx * (W / 2 - 0.02), 0, zr), (0.04, L, 0.005), steel, 0.0015, seg=1)
+        b.box((sx * (W / 2 - 0.0025), 0, zr - 0.02), (0.005, L, 0.04), steel, 0.0015, seg=1)
+    for sy in (-1, 1):                                                                               # cabezales en L
+        b.box((0, sy * (L / 2 - 0.02), zr), (W, 0.04, 0.005), steel, 0.0015, seg=1)
+        b.box((0, sy * (L / 2 - 0.0025), zr - 0.02), (W, 0.005, 0.04), steel, 0.0015, seg=1)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            x, y = sx * (W / 2 - 0.02), sy * (L / 2 - 0.02)
+            b.box((x, y, zr / 2), (0.035, 0.035, zr), steel, 0.004, grain="z")                      # pata
+            b.box((x, y, 0.004), (0.06, 0.06, 0.008), steel, 0.002)                                  # zapata
+            b.cyl((x, y, 0.009), 0.006, 0.004, "z", "AA_Acero", 8, 0.0)                              # tornillo al suelo
+    for k in range(9):                                                                              # pletinas a lo largo
+        x = -W / 2 + 0.07 + k * (W - 0.14) / 8
+        b.box((x, 0, zr + 0.002), (0.022, L - 0.06, 0.003), steel, 0.0)
+    for k in range(13):                                                                             # pletinas transversales
+        y = -L / 2 + 0.09 + k * (L - 0.18) / 12
+        b.box((0, y, zr + 0.005), (W - 0.06, 0.022, 0.003), steel, 0.0)
+    b.box((0, -L / 2 + 0.05, zr - 0.08), (W - 0.06, 0.02, 0.02), steel, 0.004)            # travesano bajo
+    b.box((0, L / 2 - 0.05, zr - 0.08), (W - 0.06, 0.02, 0.02), steel, 0.004)
+    b.cushion((0, 0, zr + 0.05), (W - 0.04, L - 0.04, 0.085), "AA_Colchon", 0.015, round_edge=0.03)   # colchon
+    b.cushion((0, 0.36, zr + 0.105), (W - 0.02, 1.08, 0.03), "AA_Manta", 0.012, round_edge=0.014)       # manta estirada
+    b.cushion((0, -0.2, zr + 0.13), (W - 0.04, 0.12, 0.04), "AA_Manta", 0.01, round_edge=0.018)        # doblez
+    b.cushion((0, -0.66, zr + 0.13), (0.52, 0.34, 0.08), "AA_Colchon", 0.03, round_edge=0.035)          # almohada
+    return b.finish("Cot")
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
             "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair,
             "CeilingLampAA": make_ceiling_lamp, "DeskComputer": make_desk_computer, "DeskLamp": make_desk_lamp,
             "TrashBin": make_trash_bin, "Chair": make_visitor_chair, "Bookcase": make_bookcase,
-            "AuditoriumChair": make_auditorium_chair, "WaitingBench": make_waiting_bench}
+            "AuditoriumChair": make_auditorium_chair, "WaitingBench": make_waiting_bench, "VendingMachine": make_vending, "Cot": make_cot}
 
 
 def preview(name):
