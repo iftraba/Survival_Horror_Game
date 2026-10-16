@@ -531,7 +531,8 @@ namespace Horror.EditorTools
             m.SetColor("_BaseColor", Color.Lerp(new Color(0.55f, 0.55f, 0.55f), tint, 0.25f));
             m.EnableKeyword("_EMISSION");
             m.SetColor("_EmissionColor", Color.Lerp(Color.white, tint, 0.6f) * 4f);
-            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            // RealtimeEmissive (no None): con None la palabra clave _EMISSION no se guardaba en el .mat y los paneles no brillaban (2026-10-16)
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
             if (isNew) AssetDatabase.CreateAsset(m, path);
             // La palabra clave se pierde si solo se activa antes de crear el asset: sin ella la emision se ignora
             m.EnableKeyword("_EMISSION");

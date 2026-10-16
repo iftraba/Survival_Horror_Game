@@ -47,6 +47,8 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-16 · Art/Level · **Fase C AA: luminarias de techo** (pantalla fluorescente con marco de aluminio, rejilla de celdas y tapas) en las 252 lámparas por el menú 14. **Arreglo**: los paneles de las lámparas no brillaban porque sus materiales perdían `_EMISSION` al guardarse; ahora usan emisión en tiempo real.
+
 - 2026-10-16 · Art/Level · **Fase C AA: escalera de caracol del vestíbulo** de fundición (peldaños en abanico con nervios, balaustres con bolas, pasamanos helicoidal de madera con voluta) en lugar de las primitivas; misma hélice, la rampa de colisión no cambia. Menú 1 y *Horror/Calidad AA/Muebles AA* la ponen.
 
 - 2026-10-16 · Art · **Fase C AA: mostrador del vestíbulo** (plafones en relieve, canto de media caña, reposapiés de latón, puesto del funcionario con monitores, teclados, teléfono de disco, timbre y libro de registro) con materiales escaneados por `AAMaterialKit`; GI rehorneada tras los muebles AA.

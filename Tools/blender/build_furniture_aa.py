@@ -419,8 +419,44 @@ def make_spiral_stair():
     return b.finish("SpiralStairAA", smooth_angle=35)
 
 
+# ------------------------------------------------------------------ luminaria de techo (sustituye a la caja "Housing" y al "Marco")
+def make_ceiling_lamp():
+    """Pantalla fluorescente de superficie con rejilla de celdas. Origen en el centro de la caja antigua (1,30 x 0,42 x 0,07; el techo esta en z = +0,035).
+    El panel emisivo 'Bulb' de la escena (1,18 x 0,30, de z -0,0475 a -0,0225) se queda: la rejilla va delante y el marco alrededor. 252 instancias:
+    poca geometria (cajas sin bisel donde no se ve)."""
+    b = Builder()
+    L, W = 1.30, 0.42
+    paint = "AA_PinturaCrema"
+    b.box((0, 0, 0.0), (L, W, 0.07), paint, 0.012, seg=2)                                     # carcasa de chapa con cantos redondeados
+    b.box((0, 0, 0.03), (L + 0.02, W + 0.02, 0.01), paint, 0.003, seg=1)                     # pestana de apoyo contra el techo
+    # marco de aluminio alrededor del difusor (abertura 1,20 x 0,32), algo por debajo del panel
+    fz, fw = -0.044, 0.035
+    for sy in (-1, 1):
+        b.box((0, sy * (0.16 + fw / 2), fz), (1.20 + 2 * fw, fw, 0.014), "AA_Acero", 0.003, seg=1)
+    for sx in (-1, 1):
+        b.box((sx * (0.60 + fw / 2), 0, fz), (fw, 0.32, 0.014), "AA_Acero", 0.003, seg=1)
+    # rejilla de celdas de chapa blanca (la de las oficinas de los 80) delante del panel: 1 lama larga y 7 transversales, bajas para que mande el panel
+    lz = -0.0555
+    b.box((0, 0, lz), (1.19, 0.003, 0.014), "AA_PinturaCrema", 0.0)
+    for i in range(7):
+        x = -0.45 + i * 0.15
+        b.box((x, 0, lz), (0.003, 0.31, 0.014), "AA_PinturaCrema", 0.0)
+    for sy in (-1, 1):
+        b.box((0, sy * 0.155, lz), (1.19, 0.004, 0.014), "AA_PinturaCrema", 0.0)
+    # tapas de los extremos, pestillos del marco y tornillos
+    for sx in (-1, 1):
+        b.box((sx * (L / 2 + 0.006), 0, -0.004), (0.012, W - 0.03, 0.062), "AA_Plastico", 0.004, seg=1)
+        for sy in (-1, 1):
+            b.cyl((sx * 0.62, sy * 0.178, fz - 0.0075), 0.0055, 0.003, "z", "AA_Acero", 8, 0.0)
+    for sy in (-1, 1):
+        b.box((0, sy * (0.16 + fw + 0.004), fz + 0.004), (0.05, 0.008, 0.012), "AA_Acero", 0.002, seg=1)
+    b.box((L / 2 - 0.14, -W / 2 - 0.0005, 0.0), (0.07, 0.001, 0.03), "AA_Papel", 0.0)     # etiqueta del fabricante
+    return b.finish("CeilingLampAA", smooth_angle=30)
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
-            "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair}
+            "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair,
+            "CeilingLampAA": make_ceiling_lamp}
 
 
 def preview(name):

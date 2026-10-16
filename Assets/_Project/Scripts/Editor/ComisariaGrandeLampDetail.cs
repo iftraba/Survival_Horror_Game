@@ -11,6 +11,8 @@ namespace Horror.EditorTools
     /// oscuro con un panel emisivo. Cada una recibe un unico hijo "Marco" (una malla combinada de ~10 cajas, estatica y por tanto agrupable): marco de
     /// aluminio alrededor del difusor, dos tapas laterales, dos escuadras de anclaje, rejilla central y tornillos. No se toca la luz ni el panel (los usa CeilingLamp).
     /// Repetible: borra los "Marco" y los vuelve a crear. Se vuelve a lanzar tras rehacer las lamparas (menu 7a).
+    /// Calidad AA (2026-10-16): si existe Art/Props/Lamp/CeilingLampAA.fbx (build_furniture_aa.py), el "Marco" es esa pantalla fluorescente (carcasa, marco
+    /// de aluminio, rejilla parabolica delante del panel emisivo y tapas) y la caja "Housing" deja de dibujarse; el panel "Bulb" y la luz no cambian.
     /// </summary>
     public static class ComisariaGrandeLampDetail
     {
@@ -64,10 +66,25 @@ namespace Horror.EditorTools
             mat.SetColor("_BaseColor", new Color(0.42f, 0.43f, 0.45f)); mat.SetFloat("_Metallic", 0.8f); mat.SetFloat("_Smoothness", 0.45f);
             EditorUtility.SetDirty(mat);
             int n = 0;
+            var aa = AssetDatabase.LoadAssetAtPath<GameObject>(AAMaterialKit.LampPath);     // pantalla AA (fase C): sustituye a la caja y al marco
             foreach (var lamp in level.GetComponentsInChildren<CeilingLamp>(true))
             {
                 var old = lamp.transform.Find("Marco"); if (old != null) Object.DestroyImmediate(old.gameObject);
                 var housing = lamp.transform.Find("Housing"); if (housing == null) continue;
+                var hr = housing.GetComponent<MeshRenderer>();
+                if (aa != null)
+                {
+                    if (hr != null) hr.enabled = false;                                             // la caja se queda (sin dibujarse) por si algo la busca
+                    var inst = (GameObject)PrefabUtility.InstantiatePrefab(aa, lamp.transform);
+                    inst.name = "Marco";
+                    inst.transform.position = housing.position;
+                    inst.transform.rotation = aa.transform.rotation;                                 // la del FBX en ejes del mundo (X = largo, como la caja)
+                    foreach (var ir in inst.GetComponentsInChildren<MeshRenderer>()) ir.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    foreach (var t in inst.GetComponentsInChildren<Transform>()) t.gameObject.isStatic = true;
+                    n++;
+                    continue;
+                }
+                if (hr != null) hr.enabled = true;
                 var go = new GameObject("Marco");
                 go.transform.SetParent(lamp.transform, true);
                 go.transform.position = housing.position; go.transform.rotation = Quaternion.identity;       // ejes del mundo: la malla esta hecha con X = largo de la luminaria
@@ -79,7 +96,7 @@ namespace Horror.EditorTools
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            return "luminarias con marco: " + n;
+            return (aa != null ? "luminarias AA: " : "luminarias con marco: ") + n;
         }
     }
 }

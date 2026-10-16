@@ -28,8 +28,10 @@ namespace Horror.EditorTools
             ("SwivelChair", "Assets/_Project/Art/Props/Office/SwivelChair.fbx"),
             ("ReceptionDesk", "Assets/_Project/Art/Props/Exterior/ReceptionDesk.fbx"),
             ("SpiralStairAA", SpiralPath),
+            ("CeilingLampAA", LampPath),
         };
 
+        public const string LampPath = "Assets/_Project/Art/Props/Lamp/CeilingLampAA.fbx";
         public const string SpiralPath = "Assets/_Project/Art/Props/Station/SpiralStairAA.fbx";
 
         public static bool IsAA(string fbxPath) => Models.Any(m => m.path == fbxPath);
@@ -118,7 +120,7 @@ namespace Horror.EditorTools
                 var imp = AssetImporter.GetAtPath(path) as ModelImporter;
                 if (imp == null) { log.Add("falta " + path); continue; }
                 imp.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
-                if (name == "SpiralStairAA") imp.generateSecondaryUV = true;                // estatica: UV2 para la luz horneada
+                if (name == "SpiralStairAA" || name == "CeilingLampAA") imp.generateSecondaryUV = true;                // estatica: UV2 para la luz horneada
                 foreach (var old in imp.GetExternalObjectMap().Keys.Where(k => k.type == typeof(Material) && !k.name.StartsWith("AA_")).ToList()) imp.RemoveRemap(old);
                 var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);      // los materiales del modelo (los suyos o ya reasignados: se llaman igual)
                 var names = go == null ? new List<string>() : go.GetComponentsInChildren<Renderer>(true).SelectMany(r => r.sharedMaterials).Where(x => x != null)
@@ -130,6 +132,7 @@ namespace Horror.EditorTools
             AssetDatabase.SaveAssets();
             var esc = GameObject.Find("EscaleraCaracol");
             if (esc != null) log.Add(SpiralSwap(esc.transform));
+            if (GameObject.Find("--- COMISARIA V2 ---") != null) log.Add(ComisariaGrandeLampDetail.Build());
             return "muebles AA: " + string.Join(" | ", log);
         }
 
