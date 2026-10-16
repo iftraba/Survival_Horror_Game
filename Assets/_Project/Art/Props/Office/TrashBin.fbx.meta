@@ -7,8 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: TrashBin_baked
-    second: {fileID: 2100000, guid: 19a977fa74674774f862f9c34ae049be, type: 2}
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaGris
+    second: {fileID: 2100000, guid: f991f46c7bbf4a940b9965537a9837a0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -29,6 +29,10 @@ namespace Horror.EditorTools
             ("ReceptionDesk", "Assets/_Project/Art/Props/Exterior/ReceptionDesk.fbx"),
             ("SpiralStairAA", SpiralPath),
             ("CeilingLampAA", LampPath),
+            ("DeskComputer", "Assets/_Project/Art/Props/Office/DeskComputer.fbx"),
+            ("DeskLamp", "Assets/_Project/Art/Props/Office/DeskLamp.fbx"),
+            ("TrashBin", "Assets/_Project/Art/Props/Office/TrashBin.fbx"),
+            ("Chair", "Assets/_Project/Art/Props/Chair.fbx"),
         };
 
         public const string LampPath = "Assets/_Project/Art/Props/Lamp/CeilingLampAA.fbx";

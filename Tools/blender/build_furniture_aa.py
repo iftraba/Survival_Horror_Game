@@ -454,9 +454,161 @@ def make_ceiling_lamp():
     return b.finish("CeilingLampAA", smooth_angle=30)
 
 
+# ------------------------------------------------------------------ tanda de oficina: ordenador, flexo, papelera y silla de visitas
+def _crumple(b, c, r, seed, mat="AA_Papel"):
+    """Bola de papel arrugado: icosfera con los vertices desplazados al azar."""
+    import random
+    rnd = random.Random(seed)
+    bm = bmesh.new()
+    bmesh.ops.create_icosphere(bm, subdivisions=1, radius=r)
+    for v in bm.verts:
+        v.co *= 0.75 + rnd.random() * 0.45
+    bmesh.ops.translate(bm, verts=bm.verts[:], vec=Vector(c))
+    b.parts.append(Part(bm, mat, "x"))
+
+
+def _shell(b, c, r_bot, r_top, h, segs, mat_out, mat_in, t=0.0025):
+    """Pantalla abierta (cono sin tapas) con cara exterior e interior, para que se vea hueca."""
+    for (rb, rt, inner) in ((r_bot, r_top, False), (r_bot - t, r_top - t, True)):
+        bm = bmesh.new()
+        bmesh.ops.create_cone(bm, cap_ends=False, cap_tris=False, segments=segs, radius1=rb, radius2=rt, depth=h)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+        if inner:
+            for f in bm.faces:
+                f.normal_flip()
+        bmesh.ops.translate(bm, verts=bm.verts[:], vec=Vector(c))
+        b.parts.append(Part(bm, mat_in if inner else mat_out, "z"))
+
+
+def make_desk_computer():
+    """Puesto de ordenador de sobremesa: monitor plano hacia -Y (donde se sienta el usuario), teclado con las teclas modeladas, raton sobre alfombrilla y cables."""
+    b = Builder()
+    f = -1.0                                                                                     # la pantalla mira a -Y
+    x, y, z = 0.0, 0.1, 0.0
+    b.box((x, y, z + 0.008), (0.24, 0.18, 0.016), "AA_Plastico", 0.006)
+    b.box((x, y + 0.03, z + 0.11), (0.06, 0.03, 0.2), "AA_Plastico", 0.008, rot=(-8, 0, 0))
+    b.box((x, y, z + 0.30), (0.56, 0.055, 0.35), "AA_Plastico", 0.012)
+    b.box((x, y + 0.045, z + 0.30), (0.3, 0.04, 0.22), "AA_Plastico", 0.015)                    # joroba trasera
+    b.box((x, y + f * 0.0285, z + 0.315), (0.51, 0.004, 0.29), "AA_Pantalla", 0.0)
+    b.box((x + 0.23, y + f * 0.029, z + 0.142), (0.012, 0.004, 0.006), "AA_Cromo", 0.0)
+    for i in range(3):
+        b.box((x - 0.2 + i * 0.03, y + f * 0.0285, z + 0.142), (0.016, 0.003, 0.006), "AA_Negro", 0.0)
+    # teclado (las filas suben hacia el monitor)
+    kx, ky = 0.0, -0.16
+    b.box((kx, ky, 0.013), (0.45, 0.165, 0.026), "AA_Plastico", 0.006, rot=(3, 0, 0))
+    for r in range(5):
+        n = 14 if r < 4 else 7
+        for k in range(n):
+            w = 0.022
+            kxx = kx - 0.19 + k * 0.0275
+            if r == 4:
+                if k == 3:
+                    w, kxx = 0.13, kx - 0.19 + 3 * 0.0275 + 0.054
+                elif k > 3:
+                    kxx += 0.11
+            b.box((kxx, ky - 0.06 + r * 0.0285, 0.03 + (4 - r) * 0.0014), (w, 0.022, 0.009), "AA_PinturaCrema", 0.0)
+    b.box((0.33, -0.15, 0.002), (0.2, 0.17, 0.004), "AA_Tela", 0.001)                              # alfombrilla
+    b.box((0.33, -0.15, 0.016), (0.055, 0.095, 0.024), "AA_Plastico", 0.011, seg=3)             # raton
+    b.sweep([(0.33, -0.1, 0.012), (0.3, -0.02, 0.005), (0.18, 0.08, 0.005), (0.08, 0.14, 0.005)], 0.0025, "AA_Negro", 5)
+    b.sweep([(kx + 0.1, ky + 0.083, 0.012), (0.12, -0.02, 0.005), (0.04, 0.12, 0.005)], 0.0025, "AA_Negro", 5)
+    return b.finish("DeskComputer")
+
+
+def make_desk_lamp():
+    """Flexo articulado de los 70: base pesada con interruptor, dos brazos de varillas paralelas con muelles, rotulas y pantalla conica esmaltada hacia -Y."""
+    b = Builder()
+    enamel, steel = "AA_PinturaVerde", "AA_Cromo"
+    b.cyl((0, 0, 0.012), 0.078, 0.024, "z", enamel, 28, 0.008)                                  # base
+    b.cyl((0, 0, 0.03), 0.05, 0.016, "z", enamel, 24, 0.006, r_top=0.035)
+    b.box((0.045, -0.035, 0.03), (0.018, 0.012, 0.01), "AA_Negro", 0.003)                        # interruptor
+    b.cyl((0, 0.02, 0.05), 0.016, 0.03, "z", steel, 14, 0.004)                                  # rotula baja
+    # brazo inferior: sube hacia +Y; brazo superior: vuelve hacia -Y
+    p0, p1, p2 = (0.0, 0.02, 0.06), (0.0, 0.06, 0.33), (0.0, -0.2, 0.37)
+    for dx in (-0.011, 0.011):
+        b.sweep([(p0[0] + dx, p0[1], p0[2]), (p1[0] + dx, p1[1], p1[2])], 0.0045, steel, 8)
+        b.sweep([(p1[0] + dx, p1[1], p1[2]), (p2[0] + dx, p2[1], p2[2])], 0.0045, steel, 8)
+    for (a, c) in ((p0, p1), (p1, p2)):                                                          # muelles en espiral junto a cada brazo
+        pts = []
+        for i in range(37):
+            t = 0.15 + 0.5 * i / 36
+            px, py, pz = a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t, a[2] + (c[2] - a[2]) * t
+            ang = i * 1.5
+            pts.append((px + 0.026 + 0.006 * math.cos(ang), py + 0.006 * math.sin(ang), pz))
+        b.sweep(pts, 0.0012, steel, 3)
+    for p in (p1, p2):
+        b.cyl(p, 0.014, 0.034, "x", steel, 14, 0.003)                                            # rotulas con pomo
+        b.cyl((p[0] + 0.022, p[1], p[2]), 0.009, 0.012, "x", "AA_Negro", 12, 0.002)
+    # pantalla conica abierta hacia abajo con portalamparas y bombilla
+    hx, hy, hz = 0.0, -0.2, 0.30
+    b.cyl((hx, hy, hz + 0.065), 0.022, 0.03, "z", enamel, 16, 0.004)
+    _shell(b, (hx, hy, hz + 0.02), 0.075, 0.028, 0.07, 28, enamel, "AA_PinturaCrema")
+    b.cyl((hx, hy, hz - 0.016), 0.077, 0.006, "z", enamel, 28, 0.002, r_top=0.077)               # borde enrollado
+    b.cyl((hx, hy, hz + 0.03), 0.016, 0.02, "z", "AA_Negro", 14, 0.002)
+    b.cyl((hx, hy, hz + 0.008), 0.024, 0.03, "z", "AA_Papel", 16, 0.01, r_top=0.014)            # bombilla
+    b.sweep([(0.0, 0.03, 0.03), (0.0, 0.07, 0.01), (0.03, 0.075, 0.003)], 0.0025, "AA_Negro", 5)  # cable
+    return b.finish("DeskLamp")
+
+
+def make_trash_bin():
+    """Papelera de chapa troncoconica con borde enrollado, aros embutidos, fondo y papeles arrugados."""
+    b = Builder()
+    paint = "AA_PinturaGris"
+    _shell(b, (0, 0, 0.185), 0.12, 0.148, 0.35, 28, paint, paint, t=0.003)
+    b.cyl((0, 0, 0.006), 0.122, 0.012, "z", paint, 32, 0.004)                                    # fondo
+    b.cyl((0, 0, 0.003), 0.11, 0.006, "z", "AA_Negro", 32, 0.002)                                # zocalo de goma
+    rim = [(0.153 * math.cos(2 * math.pi * k / 48), 0.153 * math.sin(2 * math.pi * k / 48), 0.36) for k in range(49)]
+    b.sweep(rim, 0.006, paint, 6)                                                               # borde enrollado
+    for z in (0.11, 0.24):                                                                       # aros embutidos
+        r = 0.12 + (z - 0.01) / 0.35 * 0.028 + 0.002
+        ring = [(r * math.cos(2 * math.pi * k / 48), r * math.sin(2 * math.pi * k / 48), z) for k in range(49)]
+        b.sweep(ring, 0.004, paint, 4)
+    for i, (x, y, z, r) in enumerate(((0.04, 0.02, 0.33, 0.055), (-0.05, 0.03, 0.34, 0.05), (0.0, -0.06, 0.35, 0.048), (0.06, -0.04, 0.37, 0.045))):
+        _crumple(b, (x, y, z), r, i + 3)
+    b.box((0.05, -0.02, 0.405), (0.15, 0.1, 0.002), "AA_Papel", 0.0, rot=(0, 28, 20))           # hoja asomando
+    return b.finish("TrashBin")
+
+
+def make_visitor_chair():
+    """Silla de visitas: tubo cromado doblado con curvas suaves, asiento y respaldo tapizados, carcasas de plastico y tacos."""
+    b = Builder()
+    tube_r = 0.0125
+
+    def bend(pts, n=4):
+        """Redondea las esquinas de una polilinea con arcos cortos."""
+        out = [pts[0]]
+        for a, c, d in zip(pts[:-2], pts[1:-1], pts[2:]):
+            va = Vector(c) - Vector(a); vd = Vector(d) - Vector(c)
+            ra = min(0.05, va.length * 0.4); rd = min(0.05, vd.length * 0.4)
+            pa = Vector(c) - va.normalized() * ra; pd = Vector(c) + vd.normalized() * rd
+            for i in range(n + 1):
+                t = i / n
+                q = pa * (1 - t) ** 2 + Vector(c) * 2 * t * (1 - t) + pd * t * t
+                out.append(tuple(q))
+        out.append(pts[-1])
+        return out
+
+    for sx in (-1, 1):
+        x = 0.185 * sx
+        b.sweep(bend([(x, -0.17, 0.02), (x, -0.17, 0.42), (x, 0.2, 0.42), (x, 0.2, 0.02)]), tube_r, "AA_Cromo", 10)
+        b.sweep(bend([(x, 0.16, 0.42), (x, 0.22, 0.62), (x, 0.235, 1.0)]), tube_r, "AA_Cromo", 10)
+        for y in (-0.17, 0.2):
+            b.cyl((x, y, 0.01), 0.017, 0.02, "z", "AA_Goma", 12, 0.004)                         # tacos
+    for y, z in ((-0.17, 0.12), (0.2, 0.12)):
+        b.sweep([(-0.185, y, z), (0.185, y, z)], 0.0095, "AA_Cromo", 8)                           # travesanos
+    b.sweep(bend([(-0.185, 0.235, 0.9), (-0.185, 0.235, 1.0), (0.185, 0.235, 1.0), (0.185, 0.235, 0.9)]), tube_r, "AA_Cromo", 10)
+    b.box((0, 0.0, 0.425), (0.40, 0.38, 0.02), "AA_Plastico", 0.008)                              # carcasa del asiento
+    b.cushion((0, 0.0, 0.46), (0.44, 0.42, 0.05), "AA_Tela", 0.014, round_edge=0.02)
+    b.box((0, 0.232, 0.78), (0.40, 0.02, 0.40), "AA_Plastico", 0.008, rot=(-4, 0, 0))             # carcasa del respaldo
+    b.cushion((0, 0.212, 0.78), (0.38, 0.04, 0.38), "AA_Tela", 0.01, round_edge=0.018)
+    for sx in (-1, 1):
+        b.box((sx * 0.185, 0.225, 0.62), (0.03, 0.03, 0.05), "AA_Plastico", 0.008)                 # abrazaderas del respaldo
+    return b.finish("Chair")
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
             "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair,
-            "CeilingLampAA": make_ceiling_lamp}
+            "CeilingLampAA": make_ceiling_lamp, "DeskComputer": make_desk_computer, "DeskLamp": make_desk_lamp,
+            "TrashBin": make_trash_bin, "Chair": make_visitor_chair}
 
 
 def preview(name):
