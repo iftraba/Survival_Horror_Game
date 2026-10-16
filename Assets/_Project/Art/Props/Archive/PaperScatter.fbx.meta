@@ -7,8 +7,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: PaperScatter_baked
-    second: {fileID: 2100000, guid: b23aab127b4dcfa4b850592d445d803c, type: 2}
+      name: AA_CartonClaro
+    second: {fileID: 2100000, guid: 3debe59c17bfa4a47879c6e2d7d0d7b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PapelAmarillo
+    second: {fileID: 2100000, guid: 497d716fcd42bf445a7f540cb17a4477, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Tinta
+    second: {fileID: 2100000, guid: d527963d566d60446a9295144dfd9c0e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

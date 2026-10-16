@@ -7,8 +7,53 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: ArchiveShelfC_baked
-    second: {fileID: 2100000, guid: 2b28e1ea4964f824090213db4cfe5fd0, type: 2}
+      name: AA_Acero
+    second: {fileID: 2100000, guid: a4ebf078f2225554ea37cd38888bdd55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Carton
+    second: {fileID: 2100000, guid: 37d875389ed46794baf4ccfa7769d6dd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_CartonOscuro
+    second: {fileID: 2100000, guid: 76882735a9a60e84ab624b044a4bc57b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Negro
+    second: {fileID: 2100000, guid: 423338ecfecbf98439c048f392abb0ca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaGris
+    second: {fileID: 2100000, guid: f991f46c7bbf4a940b9965537a9837a0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PinturaVerde
+    second: {fileID: 2100000, guid: 4b6fe34a707e3f14d92dcd58ca3eb2d4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Plastico
+    second: {fileID: 2100000, guid: a913b633e108f704fadc6d21b12287c5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_PlasticoAzul
+    second: {fileID: 2100000, guid: df89fc7b198b7f244840e8df1f2b5351, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Tinta
+    second: {fileID: 2100000, guid: d527963d566d60446a9295144dfd9c0e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

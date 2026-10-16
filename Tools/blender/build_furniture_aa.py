@@ -926,12 +926,290 @@ def make_station_sign():
 # La pistola esta en build_pistol_aa.py (siluetas extruidas y cortes booleanos).
 
 
+# ------------------------------------------------------------------ archivo (sustituye a build_archive.py; mismas medidas, frente -Y y semillas)
+BINDER_MATS = ("AA_PlasticoAzul", "AA_PlasticoRojo", "AA_Plastico", "AA_PinturaVerde")
+
+
+def aa_archive_box(b, c, w, d, h, rng, lid=True, rot=0.0):
+    """Caja de archivo de carton: cuerpo con cantos, tapa con faldon, asideros troquelados, etiqueta escrita y, si esta abierta, papeles asomando."""
+    R = (0, 0, rot)
+    ca, sa = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+
+    def at(lx, ly, lz):
+        return (c[0] + lx * ca - ly * sa, c[1] + lx * sa + ly * ca, c[2] + lz)
+    mat = "AA_Carton" if rng.random() < 0.7 else "AA_CartonOscuro"
+    b.box(at(0, 0, h / 2), (w, d, h), mat, 0.004, seg=2, rot=R)
+    if lid:
+        b.box(at(0, 0, h - 0.018), (w + 0.008, d + 0.008, 0.036), mat, 0.004, seg=2, rot=R)
+        b.box(at(0, -d / 2 - 0.0045, h - 0.018), (w * 0.98, 0.001, 0.03), "AA_CartonOscuro", 0.0, rot=R)   # borde de la tapa (sombra)
+    else:
+        for i in range(rng.randint(3, 6)):
+            b.box(at(rng.uniform(-w * 0.3, w * 0.3), rng.uniform(-d * 0.3, d * 0.3), h + 0.015), (w * 0.85, 0.002, 0.07), "AA_Papel", 0.0,
+                  rot=(rng.uniform(-12, 12), 0, rot + 90 + rng.uniform(-8, 8)))
+    for sx in (-1, 1):                                                                    # asideros troquelados en los costados
+        b.box(at(sx * (w / 2 + 0.0008), 0, h * 0.78), (0.0016, d * 0.32, 0.024), "AA_Negro", 0.0, rot=R)
+    b.box(at(0, -d / 2 - 0.0008, h * 0.82), (w * 0.28, 0.0016, 0.022), "AA_Negro", 0.0, rot=R)            # asidero frontal
+    b.box(at(0, -d / 2 - 0.001, h * 0.48), (w * 0.5, 0.0015, h * 0.26), "AA_Papel", 0.0, rot=R)           # etiqueta
+    for k in range(3):                                                                    # lineas escritas a mano
+        b.box(at(-w * 0.04 + rng.uniform(-0.01, 0.01), -d / 2 - 0.0019, h * (0.54 - k * 0.06)), (w * rng.uniform(0.25, 0.4), 0.0006, 0.004),
+              "AA_Tinta", 0.0, rot=R)
+
+
+def aa_binders(b, x0, z, d, hb, n, mat, rng, x_max):
+    """Fila de archivadores AZ con anilla en el lomo y tarjeta; la ultima puede caer inclinada. Devuelve la x final."""
+    x = x0
+    for i in range(n):
+        if x + 0.08 > x_max:
+            break
+        tilt = rng.uniform(10, 24) if (i == n - 1 and rng.random() < 0.55) else 0.0
+        cx = x + 0.038 + (math.sin(math.radians(tilt)) * hb / 2 if tilt else 0.0)
+        b.box((cx, -0.02, z + hb / 2), (0.074, d, hb), mat, 0.003, seg=2, rot=(0, tilt, 0))
+        if not tilt:
+            yf = -0.02 - d / 2
+            b.box((cx, yf - 0.001, z + hb * 0.62), (0.042, 0.002, 0.075), "AA_Papel", 0.0007, seg=1)           # tarjeta del lomo
+            b.cyl((cx, yf - 0.002, z + hb * 0.24), 0.011, 0.004, "y", "AA_Negro", 14, 0.001)                  # agujero de la anilla
+            b.box((cx, yf - 0.0015, z + hb * 0.62 + 0.012), (0.03, 0.0006, 0.004), "AA_Tinta", 0.0)
+        x += 0.078 + (0.03 if tilt else 0.0)
+    return x
+
+
+def aa_shelf_frame(b, L, D, H, levels, center_post=False):
+    """Estanteria de angulo ranurado: montantes en L con ranuras, baldas de chapa con pestana doblada, escuadras atornilladas y cruces traseras."""
+    st = "AA_PinturaGris"
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            x, y = sx * (L / 2 - 0.02), sy * (D / 2 - 0.02)
+            b.box((x, y + sy * 0.0185, H / 2), (0.04, 0.003, H), st, 0.0012, seg=1, grain="z")          # ala que da al frente/fondo
+            b.box((x + sx * 0.0185, y, H / 2), (0.003, 0.04, H), st, 0.0012, seg=1, grain="z")          # ala lateral
+            for k in range(int(H / 0.05)):                                                            # ranuras (en las dos alas)
+                zz = 0.03 + k * 0.05
+                b.box((x, y + sy * 0.0202, zz), (0.008, 0.0008, 0.018), "AA_Negro", 0.0)
+                b.box((x + sx * 0.0202, y, zz), (0.0008, 0.008, 0.018), "AA_Negro", 0.0)
+            b.box((x, y, 0.004), (0.05, 0.05, 0.008), st, 0.002, seg=1)                               # pie
+    if center_post:
+        for sy in (-1, 1):
+            b.box((0, sy * (D / 2 - 0.0035), H / 2), (0.04, 0.003, H), st, 0.0012, seg=1, grain="z")
+    for z in levels:
+        b.box((0, 0, z), (L - 0.012, D - 0.012, 0.0025), st, 0.0008, seg=1)                          # chapa de la balda
+        for sy in (-1, 1):
+            b.box((0, sy * (D / 2 - 0.008), z - 0.016), (L - 0.012, 0.0025, 0.035), st, 0.0008, seg=1)   # pestanas dobladas
+        for sx in (-1, 1):
+            b.box((sx * (L / 2 - 0.008), 0, z - 0.016), (0.0025, D - 0.012, 0.035), st, 0.0008, seg=1)
+            for sy in (-1, 1):                                                                        # tornillos a los montantes
+                b.cyl((sx * (L / 2 - 0.02), sy * (D / 2 - 0.0005) + sy * 0.0195, z - 0.016), 0.004, 0.003, "y", "AA_Acero", 8, 0.0)
+    for s in (-1, 1):                                                                                # cruces de pletina por detras
+        ang = math.degrees(math.atan2(L - 0.06, H - 0.1))
+        b.box((0, D / 2 - 0.0025, H / 2), (0.022, 0.0025, math.hypot(L - 0.06, H - 0.1)), st, 0.0006, seg=1, rot=(0, s * ang, 0))
+    b.cyl((0, D / 2 - 0.004, H / 2), 0.006, 0.006, "y", "AA_Acero", 10, 0.001)
+
+
+def aa_fill_level(b, L, D, z, h_avail, rng, mess):
+    x = -L / 2 + 0.06
+    while x < L / 2 - 0.12:
+        r = rng.random()
+        if r < mess * 0.25:
+            x += rng.uniform(0.15, 0.4)
+            continue
+        if r < 0.62:
+            w = rng.uniform(0.3, 0.4)
+            if x + w > L / 2 - 0.04:
+                break
+            h = min(h_avail - 0.04, rng.uniform(0.26, 0.32))
+            rot = rng.uniform(-6, 6) * mess
+            dy = rng.uniform(-0.04, 0.06) * (1 + mess)
+            aa_archive_box(b, (x + w / 2, dy, z + 0.0015), w, D * 0.85, h, rng, lid=rng.random() > 0.15 * (1 + mess), rot=rot)
+            x += w + rng.uniform(0.005, 0.03)
+        else:
+            x = aa_binders(b, x, z + 0.0015, D * 0.6, min(h_avail - 0.04, 0.31), rng.randint(3, 9), rng.choice(BINDER_MATS), rng, L / 2 - 0.04)
+            x += rng.uniform(0.01, 0.05)
+
+
+def aa_archive_shelf(name, seed, mess):
+    import random
+    rng = random.Random(seed)
+    b = Builder()
+    L, D, H = 1.8, 0.5, 2.3
+    levels = [0.08, 0.53, 0.98, 1.43, 1.88, 2.28]
+    aa_shelf_frame(b, L, D, H, levels)
+    for i, z in enumerate(levels[:-1]):
+        aa_fill_level(b, L, D, z, levels[i + 1] - z, rng, mess)
+    for k in range(rng.randint(0, 2)):
+        aa_archive_box(b, (rng.uniform(-0.6, 0.6), 0, levels[-1] + 0.0015), 0.36, 0.42, 0.28, rng, lid=True, rot=rng.uniform(-20, 20))
+    return b.finish(name)
+
+
+def make_archive_wall_shelf():
+    import random
+    rng = random.Random(21)
+    b = Builder()
+    L, D, H = 4.0, 0.45, 3.4
+    levels = [0.08 + i * 0.47 for i in range(7)] + [3.37]
+    aa_shelf_frame(b, L, D, H, levels, center_post=True)
+    for i, z in enumerate(levels[:-1]):
+        aa_fill_level(b, L, D, z, levels[i + 1] - z, rng, 0.3)
+    return b.finish("ArchiveWallShelf")
+
+
+def aa_box_stack(name, seed):
+    import random
+    rng = random.Random(seed)
+    b = Builder()
+    z = 0.0
+    for lvl in range(rng.randint(3, 5)):
+        for i in range(2 if lvl < 2 else 1):
+            aa_archive_box(b, (rng.uniform(-0.05, 0.05) + (i - 0.5) * 0.42 * (1 if lvl < 2 else 0), rng.uniform(-0.04, 0.04), z), 0.4, 0.32, 0.27, rng,
+                           lid=rng.random() > 0.3, rot=rng.uniform(-12, 12))
+        z += 0.3
+    aa_archive_box(b, (0.65, 0.1, 0), 0.4, 0.32, 0.27, rng, lid=False, rot=35)
+    for i in range(6):
+        _sheet(b, (rng.uniform(-0.6, 0.9), rng.uniform(-0.5, 0.5), 0.0015 + i * 0.0004), rng.uniform(0, 180), rng)
+    return b.finish(name)
+
+
+def _sheet(b, c, rot, rng, mat="AA_Papel", size=(0.21, 0.297), curl=0.012, lines=True):
+    """Hoja con una esquina levantada (rejilla 4x5 curvada) y renglones de texto."""
+    w, h = size
+    bm = bmesh.new()
+    nx, ny = 4, 5
+    vs = [[bm.verts.new((-w / 2 + w * i / nx, -h / 2 + h * j / ny, 0)) for j in range(ny + 1)] for i in range(nx + 1)]
+    for i in range(nx):
+        for j in range(ny):
+            bm.faces.new((vs[i][j], vs[i + 1][j], vs[i + 1][j + 1], vs[i][j + 1]))
+    k = rng.random()
+    for v in bm.verts:
+        u, t = (v.co.x + w / 2) / w, (v.co.y + h / 2) / h
+        v.co.z = curl * max(0.0, (u if k < 0.5 else 1 - u) * t - 0.45) * 2.0 + 0.002 * math.sin(u * 5 + t * 3)
+    bmesh.ops.rotate(bm, verts=bm.verts[:], cent=Vector(), matrix=Matrix.Rotation(math.radians(rot), 3, "Z"))
+    bmesh.ops.translate(bm, verts=bm.verts[:], vec=Vector(c))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    for f in bm.faces:
+        if f.normal.z < 0:
+            f.normal_flip()
+    b.parts.append(Part(bm, mat, "x"))
+    if lines:
+        ca, sa = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+        for r in range(7):
+            ly = h * 0.36 - r * 0.028
+            lw = w * rng.uniform(0.45, 0.75)
+            lx = -w * 0.38 + lw / 2
+            b.box((c[0] + lx * ca - ly * sa, c[1] + lx * sa + ly * ca, c[2] + 0.0008), (lw, 0.0025, 0.0004), "AA_Tinta", 0.0, rot=(0, 0, rot))
+
+
+def make_paper_scatter():
+    import random
+    rng = random.Random(5)
+    b = Builder()
+    for i in range(45):
+        r = rng.random() ** 0.7 * 1.0
+        a = rng.uniform(0, 2 * math.pi)
+        _sheet(b, (r * math.cos(a), r * math.sin(a), 0.001 + i * 0.0004), rng.uniform(0, 180), rng, "AA_Papel" if rng.random() < 0.75 else "AA_PapelAmarillo",
+               lines=rng.random() < 0.5)
+    for i in range(3):                                                                    # carpetas de carton abiertas
+        a = rng.uniform(0, 2 * math.pi)
+        _sheet(b, (0.6 * math.cos(a), 0.6 * math.sin(a), 0.003), rng.uniform(0, 180), rng, "AA_CartonClaro", size=(0.46, 0.32), curl=0.03, lines=False)
+    return b.finish("PaperScatter")
+
+
+def make_rolling_ladder():
+    """Escalera de archivo con ruedas: largueros de tubo rojo, peldanos de chapa estriada, plataforma con barandilla y ruedas con freno."""
+    b = Builder()
+    red, steel = "AA_PinturaRoja", "AA_Acero"
+    for sx in (-1, 1):
+        x = sx * 0.25
+        b.sweep([(x, 0.07, 0.07), (x, 0.3, 1.2)], 0.016, red, 12)                               # larguero delantero
+        b.sweep([(x, 0.52, 0.07), (x, 0.42, 1.2)], 0.015, red, 12)                              # trasero
+        b.sweep([(x, 0.3, 1.2), (x, 0.3, 1.71)], 0.013, red, 10)                                # montante de la barandilla
+        for y in (0.07, 0.52):                                                                 # ruedas
+            b.cyl((x, y, 0.035), 0.033, 0.024, "x", "AA_Goma", 20, 0.006)
+            b.cyl((x, y, 0.035), 0.012, 0.03, "x", steel, 12, 0.002)
+            b.box((x, y, 0.062), (0.035, 0.02, 0.02), steel, 0.004)
+    b.sweep([(-0.27, 0.3, 1.71), (0.27, 0.3, 1.71)], 0.013, red, 10)                             # barandilla superior
+    b.sweep([(-0.25, 0.3, 1.45), (0.25, 0.3, 1.45)], 0.01, red, 8)
+    for k in range(4):                                                                          # peldanos estriados
+        z = 0.3 + k * 0.28
+        y = 0.07 + (z - 0.07) / 1.13 * 0.23
+        b.box((0, y + 0.05, z), (0.5, 0.16, 0.012), steel, 0.003, seg=1)
+        for i in range(6):
+            b.box((0, y + 0.0 + i * 0.022, z + 0.0075), (0.46, 0.006, 0.003), steel, 0.001, seg=1)
+    b.box((0, 0.36, 1.2), (0.54, 0.3, 0.014), steel, 0.003, seg=1)                              # plataforma
+    for i in range(10):
+        b.box((0, 0.24 + i * 0.026, 1.2085), (0.5, 0.006, 0.003), steel, 0.001, seg=1)
+    return b.finish("RollingLadder")
+
+
+def make_card_catalog():
+    """Fichero de biblioteca: mueble de roble con zocalo y cornisa molduradas, 40 cajones con tirador de anilla y tarjetero de laton, algunos abiertos con fichas."""
+    import random
+    rng = random.Random(9)
+    b = Builder()
+    W, D, H = 1.0, 0.5, 1.3
+    wood = "AA_Madera"
+    b.box((0, 0, 0.06), (W - 0.04, D - 0.04, 0.12), wood, 0.01, seg=3)
+    b.box((0, 0.0, 0.13 + (H - 0.13) / 2), (W, D, H - 0.13), wood, 0.006, seg=2, grain="z")
+    b.box((0, -0.005, H + 0.012), (W + 0.04, D + 0.03, 0.024), wood, 0.009, seg=3)
+    b.box((0, -0.01, H - 0.012), (W + 0.02, D + 0.02, 0.02), wood, 0.006, seg=2)
+    cols, rows = 5, 8
+    cw = (W - 0.08) / cols
+    rh = (H - 0.22) / rows
+    for c in range(cols):
+        for r in range(rows):
+            x = -W / 2 + 0.04 + cw * (c + 0.5)
+            z = 0.17 + rh * (r + 0.5)
+            out = rng.uniform(0.08, 0.25) if rng.random() < 0.12 else 0.0
+            if out:
+                b.box((x, -D / 2 - out / 2 + 0.02, z - 0.01), (cw - 0.03, out + 0.04, rh - 0.03), wood, 0.002, seg=1)
+                for k in range(int(out / 0.012)):
+                    b.box((x, -D / 2 - out + 0.03 + k * 0.012, z), (cw - 0.05, 0.0015, rh - 0.05), "AA_Papel", 0.0)
+            fy = -D / 2 - out
+            b.box((x, fy - 0.006, z), (cw - 0.012, 0.014, rh - 0.012), wood, 0.003, seg=2)
+            b.box((x, fy - 0.0135, z + rh * 0.2), (0.05, 0.002, 0.022), "AA_Laton", 0.0008, seg=1)            # tarjetero
+            b.box((x, fy - 0.0145, z + rh * 0.2), (0.042, 0.001, 0.016), "AA_Papel", 0.0)
+            b.sweep([(x - 0.012, fy - 0.013, z - rh * 0.12), (x - 0.01, fy - 0.022, z - rh * 0.2), (x + 0.01, fy - 0.022, z - rh * 0.2),
+                     (x + 0.012, fy - 0.013, z - rh * 0.12)], 0.0022, "AA_Laton", 6)                           # tirador de anilla
+            b.cyl((x, fy - 0.0135, z - rh * 0.12), 0.007, 0.002, "y", "AA_Laton", 12, 0.0)
+    return b.finish("CardCatalog")
+
+
+def make_archive_cart():
+    """Carro de archivo: bastidor de tubo, tres bandejas con borde, ruedas giratorias, asa, archivadores y una caja abierta."""
+    import random
+    rng = random.Random(13)
+    b = Builder()
+    L, D = 0.9, 0.45
+    st = "AA_PinturaGris"
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            x, y = sx * (L / 2 - 0.02), sy * (D / 2 - 0.02)
+            b.cyl((x, y, 0.5), 0.0125, 0.86, "z", st, 14, 0.0)
+            b.box((x, y, 0.072), (0.04, 0.04, 0.006), "AA_Acero", 0.002, seg=1)
+            b.cyl((x, y - 0.012, 0.035), 0.033, 0.022, "x", "AA_Goma", 20, 0.006)
+            b.box((x, y - 0.006, 0.058), (0.03, 0.03, 0.02), "AA_Acero", 0.004)
+    for z in (0.15, 0.5, 0.92):
+        b.box((0, 0, z), (L, D, 0.004), st, 0.001, seg=1)
+        for sy in (-1, 1):
+            b.box((0, sy * (D / 2 - 0.002), z + 0.02), (L, 0.004, 0.04), st, 0.0012, seg=1)
+        for sx in (-1, 1):
+            b.box((sx * (L / 2 - 0.002), 0, z + 0.02), (0.004, D, 0.04), st, 0.0012, seg=1)
+    for z in (0.152, 0.502):
+        x = -L / 2 + 0.06
+        x = aa_binders(b, x, z, 0.28, 0.3, 10, rng.choice(BINDER_MATS), rng, L / 2 - 0.05)
+    aa_archive_box(b, (0.1, 0, 0.922), 0.4, 0.32, 0.27, rng, lid=False, rot=8)
+    b.sweep([(0.42, -0.2, 0.92), (0.47, -0.25, 1.0), (0.47, -0.25, 1.0)], 0.011, st, 10)
+    b.sweep([(0.47, -0.25, 1.0), (0.47, 0.2, 1.0)], 0.012, "AA_Goma", 10)
+    b.sweep([(0.42, 0.2, 0.92), (0.47, 0.2, 1.0)], 0.011, st, 10)
+    return b.finish("ArchiveCart")
+
+
 BUILDERS = {"Locker": make_locker, "FilingCabinet": make_filing_cabinet, "Desk": make_desk, "SwivelChair": make_swivel_chair,
             "ReceptionDesk": make_reception_desk, "SpiralStairAA": make_spiral_stair,
             "CeilingLampAA": make_ceiling_lamp, "DeskComputer": make_desk_computer, "DeskLamp": make_desk_lamp,
             "TrashBin": make_trash_bin, "Chair": make_visitor_chair, "Bookcase": make_bookcase,
             "AuditoriumChair": make_auditorium_chair, "WaitingBench": make_waiting_bench, "VendingMachine": make_vending, "Cot": make_cot,
-            "StationSign": make_station_sign}
+            "StationSign": make_station_sign,
+            "ArchiveShelfA": lambda: aa_archive_shelf("ArchiveShelfA", 1, 0.2), "ArchiveShelfB": lambda: aa_archive_shelf("ArchiveShelfB", 2, 0.5),
+            "ArchiveShelfC": lambda: aa_archive_shelf("ArchiveShelfC", 3, 1.0), "ArchiveWallShelf": make_archive_wall_shelf,
+            "ArchiveBoxStackA": lambda: aa_box_stack("ArchiveBoxStackA", 4), "ArchiveBoxStackB": lambda: aa_box_stack("ArchiveBoxStackB", 8),
+            "PaperScatter": make_paper_scatter, "RollingLadder": make_rolling_ladder, "CardCatalog": make_card_catalog, "ArchiveCart": make_archive_cart}
 
 
 def preview(name):

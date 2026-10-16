@@ -39,6 +39,16 @@ namespace Horror.EditorTools
             ("VendingMachine", "Assets/_Project/Art/Props/Station/VendingMachine.fbx"),
             ("Cot", "Assets/_Project/Art/Props/Cot.fbx"),
             ("StationSign", "Assets/_Project/Art/Props/Front/StationSign.fbx"),
+            ("ArchiveShelfA", "Assets/_Project/Art/Props/Archive/ArchiveShelfA.fbx"),
+            ("ArchiveShelfB", "Assets/_Project/Art/Props/Archive/ArchiveShelfB.fbx"),
+            ("ArchiveShelfC", "Assets/_Project/Art/Props/Archive/ArchiveShelfC.fbx"),
+            ("ArchiveWallShelf", "Assets/_Project/Art/Props/Archive/ArchiveWallShelf.fbx"),
+            ("ArchiveBoxStackA", "Assets/_Project/Art/Props/Archive/ArchiveBoxStackA.fbx"),
+            ("ArchiveBoxStackB", "Assets/_Project/Art/Props/Archive/ArchiveBoxStackB.fbx"),
+            ("PaperScatter", "Assets/_Project/Art/Props/Archive/PaperScatter.fbx"),
+            ("RollingLadder", "Assets/_Project/Art/Props/Archive/RollingLadder.fbx"),
+            ("CardCatalog", "Assets/_Project/Art/Props/Archive/CardCatalog.fbx"),
+            ("ArchiveCart", "Assets/_Project/Art/Props/Archive/ArchiveCart.fbx"),
         };
 
         public const string LampPath = "Assets/_Project/Art/Props/Lamp/CeilingLampAA.fbx";
@@ -82,6 +92,10 @@ namespace Horror.EditorTools
             { "AA_EsmalteAzul", (null, null, new Color(0.04f, 0.09f, 0.28f), 1f, 0f, 0f, 0.75f) },                            // esmalte del escudo
             { "AA_Pavonado", (null, null, new Color(0.16f, 0.165f, 0.17f), 1f, 0f, 0.55f, 0.42f) },                             // acero fosfatado gris oscuro mate y limpio (corredera de la pistola)
             { "AA_Polimero", ("poly_wool_herringbone", "_diff", new Color(0.07f, 0.07f, 0.075f), 12.0f, 0.15f, 0f, 0.45f) },      // polimero negro con grano fino
+            { "AA_CartonOscuro", (null, null, new Color(0.33f, 0.24f, 0.14f), 1f, 0f, 0f, 0.1f) },
+            { "AA_CartonClaro", (null, null, new Color(0.6f, 0.5f, 0.34f), 1f, 0f, 0f, 0.12f) },
+            { "AA_Tinta", (null, null, new Color(0.05f, 0.06f, 0.12f), 1f, 0f, 0f, 0.2f) },
+            { "AA_PapelAmarillo", (null, null, new Color(0.78f, 0.72f, 0.52f), 1f, 0f, 0f, 0.08f) },
             { "AA_Pantalla", (null, null, new Color(0.015f, 0.018f, 0.022f), 1f, 0f, 0f, 0.88f) },     // pantalla apagada, cristal brillante
         };
 

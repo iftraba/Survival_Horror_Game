@@ -29,7 +29,7 @@ Cada pieza: referencia real → modelo de alta en Blender con superficie dura de
 2. Taquilla, archivador, escritorio, silla giratoria (≈350 instancias). **Hecho 2026-10-15** (con materiales escaneados por submalla en vez de horneado, ver `docs/art-pipeline.md`; GI rehorneada el 2026-10-16).
 3. Coche de policía (pieza estrella del exterior). Ya se rehízo en la v3 de `build_police_cars.py` (lavado de cara del exterior); se deja para el final por si se quiere pasar a materiales por submalla.
 4. Mostrador del vestíbulo, escalera de caracol y luminarias (**hechos 2026-10-16**).
-5. Resto de muebles por zonas. Hecho el 2026-10-16: ordenador, flexo, papelera y silla de visitas (lo más repetido). Tanda 2 el mismo día: estanterías, butacas del auditorio y bancos de espera. Tanda 3: máquinas expendedoras y catres.
+5. Resto de muebles por zonas. Hecho el 2026-10-16: ordenador, flexo, papelera y silla de visitas (lo más repetido). Tanda 2 el mismo día: estanterías, butacas del auditorio y bancos de espera. Tanda 3: máquinas expendedoras y catres. Tanda 4 (2026-10-17): mobiliario del archivo.
 Calculo 1-2 piezas por sesión a esta calidad.
 
 ### Alternativa más rápida para la fase C

@@ -7,8 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: CardCatalog_baked
-    second: {fileID: 2100000, guid: eab969bdaa63c8a489848feb8c5ce79e, type: 2}
+      name: AA_Laton
+    second: {fileID: 2100000, guid: 5b37310192562bd47b01eeac3a9b80b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Madera
+    second: {fileID: 2100000, guid: 57a012089bdd0bd4ebe826f78d05e2e8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AA_Papel
+    second: {fileID: 2100000, guid: 0565b4f582bc6bc4e9f95d149ae4747e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
