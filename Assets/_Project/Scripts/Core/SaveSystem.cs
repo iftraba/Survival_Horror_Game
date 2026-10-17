@@ -11,7 +11,7 @@ namespace Horror
     [Serializable] public class SlotSave { public string item; public int count; }
     [Serializable] public class MagSave { public string weapon; public int ammo; }
     [Serializable] public class PickupSave { public string item; public int count; public Vector3 pos; public Quaternion rot; }
-    [Serializable] public class ZombieSave { public string name; public Vector3 pos; public Quaternion rot; public float hp; }
+    [Serializable] public class ZombieSave { public string name; public string id; public Vector3 pos; public Quaternion rot; public float hp; }
 
     [Serializable]
     public class SaveData
@@ -174,7 +174,7 @@ namespace Horror
             foreach (var z in ZombieAI.All)   // solo los vivos
             {
                 var zh = z.GetComponent<Health>();
-                d.zombies.Add(new ZombieSave { name = z.name, pos = z.transform.position, rot = z.transform.rotation, hp = zh != null ? zh.Current : 100f });
+                d.zombies.Add(new ZombieSave { name = z.name, id = z.SaveId, pos = z.transform.position, rot = z.transform.rotation, hp = zh != null ? zh.Current : 100f });
             }
 
             foreach (var door in OrderedDoors()) { d.doorsUnlocked.Add(door.IsUnlocked); d.doorsOpen.Add(door.IsOpen); }
@@ -223,6 +223,28 @@ namespace Horror
             Progress.Restore(d.flags);
             MapMemory.Restore(d.mapRooms);
 
+            // Cada parte va protegida: si una falla, las demas se aplican igual (antes un fallo cortaba la carga a medias)
+            Try("jugador", () => ApplyPlayer(d));
+            Try("objetos sueltos", () => ApplyPickups(d));
+            Try("zombis", () => ApplyZombies(d));
+            Try("puertas", () => ApplyDoors(d));
+            Try("baul", () => ApplyBox(d));
+            Try("taquillas", () => { int li = 0; foreach (var l in OrderedLockers()) { if (li < d.lockers.Count) l.SetOpen(d.lockers[li]); li++; } });
+            Try("interruptores", () => { int i = 0; foreach (var s in OrderedSwitches()) { if (i < d.switches.Count) s.SetOn(d.switches[i]); i++; } });
+
+            Objectives.Set(d.objective, false);
+            Hud.Message("Partida cargada");
+            return true;
+        }
+
+        static void Try(string part, Action apply)
+        {
+            try { apply(); }
+            catch (Exception e) { Debug.LogError("[Horror] Al cargar la partida fallo la parte '" + part + "': " + e); }
+        }
+
+        static void ApplyPlayer(SaveData d)
+        {
             var pc = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
             if (pc != null)
             {
@@ -263,7 +285,10 @@ namespace Horror
                     weapons.Equip(equipped);
                 }
             }
+        }
 
+        static void ApplyPickups(SaveData d)
+        {
             // Objetos sueltos: se retiran los de la escena y se recrean tal como estaban
             foreach (var p in UnityEngine.Object.FindObjectsByType<Pickup>(FindObjectsSortMode.None)) UnityEngine.Object.Destroy(p.gameObject);
             var itemsRoot = GameObject.Find("Items");
@@ -276,11 +301,28 @@ namespace Horror
                 if (itemsRoot != null) p.transform.SetParent(itemsRoot.transform);
             }
 
-            // Zombis: los que no estaban vivos al guardar se retiran; los demas vuelven a su sitio y vida
-            var alive = d.zombies.ToDictionary(z => z.name, z => z);
+        }
+
+        /// <summary>
+        /// Zombis: los que no estaban vivos al guardar se retiran; los demas vuelven a su sitio y vida. Se emparejan por SaveId
+        /// (nombre + posicion inicial: hay nombres repetidos, como los de la verja, y con el nombre solo la carga fallaba y
+        /// revivian todos). Los guardados antiguos, sin id, se emparejan por nombre, uno a uno.
+        /// </summary>
+        static void ApplyZombies(SaveData d)
+        {
+            var byId = new Dictionary<string, ZombieSave>();
+            var byName = new Dictionary<string, Queue<ZombieSave>>();
+            foreach (var z in d.zombies)
+            {
+                if (!string.IsNullOrEmpty(z.id)) { byId[z.id] = z; continue; }
+                if (!byName.TryGetValue(z.name ?? "", out var q)) byName[z.name ?? ""] = q = new Queue<ZombieSave>();
+                q.Enqueue(z);
+            }
             foreach (var z in UnityEngine.Object.FindObjectsByType<ZombieAI>(FindObjectsSortMode.None))
             {
-                if (!alive.TryGetValue(z.name, out var zs)) { UnityEngine.Object.Destroy(z.gameObject); continue; }
+                ZombieSave zs = null;
+                if (!byId.TryGetValue(z.SaveId ?? "", out zs) && byName.TryGetValue(z.name, out var q) && q.Count > 0) zs = q.Dequeue();
+                if (zs == null) { UnityEngine.Object.Destroy(z.gameObject); continue; }
                 var agent = z.GetComponent<NavMeshAgent>();
                 if (agent != null && agent.enabled && agent.isOnNavMesh) agent.Warp(zs.pos);
                 else z.transform.position = zs.pos;
@@ -289,12 +331,20 @@ namespace Horror
                 if (zh != null) zh.SetCurrent(zs.hp);
             }
 
+        }
+
+        static void ApplyDoors(SaveData d)
+        {
             int di = 0;
             foreach (var door in OrderedDoors())
             {
                 if (di < d.doorsOpen.Count) door.ApplySaved(d.doorsUnlocked[di], d.doorsOpen[di]);
                 di++;
             }
+        }
+
+        static void ApplyBox(SaveData d)
+        {
             var boxStacks = new List<ItemStack>();
             foreach (var b in d.box)
             {
@@ -302,16 +352,6 @@ namespace Horror
                 if (it != null) boxStacks.Add(new ItemStack { item = it, count = b.count });
             }
             ItemStorage.Set(boxStacks);
-
-            int li = 0;
-            foreach (var l in OrderedLockers()) { if (li < d.lockers.Count) l.SetOpen(d.lockers[li]); li++; }
-
-            int i = 0;
-            foreach (var s in OrderedSwitches()) { if (i < d.switches.Count) s.SetOn(d.switches[i]); i++; }
-
-            Objectives.Set(d.objective, false);
-            Hud.Message("Partida cargada");
-            return true;
         }
 
         static WeaponData FindWeapon(string displayName)

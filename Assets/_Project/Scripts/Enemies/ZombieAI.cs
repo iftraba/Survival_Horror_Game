@@ -103,8 +103,13 @@ namespace Horror
         bool chasing;
         Coroutine pendingHit;
 
+        /// <summary>Identificador para guardar: nombre + posicion de partida (hay nombres repetidos, como los de la verja).</summary>
+        [System.NonSerialized] public string SaveId;
+
         void Awake()
         {
+            var p0 = transform.position;
+            SaveId = name + "@" + Mathf.RoundToInt(p0.x * 10f) + "," + Mathf.RoundToInt(p0.y * 10f) + "," + Mathf.RoundToInt(p0.z * 10f);
             health = GetComponent<Health>();
             agent = GetComponent<NavMeshAgent>();
             health.Died += OnDied;
