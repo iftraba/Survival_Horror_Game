@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1241652318244648009
+--- !u!1 &3171367927434706939
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,38 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7722042969483951766}
-  m_Layer: 0
-  m_Name: LongWeaponHolder
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7722042969483951766
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1241652318244648009}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0.41771436, y: 0.4371957, z: 0.5856626, w: 0.53979075}
-  m_LocalPosition: {x: -0.01833709, y: 0.04983194, z: 0.027937938}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 385413187401671324}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1591266986059268234
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1909620996182493954}
+  - component: {fileID: 2017370935273382601}
   m_Layer: 0
   m_Name: WeaponHolder
   m_TagString: Untagged
@@ -47,20 +16,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1909620996182493954
+--- !u!4 &2017370935273382601
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1591266986059268234}
+  m_GameObject: {fileID: 3171367927434706939}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.41771436, y: 0.4371957, z: 0.5856626, w: 0.53979075}
-  m_LocalPosition: {x: -0.01833709, y: 0.04983194, z: 0.027937938}
+  m_LocalRotation: {x: -0.6580138, y: 0.18231437, z: -0.034344535, w: 0.7297943}
+  m_LocalPosition: {x: -0.0010420668, y: 0.05996349, z: -0.0018163542}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 385413187401671324}
+  m_Father: {fileID: 1025796959846330212}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6939996379250810105
 GameObject:
@@ -101,7 +70,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1974361106730547903}
+  - {fileID: 1153846543330473799}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &86922911795876134
@@ -225,8 +194,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Horror.WeaponController
   aimCamera: {fileID: 0}
   player: {fileID: 468666366619798672}
-  handSocket: {fileID: 1909620996182493954}
-  longSocket: {fileID: 7722042969483951766}
+  handSocket: {fileID: 2017370935273382601}
+  longSocket: {fileID: 3574912922485138444}
 --- !u!114 &7870154034900173985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -253,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db96f501d2ef2b24e9df1a2bf493d0e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Horror.PlayerAnimation
-  animator: {fileID: 5586286681972580549}
+  animator: {fileID: 5108038027930479933}
   handgunController: {fileID: 9100000, guid: 1c3a730fd76f7be49ade80b564562e27, type: 2}
   longGunController: {fileID: 22100000, guid: 030221514884f644d9b630de14480983, type: 2}
 --- !u!114 &4510499082962940382
@@ -271,7 +240,38 @@ MonoBehaviour:
   models:
   - {fileID: 0}
   - {fileID: 4909151694739763540, guid: 4408190344476774ba56d60c833b8667, type: 3}
---- !u!1001 &2084304104485035348
+--- !u!1 &7070994262139092041
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3574912922485138444}
+  m_Layer: 0
+  m_Name: LongWeaponHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3574912922485138444
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7070994262139092041}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.41771436, y: 0.4371957, z: 0.5856626, w: 0.53979075}
+  m_LocalPosition: {x: -0.01833709, y: 0.04983194, z: 0.027937938}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1025796959846330212}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1696150807025225900
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -340,24 +340,24 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1852576806548013000, guid: c06e7248895e5604a843552b7f11d8be, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1909620996182493954}
+      addedObject: {fileID: 2017370935273382601}
     - targetCorrespondingSourceObject: {fileID: 1852576806548013000, guid: c06e7248895e5604a843552b7f11d8be, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7722042969483951766}
+      addedObject: {fileID: 3574912922485138444}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c06e7248895e5604a843552b7f11d8be, type: 3}
---- !u!4 &385413187401671324 stripped
+--- !u!4 &1025796959846330212 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: c06e7248895e5604a843552b7f11d8be, type: 3}
-  m_PrefabInstance: {fileID: 2084304104485035348}
+  m_PrefabInstance: {fileID: 1696150807025225900}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &1974361106730547903 stripped
+--- !u!4 &1153846543330473799 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c06e7248895e5604a843552b7f11d8be, type: 3}
-  m_PrefabInstance: {fileID: 2084304104485035348}
+  m_PrefabInstance: {fileID: 1696150807025225900}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &5586286681972580549 stripped
+--- !u!95 &5108038027930479933 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: c06e7248895e5604a843552b7f11d8be, type: 3}
-  m_PrefabInstance: {fileID: 2084304104485035348}
+  m_PrefabInstance: {fileID: 1696150807025225900}
   m_PrefabAsset: {fileID: 0}

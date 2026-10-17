@@ -117,14 +117,16 @@ namespace Horror
                 animator.SetInteger(CoverId, actions.CoverType);
                 animator.SetFloat(CoverMoveId, actions.CoverMove, 0.1f, Time.deltaTime);
             }
-            // sacar / guardar la escopeta al cambiar de arma
+            // sacar / guardar el arma al cambiar: escopeta (sacar y guardar) y pistola (sacar, 2026-10-17). Al cargar la
+            // partida o al empezar (primer segundo) no se anima: el arma ya estaba en la mano.
             var eq = weapons != null ? weapons.Equipped : null;
             if (eq != lastWeapon)
             {
-                if (lastWeapon != null)
+                if (lastWeapon != null || Time.timeSinceLevelLoad > 1f)
                 {
                     if (eq != null && eq.twoHanded) Trigger("Draw");
-                    else if (lastWeapon.twoHanded) Trigger("Holster");
+                    else if (eq != null) Trigger("DrawPistol");
+                    else if (lastWeapon != null && lastWeapon.twoHanded) Trigger("Holster");
                 }
                 lastWeapon = eq;
             }
@@ -141,7 +143,7 @@ namespace Horror
             animator.SetBool(ArmedId, weapons != null && weapons.Equipped != null);
         }
 
-        Transform spine, rHand, lHand;
+        Transform spine, rHand, lHand, rArm, lArm;
         float aimBlend;
         float recoil;
         Quaternion smoothFix = Quaternion.identity;
@@ -159,6 +161,8 @@ namespace Horror
                 spine = animator.GetBoneTransform(HumanBodyBones.Spine);
                 rHand = animator.GetBoneTransform(HumanBodyBones.RightHand);
                 lHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                rArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
+                lArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
                 if (spine == null || rHand == null || lHand == null) { enabled = false; return; }
             }
             bool on = player.IsAiming && weapons != null && weapons.Equipped != null && (health == null || !health.IsDead);
@@ -185,6 +189,14 @@ namespace Horror
             {
                 float kick = weapons.Equipped.twoHanded ? 7f : 4f;
                 spine.rotation = Quaternion.AngleAxis(-kick * recoil * recoil, transform.right) * spine.rotation;
+                // pistola (2026-10-17): los brazos suben con el arma y vuelven. El clip de disparo de Mixamo ("Firing A Gun") no
+                // vale en la capa del torso (inclina la cadera y, con la cadera recta, echaba el torso atras y el brazo arriba)
+                if (!weapons.Equipped.twoHanded && rArm != null && lArm != null)
+                {
+                    var up = Quaternion.AngleAxis(-9f * recoil * recoil, transform.right);
+                    rArm.rotation = up * rArm.rotation;
+                    lArm.rotation = up * lArm.rotation;
+                }
             }
         }
 

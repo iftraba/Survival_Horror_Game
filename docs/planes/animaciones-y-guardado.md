@@ -1,7 +1,7 @@
 # Plan: animaciones más fluidas, jefes y guardado de zombis y puertas
 
 - **Fecha:** 2026-10-17
-- **Estado:** Aprobado por el usuario (2026-10-17); fase 1 hecha
+- **Estado:** Aprobado por el usuario (2026-10-17); fases 1 y 2 hechas
 - **Autor:** Opus (sesión principal)
 - **Rama:** modelos_3d
 
@@ -74,3 +74,9 @@ El usuario ve las animaciones escasas y poco fluidas. Pide: una animación real 
 - Comprobado en Play: partida nueva, maté 5 zombis (los dos `Verja_Zombie_Cop` y 3 de dentro) y abrí 3 puertas de tarjeta, guardé y cargué: 0 muertos de vuelta (50 en escena), las 3 puertas abiertas y desbloqueadas, consola sin errores.
 - Los 4 guardados del usuario de la comisaría grande tenían los nombres de la verja repetidos (la causa confirmada). El hueco 1 (formato antiguo) carga ahora con 48 zombis, 35 puertas abiertas y el jugador en su sitio, igual que el archivo.
 - Error en la prueba: se sobrescribió el hueco 5 de la comisaría grande (`savegame_v2_5.json`); la copia se hizo de la ruta de la comisaría vieja.
+
+**Fase 2 (pistola), hecha el 2026-10-17.**
+- Lote 1 de Mixamo: 8 clips descargados con la sesión del usuario desde el navegador integrado (API de Mixamo: exportar, esperar y bajar el enlace), de 0,3 a 0,8 MB cada uno.
+- Detalle en `docs/player.md`, sección «Pistola». Los clips de disparo de Mixamo no valían en la capa del torso: el retroceso es por código.
+- Para ver clips sueltos sirve el Animator en Play. En el editor parado, el muestreo da bien los huesos, pero las capturas salían con la malla sin actualizar.
+- Pendiente: enfundar la pistola, que no tiene clip.

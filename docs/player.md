@@ -29,6 +29,19 @@ Componente que añade `PlayerController` si falta. Mientras dura una acción, `P
 - **Gestos en reposo**: con la pistola, tras 12-24 s quieto, uno de cuatro (`A_Idle2..5`).
 - **Muerte** según de dónde llega el último golpe: de frente, por la espalda, por la derecha (clips del pack de rifle) o la de siempre.
 
+## Pistola (2026-10-17)
+Clips de Mixamo descargados con la sesión del usuario (lote 1, en `PlayerAnims/`):
+- **Apuntar:** `P_PistolAimIdle` («Idle With Aimed Pistol»), a dos manos.
+- **Pasos laterales apuntando:** `P_PistolStrafeLeft` y `P_PistolStrafeRight`. En el override de arma larga se cambian por los del rifle.
+- **Recarga:** `P_PistolReload` («Gun Reload While Walking»). Mixamo no tiene recarga de pistola de pie; como solo cuenta el torso, vale también parado.
+- **Desenfundar:** `P_PistolDraw` («Drawing Gun»), al equipar la pistola (estado `DrawPistol` de la capa del torso; no se anima al cargar ni en el primer segundo). Si el torso está en una transición, espera a que acabe (unos 0,25 s).
+- **Disparo:** la pose de apuntar más un retroceso por código en `PlayerAnimation.LateUpdate`: los brazos suben 9° con el arma y vuelven en 0,2 s, y el torso 4°.
+  - «Firing A Gun» (`P_PistolFire2`) inclina la cadera; en la capa del torso, con la cadera recta, echaba el torso atrás y levantaba el brazo.
+  - «Shooting Handgun» (`P_PistolFire`) dispara hacia arriba.
+  - Los dos se quedan importados, sin usar, igual que «Pistol Aim To Holster Idle» (`P_PistolHolster`), que es bajar el arma y quedarse en reposo (7 s), no enfundar.
+- **Agarre:** `WeaponHolder` (pistola) se calcula con la pose de apuntar con pistola, recto al frente y sin ladear. `LongWeaponHolder` sigue con la del rifle. Antes los dos usaban la del rifle y la pistola salía torcida con los clips nuevos.
+- **Comprobado en Play** (capturas): apuntar con el botón derecho simulado, disparo real (baja una bala, fogonazo y casquillo), recarga, paso lateral y desenfundar (lanzado a mano).
+
 ## Composición del prefab
 Raíz con `PlayerController`, `CharacterController`, `Health`, `Inventory`, `WeaponController`, `PlayerAnimation`,
 `PlayerInteractor`. Hijo `Model` = Soldier de Mixamo (Humanoid) con los *holders* de arma en la mano derecha.

@@ -117,6 +117,7 @@ namespace Horror.EditorTools
             c.AddParameter("DeathVariant", AnimatorControllerParameterType.Int);
             c.AddParameter("Draw", AnimatorControllerParameterType.Trigger);
             c.AddParameter("Holster", AnimatorControllerParameterType.Trigger);
+            c.AddParameter("DrawPistol", AnimatorControllerParameterType.Trigger);
 
             // ---- clips por ranura (con sustituto provisional)
             var runF = First("P_RunForward", "P_Running", "P_Run");
@@ -129,12 +130,12 @@ namespace Horror.EditorTools
             float walkSpeedClip = walk != null && walk.name == "P_PistolWalk" ? 2.35f : 2.4f;
             if (walk == null) { walk = runF; walkScale = 0.6f; walkNote = "andar: correr a ritmo lento provisional (falta Walking)"; }
             var back = First("P_WalkingBackwards", "P_WalkBackward", "P_PistolWalkBackward");
-            var wl = First("P_WalkLeft", "P_LeftStrafeWalking"); var wr = First("P_WalkRight", "P_RightStrafeWalking");
+            var wl = First("P_PistolStrafeLeft", "P_WalkLeft", "P_LeftStrafeWalking"); var wr = First("P_PistolStrafeRight", "P_WalkRight", "P_RightStrafeWalking");   // pasos laterales apuntando con la pistola (2026-10-17)
             var wfl = First("P_WalkForwardLeft");
             var aimRifle = First("P_RifleAimingIdle", "P_RifleAimIdle");
-            var aimPistol = First("P_PistolIdle", "P_PistolAimIdle", "P_PistolAim") ?? aimRifle;
+            var aimPistol = First("P_PistolAimIdle", "P_PistolIdle", "P_PistolAim") ?? aimRifle;   // "Idle With Aimed Pistol": a dos manos, casa con el disparo
             var fireRifle = First("P_FiringRifle", "P_RifleFire");
-            var firePistol = First("P_PistolFire", "P_Shooting", "P_PistolShoot") ?? aimPistol;   // sin clip de pistola: se mantiene la pose de apuntar (el retroceso es por codigo)
+            var firePistol = aimPistol;   // el retroceso de la pistola es por codigo (PlayerAnimation): "Firing A Gun" inclina la cadera y en la capa del torso levantaba el brazo; "Shooting Handgun" dispara hacia arriba
             fireRifle = aimRifle;   // el clip de rifle gira el torso unos 30 grados respecto a la pose de apuntar: tiron al disparar; retroceso por codigo
             var dying = First("P_Dying");
             log.Add(idleNote); log.Add(walkNote);
@@ -230,7 +231,7 @@ namespace Horror.EditorTools
                 var back2 = s.AddTransition(a); back2.hasExitTime = true; back2.exitTime = 0.45f; back2.duration = 0.18f;
             }
             // recarga (pistola / arma larga) y golpe recibido: se pueden disparar desde cualquier estado del torso
-            var rlP = First("P_Reload", "P_Reloading"); var rlR = First("P_Reloading", "P_Reload");
+            var rlP = First("P_PistolReload", "P_Reload", "P_Reloading"); var rlR = First("P_Reloading", "P_Reload");   // pistola: "Gun Reload While Walking" (solo cuenta el torso)
             float RT(string path, float fallback) { var w = AssetDatabase.LoadAssetAtPath<WeaponData>(path); return w != null ? w.reloadTime : fallback; }
             if (rlP != null)
             {
@@ -254,7 +255,7 @@ namespace Horror.EditorTools
                 var back4 = hit.AddTransition(empty); back4.hasExitTime = true; back4.exitTime = 0.55f; back4.duration = 0.2f;
             }
             // sacar / guardar la escopeta al cambiar de arma (solo brazos)
-            foreach (var (st, clipName, trig, sp) in new[] { ("DrawLong", "L_RiflePullOut", "Draw", 1.6f), ("HolsterLong", "L_PutBackRifle", "Holster", 1.8f) })
+            foreach (var (st, clipName, trig, sp) in new[] { ("DrawLong", "L_RiflePullOut", "Draw", 1.6f), ("HolsterLong", "L_PutBackRifle", "Holster", 1.8f), ("DrawPistol", "P_PistolDraw", "DrawPistol", 1.7f) })
             {
                 var clip = First(clipName); if (clip == null) continue;
                 var s = um.AddState(st); s.motion = clip; s.speed = sp;
@@ -400,6 +401,7 @@ namespace Horror.EditorTools
             {
                 ["P_Idle"] = "R_Idle", ["P_BreathingIdle"] = "R_Idle", ["P_PistolWalk"] = "R_WalkForward", ["P_Walking"] = "R_WalkForward",
                 ["P_RunForward"] = "R_RunForward", ["P_WalkLeft"] = "R_WalkLeft", ["P_WalkRight"] = "R_WalkRight",
+                ["P_PistolStrafeLeft"] = "R_WalkLeft", ["P_PistolStrafeRight"] = "R_WalkRight",
                 ["P_PistolWalkBackward"] = "R_WalkBackward", ["P_WalkForwardLeft"] = "R_WalkForwardLeft",
                 ["A_JumpingUp"] = "R_JumpUp", ["A_FallingIdle"] = "R_JumpLoop",
             };
@@ -430,19 +432,30 @@ namespace Horror.EditorTools
 
             // agarre de las armas: en la pose de apuntar, el cañon va de la mano derecha a la izquierda
             var inst = Object.Instantiate(fbx);
-            Vector3 holderLocalPos; Quaternion holderLocalRot;
+            inst.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            // Arma larga: con la pose de apuntar con rifle, el cañon va de la mano derecha a la izquierda.
+            // Pistola (2026-10-17): con su pose de apuntar a dos manos ("Idle With Aimed Pistol"), recta al frente y sin ladear;
+            // antes usaba la del rifle y con los clips de pistola quedaba torcida.
+            Vector3 holderLocalPos, pistolLocalPos; Quaternion holderLocalRot, pistolLocalRot;
             {
                 var an = inst.GetComponent<Animator>();
-                var aimClip = First("P_RifleAimingIdle");
-                AnimationMode.StartAnimationMode();
-                AnimationMode.SampleAnimationClip(inst, aimClip, 0.5f);
                 var rh = an.GetBoneTransform(HumanBodyBones.RightHand); var lh = an.GetBoneTransform(HumanBodyBones.LeftHand); var rl = an.GetBoneTransform(HumanBodyBones.RightLowerArm);
-                Vector3 dir = (lh.position - rh.position).normalized;
-                Vector3 handDir = (rh.position - rl.position).normalized;
-                Vector3 worldPos = rh.position + handDir * 0.06f;
-                Quaternion worldRot = Quaternion.LookRotation(dir, inst.transform.up);
+                AnimationMode.StartAnimationMode();
+                AnimationMode.SampleAnimationClip(inst, First("P_RifleAimingIdle"), 0.5f);
+                Vector3 worldPos = rh.position + (rh.position - rl.position).normalized * 0.06f;
+                Quaternion worldRot = Quaternion.LookRotation((lh.position - rh.position).normalized, Vector3.up);
                 holderLocalPos = Quaternion.Inverse(rh.rotation) * (worldPos - rh.position);
                 holderLocalRot = Quaternion.Inverse(rh.rotation) * worldRot;
+                var pistolAim = First("P_PistolAimIdle", "P_PistolIdle");
+                if (pistolAim != null)
+                {
+                    AnimationMode.SampleAnimationClip(inst, pistolAim, pistolAim.length * 0.5f);
+                    worldPos = rh.position + (rh.position - rl.position).normalized * 0.06f;
+                    worldRot = Quaternion.LookRotation(Vector3.forward, Vector3.up);                        // al frente del personaje
+                    pistolLocalPos = Quaternion.Inverse(rh.rotation) * (worldPos - rh.position);
+                    pistolLocalRot = Quaternion.Inverse(rh.rotation) * worldRot;
+                }
+                else { pistolLocalPos = holderLocalPos; pistolLocalRot = holderLocalRot; }
                 AnimationMode.StopAnimationMode();
             }
             Object.DestroyImmediate(inst);
@@ -460,16 +473,16 @@ namespace Horror.EditorTools
             an2.runtimeAnimatorController = ctrl; an2.applyRootMotion = false; an2.cullingMode = AnimatorCullingMode.AlwaysAnimate;
 
             var rightHand = an2.GetBoneTransform(HumanBodyBones.RightHand);
-            Transform Holder(string n)
+            Transform Holder(string n, Vector3 lp, Quaternion lr)
             {
                 var h = new GameObject(n).transform;
                 h.SetParent(rightHand, false);
-                h.localPosition = holderLocalPos; h.localRotation = holderLocalRot; h.localScale = Vector3.one;
+                h.localPosition = lp; h.localRotation = lr; h.localScale = Vector3.one;
                 return h;
             }
-            var holder = Holder("WeaponHolder");
             var wc = root.GetComponent<WeaponController>();
-            wc.handSocket = holder; wc.longSocket = Holder("LongWeaponHolder");
+            wc.handSocket = Holder("WeaponHolder", pistolLocalPos, pistolLocalRot);
+            wc.longSocket = Holder("LongWeaponHolder", holderLocalPos, holderLocalRot);
             var pa = root.GetComponent<PlayerAnimation>();
             pa.animator = an2; pa.handgunController = ctrl; pa.longGunController = LongGunOverride(ctrl);
             var pc = root.GetComponent<PlayerController>();

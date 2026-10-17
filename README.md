@@ -47,6 +47,11 @@ docs/                     Documentación por módulos
 ## Registro de cambios
 Más reciente primero. Formato: fecha · módulo · cambio.
 
+- 2026-10-17 · Player · **Pistola con animaciones reales**:
+  - Apuntar a dos manos, pasos laterales, recarga y desenfundar con clips de Mixamo.
+  - El arma ya no sale torcida (agarre propio de la pistola).
+  - Retroceso de brazos al disparar.
+
 - 2026-10-17 · Core · **Guardado: los zombis muertos ya no reviven y las puertas de tarjeta siguen abiertas al cargar.** Los nombres repetidos de la verja rompían la carga a medias; ahora cada zombi tiene un id (nombre + posición de partida) y cada parte de la carga va protegida. Los guardados antiguos siguen cargando.
 
 - 2026-10-17 · Player/UI · **Menú oculto de selección de personaje**: F3 siete veces en el menú principal; Soldado o Chica (modelo de Meshy del usuario, rig corregido con `fix_meshy_rig.py`). Empieza partida nueva con el elegido y se guarda en la partida.
